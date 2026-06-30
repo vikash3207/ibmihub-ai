@@ -3,9 +3,9 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.3
-- Status: Draft — Section 1 Complete
-- Last Updated: 2026-06-30
+- Version: 0.5
+- Status: Draft — Sections 1–3 Complete
+- Last Updated: 2026-07-01
 - Owner: Product
 
 ---
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Section 1: Executive Summary contains approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–3 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -93,21 +93,238 @@ Success will be measured not only by traffic or sign-ups, but by meaningful outc
 
 ## 2. Vision & Mission
 
-- **Purpose:** Articulate the long-term reason the product exists and where it is headed.
-- **Description:** Vision statement, mission statement, guiding principles, and the multi-year product philosophy (AI-first, learn-by-doing, original content).
-- **Audience:** All stakeholders; primary reference for prioritization disputes.
-- **Approximate size:** 1–2 pages.
-- **Status:** Not started.
+### Vision Statement
+
+To build the world's leading AI-powered platform for IBM i professionals.
+
+IBMiHub AI exists to make IBM i learning, development, troubleshooting, documentation, and modernization more accessible, practical, and intelligent for the next generation of professionals.
+
+The long-term vision is to become the default destination for anyone who wants to learn IBM i, improve as an RPG developer, understand legacy applications, modernize existing systems, or train teams working on IBM i platforms.
+
+### Mission Statement
+
+Our mission is to help IBM i professionals learn faster, practice better, troubleshoot smarter, and stay productive using AI-assisted learning and development tools.
+
+IBMiHub AI will combine structured education, interactive practice, AI guidance, and productivity utilities into one focused platform built specifically for the IBM i ecosystem.
+
+The platform should help users move from passive reading to active learning, from manual investigation to AI-assisted understanding, and from fragmented resources to a guided learning and productivity experience.
+
+### Product Philosophy
+
+IBMiHub AI is based on the belief that IBM i remains important, but the way people learn and work with IBM i needs to become more modern.
+
+Many IBM i professionals still depend on scattered tutorials, internal team knowledge, legacy documentation, and manual debugging techniques. While these resources are valuable, they are often difficult for beginners to navigate and inefficient for experienced developers trying to solve real problems quickly.
+
+IBMiHub AI will not simply collect IBM i articles. It will provide a guided, AI-first experience where users can learn concepts, ask questions, practice workflows, analyze code, understand job logs, and build confidence through hands-on exercises.
+
+### What IBMiHub AI Is
+
+IBMiHub AI is:
+
+- An AI-first learning platform for IBM i professionals
+- A practical training environment for beginners and teams
+- A productivity assistant for RPGLE, CLLE, SQL, DDS, job logs, and documentation
+- A future enterprise training and enablement platform
+- A long-term product designed to support learning, practice, troubleshooting, modernization, and career growth
+
+### What IBMiHub AI Is Not
+
+IBMiHub AI is not:
+
+- Just another static tutorial website
+- A copy of existing IBM i content websites
+- A generic AI coding assistant with no IBM i focus
+- A replacement for real production IBM i expertise
+- A tool that encourages users to blindly trust AI output without review
+
+### Long-Term Ambition
+
+The long-term ambition is to build a trusted platform that supports the IBM i community globally.
+
+Over time, IBMiHub AI may expand into multiple product areas, including:
+
+- IBMiHub Learn for structured education
+- IBMiHub Labs for hands-on 5250 and RPG practice
+- IBMiHub AI for developer productivity
+- IBMiHub Enterprise for corporate training and onboarding
+- IBMiHub Community for knowledge sharing
+- IBMiHub Certifications for skill validation
+
+The first product focus is learning and AI assistance, but the foundation should be designed so the platform can grow into a broader ecosystem for IBM i professionals.
+
+### Strategic Direction
+
+The product will grow in phases.
+
+The early focus will be on building trust through high-quality original content, a simple learning experience, and a useful AI tutor.
+
+Later phases will introduce more advanced capabilities such as interactive 5250 practice, RPG playgrounds, job log analysis, documentation generation, team learning, certifications, and enterprise features.
+
+Every product decision should support the core vision: helping IBM i professionals become more capable, productive, and confident through AI-assisted learning and practical tools.
 
 ---
 
 ## 3. Problem Statement
 
-- **Purpose:** Establish the unmet need in the market with evidence, not assertion.
-- **Description:** Pain points of IBM i professionals today (skills gap, aging workforce, fragmented tooling, lack of modern AI assistance for legacy stacks), framed per target segment.
-- **Audience:** Product, Engineering, Marketing, Investors.
-- **Approximate size:** 1–2 pages.
-- **Status:** Not started.
+### Core Problem
+
+IBM i continues to support critical business applications across many industries, but the learning and productivity experience around IBM i has not modernized at the same pace as the broader software development ecosystem.
+
+Developers, learners, consultants, and teams often depend on scattered tutorials, legacy documentation, internal knowledge transfer, forums, tribal knowledge, and manual debugging practices. While these resources are valuable, they are fragmented and often difficult to use as a complete learning or productivity system.
+
+This creates a gap between the importance of IBM i systems and the quality of modern tooling available to help people learn, practice, troubleshoot, document, and modernize those systems.
+
+IBMiHub AI exists to close that gap.
+
+### Problem 1: Learning IBM i Is Difficult for New Developers
+
+New developers entering the IBM i ecosystem often struggle to understand where to begin.
+
+They may need to learn many concepts at once, including:
+
+- IBM i operating system basics
+- 5250 green screen navigation
+- Libraries, objects, jobs, job queues, and output queues
+- Physical files and logical files
+- DDS
+- RPGLE
+- CLLE
+- SQLRPGLE
+- DB2 for i
+- Job logs and spool files
+- Batch processing
+- Modern tooling such as VS Code, Git, APIs, and AI assistants
+
+The challenge is not only the number of topics. The larger challenge is that these topics are often learned from disconnected resources with no guided path, no hands-on practice, and no immediate feedback.
+
+As a result, beginners may feel overwhelmed, and companies may need to depend heavily on senior developers for onboarding and mentoring.
+
+### Problem 2: Existing Learning Resources Are Mostly Static
+
+Many IBM i learning resources are article-based, documentation-heavy, or reference-oriented.
+
+Static content is useful, but it has limitations:
+
+- It does not adapt to the learner's current level.
+- It does not provide interactive practice.
+- It does not explain concepts differently when the learner is confused.
+- It does not easily connect theory to real development scenarios.
+- It does not help users practice troubleshooting workflows.
+- It does not provide a guided learning journey from beginner to job-ready capability.
+
+A modern learner expects more than static reading. They expect guided learning, examples, exercises, feedback, progress tracking, and the ability to ask questions in natural language.
+
+### Problem 3: Hands-On Practice Is Hard to Access
+
+IBM i is best learned by doing, but hands-on access is not always easy.
+
+A learner may understand a concept after reading about it, but still struggle when faced with a 5250 screen, a command line, a job log, or an RPGLE program.
+
+Practical learning requires safe environments where users can experiment without fear of breaking production systems.
+
+Today, many learners do not have easy access to:
+
+- A safe IBM i practice environment
+- Guided 5250 command exercises
+- Realistic job log examples
+- RPGLE and CLLE practice scenarios
+- Debugging simulations
+- Step-by-step business process examples
+
+This limits confidence and slows skill development.
+
+### Problem 4: Experienced Developers Still Lose Time on Manual Investigation
+
+The problem is not limited to beginners.
+
+Experienced IBM i professionals also spend significant time understanding legacy code, reviewing job logs, tracing program flows, documenting old applications, and explaining system behavior to other teams.
+
+Common productivity challenges include:
+
+- Understanding unfamiliar RPGLE or CLLE programs
+- Reading long job logs
+- Identifying the root cause of errors
+- Explaining legacy business logic
+- Creating documentation from existing code
+- Reviewing program call flows
+- Translating technical behavior into clear explanations
+- Supporting modernization efforts
+
+These tasks often require deep experience and manual effort. AI can reduce that effort, but generic AI tools are not always optimized for IBM i-specific workflows.
+
+### Problem 5: Generic AI Tools Are Not Enough
+
+General-purpose AI coding assistants are powerful, but they are not built specifically around IBM i learning and development.
+
+They may help explain code, but they often lack:
+
+- IBM i-specific learning paths
+- 5250 practice workflows
+- RPGLE and CLLE-focused context
+- Job log analysis patterns
+- DDS and DB2 for i examples
+- Safe educational guardrails
+- Structured curriculum
+- Progress tracking
+- Enterprise training features
+
+Users need more than a chatbot. They need a focused platform that understands the IBM i ecosystem and combines AI assistance with structured learning, practice, and productivity workflows.
+
+### Problem 6: IBM i Knowledge Is at Risk of Becoming Harder to Transfer
+
+Many organizations rely on experienced IBM i professionals who have accumulated years of system and business knowledge.
+
+As teams change, retire, or modernize, transferring that knowledge becomes difficult. Important understanding may live in source code, job logs, old documentation, and individual experience rather than in clear, accessible, reusable learning material.
+
+Companies need better ways to:
+
+- Train new developers
+- Document existing applications
+- Capture legacy knowledge
+- Support modernization initiatives
+- Reduce dependency on a few senior experts
+- Help teams understand systems faster
+
+IBMiHub AI can support this by combining education, AI explanation, documentation generation, and practical exercises.
+
+### Problem 7: The IBM i Ecosystem Needs a Modern Learning and Productivity Experience
+
+The broader software industry has moved toward interactive learning platforms, AI coding assistants, guided labs, online sandboxes, and developer productivity tools.
+
+The IBM i ecosystem deserves the same kind of modern experience.
+
+The opportunity is to create a platform that brings together:
+
+- Structured IBM i learning
+- AI-assisted explanations
+- Hands-on practice
+- 5250 simulations
+- RPGLE and CLLE assistance
+- Job log understanding
+- Documentation support
+- Team onboarding
+- Enterprise training
+
+This combination is currently fragmented across many tools and resources.
+
+### Product Opportunity
+
+IBMiHub AI has the opportunity to become a focused AI-powered platform for the IBM i community.
+
+The product can help:
+
+- Beginners learn with confidence
+- Developers understand code faster
+- Teams onboard new members more effectively
+- Companies preserve and transfer IBM i knowledge
+- Professionals practice real-world workflows safely
+- The IBM i community modernize its learning and productivity experience
+
+The core problem is not that IBM i lacks information.
+
+The core problem is that IBM i knowledge, practice, troubleshooting, and productivity support are fragmented.
+
+IBMiHub AI aims to transform that fragmented experience into a guided, AI-assisted, hands-on platform built specifically for IBM i professionals.
 
 ---
 
@@ -336,3 +553,5 @@ Success will be measured not only by traffic or sign-ups, but by meaningful outc
 | 2026-06-30 | 0.1 | Initial structure created — table of contents and section placeholders only; no content drafted |
 | 2026-06-30 | 0.2 | Renamed to PRD.md; inserted new section 6 "Product Principles" after Success Metrics & KPIs; renumbered sections 6–24 to 7–25 |
 | 2026-06-30 | 0.3 | Added approved Executive Summary content |
+| 2026-07-01 | 0.4 | Added approved Vision & Mission content |
+| 2026-07-01 | 0.5 | Added approved Problem Statement content |
