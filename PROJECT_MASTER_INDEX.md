@@ -34,7 +34,7 @@
 | Document | Purpose | Owner | Status | Location | Dependencies |
 |---|---|---|---|---|---|
 | MVP Scope | Defines the initial release scope | Both | NOT STARTED | docs/mvp-scope.md | Product Vision |
-| PRD | Master Product Requirements Document — single source of truth for all product decisions | Product | Draft (Structure Only) | [PRODUCT_REQUIREMENTS.md](PRODUCT_REQUIREMENTS.md) | Product Vision |
+| PRD | Master Product Requirements Document — single source of truth for all product decisions | Product | Draft (Structure Only) | [PRD.md](PRD.md) | Product Vision |
 | User Personas | To be defined | Product | NOT STARTED | docs/personas.md | PRD |
 | User Journeys | To be defined | Product | NOT STARTED | docs/user-journeys.md | PRD |
 
@@ -163,3 +163,4 @@
 |---|---|---|
 | 2026-06-30 | 0.1 | Initial draft of project master index |
 | 2026-06-30 | 0.2 | Registered PRODUCT_REQUIREMENTS.md (PRD) as Draft, structure only; updated User Personas dependency to PRD |
+| 2026-06-30 | 0.3 | Updated PRD link to PRD.md following rename from PRODUCT_REQUIREMENTS.md |

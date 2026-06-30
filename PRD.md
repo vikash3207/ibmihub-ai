@@ -3,7 +3,7 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.1
+- Version: 0.2
 - Status: Draft (Structure Only — No Content)
 - Last Updated: 2026-06-30
 - Owner: Product
@@ -33,25 +33,26 @@ Estimated total document length once complete: **45–65 pages**.
 3. [Problem Statement](#3-problem-statement)
 4. [Goals & Objectives](#4-goals--objectives)
 5. [Success Metrics & KPIs](#5-success-metrics--kpis)
-6. [Market Analysis](#6-market-analysis)
-7. [Competitive Landscape](#7-competitive-landscape)
-8. [User Personas](#8-user-personas)
-9. [User Journeys](#9-user-journeys)
-10. [Product Scope](#10-product-scope)
-11. [MVP Definition](#11-mvp-definition)
-12. [Functional Requirements](#12-functional-requirements)
-13. [Non-Functional Requirements](#13-non-functional-requirements)
-14. [AI Strategy](#14-ai-strategy)
-15. [Learning & Content Strategy](#15-learning--content-strategy)
-16. [Monetization Strategy](#16-monetization-strategy)
-17. [Technical Constraints & Dependencies](#17-technical-constraints--dependencies)
-18. [Risk Analysis](#18-risk-analysis)
-19. [Assumptions & Open Questions](#19-assumptions--open-questions)
-20. [Roadmap](#20-roadmap)
-21. [Future Vision](#21-future-vision)
-22. [Glossary & Terminology](#22-glossary--terminology)
-23. [Appendix](#23-appendix)
-24. [Revision History](#24-revision-history)
+6. [Product Principles](#6-product-principles)
+7. [Market Analysis](#7-market-analysis)
+8. [Competitive Landscape](#8-competitive-landscape)
+9. [User Personas](#9-user-personas)
+10. [User Journeys](#10-user-journeys)
+11. [Product Scope](#11-product-scope)
+12. [MVP Definition](#12-mvp-definition)
+13. [Functional Requirements](#13-functional-requirements)
+14. [Non-Functional Requirements](#14-non-functional-requirements)
+15. [AI Strategy](#15-ai-strategy)
+16. [Learning & Content Strategy](#16-learning--content-strategy)
+17. [Monetization Strategy](#17-monetization-strategy)
+18. [Technical Constraints & Dependencies](#18-technical-constraints--dependencies)
+19. [Risk Analysis](#19-risk-analysis)
+20. [Assumptions & Open Questions](#20-assumptions--open-questions)
+21. [Roadmap](#21-roadmap)
+22. [Future Vision](#22-future-vision)
+23. [Glossary & Terminology](#23-glossary--terminology)
+24. [Appendix](#24-appendix)
+25. [Revision History](#25-revision-history)
 
 ---
 
@@ -115,7 +116,25 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 6. Market Analysis
+## 6. Product Principles
+
+- **Purpose:** The principles that guide every product decision.
+- **Examples:**
+  - AI First
+  - Learn by Doing
+  - Original Content
+  - Productivity over Complexity
+  - Enterprise Ready
+  - Accessibility
+  - Continuous Improvement
+  - Customer Obsession
+- **Audience:** All stakeholders; primary reference for prioritization and trade-off decisions.
+- **Approximate size:** 1 page.
+- **Status:** Not started.
+
+---
+
+## 7. Market Analysis
 
 - **Purpose:** Size and characterize the market opportunity.
 - **Description:** TAM/SAM/SOM estimate, IBM i ecosystem trends (workforce demographics, modernization pressure), buyer landscape (individual vs. enterprise).
@@ -125,7 +144,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 7. Competitive Landscape
+## 8. Competitive Landscape
 
 - **Purpose:** Position IBMiHub AI against existing alternatives.
 - **Description:** Direct competitors (IBM i training vendors, generic AI coding assistants), indirect substitutes (in-house mentorship, forums, IBM documentation), feature/positioning comparison matrix, and differentiation thesis.
@@ -135,7 +154,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 8. User Personas
+## 9. User Personas
 
 - **Purpose:** Ground every product decision in named, specific user needs.
 - **Description:** Detailed personas (Beginner, RPG Developer, Team Lead, Architect, Enterprise Buyer, Interview Candidate) including goals, pain points, technical context, and success criteria per persona.
@@ -145,7 +164,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 9. User Journeys
+## 10. User Journeys
 
 - **Purpose:** Map how each persona discovers, adopts, and grows within the product.
 - **Description:** End-to-end journey maps (awareness → onboarding → activation → habitual use → advocacy/upgrade) for primary personas, including key moments of friction or delight.
@@ -155,7 +174,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 10. Product Scope
+## 11. Product Scope
 
 - **Purpose:** Define the full boundary of the product across all phases — not just MVP.
 - **Description:** Complete module inventory (Learning Center, AI Tutor, 5250 Practice Lab, RPG Playground, AI Code Review, Job Log Analyzer, Documentation Generator, Quiz Engine, Community), explicitly marked in-scope vs. out-of-scope per phase.
@@ -165,7 +184,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 11. MVP Definition
+## 12. MVP Definition
 
 - **Purpose:** Pin down the precise, approved first release.
 - **Description:** MVP feature list, explicit exclusions, MVP success criteria, and the rationale for sequencing.
@@ -175,7 +194,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 12. Functional Requirements
+## 13. Functional Requirements
 
 - **Purpose:** Specify what the product must do, module by module, at the requirements level (not implementation level).
 - **Description:** Per-module requirement statements with acceptance-level detail (Authentication, Dashboard, Learning Center, AI Tutor, 5250 Lab, RPG Playground, Code Review, Job Log Analyzer, Documentation Generator, Quiz Engine, Community), cross-referenced to downstream SDD specs in `specs/`.
@@ -185,7 +204,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 13. Non-Functional Requirements
+## 14. Non-Functional Requirements
 
 - **Purpose:** Define the quality bar the product must meet regardless of feature.
 - **Description:** Performance, scalability, availability, security, privacy, accessibility, localization, and maintainability expectations at the product level.
@@ -195,7 +214,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 14. AI Strategy
+## 15. AI Strategy
 
 - **Purpose:** Define the product's approach to AI as a core differentiator, at the product (not technical) level.
 - **Description:** AI use cases by module, AI specialist/agent roles (Tutor, RPG Expert, CL Expert, SQL Expert, Job Log Expert, Interview Coach, Documentation Writer), quality/trust expectations, human-in-the-loop boundaries, and AI provider strategy at a product-decision level.
@@ -205,7 +224,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 15. Learning & Content Strategy
+## 16. Learning & Content Strategy
 
 - **Purpose:** Define how educational value is created, structured, and kept current.
 - **Description:** Curriculum structure, content sourcing and originality policy, skill progression model, certification/gamification approach, and content governance.
@@ -215,7 +234,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 16. Monetization Strategy
+## 17. Monetization Strategy
 
 - **Purpose:** Define how the product generates revenue at each stage of growth.
 - **Description:** Pricing tiers (Free / Pro / Enterprise), packaging, enterprise/corporate training offering, certification revenue, future marketplace model.
@@ -225,7 +244,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 17. Technical Constraints & Dependencies
+## 18. Technical Constraints & Dependencies
 
 - **Purpose:** Capture product-relevant constraints that originate from technology, vendors, or platform realities — without prescribing architecture.
 - **Description:** Known constraints (e.g., AI provider limitations, hosting model implications, IBM i connectivity realities), and dependencies on the Engineering Review's open technical decisions.
@@ -235,7 +254,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 18. Risk Analysis
+## 19. Risk Analysis
 
 - **Purpose:** Surface product-level risks early so they can be actively managed.
 - **Description:** Scope risk, AI trust/accuracy risk, data privacy risk, competitive risk, monetization risk — each with likelihood, impact, and mitigation owner.
@@ -245,7 +264,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 19. Assumptions & Open Questions
+## 20. Assumptions & Open Questions
 
 - **Purpose:** Make hidden assumptions explicit and track unresolved product questions to closure.
 - **Description:** Running log of assumptions made in absence of data, and open questions requiring Product Owner decisions, each with an owner and target resolution date.
@@ -255,7 +274,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 20. Roadmap
+## 21. Roadmap
 
 - **Purpose:** Sequence the product's evolution across releases.
 - **Description:** Phased roadmap from MVP through subsequent releases (post-MVP modules, enterprise readiness, platform expansion), time-horizon framed (Now / Next / Later) rather than fixed dates where uncertainty is high.
@@ -265,7 +284,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 21. Future Vision
+## 22. Future Vision
 
 - **Purpose:** Describe the multi-year aspiration beyond the current roadmap horizon.
 - **Description:** Platform expansion (mobile, desktop, VS Code extension, enterprise SaaS), ecosystem and marketplace ambitions, and how today's decisions preserve future optionality.
@@ -275,7 +294,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 22. Glossary & Terminology
+## 23. Glossary & Terminology
 
 - **Purpose:** Ensure shared, unambiguous language across product, engineering, and business stakeholders.
 - **Description:** Definitions of domain terms (RPGLE, CLLE, DDS, 5250, job log, etc.) and product-specific terminology.
@@ -285,7 +304,7 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 23. Appendix
+## 24. Appendix
 
 - **Purpose:** House supporting material that would otherwise clutter the core narrative.
 - **Description:** Research references, source data for market sizing, supplementary diagrams, links to related documents (Engineering Review, Sprint 0 Roadmap, journal).
@@ -295,8 +314,9 @@ Estimated total document length once complete: **45–65 pages**.
 
 ---
 
-## 24. Revision History
+## 25. Revision History
 
 | Date | Version | Summary |
 |---|---|---|
 | 2026-06-30 | 0.1 | Initial structure created — table of contents and section placeholders only; no content drafted |
+| 2026-06-30 | 0.2 | Renamed to PRD.md; inserted new section 6 "Product Principles" after Success Metrics & KPIs; renumbered sections 6–24 to 7–25 |
