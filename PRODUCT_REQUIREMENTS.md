@@ -1,0 +1,302 @@
+# Product Requirements Document (PRD)
+
+## Document Metadata
+- Project: IBMiHub AI
+- Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
+- Version: 0.1
+- Status: Draft (Structure Only — No Content)
+- Last Updated: 2026-06-30
+- Owner: Product
+
+---
+
+## Document Purpose & How to Use This Document
+
+This PRD is the authoritative product definition for IBMiHub AI. It exists one level above implementation: it defines **what** the product is, **why** it exists, **who** it serves, and **what success looks like** — not how it will be built.
+
+This document is **not**:
+- A technical specification
+- An implementation or engineering design document
+- An SDD feature specification (those live under `specs/` and derive from this PRD)
+
+Every section below is currently a **placeholder**. No section contains approved content yet. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+
+Estimated total document length once complete: **45–65 pages**.
+
+---
+
+## Table of Contents
+
+0. [Document Control](#0-document-control)
+1. [Executive Summary](#1-executive-summary)
+2. [Vision & Mission](#2-vision--mission)
+3. [Problem Statement](#3-problem-statement)
+4. [Goals & Objectives](#4-goals--objectives)
+5. [Success Metrics & KPIs](#5-success-metrics--kpis)
+6. [Market Analysis](#6-market-analysis)
+7. [Competitive Landscape](#7-competitive-landscape)
+8. [User Personas](#8-user-personas)
+9. [User Journeys](#9-user-journeys)
+10. [Product Scope](#10-product-scope)
+11. [MVP Definition](#11-mvp-definition)
+12. [Functional Requirements](#12-functional-requirements)
+13. [Non-Functional Requirements](#13-non-functional-requirements)
+14. [AI Strategy](#14-ai-strategy)
+15. [Learning & Content Strategy](#15-learning--content-strategy)
+16. [Monetization Strategy](#16-monetization-strategy)
+17. [Technical Constraints & Dependencies](#17-technical-constraints--dependencies)
+18. [Risk Analysis](#18-risk-analysis)
+19. [Assumptions & Open Questions](#19-assumptions--open-questions)
+20. [Roadmap](#20-roadmap)
+21. [Future Vision](#21-future-vision)
+22. [Glossary & Terminology](#22-glossary--terminology)
+23. [Appendix](#23-appendix)
+24. [Revision History](#24-revision-history)
+
+---
+
+## 0. Document Control
+
+- **Purpose:** Track ownership, approval status, and change history at a glance.
+- **Description:** Version table, approval sign-off log, and links to related governing documents (PROJECT_CONTEXT.md, PROJECT_STATE.md, PROJECT_MASTER_INDEX.md, Engineering Review, Sprint 0 Documentation Roadmap).
+- **Audience:** Product Owner, Engineering leadership, all contributors.
+- **Approximate size:** <1 page.
+- **Status:** Not started.
+
+---
+
+## 1. Executive Summary
+
+- **Purpose:** Give any reader — investor, new hire, or executive — a complete picture of the product in under two minutes.
+- **Description:** One-page distillation of vision, problem, target users, MVP, and business model.
+- **Audience:** Founders, leadership, investors, new team members.
+- **Approximate size:** 1 page.
+- **Status:** Not started.
+
+---
+
+## 2. Vision & Mission
+
+- **Purpose:** Articulate the long-term reason the product exists and where it is headed.
+- **Description:** Vision statement, mission statement, guiding principles, and the multi-year product philosophy (AI-first, learn-by-doing, original content).
+- **Audience:** All stakeholders; primary reference for prioritization disputes.
+- **Approximate size:** 1–2 pages.
+- **Status:** Not started.
+
+---
+
+## 3. Problem Statement
+
+- **Purpose:** Establish the unmet need in the market with evidence, not assertion.
+- **Description:** Pain points of IBM i professionals today (skills gap, aging workforce, fragmented tooling, lack of modern AI assistance for legacy stacks), framed per target segment.
+- **Audience:** Product, Engineering, Marketing, Investors.
+- **Approximate size:** 1–2 pages.
+- **Status:** Not started.
+
+---
+
+## 4. Goals & Objectives
+
+- **Purpose:** Translate vision into measurable, time-bound product objectives.
+- **Description:** Company-level and product-level goals, likely structured as OKRs, spanning near-term (Sprint 1–2) and annual horizons.
+- **Audience:** Product, Engineering, Leadership.
+- **Approximate size:** 1 page.
+- **Status:** Not started.
+
+---
+
+## 5. Success Metrics & KPIs
+
+- **Purpose:** Define how the team will know the product is winning.
+- **Description:** North Star metric, activation/retention/engagement metrics, learning outcome metrics, revenue metrics, and enterprise adoption metrics.
+- **Audience:** Product, Engineering, Leadership, Investors.
+- **Approximate size:** 1–2 pages.
+- **Status:** Not started.
+
+---
+
+## 6. Market Analysis
+
+- **Purpose:** Size and characterize the market opportunity.
+- **Description:** TAM/SAM/SOM estimate, IBM i ecosystem trends (workforce demographics, modernization pressure), buyer landscape (individual vs. enterprise).
+- **Audience:** Product, Leadership, Investors.
+- **Approximate size:** 3–5 pages.
+- **Status:** Not started.
+
+---
+
+## 7. Competitive Landscape
+
+- **Purpose:** Position IBMiHub AI against existing alternatives.
+- **Description:** Direct competitors (IBM i training vendors, generic AI coding assistants), indirect substitutes (in-house mentorship, forums, IBM documentation), feature/positioning comparison matrix, and differentiation thesis.
+- **Audience:** Product, Marketing, Leadership.
+- **Approximate size:** 2–4 pages.
+- **Status:** Not started.
+
+---
+
+## 8. User Personas
+
+- **Purpose:** Ground every product decision in named, specific user needs.
+- **Description:** Detailed personas (Beginner, RPG Developer, Team Lead, Architect, Enterprise Buyer, Interview Candidate) including goals, pain points, technical context, and success criteria per persona.
+- **Audience:** Product, Design, Engineering, Marketing.
+- **Approximate size:** 3–5 pages.
+- **Status:** Not started.
+
+---
+
+## 9. User Journeys
+
+- **Purpose:** Map how each persona discovers, adopts, and grows within the product.
+- **Description:** End-to-end journey maps (awareness → onboarding → activation → habitual use → advocacy/upgrade) for primary personas, including key moments of friction or delight.
+- **Audience:** Product, Design, Engineering.
+- **Approximate size:** 2–4 pages.
+- **Status:** Not started.
+
+---
+
+## 10. Product Scope
+
+- **Purpose:** Define the full boundary of the product across all phases — not just MVP.
+- **Description:** Complete module inventory (Learning Center, AI Tutor, 5250 Practice Lab, RPG Playground, AI Code Review, Job Log Analyzer, Documentation Generator, Quiz Engine, Community), explicitly marked in-scope vs. out-of-scope per phase.
+- **Audience:** Product, Engineering.
+- **Approximate size:** 2–3 pages.
+- **Status:** Not started.
+
+---
+
+## 11. MVP Definition
+
+- **Purpose:** Pin down the precise, approved first release.
+- **Description:** MVP feature list, explicit exclusions, MVP success criteria, and the rationale for sequencing.
+- **Audience:** Product, Engineering, Sprint 1 planning.
+- **Approximate size:** 2–3 pages.
+- **Status:** Not started.
+
+---
+
+## 12. Functional Requirements
+
+- **Purpose:** Specify what the product must do, module by module, at the requirements level (not implementation level).
+- **Description:** Per-module requirement statements with acceptance-level detail (Authentication, Dashboard, Learning Center, AI Tutor, 5250 Lab, RPG Playground, Code Review, Job Log Analyzer, Documentation Generator, Quiz Engine, Community), cross-referenced to downstream SDD specs in `specs/`.
+- **Audience:** Product, Engineering, QA.
+- **Approximate size:** 8–15 pages (largest section in the document).
+- **Status:** Not started.
+
+---
+
+## 13. Non-Functional Requirements
+
+- **Purpose:** Define the quality bar the product must meet regardless of feature.
+- **Description:** Performance, scalability, availability, security, privacy, accessibility, localization, and maintainability expectations at the product level.
+- **Audience:** Engineering, Product, Security/Compliance.
+- **Approximate size:** 3–5 pages.
+- **Status:** Not started.
+
+---
+
+## 14. AI Strategy
+
+- **Purpose:** Define the product's approach to AI as a core differentiator, at the product (not technical) level.
+- **Description:** AI use cases by module, AI specialist/agent roles (Tutor, RPG Expert, CL Expert, SQL Expert, Job Log Expert, Interview Coach, Documentation Writer), quality/trust expectations, human-in-the-loop boundaries, and AI provider strategy at a product-decision level.
+- **Audience:** Product, Engineering, AI/ML stakeholders.
+- **Approximate size:** 3–5 pages.
+- **Status:** Not started.
+
+---
+
+## 15. Learning & Content Strategy
+
+- **Purpose:** Define how educational value is created, structured, and kept current.
+- **Description:** Curriculum structure, content sourcing and originality policy, skill progression model, certification/gamification approach, and content governance.
+- **Audience:** Product, Content/Curriculum team, Engineering.
+- **Approximate size:** 2–4 pages.
+- **Status:** Not started.
+
+---
+
+## 16. Monetization Strategy
+
+- **Purpose:** Define how the product generates revenue at each stage of growth.
+- **Description:** Pricing tiers (Free / Pro / Enterprise), packaging, enterprise/corporate training offering, certification revenue, future marketplace model.
+- **Audience:** Product, Leadership, Sales/Business.
+- **Approximate size:** 2–4 pages.
+- **Status:** Not started.
+
+---
+
+## 17. Technical Constraints & Dependencies
+
+- **Purpose:** Capture product-relevant constraints that originate from technology, vendors, or platform realities — without prescribing architecture.
+- **Description:** Known constraints (e.g., AI provider limitations, hosting model implications, IBM i connectivity realities), and dependencies on the Engineering Review's open technical decisions.
+- **Audience:** Product, Engineering.
+- **Approximate size:** 1–2 pages.
+- **Status:** Not started.
+
+---
+
+## 18. Risk Analysis
+
+- **Purpose:** Surface product-level risks early so they can be actively managed.
+- **Description:** Scope risk, AI trust/accuracy risk, data privacy risk, competitive risk, monetization risk — each with likelihood, impact, and mitigation owner.
+- **Audience:** Product, Engineering, Leadership.
+- **Approximate size:** 2–3 pages.
+- **Status:** Not started.
+
+---
+
+## 19. Assumptions & Open Questions
+
+- **Purpose:** Make hidden assumptions explicit and track unresolved product questions to closure.
+- **Description:** Running log of assumptions made in absence of data, and open questions requiring Product Owner decisions, each with an owner and target resolution date.
+- **Audience:** Product, Engineering.
+- **Approximate size:** 1–2 pages.
+- **Status:** Not started.
+
+---
+
+## 20. Roadmap
+
+- **Purpose:** Sequence the product's evolution across releases.
+- **Description:** Phased roadmap from MVP through subsequent releases (post-MVP modules, enterprise readiness, platform expansion), time-horizon framed (Now / Next / Later) rather than fixed dates where uncertainty is high.
+- **Audience:** Product, Engineering, Leadership, Investors.
+- **Approximate size:** 2–3 pages.
+- **Status:** Not started.
+
+---
+
+## 21. Future Vision
+
+- **Purpose:** Describe the multi-year aspiration beyond the current roadmap horizon.
+- **Description:** Platform expansion (mobile, desktop, VS Code extension, enterprise SaaS), ecosystem and marketplace ambitions, and how today's decisions preserve future optionality.
+- **Audience:** Leadership, Investors, Product.
+- **Approximate size:** 1–2 pages.
+- **Status:** Not started.
+
+---
+
+## 22. Glossary & Terminology
+
+- **Purpose:** Ensure shared, unambiguous language across product, engineering, and business stakeholders.
+- **Description:** Definitions of domain terms (RPGLE, CLLE, DDS, 5250, job log, etc.) and product-specific terminology.
+- **Audience:** All stakeholders, especially new contributors.
+- **Approximate size:** 1 page.
+- **Status:** Not started.
+
+---
+
+## 23. Appendix
+
+- **Purpose:** House supporting material that would otherwise clutter the core narrative.
+- **Description:** Research references, source data for market sizing, supplementary diagrams, links to related documents (Engineering Review, Sprint 0 Roadmap, journal).
+- **Audience:** Product, Engineering (as needed).
+- **Approximate size:** Variable.
+- **Status:** Not started.
+
+---
+
+## 24. Revision History
+
+| Date | Version | Summary |
+|---|---|---|
+| 2026-06-30 | 0.1 | Initial structure created — table of contents and section placeholders only; no content drafted |
