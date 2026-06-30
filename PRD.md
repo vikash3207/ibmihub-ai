@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.5
-- Status: Draft — Sections 1–3 Complete
+- Version: 0.6
+- Status: Draft — Sections 1–4 Complete
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–3 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–4 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -330,11 +330,160 @@ IBMiHub AI aims to transform that fragmented experience into a guided, AI-assist
 
 ## 4. Goals & Objectives
 
-- **Purpose:** Translate vision into measurable, time-bound product objectives.
-- **Description:** Company-level and product-level goals, likely structured as OKRs, spanning near-term (Sprint 1–2) and annual horizons.
-- **Audience:** Product, Engineering, Leadership.
-- **Approximate size:** 1 page.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to translate the product vision and problem statement into clear goals and measurable objectives.
+
+IBMiHub AI is being built as a long-term AI-powered platform for IBM i professionals. However, the product must grow in focused stages. The early goal is not to build every possible feature immediately, but to validate that users find value in an AI-first IBM i learning and productivity experience.
+
+### Primary Product Goal
+
+The primary goal of IBMiHub AI is to become the most useful AI-powered learning and productivity platform for IBM i professionals.
+
+This means the product should help users:
+
+- Learn IBM i concepts faster
+- Practice IBM i workflows more confidently
+- Understand RPGLE, CLLE, SQL, DDS, and job logs more easily
+- Reduce time spent searching across fragmented resources
+- Improve productivity through AI-assisted explanations and tools
+- Support companies in training and onboarding IBM i talent
+
+### Goal 1: Build a Trusted IBM i Learning Foundation
+
+The first major goal is to create a structured and trustworthy learning experience for IBM i professionals.
+
+The product should help users move from scattered learning to guided learning.
+
+Objectives:
+
+- Define a clear beginner-to-practical IBM i learning path
+- Create original IBM i-focused learning content
+- Organize topics in a logical sequence
+- Provide explanations that are simple, practical, and beginner-friendly
+- Support learners who may have no prior IBM i exposure
+- Build early trust through accuracy, clarity, and usefulness
+
+### Goal 2: Introduce AI as a Practical Learning Assistant
+
+The second goal is to make AI useful in a focused IBM i context.
+
+The AI tutor should not behave like a generic chatbot. It should support IBM i learning and productivity use cases with appropriate context, boundaries, and guidance.
+
+Objectives:
+
+- Allow users to ask IBM i-related questions in natural language
+- Provide explanations for RPGLE, CLLE, SQL, DDS, job logs, and IBM i concepts
+- Help learners understand concepts from multiple angles
+- Encourage review and validation of AI responses
+- Avoid presenting AI output as unquestionable truth
+- Establish early patterns for safe, useful, and trustworthy AI assistance
+
+### Goal 3: Validate Real User Demand Before Expanding Scope
+
+IBMiHub AI has a broad long-term vision, but the first product release must stay focused.
+
+The early objective is to validate whether users are interested in a dedicated AI-powered IBM i platform before investing heavily in advanced modules.
+
+Objectives:
+
+- Launch a narrow MVP quickly
+- Attract early users from the IBM i community
+- Collect feedback from learners and working professionals
+- Identify which use cases create the strongest value
+- Avoid premature overengineering
+- Prioritize learning and AI tutor experiences before advanced tools
+
+### Goal 4: Create a Foundation for Future Hands-On Practice
+
+Hands-on practice is central to the long-term vision, but it does not need to be fully delivered in the first release.
+
+The platform should be designed so future interactive learning features can be added without redesigning the product.
+
+Objectives:
+
+- Plan for future 5250 practice labs
+- Plan for future RPGLE and CLLE exercises
+- Support future simulated job logs and debugging scenarios
+- Keep learning content structured so it can later connect to labs
+- Avoid architecture decisions that block future interactive modules
+
+### Goal 5: Support Both Learning and Productivity
+
+The product should not be limited to beginners.
+
+While the MVP may begin with learning and AI assistance, the long-term platform should also support experienced IBM i professionals.
+
+Objectives:
+
+- Serve beginners learning IBM i fundamentals
+- Serve experienced developers who need faster explanations
+- Support team leads responsible for onboarding
+- Support architects and consultants who analyze legacy systems
+- Prepare the platform for future productivity tools such as code explanation, job log analysis, and documentation generation
+
+### Goal 6: Build a Product That Can Become a Business
+
+IBMiHub AI is being treated as a real SaaS product, not a casual side project.
+
+The product should be designed with eventual monetization, trust, and scalability in mind.
+
+Objectives:
+
+- Build a professional product foundation
+- Support future free, pro, and enterprise plans
+- Create value that users may eventually pay for
+- Maintain original content and clear product differentiation
+- Build credibility in the IBM i community
+- Avoid copying existing content or relying on low-quality generated material
+
+### Goal 7: Establish a Disciplined Product Development Process
+
+The project should follow a structured product and engineering process from the beginning.
+
+This is important because the product has a long-term roadmap and will likely grow across learning, AI, labs, productivity tools, enterprise training, and community features.
+
+Objectives:
+
+- Use the PRD as the source of truth for product decisions
+- Use SDD specifications for feature-level requirements
+- Avoid coding without approved requirements
+- Maintain project state, documentation, and decision records
+- Use Git as the source of truth
+- Keep product decisions, architecture decisions, and implementation work clearly separated
+
+### Near-Term Objectives
+
+For the first stage of the product, the near-term objectives are:
+
+- Complete the PRD for the MVP direction
+- Finalize the MVP scope
+- Define the first learning path
+- Define the AI tutor behavior and boundaries
+- Prepare SDD specs for the first implementation features
+- Build a simple, usable MVP
+- Share early progress with the IBM i community
+- Identify early beta users
+
+### Long-Term Objectives
+
+Over the longer term, IBMiHub AI should aim to:
+
+- Become a trusted global learning resource for IBM i professionals
+- Provide interactive 5250 and RPG practice experiences
+- Offer AI-powered productivity tools for working developers
+- Support corporate training and onboarding
+- Enable certifications or skill validation
+- Build a community around modern IBM i learning and productivity
+- Help preserve and transfer IBM i knowledge to future generations
+
+### Summary
+
+The immediate objective is to create a focused, trusted, AI-assisted learning experience for IBM i professionals.
+
+The long-term objective is to grow IBMiHub AI into a broader platform that supports learning, practice, troubleshooting, documentation, modernization, enterprise training, and community building.
+
+The product should grow carefully, validating real user value at each stage before expanding into more advanced capabilities.
 
 ---
 
@@ -555,3 +704,4 @@ IBMiHub AI aims to transform that fragmented experience into a guided, AI-assist
 | 2026-06-30 | 0.3 | Added approved Executive Summary content |
 | 2026-07-01 | 0.4 | Added approved Vision & Mission content |
 | 2026-07-01 | 0.5 | Added approved Problem Statement content |
+| 2026-07-01 | 0.6 | Added approved Goals & Objectives content |
