@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 1.0
-- Status: Draft — Sections 1–8 Complete
+- Version: 1.5
+- Status: Draft — Sections 1–13 Complete
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–8 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–13 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -1538,51 +1538,2493 @@ The product should position itself as complementary to the existing ecosystem wh
 
 ## 9. User Personas
 
-- **Purpose:** Ground every product decision in named, specific user needs.
-- **Description:** Detailed personas (Beginner, RPG Developer, Team Lead, Architect, Enterprise Buyer, Interview Candidate) including goals, pain points, technical context, and success criteria per persona.
-- **Audience:** Product, Design, Engineering, Marketing.
-- **Approximate size:** 3–5 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define the primary and secondary users for IBMiHub AI.
+
+Personas help ensure that the product is not built around vague assumptions. Each persona represents a real type of user with specific goals, frustrations, skill levels, motivations, and success criteria.
+
+These personas should guide product decisions, learning content design, AI tutor behavior, onboarding, pricing, and future roadmap decisions.
+
+### Persona Overview
+
+IBMiHub AI will serve multiple user groups over time, but the product should not try to satisfy all of them equally in the first release.
+
+The early MVP should focus mainly on individual learners and working IBM i professionals. Team leads, architects, enterprise buyers, and interview candidates are important for future expansion, but they should not overload the first release.
+
+| Persona | Priority | Primary Need | MVP Relevance |
+|---|---|---|---|
+| Beginner IBM i Learner | Primary | Learn IBM i from the ground up | High |
+| Working IBM i Developer | Primary | Understand concepts, code, and logs faster | High |
+| Team Lead / Mentor | Secondary | Onboard and support team members | Medium |
+| IBM i Architect / Consultant | Secondary | Analyze legacy systems and guide modernization | Medium |
+| Enterprise Training Buyer | Future Buyer | Train teams and track progress | Future |
+| Interview Candidate / Career Switcher | Secondary | Prepare for IBM i roles | Medium |
+
+---
+
+### Persona 1: Beginner IBM i Learner
+
+#### Profile
+
+The Beginner IBM i Learner is new to the IBM i ecosystem.
+
+This user may be a junior developer, a developer moving from another technology stack, a new employee assigned to an IBM i project, or someone trying to understand IBM i for the first time.
+
+They may have basic programming knowledge but little or no exposure to RPGLE, CLLE, 5250 screens, libraries, objects, job logs, spool files, or DB2 for i.
+
+#### Goals
+
+This user wants to:
+
+- Understand what IBM i is
+- Learn basic IBM i terminology
+- Navigate common IBM i concepts without feeling overwhelmed
+- Learn RPGLE, CLLE, DDS, SQLRPGLE, and DB2 for i step by step
+- Understand 5250 screens and command workflows
+- Build confidence through examples and practice
+- Become productive enough to work on real IBM i tasks
+
+#### Pain Points
+
+This user struggles because:
+
+- IBM i concepts feel unfamiliar and intimidating
+- Existing resources are scattered
+- Many explanations assume prior experience
+- There is no obvious beginner-friendly learning path
+- 5250 screens can feel outdated or confusing
+- They may not have safe hands-on access to practice
+- They may depend too much on senior developers for basic questions
+
+#### What Success Looks Like
+
+This user is successful when they can:
+
+- Explain basic IBM i concepts in their own words
+- Follow a structured learning path
+- Complete beginner lessons and quizzes
+- Ask the AI tutor questions without fear
+- Understand simple RPGLE and CLLE examples
+- Recognize common IBM i objects and workflows
+- Feel confident enough to continue learning independently
+
+#### Product Implications
+
+For this persona, IBMiHub AI should provide:
+
+- Simple onboarding
+- Beginner learning paths
+- Plain-language explanations
+- Glossary support
+- AI tutor guidance
+- Step-by-step examples
+- Progress tracking
+- Future practice labs and simulations
+
+---
+
+### Persona 2: Working IBM i Developer
+
+#### Profile
+
+The Working IBM i Developer already works with IBM i systems.
+
+This user may write or maintain RPGLE, CLLE, SQLRPGLE, DDS, batch jobs, reports, integrations, or production support utilities.
+
+They may not need beginner-level explanations all the time, but they often need faster ways to understand code, job logs, legacy behavior, or unfamiliar modules.
+
+#### Goals
+
+This user wants to:
+
+- Understand unfamiliar RPGLE or CLLE programs faster
+- Interpret job logs and errors more efficiently
+- Refresh concepts they do not use daily
+- Get practical explanations for IBM i topics
+- Save time during debugging and analysis
+- Create documentation from existing knowledge
+- Learn modern tooling and development practices
+- Improve productivity without leaving the IBM i context
+
+#### Pain Points
+
+This user struggles because:
+
+- Legacy code can be difficult to understand
+- Business logic may be undocumented
+- Job logs can be long and noisy
+- Root-cause analysis often takes manual effort
+- Knowledge may be spread across code, logs, old documents, and senior developers
+- Generic AI tools may not understand IBM i-specific context well
+- Documentation work is often time-consuming
+
+#### What Success Looks Like
+
+This user is successful when they can:
+
+- Get faster explanations for IBM i concepts
+- Understand code snippets more quickly
+- Use the AI tutor to clarify errors or concepts
+- Reduce time spent searching across disconnected resources
+- Produce clearer documentation
+- Learn new IBM i topics as needed
+- Trust the platform as a daily support tool
+
+#### Product Implications
+
+For this persona, IBMiHub AI should eventually provide:
+
+- AI-assisted code explanation
+- Job log explanation
+- RPGLE, CLLE, SQL, and DDS help
+- Practical examples
+- Documentation generation
+- Searchable learning content
+- Advanced topic paths
+- Productivity-focused AI tools
+
+---
+
+### Persona 3: Team Lead / Mentor
+
+#### Profile
+
+The Team Lead or Mentor is responsible for helping others become productive on IBM i projects.
+
+This user may manage developers, review work, support onboarding, answer repeated questions, explain legacy systems, or guide production support activities.
+
+They care about team productivity, consistency, training quality, and reducing dependency on a few senior people.
+
+#### Goals
+
+This user wants to:
+
+- Onboard new IBM i developers faster
+- Reduce repeated basic questions
+- Standardize learning paths for the team
+- Help junior developers become independent
+- Preserve team knowledge
+- Improve documentation quality
+- Support team members during troubleshooting
+- Track learning progress in the future
+
+#### Pain Points
+
+This user struggles because:
+
+- New developers need significant guidance
+- Senior developers become bottlenecks
+- Internal documentation may be incomplete or outdated
+- Training is often informal and inconsistent
+- Knowledge transfer depends on availability of experienced people
+- It is difficult to know whether learners are progressing
+- Production support knowledge may not be captured well
+
+#### What Success Looks Like
+
+This user is successful when:
+
+- New developers can learn basics independently
+- Team members use IBMiHub AI before escalating simple questions
+- Onboarding becomes more structured
+- Internal mentoring effort reduces
+- Documentation and explanations become easier to produce
+- The team has a repeatable IBM i learning foundation
+
+#### Product Implications
+
+For this persona, IBMiHub AI should eventually support:
+
+- Team learning paths
+- Recommended onboarding tracks
+- Progress visibility
+- Shareable lessons
+- Internal training support
+- Documentation workflows
+- Future admin/team features
+
+---
+
+### Persona 4: IBM i Architect / Consultant
+
+#### Profile
+
+The IBM i Architect or Consultant works across systems, teams, integrations, modernization initiatives, and legacy application analysis.
+
+This user is experienced and often responsible for understanding complex systems, explaining architecture, documenting flows, advising on modernization, and helping teams make technical decisions.
+
+#### Goals
+
+This user wants to:
+
+- Understand legacy application flows faster
+- Explain system behavior clearly to others
+- Support modernization planning
+- Document existing applications
+- Analyze RPGLE, CLLE, SQL, DDS, APIs, and integrations
+- Identify knowledge gaps
+- Help teams move toward modern practices
+- Use AI to accelerate analysis without losing control
+
+#### Pain Points
+
+This user struggles because:
+
+- Legacy systems may have limited documentation
+- Application behavior may be spread across many programs and jobs
+- Business rules may be hidden in old code
+- Modernization requires both technical and business understanding
+- Manual documentation is slow
+- Generic AI tools may lack deep IBM i workflow context
+- Accuracy and trust are critical
+
+#### What Success Looks Like
+
+This user is successful when:
+
+- They can analyze systems faster
+- They can generate clearer explanations and documentation
+- They can support modernization without losing legacy understanding
+- They can use AI as an assistant while retaining expert judgment
+- They can help teams understand complex IBM i systems more efficiently
+
+#### Product Implications
+
+For this persona, IBMiHub AI should eventually provide:
+
+- Advanced code understanding
+- Application documentation support
+- Job log and flow explanation
+- Modernization learning paths
+- Architecture-focused content
+- AI-assisted analysis with clear trust boundaries
+
+---
+
+### Persona 5: Enterprise Training Buyer
+
+#### Profile
+
+The Enterprise Training Buyer is a manager, delivery leader, training owner, engineering leader, or organization decision-maker responsible for IBM i capability building.
+
+This user may not personally use the platform daily, but they influence or approve purchases for training, onboarding, productivity, and knowledge-transfer tools.
+
+#### Goals
+
+This user wants to:
+
+- Train new IBM i developers efficiently
+- Reduce onboarding time
+- Reduce dependency on senior experts
+- Standardize IBM i learning across teams
+- Improve knowledge retention
+- Support modernization initiatives
+- Track learner progress
+- Justify training investment
+
+#### Pain Points
+
+This user struggles because:
+
+- IBM i talent can be difficult to find
+- Training is often dependent on internal experts
+- Onboarding may take months
+- Existing learning resources may not match company needs
+- Knowledge transfer is hard to measure
+- Enterprise adoption requires trust, privacy, security, and support
+- Training budget needs clear value justification
+
+#### What Success Looks Like
+
+This user is successful when:
+
+- Teams onboard faster
+- Learners follow structured paths
+- Progress can be tracked
+- Senior developers spend less time on basics
+- IBM i knowledge becomes easier to preserve
+- The platform shows measurable training and productivity value
+
+#### Product Implications
+
+For this persona, IBMiHub AI should eventually support:
+
+- Enterprise plans
+- Team accounts
+- Admin dashboards
+- Progress reporting
+- Role-based learning paths
+- Privacy and security controls
+- Corporate onboarding packages
+- Enterprise support
+
+This persona is important for long-term monetization, but should not dominate MVP scope.
+
+---
+
+### Persona 6: Interview Candidate / Career Switcher
+
+#### Profile
+
+The Interview Candidate or Career Switcher wants to prepare for IBM i job opportunities.
+
+This user may already know some programming but needs to understand IBM i concepts, RPGLE basics, common interview topics, and practical development workflows.
+
+They may be a fresher, lateral developer, internal transfer, or experienced developer moving into IBM i work.
+
+#### Goals
+
+This user wants to:
+
+- Learn IBM i concepts quickly
+- Prepare for interviews
+- Understand common RPGLE, CLLE, SQL, and DB2 for i questions
+- Practice real-world scenarios
+- Build confidence before joining an IBM i role
+- Validate their knowledge through quizzes or assessments
+
+#### Pain Points
+
+This user struggles because:
+
+- Interview topics are scattered
+- Many resources do not explain concepts from the ground up
+- They may not know what level of depth is expected
+- They may lack hands-on practice
+- They may memorize answers without understanding workflows
+- They may not know how IBM i is used in real projects
+
+#### What Success Looks Like
+
+This user is successful when:
+
+- They understand core IBM i concepts
+- They can answer interview questions with confidence
+- They can explain RPGLE, CLLE, SQL, DDS, and job log basics
+- They can complete quizzes and practice scenarios
+- They feel prepared for entry-level or lateral IBM i roles
+
+#### Product Implications
+
+For this persona, IBMiHub AI should eventually provide:
+
+- Interview preparation paths
+- Topic-wise question banks
+- Mock quizzes
+- Practical scenario explanations
+- Skill readiness indicators
+- Future certification or assessment features
+
+---
+
+### Primary MVP Personas
+
+The first MVP should focus mainly on:
+
+1. Beginner IBM i Learner
+2. Working IBM i Developer
+
+These two personas give the product a strong early foundation.
+
+The Beginner IBM i Learner validates the learning platform.
+
+The Working IBM i Developer validates the AI assistance and productivity angle.
+
+If the product creates value for both, it can later expand toward team leads, architects, enterprise buyers, and interview candidates.
+
+### Persona Prioritization
+
+For MVP decisions, priority should be:
+
+| Priority | Persona | Why |
+|---|---|---|
+| 1 | Beginner IBM i Learner | Needs structured learning and validates the education foundation |
+| 2 | Working IBM i Developer | Needs AI-assisted explanations and validates productivity potential |
+| 3 | Team Lead / Mentor | Influences onboarding and future team features |
+| 4 | Interview Candidate / Career Switcher | Supports learning and future monetization |
+| 5 | IBM i Architect / Consultant | Important for advanced productivity and modernization tools |
+| 6 | Enterprise Training Buyer | Important for future revenue but not the first MVP user |
+
+### Summary
+
+IBMiHub AI is being built for a specialized but diverse IBM i audience.
+
+The product should begin by serving learners and working developers well. These personas represent the strongest early path to product validation because they directly experience the learning and AI-assistance problems the platform aims to solve.
+
+Over time, the platform can expand to support team leads, architects, enterprise buyers, and interview candidates through more advanced learning, productivity, onboarding, assessment, and enterprise features.
 
 ---
 
 ## 10. User Journeys
 
-- **Purpose:** Map how each persona discovers, adopts, and grows within the product.
-- **Description:** End-to-end journey maps (awareness → onboarding → activation → habitual use → advocacy/upgrade) for primary personas, including key moments of friction or delight.
-- **Audience:** Product, Design, Engineering.
-- **Approximate size:** 2–4 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to describe how key users discover, evaluate, start using, and continue engaging with IBMiHub AI.
+
+User journeys help translate personas into real product experiences. They show what users are trying to accomplish, what friction they may face, and where the product must create value.
+
+The MVP should focus mainly on the journeys of:
+
+1. Beginner IBM i Learner
+2. Working IBM i Developer
+
+Other journeys are important for future roadmap planning but should not dominate the first release.
+
+---
+
+### Journey Overview
+
+IBMiHub AI should support users through the following journey stages:
+
+| Stage | Description | Product Responsibility |
+|---|---|---|
+| Awareness | User discovers IBMiHub AI | Communicate clear IBM i-focused value |
+| Evaluation | User decides whether the platform is useful | Show credibility, clarity, and relevance |
+| Onboarding | User creates account and starts | Make first steps simple and guided |
+| Activation | User experiences first meaningful value | Help user complete first lesson or ask first AI question |
+| Engagement | User returns and continues learning | Provide progress, next steps, and useful AI support |
+| Expansion | User explores advanced value | Introduce deeper learning, AI tools, and future practice |
+| Advocacy / Upgrade | User recommends or pays | Build enough trust and value to support growth |
+
+---
+
+## Journey 1: Beginner IBM i Learner
+
+### User Context
+
+The Beginner IBM i Learner is new to IBM i and may feel overwhelmed by unfamiliar terminology, 5250 screens, RPGLE, CLLE, DDS, job logs, and legacy system concepts.
+
+This user needs confidence, structure, and reassurance.
+
+### Stage 1: Awareness
+
+The user may discover IBMiHub AI through:
+
+- LinkedIn posts
+- Search results
+- IBM i community discussions
+- Recommendation from a senior developer
+- A colleague or team lead
+- Content shared by the founder
+- A beginner-friendly IBM i article or video
+
+At this stage, the user is likely asking:
+
+- What is IBM i?
+- How do I start learning IBM i?
+- Is there a beginner-friendly learning path?
+- Can AI help me understand IBM i concepts?
+
+### Stage 2: Evaluation
+
+The user visits the platform and tries to understand whether it is meant for someone like them.
+
+The product must quickly answer:
+
+- Is this beginner-friendly?
+- Does it assume prior IBM i knowledge?
+- Is there a clear learning path?
+- Can I ask basic questions without feeling embarrassed?
+- Is this more useful than scattered articles?
+
+The landing and onboarding experience should clearly communicate that IBMiHub AI supports beginners.
+
+### Stage 3: Onboarding
+
+The user creates an account or enters the learning experience.
+
+A good onboarding flow should:
+
+- Ask about the user's experience level
+- Recommend a beginner learning path
+- Explain what the AI tutor can help with
+- Avoid overwhelming the user with too many modules
+- Show the next best action clearly
+
+For MVP, onboarding should be simple. The goal is to get the user into their first meaningful learning activity quickly.
+
+### Stage 4: Activation
+
+The first meaningful value occurs when the user completes an early lesson or receives a helpful AI tutor explanation.
+
+Examples of activation moments:
+
+- User understands what IBM i is
+- User completes the first beginner lesson
+- User asks the AI tutor a basic question and receives a clear answer
+- User sees their learning progress
+- User feels the platform is less intimidating than random web search
+
+Activation is successful when the user thinks:
+
+"This finally makes IBM i easier to understand."
+
+### Stage 5: Engagement
+
+The user returns to continue learning.
+
+The product should support engagement through:
+
+- Clear next lesson recommendations
+- Visible progress tracking
+- Simple quizzes or checks for understanding
+- AI tutor support inside learning content
+- Beginner-friendly explanations
+- Practical examples connected to real IBM i work
+
+The user should not need to decide what to learn next without guidance.
+
+### Stage 6: Expansion
+
+As the beginner gains confidence, they may explore:
+
+- RPGLE basics
+- CLLE basics
+- DDS and database concepts
+- 5250 workflow explanations
+- Job log examples
+- Practice exercises
+- Interview preparation
+- Future labs or simulations
+
+Expansion should happen gradually. The product should avoid exposing too many advanced features too early.
+
+### Stage 7: Advocacy or Upgrade
+
+The user may recommend the platform if it helps them learn faster and with less frustration.
+
+Possible advocacy or upgrade signals:
+
+- User shares the platform with another learner
+- User asks for more lessons
+- User joins a beta program
+- User upgrades for advanced AI tutor usage or practice labs in the future
+- User recommends the platform to a team lead
+
+### Key Friction Points
+
+The beginner may drop off if:
+
+- The platform feels too advanced
+- The first lesson is too long
+- IBM i terminology is not explained clearly
+- The AI tutor gives overly technical answers
+- The user does not know what to do next
+- Progress is not visible
+- The product feels like just another article website
+
+### Product Requirements Implied by This Journey
+
+The product should provide:
+
+- Beginner onboarding
+- Clear learning paths
+- Simple first lesson
+- Glossary support
+- AI tutor with beginner-friendly behavior
+- Progress tracking
+- Next-step recommendations
+- Low-friction account creation
+
+---
+
+## Journey 2: Working IBM i Developer
+
+### User Context
+
+The Working IBM i Developer already works with IBM i systems and wants practical help.
+
+This user may not need beginner-level content every time. They want faster explanations, code understanding, job log support, and productivity assistance.
+
+### Stage 1: Awareness
+
+The user may discover IBMiHub AI through:
+
+- LinkedIn posts about IBM i AI tools
+- A shared demo video
+- IBM i community discussion
+- Search for RPGLE, CLLE, DDS, or job log explanation
+- Recommendation from another developer
+- A practical article about IBM i productivity
+
+At this stage, the user is likely asking:
+
+- Can this help me with real IBM i work?
+- Is this more useful than a generic AI chatbot?
+- Can it explain RPGLE or CLLE clearly?
+- Can it help with job logs or documentation?
+- Is it trustworthy?
+
+### Stage 2: Evaluation
+
+The user evaluates whether the platform is practical or only beginner-focused.
+
+The product must quickly show:
+
+- IBM i-specific depth
+- Practical examples
+- AI tutor usefulness
+- RPGLE, CLLE, SQL, DDS, and job log relevance
+- Trust boundaries
+- Clear positioning as both learning and productivity support
+
+The user should feel that the product respects experienced IBM i professionals.
+
+### Stage 3: Onboarding
+
+The user may choose a path such as:
+
+- "I am new to IBM i"
+- "I already work with IBM i"
+- "I want help understanding code or logs"
+- "I want to refresh concepts"
+
+For MVP, the product may keep this simple, but it should avoid forcing all users through beginner-only content.
+
+### Stage 4: Activation
+
+The first meaningful value occurs when the user gets a useful answer or explanation that saves time.
+
+Examples of activation moments:
+
+- User asks the AI tutor about an RPGLE concept
+- User gets a clear explanation of a CLLE command or flow
+- User refreshes an IBM i concept quickly
+- User finds a lesson or explanation relevant to current work
+- User sees that the platform is more focused than generic search
+
+Activation is successful when the user thinks:
+
+"This can save me time during real IBM i work."
+
+### Stage 5: Engagement
+
+The working developer returns when the platform becomes useful for recurring tasks.
+
+Engagement may include:
+
+- Asking AI tutor questions
+- Looking up IBM i concepts
+- Reviewing RPGLE or CLLE explanations
+- Learning modern IBM i tooling practices
+- Revisiting advanced topics
+- Using future code, job log, or documentation tools
+
+The product should make repeated use easy and fast.
+
+### Stage 6: Expansion
+
+As the user trusts the platform, they may explore:
+
+- Advanced RPGLE topics
+- CLLE workflows
+- SQLRPGLE and DB2 for i concepts
+- Job log analysis
+- Documentation generation
+- Modernization content
+- Future productivity tools
+- Team onboarding features
+
+Expansion should be based on actual user demand and measured engagement.
+
+### Stage 7: Advocacy or Upgrade
+
+The working developer may become a strong advocate if the platform saves time.
+
+Possible advocacy or upgrade signals:
+
+- User shares it with teammates
+- User recommends it to juniors
+- User uses it during support or analysis
+- User upgrades for advanced AI usage or tools
+- User asks for team features
+- User provides product feedback
+
+### Key Friction Points
+
+The working developer may drop off if:
+
+- The product feels too basic
+- AI explanations are generic or inaccurate
+- The platform does not understand IBM i terminology
+- The workflow is slower than using a generic AI tool
+- The product lacks trust indicators
+- There is no clear productivity value
+- Advanced use cases are promised too early but not delivered well
+
+### Product Requirements Implied by This Journey
+
+The product should provide:
+
+- IBM i-specific AI tutor behavior
+- Practical explanations
+- Advanced topic discovery
+- Fast access to useful content
+- Clear trust boundaries
+- Future support for code, job logs, and documentation
+- Separation between beginner and professional user flows
+
+---
+
+## Journey 3: Team Lead / Mentor
+
+### User Context
+
+The Team Lead or Mentor wants to reduce onboarding burden and help team members become productive faster.
+
+This user may not be the first daily user of the MVP, but they can influence adoption.
+
+### Journey Summary
+
+The team lead discovers IBMiHub AI through community activity, a recommendation, or seeing a junior developer use it.
+
+They evaluate whether the platform can support onboarding and reduce repeated questions.
+
+They may start by reviewing beginner learning paths, AI tutor behavior, and content quality.
+
+If the product proves useful, they may recommend it to juniors or use it as part of informal onboarding.
+
+### Success Moment
+
+The success moment for this persona is:
+
+"This can help my team members learn basics before coming to me."
+
+### Future Product Opportunities
+
+This journey may later require:
+
+- Team learning paths
+- Progress visibility
+- Shareable lesson links
+- Internal onboarding tracks
+- Admin dashboards
+- Team plans
+
+These should not dominate the first MVP but should inform future design.
+
+---
+
+## Journey 4: IBM i Architect / Consultant
+
+### User Context
+
+The IBM i Architect or Consultant needs to understand complex systems, explain legacy behavior, and support modernization.
+
+This user is experienced and expects accuracy, depth, and control.
+
+### Journey Summary
+
+The architect discovers IBMiHub AI through AI productivity positioning, IBM i modernization content, or peer recommendation.
+
+They evaluate whether the platform can assist with code understanding, documentation, job logs, and modernization topics.
+
+They may initially test the platform with conceptual questions or sample code before trusting it for deeper analysis.
+
+### Success Moment
+
+The success moment for this persona is:
+
+"This can accelerate analysis and documentation without replacing expert judgment."
+
+### Future Product Opportunities
+
+This journey may later require:
+
+- Advanced code analysis
+- Application flow documentation
+- Job log interpretation
+- Modernization learning paths
+- Architecture-level explanations
+- Strong privacy and data handling controls
+
+This is a high-value future persona but not the first MVP focus.
+
+---
+
+## Journey 5: Enterprise Training Buyer
+
+### User Context
+
+The Enterprise Training Buyer is interested in team training, onboarding, knowledge transfer, and measurable learning outcomes.
+
+This user is more likely to engage after the product has proof of individual value.
+
+### Journey Summary
+
+The buyer may discover IBMiHub AI through employee recommendation, founder outreach, LinkedIn content, or a demo.
+
+They evaluate whether the platform can reduce onboarding time, standardize learning, and support team capability building.
+
+They will likely require evidence of content quality, product reliability, privacy, security, and measurable training outcomes.
+
+### Success Moment
+
+The success moment for this persona is:
+
+"This could reduce onboarding effort and help us build IBM i capability at scale."
+
+### Future Product Opportunities
+
+This journey may later require:
+
+- Enterprise plans
+- Team accounts
+- Admin dashboards
+- Progress reports
+- Role-based learning paths
+- Privacy and security controls
+- Procurement support
+- Corporate onboarding packages
+
+This persona is important for monetization but should be treated as a future buyer journey.
+
+---
+
+## Journey 6: Interview Candidate / Career Switcher
+
+### User Context
+
+The Interview Candidate or Career Switcher wants to learn enough IBM i to prepare for job opportunities.
+
+This user may be motivated, time-sensitive, and focused on practical readiness.
+
+### Journey Summary
+
+The user may discover IBMiHub AI through search, LinkedIn, career advice, or interview preparation content.
+
+They evaluate whether the platform can help them understand IBM i concepts and prepare for interviews.
+
+They may begin with beginner lessons, then move into quizzes, common questions, and practical scenarios.
+
+### Success Moment
+
+The success moment for this persona is:
+
+"I feel more confident preparing for an IBM i role."
+
+### Future Product Opportunities
+
+This journey may later require:
+
+- Interview preparation paths
+- Question banks
+- Mock assessments
+- Skill readiness scores
+- Certification or completion badges
+- Practical scenario practice
+
+This persona can support future monetization but should remain secondary to the core learning and developer journeys.
+
+---
+
+## MVP Journey Prioritization
+
+For the first MVP, the product should prioritize:
+
+| Priority | Journey | Reason |
+|---|---|---|
+| 1 | Beginner IBM i Learner Journey | Validates structured learning and onboarding |
+| 2 | Working IBM i Developer Journey | Validates AI assistance and productivity usefulness |
+| 3 | Team Lead / Mentor Journey | Supports future onboarding and team adoption |
+| 4 | Interview Candidate Journey | Supports future learning monetization |
+| 5 | Architect / Consultant Journey | Supports future advanced productivity tools |
+| 6 | Enterprise Buyer Journey | Supports future enterprise monetization |
+
+The MVP should not attempt to fully serve all journeys.
+
+It should serve the first two journeys well enough to validate demand, trust, and repeated usage.
+
+---
+
+## Key Journey Design Principles
+
+Across all journeys, IBMiHub AI should:
+
+- Make the next step clear
+- Avoid overwhelming new users
+- Separate beginner and experienced user needs
+- Provide meaningful value quickly
+- Use AI where it improves learning or productivity
+- Maintain trust boundaries around AI output
+- Encourage continued learning and practice
+- Avoid over-promising advanced functionality before it exists
+
+---
+
+## Summary
+
+User journeys show that IBMiHub AI must support both learning and productivity.
+
+The first MVP should focus on helping beginners start confidently and helping working developers get useful IBM i-specific explanations.
+
+If those journeys are successful, the product can gradually expand into team onboarding, interview preparation, architecture support, enterprise training, practice labs, and advanced productivity tools.
 
 ---
 
 ## 11. Product Scope
 
-- **Purpose:** Define the full boundary of the product across all phases — not just MVP.
-- **Description:** Complete module inventory (Learning Center, AI Tutor, 5250 Practice Lab, RPG Playground, AI Code Review, Job Log Analyzer, Documentation Generator, Quiz Engine, Community), explicitly marked in-scope vs. out-of-scope per phase.
-- **Audience:** Product, Engineering.
-- **Approximate size:** 2–3 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define the boundary of IBMiHub AI across the MVP, later releases, and long-term platform vision.
+
+IBMiHub AI has a broad long-term vision, but the product must be built in focused stages. The goal is not to build every possible module immediately. The goal is to start with a narrow, useful, trusted MVP and then expand based on user validation.
+
+This section defines:
+
+- What is in scope for the product overall
+- What is in scope for the first MVP
+- What is planned for later phases
+- What is explicitly out of scope for now
+
+### Scope Philosophy
+
+IBMiHub AI should start narrow and grow carefully.
+
+The first version should prove that users find value in a focused AI-powered IBM i learning and assistance experience. Advanced modules such as 5250 practice labs, RPG playgrounds, job log analyzers, documentation generators, enterprise training, and certifications are part of the long-term vision, but they should not overload the first release.
+
+The product should follow these scope principles:
+
+- Build the smallest useful version first.
+- Prioritize learning and AI tutor value before advanced tools.
+- Avoid real IBM i connectivity in the initial MVP.
+- Avoid enterprise complexity until individual value is validated.
+- Do not build features only because they sound impressive.
+- Expand only when there is evidence of user demand.
+- Keep the platform extensible so future modules can be added cleanly.
+
+---
+
+### Full Product Scope
+
+The complete long-term product vision may include the following modules.
+
+| Module | Description | Phase |
+|---|---|---|
+| Learning Center | Structured IBM i learning paths and lessons | MVP |
+| AI Tutor | IBM i-focused AI assistant for learning and explanations | MVP |
+| User Dashboard | User home, progress, next steps, and activity summary | MVP |
+| Progress Tracking | Track lesson completion and learning activity | MVP |
+| Basic Quizzes / Checks | Simple knowledge checks to support learning | MVP / Early Post-MVP |
+| Glossary | Definitions of IBM i terms and concepts | MVP / Early Post-MVP |
+| 5250 Practice Lab | Simulated 5250 learning workflows | Post-MVP |
+| RPGLE / CLLE Practice | Practice exercises for RPGLE and CLLE concepts | Post-MVP |
+| RPG Playground | Future safe environment for code-oriented practice | Future |
+| Job Log Analyzer | AI-assisted job log explanation and troubleshooting | Future |
+| Code Explanation / Review | AI-assisted explanation of RPGLE, CLLE, SQL, and DDS code | Future |
+| Documentation Generator | Generate documentation from code, notes, or system behavior | Future |
+| Interview Preparation | IBM i interview questions, quizzes, and readiness paths | Future |
+| Certification / Assessment | Skill validation, badges, or certificates | Future |
+| Team Learning | Team accounts, learning assignments, and shared progress | Future |
+| Enterprise Training | Corporate onboarding, progress reporting, privacy controls | Future |
+| Community | Knowledge sharing, discussions, and expert contributions | Future |
+| Mobile App | Mobile companion experience | Future |
+| VS Code Extension | Developer workflow integration | Future |
+
+---
+
+## MVP Scope
+
+The MVP should focus on proving the core value proposition:
+
+**A structured IBM i learning platform with AI-assisted guidance.**
+
+The MVP should serve the first two primary personas:
+
+1. Beginner IBM i Learner
+2. Working IBM i Developer
+
+The MVP should help beginners start learning IBM i with confidence and help working developers get IBM i-specific explanations faster.
+
+### MVP In-Scope Features
+
+The first MVP should include the following product capabilities.
+
+---
+
+### 1. Public Landing Experience
+
+The product should have a clear public-facing entry point that explains what IBMiHub AI is and who it is for.
+
+In scope:
+
+- Clear product positioning
+- Explanation of IBM i learning and AI assistance value
+- Basic call-to-action to start learning or join beta
+- Founder-led credibility and product story
+- Simple description of MVP capabilities
+
+Out of scope for MVP:
+
+- Complex marketing site
+- Full blog platform
+- Customer case studies
+- Enterprise sales pages
+- Advanced SEO content engine
+
+---
+
+### 2. User Account and Basic Onboarding
+
+The MVP should allow users to create an account or access a basic user experience.
+
+In scope:
+
+- Simple sign-up / login experience
+- Basic onboarding question about user type or experience level
+- Beginner vs experienced user path selection if feasible
+- Clear first recommended action
+- Low-friction start experience
+
+Out of scope for MVP:
+
+- Enterprise single sign-on
+- Organization-level user management
+- Complex role-based access
+- Admin controls
+- Team invitations
+
+---
+
+### 3. User Dashboard
+
+The dashboard should give users a clear place to continue their learning.
+
+In scope:
+
+- Welcome message
+- Current learning path
+- Next recommended lesson
+- Basic progress summary
+- Recent activity if available
+- Quick access to AI tutor
+
+Out of scope for MVP:
+
+- Advanced analytics
+- Team progress dashboards
+- Admin reporting
+- Enterprise training reports
+- Complex personalization engine
+
+---
+
+### 4. Learning Center
+
+The Learning Center is the core MVP module.
+
+It should provide structured IBM i learning content rather than disconnected articles.
+
+In scope:
+
+- Beginner IBM i learning path
+- Initial set of original lessons
+- Topic grouping by learning sequence
+- Clear lesson titles and descriptions
+- Simple lesson navigation
+- Practical explanations and examples
+- Content written in original IBMiHub AI style
+
+Initial learning topics may include:
+
+- What is IBM i
+- IBM i basic terminology
+- Libraries and objects
+- 5250 screen basics
+- Physical files and logical files
+- Introduction to RPGLE
+- Introduction to CLLE
+- Introduction to DB2 for i
+- Job logs and spool files basics
+- Basic IBM i development workflow
+
+Out of scope for MVP:
+
+- Large full curriculum
+- Advanced certification paths
+- Paid course bundles
+- Multi-language content
+- Instructor-led training
+- User-generated courses
+
+---
+
+### 5. AI Tutor
+
+The AI Tutor is a core MVP differentiator.
+
+It should help users ask IBM i-related questions and receive guided explanations.
+
+In scope:
+
+- IBM i-focused question answering
+- Beginner-friendly explanations
+- RPGLE, CLLE, SQL, DDS, 5250, and job log conceptual help
+- Contextual assistance related to learning topics
+- Safe disclaimers and trust boundaries
+- Encouragement to validate AI output for real production use
+- Feedback option for helpful / not helpful responses
+
+Out of scope for MVP:
+
+- Uploading private production source code
+- Uploading sensitive job logs
+- Automated production troubleshooting
+- Guaranteed correctness claims
+- Direct connection to IBM i systems
+- Autonomous code changes
+- Enterprise AI governance controls
+
+---
+
+### 6. Basic Progress Tracking
+
+The MVP should track enough progress to help users continue learning.
+
+In scope:
+
+- Lesson started / completed state
+- Learning path progress
+- Basic user progress display
+- Continue learning recommendation
+
+Out of scope for MVP:
+
+- Detailed learning analytics
+- Team progress tracking
+- Skill scoring engine
+- Certification progress
+- Manager reporting
+
+---
+
+### 7. Basic Feedback Collection
+
+The MVP should collect feedback from early users.
+
+In scope:
+
+- Lesson feedback
+- AI response helpfulness feedback
+- General product feedback
+- Beta user feedback signals
+- Simple contact or feedback form
+
+Out of scope for MVP:
+
+- Full support ticketing system
+- Public community forum
+- Enterprise customer success workflow
+- Advanced analytics dashboards
+
+---
+
+### 8. Basic Content Governance
+
+The MVP should ensure that learning content remains original, clear, and maintainable.
+
+In scope:
+
+- Original content only
+- Clear lesson structure
+- Review process before publishing important content
+- Content versioning through Git or documentation workflow
+- Avoid copying external tutorials or documentation
+
+Out of scope for MVP:
+
+- Full content management system
+- Multi-author publishing workflow
+- Editorial approval dashboard
+- Marketplace for user-submitted content
+
+---
+
+## Early Post-MVP Scope
+
+The early post-MVP phase should expand only after the MVP validates user interest.
+
+Possible early post-MVP features include:
+
+### 1. Expanded Learning Paths
+
+- RPGLE fundamentals path
+- CLLE fundamentals path
+- DB2 for i / SQL path
+- 5250 workflow path
+- Job log basics path
+- Modern IBM i tooling path
+
+### 2. Quizzes and Knowledge Checks
+
+- Lesson-level quizzes
+- Topic-level checks
+- Beginner skill confidence indicators
+- Review recommendations based on weak areas
+
+### 3. Glossary and Concept Explorer
+
+- IBM i terminology glossary
+- Linked terms inside lessons
+- Beginner-friendly definitions
+- Searchable concept index
+
+### 4. Improved AI Tutor Context
+
+- AI tutor connected more closely to lesson context
+- Suggested questions per lesson
+- Better beginner vs experienced response styles
+- AI answer feedback loop
+
+### 5. Early Practice Experiences
+
+- Guided command examples
+- Simulated job log reading exercises
+- Simple RPGLE and CLLE interpretation exercises
+- Non-production practice scenarios
+
+---
+
+## Later Product Scope
+
+Later product phases may include more advanced learning, practice, and productivity capabilities.
+
+### 1. 5250 Practice Lab
+
+A simulated 5250 practice experience where users can learn common IBM i workflows safely.
+
+Potential capabilities:
+
+- Simulated command line
+- Guided command exercises
+- Navigation examples
+- Object and library practice scenarios
+- Step-by-step workflows
+- No real production system connection in early versions
+
+### 2. RPGLE and CLLE Practice
+
+Practice experiences for IBM i programming concepts.
+
+Potential capabilities:
+
+- Code reading exercises
+- Syntax interpretation
+- Simple coding challenges
+- CL command flow understanding
+- Debugging-style scenarios
+- AI-assisted explanations
+
+### 3. Job Log Analyzer
+
+An AI-assisted tool for understanding job logs.
+
+Potential capabilities:
+
+- Paste sample job log text
+- Explain key messages
+- Identify likely error areas
+- Suggest investigation steps
+- Teach users how to read job logs
+
+This should require strong privacy and trust boundaries before supporting real user uploads.
+
+### 4. Code Explanation and Review
+
+AI-assisted explanation of RPGLE, CLLE, SQLRPGLE, DDS, and related IBM i code.
+
+Potential capabilities:
+
+- Explain code snippets
+- Summarize program behavior
+- Identify important logic
+- Explain file usage
+- Suggest documentation notes
+- Teach users how to read legacy code
+
+This should not be positioned as automatic production-safe code review without human validation.
+
+### 5. Documentation Generator
+
+A tool to help create readable documentation from code, notes, logs, or manually supplied context.
+
+Potential capabilities:
+
+- Program summaries
+- Process documentation
+- Technical notes
+- Onboarding explanations
+- Legacy system documentation support
+
+### 6. Interview Preparation
+
+Learning paths and assessments for users preparing for IBM i jobs.
+
+Potential capabilities:
+
+- Interview question banks
+- Topic-wise practice
+- Mock quizzes
+- Scenario-based questions
+- Readiness indicators
+
+### 7. Team and Enterprise Learning
+
+Capabilities for organizations that want to train teams.
+
+Potential capabilities:
+
+- Team accounts
+- Assigned learning paths
+- Progress dashboards
+- Role-based learning
+- Corporate onboarding tracks
+- Admin controls
+- Enterprise privacy and security features
+
+### 8. Community and Ecosystem Features
+
+Possible future community capabilities.
+
+Potential capabilities:
+
+- Discussion spaces
+- Expert Q&A
+- User-submitted questions
+- Community learning requests
+- Content suggestions
+
+Community features should only be added when moderation and quality control can be handled properly.
+
+---
+
+## Explicitly Out of Scope for MVP
+
+The following items should not be part of the first MVP:
+
+- Real IBM i system connectivity
+- Live 5250 terminal connected to production or customer systems
+- Real code compilation or execution
+- Uploading private production code
+- Uploading sensitive production job logs
+- Full RPG playground
+- Full job log analyzer
+- Full documentation generator
+- Enterprise accounts
+- Team dashboards
+- Admin dashboards
+- Paid subscriptions and billing
+- Certifications
+- Community forum
+- Mobile app
+- VS Code extension
+- Marketplace
+- Multi-language support
+- Public API
+- Enterprise SSO
+- Advanced security/compliance workflows
+
+These features may be considered later, but adding them too early would increase complexity and risk before the core product value is validated.
+
+---
+
+## Scope Boundaries
+
+### Learning Scope
+
+IBMiHub AI should focus on practical IBM i learning.
+
+The learning scope includes:
+
+- IBM i fundamentals
+- RPGLE basics and practical explanations
+- CLLE basics and practical explanations
+- DDS and DB2 for i concepts
+- 5250 concepts and workflows
+- Job log and spool file basics
+- Modern IBM i tooling concepts
+- Beginner-to-practical progression
+
+The learning scope should avoid trying to cover every advanced IBM i topic in the MVP.
+
+### AI Scope
+
+The AI scope should focus on learning and explanation.
+
+The AI tutor should:
+
+- Explain IBM i concepts
+- Help users understand lessons
+- Answer beginner and working-developer questions
+- Provide practical examples
+- Encourage validation of technical guidance
+- Avoid overconfident production advice
+
+The AI tutor should not:
+
+- Claim guaranteed correctness
+- Replace expert review
+- Make production changes
+- Connect to customer systems
+- Encourage unsafe handling of private code or logs
+
+### Practice Scope
+
+Practice is important to the long-term product, but MVP practice should remain light.
+
+The MVP may include simple examples, quizzes, or checks for understanding.
+
+More advanced practice such as 5250 simulation, RPG exercises, and job log scenarios should be phased in later.
+
+### Enterprise Scope
+
+Enterprise value is part of the long-term vision, but it is not part of the MVP.
+
+The MVP should be designed in a way that does not block future enterprise features, but it should not attempt to build enterprise functionality immediately.
+
+---
+
+## Scope Prioritization
+
+For the first MVP, priority should be:
+
+| Priority | Scope Area | Reason |
+|---|---|---|
+| 1 | Learning Center | Core product foundation |
+| 2 | AI Tutor | Main differentiation |
+| 3 | User Dashboard | Helps users continue learning |
+| 4 | Progress Tracking | Supports engagement |
+| 5 | Feedback Collection | Supports validation |
+| 6 | Basic Quizzes / Checks | Useful but can be lightweight |
+| 7 | Glossary | Useful but can grow gradually |
+
+Advanced tools such as 5250 labs, job log analyzer, code explanation, documentation generator, enterprise training, and community should remain outside the first MVP.
+
+---
+
+## Summary
+
+IBMiHub AI has a broad long-term vision, but the first release should remain focused.
+
+The MVP should prove that users want a structured IBM i learning platform with AI-assisted guidance.
+
+The initial scope should focus on learning, AI tutor, dashboard, progress tracking, and feedback. More advanced capabilities should be introduced only after the product validates demand, trust, and repeated usage.
 
 ---
 
 ## 12. MVP Definition
 
-- **Purpose:** Pin down the precise, approved first release.
-- **Description:** MVP feature list, explicit exclusions, MVP success criteria, and the rationale for sequencing.
-- **Audience:** Product, Engineering, Sprint 1 planning.
-- **Approximate size:** 2–3 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define the exact first release of IBMiHub AI.
+
+The MVP should be narrow, useful, and realistic. It should prove whether users want a structured IBM i learning platform with AI-assisted guidance before the product expands into advanced labs, code tools, job log analyzers, enterprise training, certifications, or community features.
+
+This section defines:
+
+- The approved MVP product experience
+- The primary MVP users
+- The MVP feature set
+- The MVP exclusions
+- The success criteria for MVP validation
+- The conditions for moving beyond MVP
+
+---
+
+### MVP Statement
+
+The MVP of IBMiHub AI is:
+
+**A web-based IBM i learning and AI assistance platform that helps beginners and working IBM i developers start a structured learning path, ask IBM i-focused questions, track basic progress, and provide feedback.**
+
+The MVP is not intended to be a complete IBM i training academy, full developer tool, enterprise platform, or production troubleshooting system.
+
+The MVP should answer one core question:
+
+**Do IBM i learners and professionals find enough value in a focused AI-assisted learning experience to return, engage, and ask for more?**
+
+---
+
+### MVP Target Users
+
+The MVP will focus on two primary personas:
+
+1. Beginner IBM i Learner
+2. Working IBM i Developer
+
+These personas were selected because they directly represent the two core early product promises:
+
+- Learning IBM i should become easier and more structured.
+- IBM i explanations and assistance should become faster and more accessible.
+
+Other personas such as team leads, architects, enterprise buyers, and interview candidates remain important for future growth, but they should not drive first-release complexity.
+
+---
+
+### MVP Core Value Proposition
+
+The MVP should deliver the following value:
+
+For a beginner:
+
+**"I now have a clear place to start learning IBM i, and I can ask questions when I get stuck."**
+
+For a working IBM i developer:
+
+**"I can quickly refresh IBM i concepts and get focused explanations without searching across scattered resources."**
+
+For the product team:
+
+**"We can validate whether a focused IBM i AI learning platform creates enough engagement and trust to justify further investment."**
+
+---
+
+### Approved MVP Feature Set
+
+The first MVP should include the following approved features.
+
+---
+
+### 1. Public Landing Experience
+
+The MVP should include a simple public landing page that explains the product clearly.
+
+The landing experience should communicate:
+
+- What IBMiHub AI is
+- Who it is for
+- Why IBM i learning needs a modern AI-assisted platform
+- What users can do in the MVP
+- How users can start learning or join the beta
+
+The landing page should be simple and credible. It does not need to be a full marketing website.
+
+MVP acceptance expectations:
+
+- A visitor can understand the product within one minute.
+- A visitor can identify whether the product is meant for them.
+- A visitor has a clear next action.
+
+---
+
+### 2. User Account and Basic Onboarding
+
+The MVP should provide a simple way for users to start using the platform.
+
+The onboarding experience should be lightweight and should not create unnecessary friction.
+
+In scope:
+
+- Basic sign-up and login
+- Basic user profile
+- Simple onboarding question such as experience level
+- Clear recommendation for first action
+- Option to start with beginner learning path
+
+Out of scope:
+
+- Enterprise SSO
+- Team accounts
+- Role-based permissions
+- Admin dashboards
+- Organization management
+
+MVP acceptance expectations:
+
+- A user can create an account and reach the learning experience quickly.
+- A beginner can understand where to start.
+- An experienced user is not forced into an overly beginner-only experience.
+
+---
+
+### 3. User Dashboard
+
+The MVP should include a simple dashboard that acts as the user's home base.
+
+The dashboard should help the user continue learning instead of wondering what to do next.
+
+In scope:
+
+- Welcome message
+- Current or recommended learning path
+- Next recommended lesson
+- Basic progress summary
+- Quick access to AI Tutor
+- Simple recent activity if feasible
+
+Out of scope:
+
+- Advanced analytics
+- Team dashboards
+- Personalized recommendation engine
+- Enterprise reporting
+
+MVP acceptance expectations:
+
+- A returning user can quickly continue learning.
+- The dashboard makes the next step obvious.
+- The dashboard does not feel empty or confusing.
+
+---
+
+### 4. Learning Center
+
+The Learning Center is the core MVP feature.
+
+It should provide a structured IBM i learning path with original content.
+
+In scope:
+
+- Beginner IBM i learning path
+- Original lessons written for IBMiHub AI
+- Simple lesson navigation
+- Clear lesson sequence
+- Beginner-friendly explanations
+- Practical examples
+- Lesson completion tracking
+
+The initial learning path should focus on IBM i fundamentals and should not attempt to cover the entire IBM i ecosystem.
+
+Suggested initial lesson topics:
+
+- What is IBM i?
+- IBM i platform overview
+- Libraries and objects
+- 5250 screen basics
+- Physical files and logical files
+- Introduction to RPGLE
+- Introduction to CLLE
+- Introduction to DB2 for i
+- Job logs and spool files basics
+- Basic IBM i development workflow
+
+Out of scope:
+
+- Complete RPGLE course
+- Complete CLLE course
+- Full certification path
+- Paid course bundles
+- User-generated courses
+- Instructor-led learning
+
+MVP acceptance expectations:
+
+- A beginner can complete the first few lessons without needing outside context.
+- Lessons feel structured rather than random.
+- Content is original and not copied from existing websites.
+- Lessons are clear enough to build confidence.
+
+---
+
+### 5. AI Tutor
+
+The AI Tutor is the main MVP differentiator.
+
+It should help users ask IBM i-related questions and receive useful explanations.
+
+In scope:
+
+- IBM i-focused question answering
+- Beginner-friendly explanations
+- Practical explanations for RPGLE, CLLE, SQL, DDS, 5250, job logs, and IBM i concepts
+- Support for questions related to learning content
+- Clear trust boundaries
+- Helpful / not helpful feedback option
+- Encouragement to validate AI guidance for real production use
+
+Out of scope:
+
+- Uploading private production code
+- Uploading sensitive production logs
+- Direct IBM i system connectivity
+- Automatic code changes
+- Production troubleshooting guarantees
+- Enterprise AI governance controls
+- Claims of guaranteed correctness
+
+MVP acceptance expectations:
+
+- Users can ask IBM i questions in natural language.
+- Responses are understandable and useful.
+- The AI Tutor does not behave like a generic chatbot with no IBM i context.
+- AI output includes appropriate caution where needed.
+- Users can provide feedback on response quality.
+
+---
+
+### 6. Basic Progress Tracking
+
+The MVP should include lightweight progress tracking.
+
+Progress tracking is important because IBMiHub AI is intended to be a learning platform, not just a content site.
+
+In scope:
+
+- Lesson started state
+- Lesson completed state
+- Learning path progress
+- Dashboard progress display
+- Continue learning indication
+
+Out of scope:
+
+- Skill scoring engine
+- Certification progress
+- Team progress tracking
+- Detailed learning analytics
+- Manager reports
+
+MVP acceptance expectations:
+
+- Users can see what they have completed.
+- Users can continue from where they left off.
+- Progress creates a sense of learning continuity.
+
+---
+
+### 7. Basic Feedback Collection
+
+The MVP should collect early feedback from real users.
+
+Feedback is required to validate whether the product is useful and what should be built next.
+
+In scope:
+
+- Lesson helpfulness feedback
+- AI response helpfulness feedback
+- General product feedback
+- Simple contact or beta feedback form
+- Ability to capture common user requests
+
+Out of scope:
+
+- Full support ticketing system
+- Public community forum
+- Enterprise customer success workflow
+- Advanced feedback analytics
+
+MVP acceptance expectations:
+
+- Users can easily provide feedback.
+- Product owner can identify common issues and requests.
+- Feedback can guide post-MVP priorities.
+
+---
+
+### 8. Basic Content Governance
+
+The MVP should include a simple process to protect content quality and originality.
+
+In scope:
+
+- Original content only
+- Clear lesson structure
+- Manual review before publishing important content
+- Version control for content
+- Avoid copying tutorials, documentation, or examples from other websites
+
+Out of scope:
+
+- Full CMS
+- Editorial approval dashboard
+- Multi-author publishing workflow
+- User-submitted lessons
+- Content marketplace
+
+MVP acceptance expectations:
+
+- Content is traceable and maintainable.
+- Lessons follow a consistent structure.
+- The platform avoids legal and ethical risk from copied content.
+
+---
+
+### MVP Explicit Exclusions
+
+The following are explicitly excluded from the MVP:
+
+- Real IBM i system connectivity
+- Live 5250 terminal connected to any IBM i system
+- Real code compilation or execution
+- Uploading production source code
+- Uploading sensitive job logs
+- Full RPG playground
+- Full 5250 practice lab
+- Full job log analyzer
+- Full code review tool
+- Full documentation generator
+- Enterprise accounts
+- Team dashboards
+- Admin dashboards
+- Billing and paid subscriptions
+- Certifications
+- Community forum
+- Mobile app
+- VS Code extension
+- Public API
+- Enterprise SSO
+- Advanced compliance workflows
+
+These items may be considered later, but they should not be part of the first release.
+
+---
+
+### MVP User Experience Flow
+
+The first MVP user flow should be simple:
+
+1. User discovers IBMiHub AI.
+2. User understands the product from the landing page.
+3. User signs up or enters the beta experience.
+4. User selects or is guided into a beginner or working-developer path.
+5. User lands on dashboard.
+6. User starts the first recommended lesson.
+7. User asks the AI Tutor a question when needed.
+8. User completes lesson or marks progress.
+9. User returns later and continues learning.
+10. User provides feedback.
+
+This flow should be easy to understand and should not require advanced setup.
+
+---
+
+### MVP Success Criteria
+
+The MVP should be considered successful if it demonstrates early evidence that users find the platform valuable.
+
+Success indicators include:
+
+- Users understand the product value quickly.
+- Users start the beginner learning path.
+- Users complete at least one lesson.
+- Users ask meaningful AI Tutor questions.
+- Users return for additional learning sessions.
+- Users provide positive qualitative feedback.
+- Users ask for more lessons or advanced features.
+- IBM i professionals show interest through direct feedback, sharing, or beta requests.
+
+The MVP does not need to prove full monetization immediately.
+
+The MVP needs to prove that the product direction is valuable enough to continue.
+
+---
+
+### MVP Validation Questions
+
+The MVP should help answer these questions:
+
+- Do beginners find the learning path understandable?
+- Do users trust the AI Tutor enough to ask questions?
+- Do working developers find the explanations practical?
+- Do users return after the first session?
+- Which topics attract the most engagement?
+- Which AI Tutor questions are most common?
+- Where do users get confused?
+- What advanced features do users request first?
+- Is there evidence of willingness to pay later?
+
+---
+
+### MVP Quality Bar
+
+Even though the MVP is narrow, it should still feel professional.
+
+The MVP should be:
+
+- Clear
+- Fast enough for comfortable use
+- Simple to navigate
+- Trustworthy
+- Original in content
+- Beginner-friendly
+- Useful for real IBM i learning
+- Safe in its AI boundaries
+- Easy to improve based on feedback
+
+The MVP should not feel like a random collection of AI-generated pages.
+
+---
+
+### MVP Release Readiness Checklist
+
+The MVP should not be considered ready until:
+
+- Landing page clearly explains the product.
+- User can sign up or access the learning experience.
+- Dashboard provides a clear next step.
+- Initial learning path is available.
+- First lessons are reviewed and original.
+- AI Tutor is available with appropriate boundaries.
+- Progress tracking works at a basic level.
+- Feedback collection is available.
+- Out-of-scope risky features are not accidentally included.
+- Product owner has reviewed and approved the release.
+
+---
+
+### Post-MVP Expansion Triggers
+
+The team should consider expanding beyond MVP only when there is evidence of real user value.
+
+Expansion may be justified when:
+
+- Users return repeatedly.
+- Users complete lessons.
+- Users ask meaningful AI Tutor questions.
+- Users request hands-on practice.
+- Users request more advanced RPGLE, CLLE, or job log content.
+- Working developers request productivity tools.
+- Team leads show interest in onboarding use cases.
+- There is early evidence of willingness to pay.
+
+Post-MVP expansion should be driven by evidence, not excitement alone.
+
+---
+
+### Summary
+
+The MVP of IBMiHub AI should be a focused, web-based IBM i learning and AI assistance experience.
+
+The first release should include a public landing experience, basic onboarding, user dashboard, Learning Center, AI Tutor, progress tracking, feedback collection, and basic content governance.
+
+The MVP should not include real IBM i connectivity, production code uploads, advanced labs, enterprise features, billing, certifications, community, mobile app, or VS Code extension.
+
+The goal of the MVP is to validate trust, engagement, learning value, and AI usefulness before expanding into more advanced product capabilities.
 
 ---
 
 ## 13. Functional Requirements
 
-- **Purpose:** Specify what the product must do, module by module, at the requirements level (not implementation level).
-- **Description:** Per-module requirement statements with acceptance-level detail (Authentication, Dashboard, Learning Center, AI Tutor, 5250 Lab, RPG Playground, Code Review, Job Log Analyzer, Documentation Generator, Quiz Engine, Community), cross-referenced to downstream SDD specs in `specs/`.
-- **Audience:** Product, Engineering, QA.
-- **Approximate size:** 8–15 pages (largest section in the document).
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define what IBMiHub AI must do at the product requirements level.
+
+This section does not define technical architecture, database design, APIs, UI components, or implementation details. Those will be defined later in SDD specifications, architecture documents, implementation plans, and task lists.
+
+Functional requirements in this section should guide future SDD specs and Sprint 1 planning.
+
+### Requirement Scope
+
+The requirements in this section focus on the approved MVP.
+
+The MVP includes:
+
+- Public Landing Experience
+- User Account and Basic Onboarding
+- User Dashboard
+- Learning Center
+- AI Tutor
+- Basic Progress Tracking
+- Basic Feedback Collection
+- Basic Content Governance
+
+Future modules such as 5250 Practice Lab, RPG Playground, Job Log Analyzer, Code Explanation, Documentation Generator, Enterprise Training, Community, Mobile App, and VS Code Extension are not part of the MVP functional requirements.
+
+They may be defined in future PRD updates or downstream feature specs after MVP validation.
+
+---
+
+## 13.1 Functional Requirement Categories
+
+| Category | MVP Status | Purpose |
+|---|---|---|
+| Public Landing Experience | In Scope | Explain product value and guide users to start |
+| Authentication & Account | In Scope | Allow users to access a personalized experience |
+| Basic Onboarding | In Scope | Understand user type and guide first action |
+| User Dashboard | In Scope | Help users continue learning |
+| Learning Center | In Scope | Deliver structured IBM i learning content |
+| Lesson Experience | In Scope | Let users read, navigate, and complete lessons |
+| AI Tutor | In Scope | Provide IBM i-focused AI assistance |
+| Progress Tracking | In Scope | Track basic learning progress |
+| Feedback Collection | In Scope | Capture lesson, AI, and product feedback |
+| Content Governance | In Scope | Protect originality, consistency, and quality |
+| Admin / Internal Content Management | Limited MVP Scope | Manage content through simple internal process |
+| Enterprise Features | Out of Scope | Future only |
+| Real IBM i Connectivity | Out of Scope | Future consideration only |
+| Billing / Payments | Out of Scope | Future only |
+
+---
+
+## 13.2 Public Landing Experience Requirements
+
+### Objective
+
+The public landing experience should clearly communicate what IBMiHub AI is, who it is for, and what users can do next.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-LAND-001 | The product must provide a public landing page accessible without login. | Must Have |
+| FR-LAND-002 | The landing page must explain that IBMiHub AI is an AI-assisted learning platform for IBM i professionals. | Must Have |
+| FR-LAND-003 | The landing page must identify the primary target users: beginners and working IBM i developers. | Must Have |
+| FR-LAND-004 | The landing page must communicate the MVP value: structured learning and IBM i-focused AI assistance. | Must Have |
+| FR-LAND-005 | The landing page must include a clear call-to-action to start learning, sign up, or join beta. | Must Have |
+| FR-LAND-006 | The landing page should briefly mention future product direction without implying those features are available in the MVP. | Should Have |
+| FR-LAND-007 | The landing page should communicate trust principles such as original content, AI boundaries, and IBM i-specific focus. | Should Have |
+
+### Acceptance Expectations
+
+- A new visitor can understand the product purpose within one minute.
+- A visitor can identify whether the product is relevant to them.
+- The landing page does not overpromise unavailable future features.
+
+---
+
+## 13.3 Authentication and User Account Requirements
+
+### Objective
+
+The MVP should allow users to access a basic personalized learning experience.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-AUTH-001 | The product must allow a user to create an account or access an approved beta user experience. | Must Have |
+| FR-AUTH-002 | The product must allow a user to log in after account creation. | Must Have |
+| FR-AUTH-003 | The product must maintain a basic user profile. | Must Have |
+| FR-AUTH-004 | The product must associate learning progress with the user account. | Must Have |
+| FR-AUTH-005 | The product should allow users to update basic profile information if feasible. | Should Have |
+| FR-AUTH-006 | The product should support a simple logout flow. | Should Have |
+
+### Out of Scope
+
+The MVP does not require:
+
+- Enterprise SSO
+- Team accounts
+- Organization management
+- Admin roles
+- Role-based permissions
+- Complex identity governance
+
+### Acceptance Expectations
+
+- A user can access the learning experience without unnecessary friction.
+- User progress can be associated with the correct user.
+- Authentication does not introduce enterprise complexity.
+
+---
+
+## 13.4 Basic Onboarding Requirements
+
+### Objective
+
+The onboarding experience should help users start from the right place.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-ONB-001 | The product must provide a simple onboarding step for new users. | Must Have |
+| FR-ONB-002 | The onboarding step must ask the user about their experience level or learning intent. | Must Have |
+| FR-ONB-003 | The product must guide beginner users toward the beginner IBM i learning path. | Must Have |
+| FR-ONB-004 | The product should allow experienced users to indicate that they already work with IBM i. | Should Have |
+| FR-ONB-005 | The onboarding flow must show the user a clear first recommended action. | Must Have |
+| FR-ONB-006 | The onboarding flow must avoid presenting too many modules or choices in the MVP. | Must Have |
+
+### Acceptance Expectations
+
+- A beginner knows where to start.
+- A working developer is not forced into an overly beginner-only journey.
+- The onboarding experience is short and easy to complete.
+
+---
+
+## 13.5 User Dashboard Requirements
+
+### Objective
+
+The dashboard should act as the user's home base and help them continue learning.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-DASH-001 | The product must provide a dashboard after login or entry into the learning experience. | Must Have |
+| FR-DASH-002 | The dashboard must show a welcome message or user-specific greeting. | Must Have |
+| FR-DASH-003 | The dashboard must show the current or recommended learning path. | Must Have |
+| FR-DASH-004 | The dashboard must show the next recommended lesson. | Must Have |
+| FR-DASH-005 | The dashboard must show basic progress information. | Must Have |
+| FR-DASH-006 | The dashboard must provide quick access to the AI Tutor. | Must Have |
+| FR-DASH-007 | The dashboard should show recent learning activity if available. | Should Have |
+| FR-DASH-008 | The dashboard should provide a simple way to resume learning. | Should Have |
+
+### Out of Scope
+
+The MVP dashboard does not include:
+
+- Team progress
+- Admin reporting
+- Advanced analytics
+- Enterprise dashboards
+- Complex personalization
+
+### Acceptance Expectations
+
+- A returning user can quickly continue from where they left off.
+- The dashboard makes the next step obvious.
+- The dashboard supports learning continuity.
+
+---
+
+## 13.6 Learning Center Requirements
+
+### Objective
+
+The Learning Center should provide structured, original IBM i learning content.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-LEARN-001 | The product must provide a Learning Center. | Must Have |
+| FR-LEARN-002 | The Learning Center must include at least one beginner IBM i learning path. | Must Have |
+| FR-LEARN-003 | The learning path must present lessons in a logical sequence. | Must Have |
+| FR-LEARN-004 | The Learning Center must use original IBMiHub AI content. | Must Have |
+| FR-LEARN-005 | The Learning Center must include lesson titles and short descriptions. | Must Have |
+| FR-LEARN-006 | The Learning Center must allow users to open and read lessons. | Must Have |
+| FR-LEARN-007 | The Learning Center must allow users to move between lessons. | Must Have |
+| FR-LEARN-008 | The Learning Center should group lessons by topic or learning stage. | Should Have |
+| FR-LEARN-009 | The Learning Center should support beginner and working-developer entry points where feasible. | Should Have |
+
+### Initial MVP Lesson Topics
+
+The initial learning path may include:
+
+- What is IBM i?
+- IBM i platform overview
+- Libraries and objects
+- 5250 screen basics
+- Physical files and logical files
+- Introduction to RPGLE
+- Introduction to CLLE
+- Introduction to DB2 for i
+- Job logs and spool files basics
+- Basic IBM i development workflow
+
+### Acceptance Expectations
+
+- A beginner can follow the learning path without guessing what to learn next.
+- Lessons feel structured rather than random.
+- Content is original and aligned to the product voice.
+
+---
+
+## 13.7 Lesson Experience Requirements
+
+### Objective
+
+The lesson experience should make learning clear, practical, and easy to continue.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-LESSON-001 | Each lesson must have a clear title. | Must Have |
+| FR-LESSON-002 | Each lesson must explain its learning objective. | Must Have |
+| FR-LESSON-003 | Each lesson must provide beginner-friendly explanations where appropriate. | Must Have |
+| FR-LESSON-004 | Each lesson should include practical IBM i examples or scenarios. | Should Have |
+| FR-LESSON-005 | Each lesson must allow the user to mark it as complete. | Must Have |
+| FR-LESSON-006 | Each lesson should provide a next-step recommendation. | Should Have |
+| FR-LESSON-007 | Each lesson should provide quick access to the AI Tutor. | Should Have |
+| FR-LESSON-008 | Each lesson should allow users to provide helpfulness feedback. | Should Have |
+
+### Acceptance Expectations
+
+- Lessons are easy to read and understand.
+- Users know what they learned and what to do next.
+- Lessons support both confidence and continuity.
+
+---
+
+## 13.8 AI Tutor Requirements
+
+### Objective
+
+The AI Tutor should provide IBM i-focused learning and explanation support.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-AI-001 | The product must provide an AI Tutor experience. | Must Have |
+| FR-AI-002 | The AI Tutor must allow users to ask IBM i-related questions in natural language. | Must Have |
+| FR-AI-003 | The AI Tutor must support beginner-friendly explanations. | Must Have |
+| FR-AI-004 | The AI Tutor must support questions related to IBM i concepts, RPGLE, CLLE, SQL, DDS, 5250, job logs, and learning content. | Must Have |
+| FR-AI-005 | The AI Tutor must communicate appropriate caution for production use. | Must Have |
+| FR-AI-006 | The AI Tutor must not claim guaranteed correctness. | Must Have |
+| FR-AI-007 | The AI Tutor must not encourage unsafe sharing of private production code or sensitive logs. | Must Have |
+| FR-AI-008 | The AI Tutor should provide responses in a clear, practical, and structured style. | Should Have |
+| FR-AI-009 | The AI Tutor should support follow-up questions. | Should Have |
+| FR-AI-010 | The AI Tutor should allow users to mark responses as helpful or not helpful. | Should Have |
+| FR-AI-011 | The AI Tutor should be accessible from the dashboard and lesson experience. | Should Have |
+
+### Out of Scope
+
+The MVP AI Tutor does not include:
+
+- Real IBM i connectivity
+- Production troubleshooting guarantees
+- Uploading private source code
+- Uploading sensitive job logs
+- Automatic code changes
+- Enterprise AI governance workflows
+- Autonomous system actions
+
+### Acceptance Expectations
+
+- Users can ask meaningful IBM i questions.
+- AI responses are useful and understandable.
+- AI behavior respects trust and safety boundaries.
+- The AI Tutor feels focused on IBM i, not like a generic chatbot.
+
+---
+
+## 13.9 Progress Tracking Requirements
+
+### Objective
+
+Progress tracking should help users continue learning over time.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-PROG-001 | The product must track lesson completion status. | Must Have |
+| FR-PROG-002 | The product must show learning path progress. | Must Have |
+| FR-PROG-003 | The product must allow users to resume from where they left off. | Must Have |
+| FR-PROG-004 | The dashboard must display basic progress information. | Must Have |
+| FR-PROG-005 | The product should track lesson started state if feasible. | Should Have |
+| FR-PROG-006 | The product should track recent learning activity if feasible. | Should Have |
+
+### Out of Scope
+
+The MVP does not include:
+
+- Skill scoring engine
+- Certification progress
+- Team progress tracking
+- Manager reporting
+- Advanced analytics
+
+### Acceptance Expectations
+
+- Users can see what they have completed.
+- Users can continue learning without losing context.
+- Progress tracking remains simple and understandable.
+
+---
+
+## 13.10 Feedback Collection Requirements
+
+### Objective
+
+The product should collect early user feedback to support MVP validation and future prioritization.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-FB-001 | The product must provide a way for users to submit general feedback. | Must Have |
+| FR-FB-002 | The product should allow users to rate or mark lesson helpfulness. | Should Have |
+| FR-FB-003 | The product should allow users to rate AI Tutor responses as helpful or not helpful. | Should Have |
+| FR-FB-004 | The product should capture feedback context where appropriate, such as lesson or AI response. | Should Have |
+| FR-FB-005 | The product should allow users to request topics or features. | Should Have |
+
+### Acceptance Expectations
+
+- Users can easily submit feedback.
+- Product owner can identify recurring issues or requests.
+- Feedback supports evidence-driven post-MVP decisions.
+
+---
+
+## 13.11 Content Governance Requirements
+
+### Objective
+
+Content governance should ensure that learning content is original, consistent, and maintainable.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-CONT-001 | All published learning content must be original to IBMiHub AI. | Must Have |
+| FR-CONT-002 | Content must not copy tutorials, articles, examples, or course material from other websites or providers. | Must Have |
+| FR-CONT-003 | Content should follow a consistent lesson structure. | Should Have |
+| FR-CONT-004 | Important learning content should be reviewed before publishing. | Should Have |
+| FR-CONT-005 | Content should be version-controlled or otherwise traceable. | Should Have |
+| FR-CONT-006 | External references, when used for research or validation, should be credited where applicable. | Should Have |
+
+### Acceptance Expectations
+
+- Content quality is controlled.
+- Content is original and legally safer.
+- The product does not depend on copied material.
+
+---
+
+## 13.12 Basic Quiz / Knowledge Check Requirements
+
+### Objective
+
+Basic quizzes or knowledge checks may support learning validation in the MVP or early post-MVP phase.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-QUIZ-001 | The product may provide simple lesson-level knowledge checks. | Could Have |
+| FR-QUIZ-002 | A knowledge check may show whether the selected answer is correct or incorrect. | Could Have |
+| FR-QUIZ-003 | A knowledge check may provide a short explanation after the answer. | Could Have |
+| FR-QUIZ-004 | Knowledge checks should remain lightweight and not become a full assessment system in MVP. | Should Have |
+
+### Out of Scope
+
+The MVP does not require:
+
+- Full quiz engine
+- Certification exams
+- Skill scoring
+- Question bank management
+- Paid assessments
+
+### Acceptance Expectations
+
+- If included, quizzes support learning without increasing complexity.
+- If not included in MVP, the product can still launch with lessons, AI Tutor, and progress tracking.
+
+---
+
+## 13.13 Glossary Requirements
+
+### Objective
+
+A glossary may help beginners understand IBM i terminology.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-GLOS-001 | The product may provide a glossary of IBM i terms. | Could Have |
+| FR-GLOS-002 | Glossary entries should use beginner-friendly definitions. | Should Have |
+| FR-GLOS-003 | Glossary terms may be linked from lessons in future versions. | Could Have |
+| FR-GLOS-004 | The glossary should grow gradually based on learning content and user confusion points. | Should Have |
+
+### Acceptance Expectations
+
+- If included, glossary entries help reduce beginner confusion.
+- Glossary scope remains manageable.
+
+---
+
+## 13.14 Internal Administration Requirements
+
+### Objective
+
+The MVP may require simple internal processes to manage content and product operations.
+
+This does not require a full admin dashboard in the MVP.
+
+### Functional Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| FR-ADMIN-001 | The product team must have a way to add or update learning content. | Must Have |
+| FR-ADMIN-002 | The product team must have a way to review published content. | Must Have |
+| FR-ADMIN-003 | The product team should have a way to review user feedback. | Should Have |
+| FR-ADMIN-004 | The product team should have a way to identify common AI Tutor feedback themes. | Should Have |
+
+### Out of Scope
+
+The MVP does not require:
+
+- Full admin dashboard
+- Multi-author workflow
+- Editorial approval UI
+- Enterprise admin controls
+- Team management
+
+### Acceptance Expectations
+
+- The product owner can maintain MVP content.
+- Feedback can be reviewed without building complex admin functionality.
+- Operational needs do not create unnecessary product scope.
+
+---
+
+## 13.15 Explicitly Out-of-Scope Functional Requirements
+
+The following are not functional requirements for the MVP:
+
+- Real IBM i system connectivity
+- Live 5250 terminal access
+- Production code upload
+- Sensitive job log upload
+- Real code compilation
+- Full RPG playground
+- Full 5250 lab
+- Full job log analyzer
+- Full code review tool
+- Full documentation generator
+- Enterprise accounts
+- Team dashboards
+- Admin dashboards
+- Billing and subscriptions
+- Certifications
+- Public community forum
+- Mobile app
+- VS Code extension
+- Marketplace
+- Public API
+- Enterprise SSO
+- Advanced compliance workflows
+
+These may become future requirements only after product validation and explicit Product Owner approval.
+
+---
+
+## 13.16 Requirement Priority Definitions
+
+The following priority labels should be used consistently:
+
+| Priority | Meaning |
+|---|---|
+| Must Have | Required for MVP release readiness |
+| Should Have | Important but may be simplified if needed |
+| Could Have | Optional; include only if it does not delay MVP |
+| Out of Scope | Not part of MVP |
+
+---
+
+## 13.17 MVP Functional Readiness Summary
+
+For the MVP to be functionally ready:
+
+- A visitor must understand the product from the landing page.
+- A user must be able to access the learning experience.
+- A user must receive a clear first learning recommendation.
+- A user must be able to open and complete lessons.
+- A user must be able to ask IBM i-related questions through the AI Tutor.
+- A user must be able to see basic progress.
+- A user must be able to provide feedback.
+- The product must avoid out-of-scope risky features.
+- Learning content must remain original and maintainable.
+
+---
+
+### Summary
+
+The MVP functional requirements define a focused first release.
+
+IBMiHub AI must provide a clear public entry point, basic user access, simple onboarding, a dashboard, structured IBM i learning content, AI Tutor assistance, basic progress tracking, feedback collection, and content governance.
+
+The MVP should not include advanced labs, real IBM i connectivity, production code uploads, enterprise features, billing, certifications, mobile apps, or developer extensions.
+
+These requirements should guide the first SDD feature specifications and Sprint 1 planning.
 
 ---
 
@@ -1710,3 +4152,8 @@ The product should position itself as complementary to the existing ecosystem wh
 | 2026-07-01 | 0.8 | Added approved Product Principles content |
 | 2026-07-01 | 0.9 | Added approved Market Analysis content |
 | 2026-07-01 | 1.0 | Added approved Competitive Landscape content |
+| 2026-07-01 | 1.1 | Added approved User Personas content |
+| 2026-07-01 | 1.2 | Added approved User Journeys content |
+| 2026-07-01 | 1.3 | Added approved Product Scope content |
+| 2026-07-01 | 1.4 | Added approved MVP Definition content |
+| 2026-07-01 | 1.5 | Added approved Functional Requirements content |
