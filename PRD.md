@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.7
-- Status: Draft — Sections 1–5 Complete
+- Version: 0.8
+- Status: Draft — Sections 1–6 Complete
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–5 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–6 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -724,19 +724,190 @@ The early goal is not to maximize traffic or feature count. The early goal is to
 
 ## 6. Product Principles
 
-- **Purpose:** The principles that guide every product decision.
-- **Examples:**
-  - AI First
-  - Learn by Doing
-  - Original Content
-  - Productivity over Complexity
-  - Enterprise Ready
-  - Accessibility
-  - Continuous Improvement
-  - Customer Obsession
-- **Audience:** All stakeholders; primary reference for prioritization and trade-off decisions.
-- **Approximate size:** 1 page.
-- **Status:** Not started.
+### Purpose of This Section
+
+Product principles define how IBMiHub AI should make decisions.
+
+As the product grows, there will be many possible features, technical options, business opportunities, and user requests. These principles will help decide what to build, what to avoid, and how to maintain product quality over time.
+
+The principles below should guide product, design, content, AI, engineering, and business decisions.
+
+### Principle 1: AI First, But Not AI Only
+
+IBMiHub AI should use AI as a core product differentiator, but AI should not replace product structure, learning design, or human judgment.
+
+AI should help users understand, practice, troubleshoot, and document IBM i concepts faster. However, the product should not become a generic chatbot wrapped inside a website.
+
+This means:
+
+- AI should be deeply connected to IBM i learning and productivity workflows.
+- AI responses should be guided by product context and user intent.
+- AI should support structured learning, not replace it.
+- AI output should encourage review, validation, and critical thinking.
+- AI features should be useful, focused, and trustworthy.
+
+The goal is not to add AI everywhere. The goal is to use AI where it creates real value.
+
+### Principle 2: Learn by Doing
+
+IBM i cannot be learned effectively through reading alone.
+
+Users should be encouraged to practice concepts, commands, workflows, and troubleshooting scenarios wherever possible.
+
+This means:
+
+- Lessons should eventually connect to exercises, quizzes, labs, or examples.
+- Concepts should be explained through practical IBM i scenarios.
+- Users should gain confidence by trying things, not only reading about them.
+- The platform should move toward interactive practice over time.
+- Future labs, 5250 simulations, RPG exercises, and job log scenarios should support this principle.
+
+The product should help users move from passive learning to active skill building.
+
+### Principle 3: Original Content Only
+
+IBMiHub AI must create original IBM i-focused content.
+
+The product should not copy articles, examples, explanations, or course material from existing websites, books, documentation, or training providers.
+
+This means:
+
+- Content should be written in IBMiHub AI's own voice and structure.
+- External resources may be used for research and inspiration, but not copied.
+- Examples should be created specifically for this platform.
+- Any external references should be properly credited where applicable.
+- The platform should build its own credibility through quality and originality.
+
+This principle protects the product legally, ethically, and strategically.
+
+### Principle 4: Practical Value Over Feature Count
+
+The product should prioritize useful outcomes over a large number of features.
+
+IBMiHub AI should not try to build every possible IBM i tool immediately. Each feature should solve a clear user problem and support the product vision.
+
+This means:
+
+- A small useful feature is better than a large unfinished module.
+- MVP scope should remain focused.
+- Advanced features should be added only when there is evidence of user value.
+- Feature decisions should be tied to learning, productivity, trust, or business impact.
+- The product should avoid becoming bloated or confusing.
+
+The goal is not to look feature-rich. The goal is to be genuinely useful.
+
+### Principle 5: Trust Is a Core Feature
+
+Trust is essential because IBMiHub AI will teach technical concepts and provide AI-assisted explanations.
+
+Users must feel that the platform is careful, accurate, transparent, and responsible.
+
+This means:
+
+- Content should be reviewed for clarity and correctness.
+- AI responses should avoid overconfidence.
+- Uncertainty should be communicated clearly.
+- Users should be encouraged to validate AI-generated guidance.
+- Sensitive code, logs, and uploaded materials must be handled responsibly.
+- The product should avoid misleading users into thinking AI output is always correct.
+
+A platform that teaches and advises developers must earn trust continuously.
+
+### Principle 6: Beginner Friendly, Professional Enough for Experts
+
+IBMiHub AI should be approachable for beginners without becoming shallow for experienced professionals.
+
+The product should explain concepts simply, but not oversimplify important technical details.
+
+This means:
+
+- Beginner paths should avoid unnecessary complexity at the start.
+- Advanced users should still find value in AI explanations, code understanding, job log analysis, and documentation tools.
+- Content should support progressive depth.
+- Explanations should be clear, practical, and technically respectful.
+- The product should serve both learning and productivity use cases.
+
+The platform should help someone starting from zero while still being useful to a working IBM i developer.
+
+### Principle 7: Structured Learning Before Random Content
+
+IBMiHub AI should provide guided learning, not just a library of disconnected articles.
+
+Users should know what to learn next, why it matters, and how each topic connects to real IBM i work.
+
+This means:
+
+- Learning paths should be designed intentionally.
+- Content should be sequenced from fundamentals to practical capability.
+- Lessons should connect to user goals.
+- Progress should be visible.
+- Random content creation should not replace curriculum design.
+
+The product should reduce confusion, not add more information overload.
+
+### Principle 8: Build for Long-Term Platform Growth
+
+IBMiHub AI should start narrow but be designed for long-term growth.
+
+The first release does not need every future module, but today's decisions should not block tomorrow's platform.
+
+This means:
+
+- MVP features should be simple but extensible.
+- Architecture should support future labs, AI tools, enterprise features, and content growth.
+- Product naming and structure should allow expansion.
+- Documentation should remain organized.
+- Technical and product decisions should consider future maintainability.
+
+The product should grow carefully without needing to restart from scratch.
+
+### Principle 9: Community and Ecosystem Respect
+
+IBMiHub AI should respect the existing IBM i community.
+
+The goal is not to replace existing experts, websites, forums, vendors, or documentation. The goal is to provide a modern AI-first platform that complements and strengthens the ecosystem.
+
+This means:
+
+- The product should avoid copying existing community content.
+- The platform should acknowledge that IBM i expertise is built through real experience.
+- Community feedback should influence product direction.
+- The product should create value for learners, professionals, teams, and companies.
+- The platform should help keep IBM i knowledge accessible for future generations.
+
+IBMiHub AI should become a trusted contributor to the IBM i ecosystem.
+
+### Principle 10: Validate Before Scaling
+
+The product should validate real user value before expanding aggressively.
+
+IBMiHub AI has a broad vision, but each stage should prove that users actually want and use the product.
+
+This means:
+
+- Build a focused MVP.
+- Test with real users.
+- Measure engagement and feedback.
+- Learn from early beta users.
+- Prioritize features based on evidence, not excitement alone.
+- Avoid overengineering before market validation.
+
+The product should grow through learning, feedback, and disciplined execution.
+
+### Summary
+
+These principles should guide every major product decision.
+
+When there is uncertainty, the team should ask:
+
+- Does this help IBM i professionals learn or work better?
+- Does this support AI-assisted learning or productivity?
+- Does this create practical value?
+- Does this build trust?
+- Does this respect originality and the IBM i ecosystem?
+- Does this support long-term platform growth?
+
+If the answer is unclear, the feature or decision should be reconsidered.
 
 ---
 
@@ -931,3 +1102,4 @@ The early goal is not to maximize traffic or feature count. The early goal is to
 | 2026-07-01 | 0.5 | Added approved Problem Statement content |
 | 2026-07-01 | 0.6 | Added approved Goals & Objectives content |
 | 2026-07-01 | 0.7 | Added approved Success Metrics & KPIs content |
+| 2026-07-01 | 0.8 | Added approved Product Principles content |
