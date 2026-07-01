@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.6
-- Status: Draft — Sections 1–4 Complete
+- Version: 0.7
+- Status: Draft — Sections 1–5 Complete
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–4 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–5 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -489,11 +489,236 @@ The product should grow carefully, validating real user value at each stage befo
 
 ## 5. Success Metrics & KPIs
 
-- **Purpose:** Define how the team will know the product is winning.
-- **Description:** North Star metric, activation/retention/engagement metrics, learning outcome metrics, revenue metrics, and enterprise adoption metrics.
-- **Audience:** Product, Engineering, Leadership, Investors.
-- **Approximate size:** 1–2 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define how IBMiHub AI will measure product success.
+
+The product should not be judged only by website traffic, page views, or sign-ups. Those numbers are useful, but they do not prove that the product is creating meaningful value.
+
+IBMiHub AI should be measured by whether users learn better, return regularly, trust the platform, use the AI tutor meaningfully, and eventually become willing to pay for the value they receive.
+
+### North Star Metric
+
+The proposed North Star Metric for the early product is:
+
+**Weekly Active Learning Sessions**
+
+A weekly active learning session means a user meaningfully engages with the platform through learning content, AI tutor usage, practice activities, quizzes, or progress-based learning.
+
+This is a better early metric than raw traffic because IBMiHub AI is not intended to be a passive content website. The platform should encourage active learning and repeated engagement.
+
+### Why This Metric Matters
+
+Weekly Active Learning Sessions indicate that users are not only visiting the platform, but actually using it to learn or improve.
+
+This metric aligns with the core product goals:
+
+- Help users learn IBM i concepts faster
+- Encourage active learning instead of passive reading
+- Validate whether users return to continue learning
+- Measure whether the product is becoming part of a user's learning workflow
+- Support future monetization through repeated value creation
+
+### Early MVP Success Metrics
+
+For the MVP phase, the most important metrics are learning engagement, AI usefulness, retention, and qualitative user feedback.
+
+#### User Activation Metrics
+
+These metrics measure whether new users reach initial value.
+
+Examples:
+
+- New user sign-ups
+- Percentage of users who start their first lesson
+- Percentage of users who complete the first lesson
+- Percentage of users who ask at least one AI tutor question
+- Percentage of users who return after the first session
+- Time taken for a new user to reach first meaningful value
+
+#### Learning Engagement Metrics
+
+These metrics measure whether users are actively learning.
+
+Examples:
+
+- Weekly active learners
+- Lessons started
+- Lessons completed
+- Average lessons completed per user
+- Average session duration
+- Learning path progress
+- Quiz attempts
+- Quiz completion rate
+- Repeat learning sessions per user
+
+#### AI Tutor Usage Metrics
+
+These metrics measure whether users find the AI tutor useful.
+
+Examples:
+
+- AI tutor questions asked
+- AI tutor sessions per user
+- Follow-up questions per AI session
+- Percentage of users who use AI tutor after reading a lesson
+- Percentage of AI interactions rated helpful
+- Common topics users ask about
+- AI response feedback score
+
+#### Retention Metrics
+
+These metrics measure whether users come back.
+
+Examples:
+
+- Day 1 retention
+- Day 7 retention
+- Day 30 retention
+- Weekly returning users
+- Monthly active users
+- Percentage of users continuing a learning path after starting it
+
+#### Content Quality Metrics
+
+These metrics measure whether learning content is useful and trusted.
+
+Examples:
+
+- Lesson helpfulness rating
+- Content clarity rating
+- User-reported confusion points
+- Number of lesson corrections or improvements identified
+- Most completed lessons
+- Most abandoned lessons
+- User comments and feedback per lesson
+
+#### Trust and Accuracy Metrics
+
+Trust is critical because the platform deals with technical learning and AI-generated assistance.
+
+Examples:
+
+- AI responses marked as incorrect
+- Content issues reported
+- Number of corrections made to AI guidance or learning material
+- User trust rating
+- Percentage of AI answers with user feedback
+- Repeat usage after AI tutor interaction
+
+#### Community and Demand Metrics
+
+These metrics help validate market interest.
+
+Examples:
+
+- LinkedIn post engagement
+- Waitlist sign-ups
+- Beta user requests
+- Returning beta users
+- User referrals
+- Comments from IBM i professionals
+- Direct messages or inquiries from potential users
+- Requests for specific features
+
+### Business Metrics
+
+Business metrics should become more important after the MVP shows early user value.
+
+Examples:
+
+- Free-to-paid conversion rate
+- Paid subscribers
+- Monthly recurring revenue
+- Average revenue per user
+- Churn rate
+- Trial-to-paid conversion
+- Enterprise inquiries
+- Corporate training leads
+- Willingness-to-pay feedback
+
+In the early phase, revenue is important but should not be the only measure of progress. Before optimizing revenue, the product must first prove that users find the platform useful and trustworthy.
+
+### Enterprise Readiness Metrics
+
+For future enterprise adoption, IBMiHub AI should eventually track:
+
+- Team accounts created
+- Number of learners per organization
+- Team learning progress
+- Admin dashboard usage
+- Corporate onboarding completion
+- Enterprise trial requests
+- Enterprise renewal interest
+- Training completion reports
+- Feature requests from organizations
+
+These metrics are not required for the first MVP but should be considered when designing the long-term platform.
+
+### Product Quality Metrics
+
+The platform should also be measured by reliability, usability, and maintainability.
+
+Examples:
+
+- Page load performance
+- Application error rate
+- AI response latency
+- Login success rate
+- Lesson completion flow errors
+- User-reported bugs
+- Support requests
+- Accessibility issues
+- Mobile usability issues
+
+These metrics help ensure that the product feels professional and trustworthy.
+
+### Qualitative Success Indicators
+
+Not all important signals are numerical.
+
+Qualitative success indicators include:
+
+- Users saying the platform helped them understand IBM i concepts
+- Beginners saying the learning path feels less overwhelming
+- Experienced developers saying AI explanations saved time
+- Team leads saying the platform could help onboarding
+- IBM i professionals voluntarily sharing or recommending the product
+- Users asking for more lessons, labs, or advanced features
+- Companies expressing interest in team training
+
+These signals are especially important during the early stage, when user volume may be small.
+
+### Metrics to Avoid Over-Optimizing Early
+
+In the early phase, the team should avoid over-optimizing for:
+
+- Raw page views
+- Social media likes without product usage
+- Total registered users without activation
+- Large feature count
+- AI question volume without quality
+- Revenue before product value is validated
+
+These metrics can be misleading if users are not actually learning, returning, or finding meaningful value.
+
+### MVP Success Criteria
+
+The MVP should be considered successful if it demonstrates that:
+
+- Users understand the product value quickly
+- Users engage with structured IBM i learning content
+- Users ask meaningful AI tutor questions
+- Users return for additional sessions
+- Early users provide positive qualitative feedback
+- The IBM i community shows interest in the concept
+- There is evidence that users may pay for advanced value in the future
+
+### Summary
+
+IBMiHub AI should measure success through meaningful learning engagement, AI usefulness, retention, trust, and business potential.
+
+The early goal is not to maximize traffic or feature count. The early goal is to prove that a focused AI-powered IBM i learning and productivity platform can deliver real value to users.
 
 ---
 
@@ -705,3 +930,4 @@ The product should grow carefully, validating real user value at each stage befo
 | 2026-07-01 | 0.4 | Added approved Vision & Mission content |
 | 2026-07-01 | 0.5 | Added approved Problem Statement content |
 | 2026-07-01 | 0.6 | Added approved Goals & Objectives content |
+| 2026-07-01 | 0.7 | Added approved Success Metrics & KPIs content |
