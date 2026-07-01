@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 2.8
-- Status: Draft — Minor Cleanup Complete / Ready for Product Owner Approval
+- Version: 2.9
+- Status: Approved — Ready for Sprint 1 Planning
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -74,8 +74,8 @@ This section helps contributors understand whether the PRD is still being drafte
 | Product | IBMiHub AI |
 | Owner | Product |
 | Primary Decision Owner | Product Owner |
-| Current Version | 2.8 |
-| Current Status | Draft — Minor Cleanup Complete / Ready for Product Owner Approval |
+| Current Version | 2.9 |
+| Current Status | Approved — Ready for Sprint 1 Planning |
 | Last Updated | 2026-07-01 |
 
 ---
@@ -91,9 +91,9 @@ This section helps contributors understand whether the PRD is still being drafte
 
 Current status:
 
-**Draft — Minor Cleanup Complete / Ready for Product Owner Approval**
+**Approved — Ready for Sprint 1 Planning**
 
-This means the PRD content is complete for the current planning cycle, but it should still receive a full Product Owner review before being treated as formally approved for Sprint 1 planning.
+This means the Product Owner has reviewed and approved the PRD as the product source of truth. Sprint 1 planning may begin. SDD specs, architecture decisions, and implementation should not start until the Sprint 1 decision register is resolved.
 
 ---
 
@@ -118,8 +118,8 @@ This means the PRD content is complete for the current planning cycle, but it sh
 | Approval Item | Status |
 |---|---|
 | Section-by-section content drafting | Complete |
-| Full PRD review | Pending |
-| Product Owner approval | Pending |
+| Full PRD review | Complete |
+| Product Owner approval | Complete |
 | Engineering review against PRD | Pending |
 | Sprint 1 readiness review | Pending |
 | Downstream SDD spec creation | Pending |
@@ -9353,22 +9353,23 @@ This section should capture meaningful content, scope, structure, and status cha
 | 2026-07-01 | 2.6 | Added approved Appendix content |
 | 2026-07-01 | 2.7 | Completed Document Control, Revision History, and final PRD cleanup |
 | 2026-07-01 | 2.8 | Applied final cleanup from PRD final review |
+| 2026-07-01 | 2.9 | Product Owner approved PRD for Sprint 1 planning |
 
 ---
 
 ### Current Version Summary
 
-Version 2.8 completes the first full draft of the IBMiHub AI PRD.
+Version 2.9 is the first Product Owner approved version of the IBMiHub AI PRD.
 
 At this stage:
 
-- All planned PRD sections contain draft content.
-- MVP scope is documented.
-- Functional and non-functional requirements are documented.
-- AI strategy is documented.
-- Learning, content, monetization, technical constraints, risks, assumptions, roadmap, future vision, glossary, and appendix are documented.
-- The PRD is ready for full Product Owner review.
-- Sprint 1 implementation should not begin until required decisions and SDD specs are prepared.
+- All planned PRD sections contain approved content.
+- MVP scope is documented and approved.
+- Functional and non-functional requirements are documented and approved.
+- AI strategy is documented and approved.
+- Learning, content, monetization, technical constraints, risks, assumptions, roadmap, future vision, glossary, and appendix are documented and approved.
+- The PRD has been reviewed and approved by the Product Owner for Sprint 1 planning.
+- Sprint 1 implementation should not begin until the Sprint 1 decision register is resolved and required SDD specs are prepared.
 
 ---
 
