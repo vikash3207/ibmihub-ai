@@ -8,7 +8,8 @@
 |---|---|
 | Spec ID | 001 |
 | Feature | AI Tutor |
-| Status | Draft |
+| Status | Approved |
+| Version | 1.0 |
 | Owner | Product + Engineering |
 | Last Updated | 2026-07-01 |
 
@@ -302,10 +303,10 @@ The AI Tutor must allow users to provide feedback on individual AI responses.
 
 - Each AI response must include a helpful / not helpful feedback mechanism
 - Feedback submissions must be stored for product review and AI quality improvement
-- Feedback should optionally support a brief reason or comment (to be determined during UX design; helpful/not helpful alone is acceptable for MVP per D-AI-007)
+- MVP feedback is limited to helpful / not helpful only. Optional reason or comment capture is deferred to post-MVP.
 
 **Priority:** Must Have
-**Source:** PRD 13.8 FR-AI-010, 15.10 AI Feedback and Quality Signals; D-AI-007
+**Source:** PRD 13.8 FR-AI-010, 15.10 AI Feedback and Quality Signals; OQ-AI-007
 
 ---
 
@@ -566,10 +567,24 @@ The production system prompt must be reviewed by the Product Owner before beta l
 
 The following UX requirements define the expected user experience of the AI Tutor feature. Specific visual design, layout, and component choices are to be determined during implementation.
 
-### AI Tutor Page or Panel
+### AI Tutor Page
 
-- The AI Tutor must be accessible as a dedicated page (e.g., `/ai-tutor`) or as a panel accessible from the dashboard and lesson experience
-- The AI Tutor must be clearly presented as an IBM i learning assistant, not a general programming assistant
+- The AI Tutor is a dedicated full-page experience accessible at `/ai-tutor`.
+- The AI Tutor must be clearly presented as an IBM i learning assistant, not a general programming assistant.
+- Lessons may include a link that navigates the user to `/ai-tutor`, but the AI Tutor is not embedded as a lesson-aware side panel or modal in MVP.
+
+### Empty State — Starter Prompts
+
+When the AI Tutor conversation is empty (before the first question is submitted), the UI must display a set of example starter prompts to help users understand what they can ask.
+
+Approved starter prompts for MVP:
+
+- What is IBM i?
+- What is a library in IBM i?
+- What is the difference between RPGLE and CLLE?
+- What is a job log?
+
+Clicking a starter prompt should populate the input area with that question for the user to submit or edit.
 
 ### Prompt Input
 
@@ -603,9 +618,10 @@ The following UX requirements define the expected user experience of the AI Tuto
 
 ### Helpful / Not Helpful Feedback
 
-- Each completed AI response must include a mechanism for the user to mark the response as helpful or not helpful
-- The feedback mechanism must be accessible without disrupting the conversation flow
-- After submitting feedback, the user should receive a brief acknowledgement
+- Each completed AI response must include a mechanism for the user to mark the response as helpful or not helpful.
+- MVP feedback is helpful / not helpful only. Reason or comment capture is deferred to post-MVP.
+- The feedback mechanism must be accessible without disrupting the conversation flow.
+- After submitting feedback, the user should receive a brief acknowledgement.
 
 ### Unauthenticated User State
 
@@ -633,8 +649,8 @@ The AI Tutor feature depends on the following decisions, which have all been app
 ### Internal Dependencies
 
 The AI Tutor also depends on:
-- **Spec 000: User Account and Authentication** — the authenticated session that gates AI Tutor access must be established by the auth implementation
-- **Spec 000: Dashboard** — the quick-access AI Tutor link referenced in PRD dashboard requirements (FR-DASH-006) depends on this spec being implemented
+- **Spec 004: User Account and Onboarding** — the authenticated session that gates AI Tutor access must be established by the auth implementation
+- **Spec 005: Dashboard** — the quick-access AI Tutor link referenced in PRD dashboard requirements (FR-DASH-006) depends on this spec being implemented
 
 ---
 
@@ -721,11 +737,7 @@ The following questions remain genuinely unresolved after the Sprint 1 Decision 
 | ID | Question | Owner | Needed Before |
 |---|---|---|---|
 | OQ-AI-005 | What exact wording should appear in the privacy notice near the AI Tutor input? | Product | Beta launch |
-| OQ-AI-007 | Should the AI feedback mechanism support additional reason capture beyond helpful / not helpful in MVP, or is the binary sufficient? | Product | AI Tutor Spec finalization |
-| OQ-AITUTOR-001 | Should the AI Tutor be a full-page experience, a side panel, or a modal? This affects the implementation design but not the functional requirements. | Product + Engineering | Implementation planning |
-| OQ-AITUTOR-002 | Should the AI Tutor be accessible from within a lesson page as a side-by-side panel, or as a separate page the user navigates to? | Product + Engineering | Implementation planning |
 | OQ-AITUTOR-003 | What is the maximum conversation length (number of turns) within a single session before conversation context should be truncated to manage token costs? | Engineering | Implementation planning |
-| OQ-AITUTOR-004 | Should the AI Tutor display a suggested question prompt (e.g., "Try asking: What is a physical file?") when the conversation is empty? | Product | UX design |
 
 ---
 
@@ -736,15 +748,15 @@ This specification must be reviewed and approved by the Product Owner before any
 ### Before Implementation Planning Can Begin
 
 - [ ] Product Owner has reviewed this spec and confirmed the scope, behavior rules, and acceptance criteria
-- [ ] Open questions OQ-AI-005 and OQ-AI-007 are resolved or explicitly deferred
 - [ ] Engineering has reviewed this spec and confirmed no blocking technical ambiguities
-- [ ] OQ-AITUTOR-001 and OQ-AITUTOR-002 (page vs panel, layout) are decided
+- [ ] OQ-AI-005 (privacy notice wording) is finalized or a draft is ready for review
+- [ ] OQ-AITUTOR-003 (maximum conversation length / context truncation) is decided by Engineering
 
 ### Before Coding Can Begin
 
 - [ ] This spec is approved
 - [ ] An implementation plan for the AI Tutor is created and approved
-- [ ] The Spec 000: User Account and Authentication is approved (auth must be in place for AI Tutor to function)
+- [ ] Spec 004: User Account and Onboarding is approved (auth must be in place for AI Tutor to function)
 - [ ] The system prompt draft has been written and is ready for Product Owner review
 - [ ] Model names, model IDs, and pricing have been re-verified against official Anthropic documentation (per ADR-005)
 - [ ] AI provider API key is available as an environment variable in the development environment
@@ -753,7 +765,8 @@ This specification must be reviewed and approved by the Product Owner before any
 
 - The AI service layer (provider abstraction) is a critical architectural piece. It should be designed and reviewed before any AI Tutor UI work begins.
 - Streaming support in Next.js (via Server Actions or API route with streaming response) must be confirmed to work in the chosen Vercel deployment before the UI streaming state is built.
-- The feedback storage schema should be designed as part of the database implementation plan (not in this spec).
+- The feedback storage schema should be designed as part of the database implementation plan, not in this spec.
+- The conversation context truncation strategy (OQ-AITUTOR-003) must be defined before the AI service layer is implemented to ensure token costs remain predictable.
 
 ---
 
@@ -762,3 +775,5 @@ This specification must be reviewed and approved by the Product Owner before any
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial draft — full MVP AI Tutor spec based on PRD v2.9 and Sprint 1 Decision Register v0.3 |
+| 2026-07-01 | 0.2 | Cleanup after review; resolved MVP AI Tutor UX and feedback open questions |
+| 2026-07-01 | 1.0 | Approved AI Tutor SDD spec for implementation planning |
