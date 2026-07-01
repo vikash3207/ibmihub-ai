@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.9
-- Status: Draft — Sections 1–7 Complete
+- Version: 1.0
+- Status: Draft — Sections 1–8 Complete
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–7 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–8 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -1177,11 +1177,362 @@ The early market strategy should be conservative, evidence-driven, and community
 
 ## 8. Competitive Landscape
 
-- **Purpose:** Position IBMiHub AI against existing alternatives.
-- **Description:** Direct competitors (IBM i training vendors, generic AI coding assistants), indirect substitutes (in-house mentorship, forums, IBM documentation), feature/positioning comparison matrix, and differentiation thesis.
-- **Audience:** Product, Marketing, Leadership.
-- **Approximate size:** 2–4 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to position IBMiHub AI against existing alternatives in the IBM i learning, training, documentation, community, AI assistance, and modernization ecosystem.
+
+The goal is not to claim that existing resources are weak or unimportant. Many existing IBM i resources are valuable and respected. The opportunity for IBMiHub AI is to combine structured learning, AI assistance, hands-on practice, and productivity workflows into one focused platform.
+
+IBMiHub AI should be designed to complement the IBM i ecosystem, not disrespect or replace it.
+
+### Competitive Framing
+
+IBMiHub AI does not have one direct competitor that provides the exact same complete experience.
+
+Instead, users currently solve their IBM i learning and productivity needs through a combination of alternatives:
+
+- Official IBM documentation
+- IBM training resources
+- Tutorial websites
+- Community articles and blogs
+- Forums and user groups
+- Paid training providers
+- Internal company mentoring
+- Generic AI assistants
+- IBM i modernization and DevOps tools
+
+The competitive opportunity is created by fragmentation. Users may find useful information across many sources, but they do not always have one guided, AI-assisted, hands-on platform built specifically for IBM i learning and productivity.
+
+### Alternative Category 1: Official IBM Documentation
+
+Official IBM documentation is authoritative and essential.
+
+It provides product-level technical reference material for IBM i, DB2 for i, system operations, commands, APIs, and platform behavior.
+
+#### Strengths
+
+- Highly authoritative
+- Official source of truth
+- Broad technical coverage
+- Useful for experienced professionals
+- Important for validation and reference
+
+#### Limitations from IBMiHub AI Perspective
+
+- Not designed as a beginner-first learning journey
+- Often reference-oriented rather than guided
+- May feel overwhelming to new learners
+- Does not provide AI tutoring by default
+- Does not provide a unified hands-on practice experience
+- Does not focus on personalized learning progression
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI should not compete with IBM documentation as the source of truth.
+
+Instead, IBMiHub AI should help users understand IBM i concepts in simpler language, learn in a structured sequence, practice safely, and know when to refer to official documentation for deeper validation.
+
+### Alternative Category 2: IBM Training and Formal Courses
+
+IBM and other formal training providers offer structured courses for IBM i topics.
+
+These courses can be valuable for professionals and companies that want formal learning.
+
+#### Strengths
+
+- Structured training format
+- Credible source
+- Useful for official or enterprise learning
+- May include instructor-led options
+- Suitable for organizations investing in training
+
+#### Limitations from IBMiHub AI Perspective
+
+- May not be available instantly for every learner
+- May not cover every real-world troubleshooting scenario
+- May not provide continuous AI-assisted support
+- May not provide daily practice or productivity tools
+- May be less flexible for self-paced exploratory learning
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI can complement formal training by giving users a continuous learning and practice environment before, during, and after formal courses.
+
+### Alternative Category 3: Tutorial Websites and Free Learning Resources
+
+Tutorial websites, blogs, and free learning resources are often the first place many learners go when trying to understand IBM i, RPGLE, CLLE, SQLRPGLE, DDS, commands, and basic concepts.
+
+Examples include IBM i tutorial sites, personal blogs, code examples, and topic-specific articles.
+
+#### Strengths
+
+- Easy to access
+- Often free
+- Useful for quick explanations
+- Helpful for specific syntax or examples
+- Valuable for self-directed learners
+
+#### Limitations from IBMiHub AI Perspective
+
+- Content can be fragmented
+- Quality and depth may vary
+- Learning paths may not be structured
+- No personalized guidance
+- No progress tracking
+- No integrated AI tutor
+- Limited hands-on practice experience
+- May not connect concepts to real-world workflows
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI should differentiate through original structured learning paths, AI guidance, practice-oriented examples, and progressive learning rather than random topic discovery.
+
+IBMiHub AI must not copy content from tutorial websites. It should create its own original explanations, examples, exercises, and learning flows.
+
+### Alternative Category 4: IBM i Community, Publications, and User Groups
+
+The IBM i ecosystem has strong community assets, including publications, user groups, conferences, webinars, forums, LinkedIn discussions, and expert-led sessions.
+
+These resources are important for ongoing professional learning and ecosystem connection.
+
+#### Strengths
+
+- Community credibility
+- Real-world experience
+- Expert voices
+- Industry updates
+- Networking opportunities
+- Practical insight from experienced professionals
+
+#### Limitations from IBMiHub AI Perspective
+
+- Not always designed as a step-by-step beginner path
+- Information is spread across events, articles, discussions, and recordings
+- Learning depends on user discovery and initiative
+- No single product workflow for learning, practice, AI assistance, and progress tracking
+- May not provide immediate answers for individual learning gaps
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI should respect and support the IBM i community.
+
+The platform can become a practical daily learning and productivity layer while community groups and publications continue to provide ecosystem knowledge, news, events, and expert discussion.
+
+### Alternative Category 5: Internal Company Mentoring and Tribal Knowledge
+
+Many IBM i professionals learn through senior developers, internal documentation, old source code, production support, and team-specific knowledge transfer.
+
+This is one of the most common real-world alternatives to formal learning.
+
+#### Strengths
+
+- Highly practical
+- Based on real company systems
+- Context-rich
+- Directly connected to business applications
+- Useful for job-specific onboarding
+
+#### Limitations from IBMiHub AI Perspective
+
+- Depends heavily on availability of senior experts
+- Knowledge may not be documented well
+- Onboarding can be inconsistent
+- Senior developers may become bottlenecks
+- New learners may hesitate to ask repeated basic questions
+- Legacy knowledge can be lost when people leave
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI can help reduce the load on senior developers by supporting foundational learning, code explanation, job log understanding, documentation generation, and structured onboarding.
+
+It should not replace experienced professionals. It should help teams transfer knowledge more consistently.
+
+### Alternative Category 6: Generic AI Assistants
+
+Generic AI assistants can already answer IBM i-related questions, explain code, and help users reason through technical topics.
+
+These tools are powerful and will continue to improve.
+
+#### Strengths
+
+- Broad AI capability
+- Natural language interface
+- Useful for quick explanations
+- Can assist with many programming languages and concepts
+- Familiar to many users
+
+#### Limitations from IBMiHub AI Perspective
+
+- Not designed specifically for IBM i learning paths
+- May lack product-level context
+- No structured IBM i curriculum by default
+- No built-in progress tracking
+- No 5250 practice workflow
+- No IBM i-specific learning guardrails
+- No integrated job log or RPGLE practice experience by default
+- May produce confident but incorrect answers if not constrained
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI should not compete by being a generic chatbot.
+
+It should compete by combining AI with IBM i-specific context, curriculum, examples, workflows, practice scenarios, feedback loops, and trust boundaries.
+
+### Alternative Category 7: AI Coding Assistants and IDE Tools
+
+AI coding assistants inside IDEs can help developers write, explain, and refactor code.
+
+These tools are useful for working developers, especially in modern development environments.
+
+#### Strengths
+
+- Integrated into developer workflow
+- Useful for code suggestions
+- Strong productivity value
+- Helpful for modern engineering teams
+- Useful across many programming languages
+
+#### Limitations from IBMiHub AI Perspective
+
+- Not primarily designed for structured IBM i education
+- May not support IBM i-specific workflows deeply
+- Does not replace curriculum, practice labs, or onboarding
+- May be less useful for business users, beginners, or interview candidates
+- Does not provide a complete learning platform experience
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI can coexist with IDE-based AI tools.
+
+The platform should focus on structured learning, IBM i-specific explanations, practice, job log understanding, documentation, and onboarding rather than only code completion.
+
+### Alternative Category 8: IBM i DevOps and Modernization Vendors
+
+There are specialized IBM i vendors focused on modernization, DevOps, change management, application analysis, APIs, testing, and deployment workflows.
+
+These tools are important for enterprise IBM i development teams.
+
+#### Strengths
+
+- Enterprise-grade IBM i tooling
+- Strong focus on modernization and DevOps
+- Useful for professional development teams
+- Often integrated into real IBM i environments
+- Solves production engineering problems
+
+#### Limitations from IBMiHub AI Perspective
+
+- Not primarily focused on beginner learning
+- May require enterprise purchase and setup
+- Not designed as an AI-first learning platform
+- May not provide structured curriculum or public learning paths
+- Focus is usually tooling and process rather than education
+
+#### IBMiHub AI Positioning
+
+IBMiHub AI should not initially compete directly with enterprise DevOps vendors.
+
+Instead, it should focus on learning, AI-assisted understanding, documentation, practice, and onboarding. Over time, it may support productivity workflows that complement enterprise modernization tools.
+
+### Competitive Positioning Matrix
+
+| Alternative Category | Primary User Need Served | Key Strength | Main Gap IBMiHub AI Can Address |
+|---|---|---|---|
+| IBM Documentation | Authoritative reference | Official and complete | Not a guided AI-first learning journey |
+| IBM Training | Formal education | Structured and credible | Less continuous and less personalized |
+| Tutorial Websites | Quick learning | Free and accessible | Fragmented and not interactive |
+| Community & Publications | Industry knowledge | Expert ecosystem insight | Not a unified product workflow |
+| Internal Mentoring | Company-specific learning | Practical and contextual | Hard to scale consistently |
+| Generic AI Assistants | Broad AI help | Flexible and powerful | Not IBM i-specific by default |
+| AI Coding Assistants | Developer productivity | IDE-integrated coding help | Not full learning/onboarding platform |
+| DevOps Vendors | Enterprise modernization | Production-grade tooling | Not beginner-first education |
+
+### IBMiHub AI Differentiation
+
+IBMiHub AI should differentiate through a combination of capabilities rather than one isolated feature.
+
+The main differentiation areas are:
+
+#### 1. IBM i-Specific Focus
+
+The platform is designed specifically for IBM i professionals, not generic developers.
+
+This allows the product to focus deeply on:
+
+- IBM i concepts
+- RPGLE
+- CLLE
+- SQLRPGLE
+- DDS
+- DB2 for i
+- 5250 workflows
+- Job logs
+- Legacy code understanding
+- IBM i modernization topics
+
+#### 2. AI-Assisted Learning and Productivity
+
+AI is not an add-on. It is part of the core product experience.
+
+The AI tutor and future AI tools should help users learn, understand, troubleshoot, document, and practice IBM i topics faster.
+
+#### 3. Structured Learning Paths
+
+IBMiHub AI should reduce confusion by giving learners a clear path.
+
+Users should not need to guess what to learn next.
+
+#### 4. Hands-On Practice Direction
+
+The long-term product direction includes 5250 simulations, RPGLE practice, job log scenarios, quizzes, and real-world exercises.
+
+This creates differentiation beyond static content.
+
+#### 5. Original Content and Examples
+
+The platform should build trust by creating original explanations, examples, exercises, and scenarios rather than copying existing websites.
+
+#### 6. Support for Both Beginners and Professionals
+
+The product should help beginners learn fundamentals while also helping working developers understand code, logs, and legacy behavior faster.
+
+#### 7. Future Enterprise Training Potential
+
+IBMiHub AI can eventually support companies with onboarding, team learning, progress tracking, documentation support, and knowledge transfer.
+
+### Competitive Strategy
+
+The competitive strategy should be:
+
+- Start with a focused learning and AI tutor MVP.
+- Build trust through original, high-quality IBM i content.
+- Avoid trying to compete with every IBM i tool category immediately.
+- Treat existing IBM i resources as complementary, not enemies.
+- Use AI to create a more interactive and personalized experience.
+- Expand into practice labs and productivity tools only after early validation.
+- Build credibility in the community before pursuing enterprise expansion.
+
+### What IBMiHub AI Should Avoid
+
+IBMiHub AI should avoid:
+
+- Copying existing tutorial content
+- Claiming to replace IBM documentation
+- Competing directly with mature DevOps vendors too early
+- Becoming a generic AI chatbot
+- Building a large feature list before validating user value
+- Making unsupported claims about competitors
+- Positioning itself as superior to human IBM i experts
+
+### Summary
+
+The competitive landscape is fragmented rather than dominated by a single direct competitor.
+
+Users currently rely on documentation, tutorials, community knowledge, training providers, internal mentoring, generic AI tools, and enterprise modernization products.
+
+IBMiHub AI's opportunity is to unify the most important parts of learning and productivity into a focused, AI-first IBM i platform.
+
+The product should position itself as complementary to the existing ecosystem while differentiating through IBM i-specific AI assistance, structured learning, original content, hands-on practice direction, and future enterprise training potential.
 
 ---
 
@@ -1358,3 +1709,4 @@ The early market strategy should be conservative, evidence-driven, and community
 | 2026-07-01 | 0.7 | Added approved Success Metrics & KPIs content |
 | 2026-07-01 | 0.8 | Added approved Product Principles content |
 | 2026-07-01 | 0.9 | Added approved Market Analysis content |
+| 2026-07-01 | 1.0 | Added approved Competitive Landscape content |
