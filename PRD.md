@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 1.5
-- Status: Draft — Sections 1–13 Complete
+- Version: 2.7
+- Status: Draft — All Sections Complete / Ready for Product Owner Review
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–13 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+All sections below now contain approved draft content. This PRD should be reviewed as a complete document before downstream SDD specifications, implementation plans, architecture documents, or development work reference it. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -58,11 +58,82 @@ Estimated total document length once complete: **45–65 pages**.
 
 ## 0. Document Control
 
-- **Purpose:** Track ownership, approval status, and change history at a glance.
-- **Description:** Version table, approval sign-off log, and links to related governing documents (PROJECT_CONTEXT.md, PROJECT_STATE.md, PROJECT_MASTER_INDEX.md, Engineering Review, Sprint 0 Documentation Roadmap).
-- **Audience:** Product Owner, Engineering leadership, all contributors.
-- **Approximate size:** <1 page.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to track PRD ownership, status, approval state, related documents, and governance expectations.
+
+This section helps contributors understand whether the PRD is still being drafted, ready for review, approved, or superseded by a later version.
+
+---
+
+### Document Ownership
+
+| Field | Value |
+|---|---|
+| Document Name | Product Requirements Document |
+| Product | IBMiHub AI |
+| Owner | Product |
+| Primary Decision Owner | Product Owner |
+| Current Version | 2.7 |
+| Current Status | Draft — All Sections Complete / Ready for Product Owner Review |
+| Last Updated | 2026-07-01 |
+
+---
+
+### Document Status Meaning
+
+| Status | Meaning |
+|---|---|
+| Draft | Content is being written or reviewed |
+| Ready for Product Owner Review | All planned sections are complete and ready for full review |
+| Approved | Product Owner has approved the PRD as a source of truth for downstream planning |
+| Superseded | A newer PRD version has replaced this version |
+
+Current status:
+
+**Draft — All Sections Complete / Ready for Product Owner Review**
+
+This means the PRD content is complete for the current planning cycle, but it should still receive a full Product Owner review before being treated as formally approved for Sprint 1 planning.
+
+---
+
+### Related Governing Documents
+
+| Document | Relationship to PRD |
+|---|---|
+| PROJECT_CONTEXT.md | Provides long-term project background, principles, and context |
+| PROJECT_STATE.md | Tracks current project state, progress, blockers, and next actions |
+| PROJECT_MASTER_INDEX.md | Provides navigation across major project documents |
+| AI_RULES.md | Defines how AI assistants should work on this project |
+| PROMPT_LIBRARY.md | Stores reusable prompts for product, engineering, SDD, and review workflows |
+| Engineering Review | Provides engineering recommendations and technical risk observations |
+| Sprint 0 Documentation Roadmap | Defines documentation expected before implementation |
+| Future SDD Specs | Will derive feature-level requirements from this PRD |
+| Future ADRs | Will capture technical decisions that should not live directly inside the PRD |
+
+---
+
+### Approval State
+
+| Approval Item | Status |
+|---|---|
+| Section-by-section content drafting | Complete |
+| Full PRD review | Pending |
+| Product Owner approval | Pending |
+| Engineering review against PRD | Pending |
+| Sprint 1 readiness review | Pending |
+| Downstream SDD spec creation | Pending |
+
+---
+
+### Governance Notes
+
+- This PRD is the product source of truth.
+- SDD specs should derive from this PRD.
+- Architecture documents and ADRs should not contradict PRD-level scope.
+- Implementation should not begin until required Sprint 1 decisions and SDD specs are ready.
+- Future scope changes should be reflected in the PRD before implementation.
+- Product Owner approval is required before treating this PRD as final for Sprint 1 execution.
 
 ---
 
@@ -4030,120 +4101,5232 @@ These requirements should guide the first SDD feature specifications and Sprint 
 
 ## 14. Non-Functional Requirements
 
-- **Purpose:** Define the quality bar the product must meet regardless of feature.
-- **Description:** Performance, scalability, availability, security, privacy, accessibility, localization, and maintainability expectations at the product level.
-- **Audience:** Engineering, Product, Security/Compliance.
-- **Approximate size:** 3–5 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define the quality expectations for IBMiHub AI.
+
+Functional requirements define what the product must do. Non-functional requirements define how well the product must behave while doing it.
+
+This section covers product-level expectations for:
+
+- Performance
+- Reliability
+- Availability
+- Security
+- Privacy
+- AI safety and trust
+- Usability
+- Accessibility
+- Scalability
+- Maintainability
+- Observability
+- Content quality
+- Data handling
+
+This section does not prescribe technical architecture, hosting provider, database design, AI provider implementation, or detailed engineering solutions. Those decisions should be captured later in architecture documents, ADRs, SDD specs, and implementation plans.
+
+---
+
+## 14.1 Non-Functional Requirement Scope
+
+The non-functional requirements in this section apply primarily to the approved MVP:
+
+- Public Landing Experience
+- User Account and Basic Onboarding
+- User Dashboard
+- Learning Center
+- AI Tutor
+- Basic Progress Tracking
+- Basic Feedback Collection
+- Basic Content Governance
+
+Future modules such as 5250 Practice Lab, RPG Playground, Job Log Analyzer, Code Explanation, Documentation Generator, Enterprise Training, Community, Mobile App, and VS Code Extension may require additional non-functional requirements later.
+
+---
+
+## 14.2 Requirement Priority Definitions
+
+| Priority | Meaning |
+|---|---|
+| Must Have | Required for MVP release readiness |
+| Should Have | Important quality expectation, but may be simplified for MVP |
+| Could Have | Useful improvement if it does not delay MVP |
+| Future | Not required for MVP but important for later phases |
+
+---
+
+## 14.3 Performance Requirements
+
+### Objective
+
+The MVP should feel fast, responsive, and comfortable to use.
+
+Users should not feel that the platform is slow when navigating lessons, dashboard, onboarding, or basic product pages.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-PERF-001 | Public pages should load quickly enough to support a good first impression. | Must Have |
+| NFR-PERF-002 | Dashboard and Learning Center pages should respond fast enough for comfortable repeated use. | Must Have |
+| NFR-PERF-003 | Lesson navigation should feel smooth and should not create unnecessary wait time. | Must Have |
+| NFR-PERF-004 | AI Tutor responses should be delivered within a reasonable time for conversational learning use. | Must Have |
+| NFR-PERF-005 | The product should avoid heavy or unnecessary UI elements that slow down the MVP experience. | Should Have |
+| NFR-PERF-006 | The product should be usable on typical home, office, and mobile internet connections. | Should Have |
+
+### Acceptance Expectations
+
+- Users can move through landing, dashboard, and lessons without noticeable friction.
+- AI Tutor response time is acceptable for learning support.
+- The MVP does not feel slow or overloaded.
+
+---
+
+## 14.4 Reliability Requirements
+
+### Objective
+
+The product should work consistently for core MVP flows.
+
+Reliability is important because users must trust the platform as a learning and AI-assistance experience.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-REL-001 | Core user flows should work consistently: sign-up/login, onboarding, dashboard, lesson access, progress tracking, AI Tutor, and feedback submission. | Must Have |
+| NFR-REL-002 | User progress should not be lost during normal product usage. | Must Have |
+| NFR-REL-003 | The product should handle common user errors gracefully. | Must Have |
+| NFR-REL-004 | The product should show understandable error messages when something fails. | Must Have |
+| NFR-REL-005 | AI Tutor failures should be handled gracefully without breaking the rest of the product experience. | Must Have |
+| NFR-REL-006 | The product should avoid broken navigation paths or dead ends. | Must Have |
+
+### Acceptance Expectations
+
+- Users can complete core MVP flows without frequent failures.
+- Failure states are understandable and recoverable.
+- AI-related issues do not make the entire platform unusable.
+
+---
+
+## 14.5 Availability Requirements
+
+### Objective
+
+The MVP should be available enough for beta users and early adopters to use reliably.
+
+The MVP does not need enterprise-grade availability guarantees, but it should not feel unstable.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-AVL-001 | The product should be available for normal early-user access during MVP validation. | Must Have |
+| NFR-AVL-002 | Planned downtime, if any, should be minimized and communicated where practical. | Should Have |
+| NFR-AVL-003 | The product should avoid single points of failure where simple design choices can reduce risk. | Should Have |
+| NFR-AVL-004 | Enterprise-level uptime SLAs are not required for MVP. | Future |
+
+### Acceptance Expectations
+
+- Early users can access the product reliably.
+- The product does not require enterprise SLA commitments during MVP.
+
+---
+
+## 14.6 Security Requirements
+
+### Objective
+
+The MVP must protect user accounts, product data, feedback, and learning activity.
+
+Even though the MVP is narrow, security should be considered from the beginning because trust is central to the product.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-SEC-001 | User authentication must be handled securely. | Must Have |
+| NFR-SEC-002 | User passwords, if used, must not be stored in plain text. | Must Have |
+| NFR-SEC-003 | The product must protect user account data from unauthorized access. | Must Have |
+| NFR-SEC-004 | The product must not expose private user data through public pages or URLs. | Must Have |
+| NFR-SEC-005 | The product must use secure communication for user-facing application traffic. | Must Have |
+| NFR-SEC-006 | The product must not include real IBM i system connectivity in the MVP. | Must Have |
+| NFR-SEC-007 | The product must not allow production source code upload in the MVP. | Must Have |
+| NFR-SEC-008 | The product must not allow sensitive production job log upload in the MVP. | Must Have |
+| NFR-SEC-009 | Internal content update processes should be protected from unauthorized changes. | Should Have |
+| NFR-SEC-010 | Security-sensitive decisions should be documented in architecture or ADR documents when implementation begins. | Should Have |
+
+### Acceptance Expectations
+
+- User data is protected appropriately for an MVP.
+- Risky features such as production code upload and real IBM i connectivity are not accidentally included.
+- Security is treated as a baseline expectation, not a later afterthought.
+
+---
+
+## 14.7 Privacy Requirements
+
+### Objective
+
+IBMiHub AI should handle user data responsibly.
+
+Privacy is especially important because future product phases may involve code, logs, and enterprise workflows. The MVP should establish safe habits early even though it does not include sensitive production uploads.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-PRIV-001 | The product must collect only the user information needed for the MVP experience. | Must Have |
+| NFR-PRIV-002 | The product must avoid requesting sensitive production code, logs, credentials, or customer data in the MVP. | Must Have |
+| NFR-PRIV-003 | AI Tutor guidance must discourage users from sharing private production code or sensitive logs. | Must Have |
+| NFR-PRIV-004 | User feedback should be handled as private product feedback unless clearly stated otherwise. | Must Have |
+| NFR-PRIV-005 | The product should provide clear privacy messaging appropriate for MVP usage. | Should Have |
+| NFR-PRIV-006 | Future support for code or log upload must require separate privacy, security, and data handling review. | Future |
+
+### Acceptance Expectations
+
+- Users are not encouraged to share sensitive production information.
+- The MVP collects minimal data.
+- Future sensitive workflows are not introduced without explicit review.
+
+---
+
+## 14.8 AI Trust and Safety Requirements
+
+### Objective
+
+The AI Tutor must be useful, but it must also be transparent and careful.
+
+Users should understand that AI output can help learning and explanation, but should not be treated as guaranteed production truth.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-AI-001 | The AI Tutor must avoid claiming guaranteed correctness. | Must Have |
+| NFR-AI-002 | The AI Tutor must include appropriate caution for production use. | Must Have |
+| NFR-AI-003 | The AI Tutor must discourage users from sharing private production code, credentials, or sensitive logs. | Must Have |
+| NFR-AI-004 | AI responses should be clear, structured, and practical. | Should Have |
+| NFR-AI-005 | AI responses should match the user context where available, such as beginner vs working developer. | Should Have |
+| NFR-AI-006 | AI responses should avoid unnecessary overconfidence. | Should Have |
+| NFR-AI-007 | AI Tutor feedback should be captured where feasible to improve quality over time. | Should Have |
+| NFR-AI-008 | AI provider selection and prompt design should be handled in later architecture and AI Strategy documents. | Future |
+
+### Acceptance Expectations
+
+- The AI Tutor feels helpful but not reckless.
+- Users are encouraged to validate AI guidance.
+- AI behavior supports trust and learning.
+
+---
+
+## 14.9 Usability Requirements
+
+### Objective
+
+The MVP should be easy to understand and navigate.
+
+Users should not need training to use the platform.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-USE-001 | A new visitor should understand the product purpose quickly. | Must Have |
+| NFR-USE-002 | A new user should know where to start after onboarding. | Must Have |
+| NFR-USE-003 | A returning user should be able to continue learning easily. | Must Have |
+| NFR-USE-004 | Navigation between dashboard, lessons, and AI Tutor should be simple. | Must Have |
+| NFR-USE-005 | The product should avoid exposing too many future modules in the MVP user experience. | Must Have |
+| NFR-USE-006 | Beginner users should not feel overwhelmed by terminology or layout. | Should Have |
+| NFR-USE-007 | Working developers should be able to access AI Tutor and relevant learning content without unnecessary friction. | Should Have |
+
+### Acceptance Expectations
+
+- Users can understand what to do next.
+- The MVP feels focused and uncluttered.
+- Beginner and working-developer needs are both respected.
+
+---
+
+## 14.10 Accessibility Requirements
+
+### Objective
+
+IBMiHub AI should be usable by as many people as reasonably possible.
+
+The MVP should follow basic accessibility expectations even before advanced accessibility certification work is done.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-ACC-001 | Text should be readable with sufficient contrast. | Must Have |
+| NFR-ACC-002 | The product should support keyboard-friendly navigation where practical. | Should Have |
+| NFR-ACC-003 | Important UI elements should have clear labels. | Should Have |
+| NFR-ACC-004 | The product should avoid relying only on color to communicate important meaning. | Should Have |
+| NFR-ACC-005 | Lesson content should use clear headings, lists, and readable structure. | Must Have |
+| NFR-ACC-006 | Future accessibility targets should be reviewed before enterprise expansion. | Future |
+
+### Acceptance Expectations
+
+- Lesson content is readable and structured.
+- Basic accessibility is considered during MVP design.
+- Accessibility does not become an afterthought.
+
+---
+
+## 14.11 Mobile and Responsive Experience Requirements
+
+### Objective
+
+The MVP should work reasonably well across common screen sizes.
+
+A dedicated mobile app is not part of the MVP, but the web experience should not be unusable on smaller screens.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-MOB-001 | Public landing pages should be usable on mobile and desktop browsers. | Must Have |
+| NFR-MOB-002 | Lesson reading experience should be usable on common mobile and desktop screen sizes. | Should Have |
+| NFR-MOB-003 | Dashboard and AI Tutor should be reasonably usable on common screen sizes. | Should Have |
+| NFR-MOB-004 | A native mobile app is not required for MVP. | Future |
+
+### Acceptance Expectations
+
+- Users can read core content on desktop and mobile browsers.
+- The MVP does not require a native mobile app.
+
+---
+
+## 14.12 Scalability Requirements
+
+### Objective
+
+The MVP should be simple but should not block future growth.
+
+The product does not need enterprise-scale infrastructure on day one, but it should be designed so growth does not require a full restart.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-SCL-001 | The MVP should support a small early beta user base comfortably. | Must Have |
+| NFR-SCL-002 | The product should be designed so learning content can grow over time. | Must Have |
+| NFR-SCL-003 | The product should be designed so future modules can be added without rewriting the entire platform. | Should Have |
+| NFR-SCL-004 | AI usage should be designed with future cost and rate-limit considerations in mind. | Should Have |
+| NFR-SCL-005 | Enterprise-scale usage is not required for MVP. | Future |
+
+### Acceptance Expectations
+
+- The MVP supports early users without unnecessary complexity.
+- Product and content structure do not block future expansion.
+
+---
+
+## 14.13 Maintainability Requirements
+
+### Objective
+
+IBMiHub AI should remain maintainable as the product grows.
+
+The project is being treated as a long-term SaaS platform, so maintainability matters from the beginning.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-MAIN-001 | Product behavior should be documented through PRD, SDD specs, and implementation plans before coding. | Must Have |
+| NFR-MAIN-002 | Requirements should remain traceable from PRD to future SDD specs. | Must Have |
+| NFR-MAIN-003 | Product decisions should be captured in appropriate documentation or ADRs. | Should Have |
+| NFR-MAIN-004 | Content should be organized so it can be updated without confusion. | Must Have |
+| NFR-MAIN-005 | MVP implementation should avoid unnecessary complexity and overengineering. | Must Have |
+| NFR-MAIN-006 | Future modules should be introduced through approved specs, not ad-hoc coding. | Must Have |
+
+### Acceptance Expectations
+
+- Future contributors can understand why the product behaves the way it does.
+- MVP remains simple enough to maintain.
+- Documentation remains the source of truth.
+
+---
+
+## 14.14 Observability and Monitoring Requirements
+
+### Objective
+
+The product owner and engineering team should be able to understand whether the product is working and where users face issues.
+
+The MVP does not require enterprise observability, but basic visibility is important.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-OBS-001 | The product should capture basic product usage signals needed for MVP validation. | Should Have |
+| NFR-OBS-002 | The product should make it possible to understand core flow failures such as login, lesson access, progress tracking, AI Tutor, and feedback submission. | Should Have |
+| NFR-OBS-003 | The product should support basic review of user feedback. | Should Have |
+| NFR-OBS-004 | The product should avoid collecting unnecessary or sensitive user data for analytics. | Must Have |
+| NFR-OBS-005 | Advanced observability dashboards are not required for MVP. | Future |
+
+### Acceptance Expectations
+
+- MVP validation is possible through basic usage and feedback signals.
+- Product issues can be identified without collecting excessive data.
+
+---
+
+## 14.15 Content Quality Requirements
+
+### Objective
+
+Content quality is a core part of product quality.
+
+IBMiHub AI must build trust through original, clear, structured, and useful IBM i learning material.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-CQ-001 | Learning content must be original to IBMiHub AI. | Must Have |
+| NFR-CQ-002 | Learning content must avoid copying external tutorials, documentation, articles, books, or course material. | Must Have |
+| NFR-CQ-003 | Lessons must be clear enough for the intended learner level. | Must Have |
+| NFR-CQ-004 | Lessons should include practical examples where useful. | Should Have |
+| NFR-CQ-005 | Content should be reviewed before being treated as approved learning material. | Should Have |
+| NFR-CQ-006 | Content should be updated when user feedback identifies confusion or errors. | Should Have |
+| NFR-CQ-007 | External references used for research or validation should be credited where applicable. | Should Have |
+
+### Acceptance Expectations
+
+- Content builds trust.
+- Content is useful for real learning.
+- Content originality is protected.
+
+---
+
+## 14.16 Data Handling Requirements
+
+### Objective
+
+The MVP should handle product data responsibly and simply.
+
+This includes user account data, progress data, feedback data, lesson content, and AI interaction data if retained.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-DATA-001 | User account data must be handled securely. | Must Have |
+| NFR-DATA-002 | User progress data must be associated with the correct user. | Must Have |
+| NFR-DATA-003 | Feedback data should be available for product review. | Should Have |
+| NFR-DATA-004 | AI interaction data, if stored, should be handled with privacy and trust considerations. | Should Have |
+| NFR-DATA-005 | The MVP must not store production IBM i source code or sensitive job logs. | Must Have |
+| NFR-DATA-006 | Future data retention rules should be defined before supporting sensitive uploads or enterprise customers. | Future |
+
+### Acceptance Expectations
+
+- MVP data handling supports learning and validation without unnecessary risk.
+- Sensitive future workflows require separate review.
+
+---
+
+## 14.17 Localization Requirements
+
+### Objective
+
+The MVP should initially focus on a clear English-language experience.
+
+Localization may become important later, but it should not complicate the MVP.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-LOC-001 | MVP content should be created in English. | Must Have |
+| NFR-LOC-002 | The product should avoid hard-to-change assumptions that would block future localization. | Should Have |
+| NFR-LOC-003 | Multi-language content is not required for MVP. | Future |
+
+### Acceptance Expectations
+
+- MVP launches with focused English content.
+- Future localization remains possible.
+
+---
+
+## 14.18 Compliance Requirements
+
+### Objective
+
+The MVP does not require enterprise compliance certification, but it should avoid decisions that create unnecessary compliance risk.
+
+### Requirements
+
+| ID | Requirement | Priority |
+|---|---|---|
+| NFR-COMP-001 | The MVP must avoid collecting sensitive production code, logs, credentials, or customer data. | Must Have |
+| NFR-COMP-002 | The MVP should provide basic privacy and acceptable-use messaging. | Should Have |
+| NFR-COMP-003 | Enterprise compliance requirements should be evaluated before enterprise plans are launched. | Future |
+| NFR-COMP-004 | Future support for sensitive uploads should require security, privacy, and compliance review. | Future |
+
+### Acceptance Expectations
+
+- MVP avoids high-risk data handling.
+- Enterprise compliance is deferred until enterprise scope is approved.
+
+---
+
+## 14.19 Non-Functional MVP Readiness Summary
+
+The MVP should not be considered ready unless:
+
+- Core flows are reliable.
+- Public and learning pages are reasonably fast.
+- User data is protected.
+- AI Tutor uses appropriate caution and trust boundaries.
+- The product does not request production code or sensitive logs.
+- Lesson content is original and reviewed.
+- Users can navigate the product without confusion.
+- Basic feedback and validation signals can be captured.
+- The product remains maintainable and aligned with PRD / SDD process.
+
+---
+
+## 14.20 Future Non-Functional Considerations
+
+Future product phases may require additional requirements for:
+
+- Real IBM i connectivity
+- Secure code upload
+- Secure job log upload
+- Enterprise accounts
+- Team dashboards
+- Billing and subscriptions
+- Certifications
+- Community moderation
+- Mobile applications
+- VS Code extension
+- Public APIs
+- Enterprise SSO
+- Compliance certifications
+- Advanced observability
+- AI governance
+
+These should be handled only after MVP validation and explicit Product Owner approval.
+
+---
+
+### Summary
+
+The non-functional requirements define the quality bar for IBMiHub AI.
+
+The MVP should be fast enough, reliable, secure, privacy-conscious, usable, accessible, maintainable, and trustworthy.
+
+The product should avoid risky capabilities such as real IBM i connectivity, production code upload, sensitive job log upload, enterprise compliance claims, and advanced platform complexity until the core learning and AI-assistance value has been validated.
 
 ---
 
 ## 15. AI Strategy
 
-- **Purpose:** Define the product's approach to AI as a core differentiator, at the product (not technical) level.
-- **Description:** AI use cases by module, AI specialist/agent roles (Tutor, RPG Expert, CL Expert, SQL Expert, Job Log Expert, Interview Coach, Documentation Writer), quality/trust expectations, human-in-the-loop boundaries, and AI provider strategy at a product-decision level.
-- **Audience:** Product, Engineering, AI/ML stakeholders.
-- **Approximate size:** 3–5 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define the product-level AI strategy for IBMiHub AI.
+
+AI is a core differentiator of the product, but the product should not become a generic chatbot or an uncontrolled AI wrapper. AI should be used where it improves IBM i learning, explanation, productivity, and confidence.
+
+This section defines:
+
+- The role of AI in the product
+- MVP AI scope
+- AI Tutor behavior expectations
+- AI trust and safety boundaries
+- AI feedback and quality expectations
+- Future AI expansion direction
+- What AI should not do in the MVP
+
+This section does not define technical implementation, AI provider selection, prompt architecture, retrieval architecture, vector database design, model routing, hosting approach, or cost optimization strategy. Those decisions should be captured later in architecture documents, ADRs, AI implementation plans, and SDD specifications.
+
+---
+
+### AI Strategy Statement
+
+IBMiHub AI should use AI to make IBM i learning and understanding faster, clearer, safer, and more practical.
+
+The product should use AI as a guided learning and productivity assistant, not as a replacement for structured learning, official documentation, expert judgment, or production review.
+
+The AI strategy is:
+
+**Use AI to help users understand IBM i concepts, ask questions, clarify confusion, connect lessons to practical examples, and build confidence — while maintaining clear trust boundaries and avoiding unsafe production claims.**
+
+---
+
+### Strategic Role of AI
+
+AI should support the product vision in four major ways.
+
+#### 1. Reduce Learning Friction
+
+AI should help beginners ask questions in plain language and receive explanations that match their level.
+
+This matters because IBM i terminology, tools, workflows, and programming models can feel unfamiliar to new learners.
+
+#### 2. Improve Concept Understanding
+
+AI should explain IBM i topics from multiple angles, using simple language, practical examples, and structured responses.
+
+The goal is not only to answer questions, but to help users understand the concept well enough to continue learning.
+
+#### 3. Support Working Developers
+
+AI should help working IBM i developers refresh concepts, understand unfamiliar topics, and get practical explanations faster than searching across scattered resources.
+
+For the MVP, this should remain focused on conceptual explanation and learning support, not production troubleshooting or code review.
+
+#### 4. Create a Foundation for Future Productivity Tools
+
+Over time, AI may support code explanation, job log analysis, documentation generation, interview preparation, and enterprise onboarding.
+
+However, those advanced AI capabilities should be introduced only after MVP validation and separate product approval.
+
+---
+
+## 15.1 MVP AI Scope
+
+The MVP AI scope is limited to the **AI Tutor**.
+
+The AI Tutor should support learning and explanation use cases for:
+
+- IBM i fundamentals
+- RPGLE concepts
+- CLLE concepts
+- SQL and DB2 for i concepts
+- DDS concepts
+- 5250 concepts
+- Job log and spool file basics
+- Learning content clarification
+- Practical beginner-friendly explanations
+
+The MVP AI Tutor should help users understand and learn. It should not perform production operations, connect to IBM i systems, analyze private source code, or troubleshoot sensitive production logs.
+
+---
+
+## 15.2 MVP AI In-Scope Capabilities
+
+The MVP AI Tutor may support the following capabilities.
+
+| Capability | Description | MVP Status |
+|---|---|---|
+| IBM i Q&A | Answer general IBM i learning questions | In Scope |
+| Lesson Clarification | Explain lesson concepts in simpler or different ways | In Scope |
+| Beginner Explanation | Adapt responses for new learners | In Scope |
+| Working Developer Explanation | Provide practical explanations for experienced users | In Scope |
+| Concept Examples | Provide simple examples to explain concepts | In Scope |
+| Follow-up Questions | Allow users to continue a learning conversation | In Scope |
+| AI Response Feedback | Allow users to mark responses helpful or not helpful | In Scope |
+| Production Caution | Remind users to validate AI guidance before real production use | In Scope |
+
+---
+
+## 15.3 MVP AI Out-of-Scope Capabilities
+
+The following AI capabilities are explicitly out of scope for the MVP:
+
+- Real IBM i system connectivity
+- Live 5250 terminal interaction
+- Production troubleshooting guarantees
+- Uploading private production source code
+- Uploading sensitive job logs
+- Automated code changes
+- Code compilation or execution
+- Full RPGLE code review
+- Full job log analyzer
+- Full documentation generator
+- Autonomous agent workflows
+- Enterprise AI governance
+- Customer-specific knowledge base ingestion
+- Organization-specific AI training
+- AI-based certification scoring
+- AI actions on external systems
+
+These may be considered in future phases only after product validation, privacy review, security review, and explicit Product Owner approval.
+
+---
+
+## 15.4 AI Product Principles
+
+AI behavior in IBMiHub AI should follow these principles.
+
+### Principle 1: IBM i Focused
+
+AI should stay focused on IBM i learning and productivity use cases.
+
+It should not behave like a generic assistant covering unrelated topics unless the question clearly supports the user's IBM i learning journey.
+
+### Principle 2: Guided, Not Random
+
+AI should support structured learning paths and product workflows.
+
+It should help users move forward, understand lessons, and know what to learn next.
+
+### Principle 3: Helpful, But Not Overconfident
+
+AI should be useful and direct, but should not pretend to be certain when uncertainty exists.
+
+When appropriate, the AI should say that a topic may depend on system version, local standards, company implementation, or production context.
+
+### Principle 4: Beginner-Aware
+
+AI should adapt to beginner users by using simpler language, explaining terms, avoiding unnecessary jargon, and offering step-by-step clarification.
+
+### Principle 5: Professional Enough for Working Developers
+
+AI should also respect experienced users by providing practical, technically meaningful answers without oversimplifying everything.
+
+### Principle 6: Privacy-Conscious
+
+AI should not ask users to share private production source code, sensitive job logs, passwords, credentials, customer data, or proprietary business information.
+
+### Principle 7: Human Judgment Required
+
+AI output should support learning and analysis, but users should remain responsible for validation before applying anything to real systems.
+
+### Principle 8: Product Context Matters
+
+AI responses should align with the product's learning paths, MVP scope, content style, and trust boundaries.
+
+---
+
+## 15.5 AI Tutor Behavior Expectations
+
+The AI Tutor should behave like a patient IBM i learning assistant.
+
+It should:
+
+- Answer in clear and practical language
+- Structure explanations with headings, bullets, or examples when useful
+- Explain IBM i terms when they may be unfamiliar
+- Provide beginner-friendly answers when the user appears new
+- Provide more concise practical answers for working developers when appropriate
+- Encourage users to continue learning through related topics
+- Avoid making production-safe guarantees
+- Ask clarifying questions when the user's request is unclear
+- Say when a topic depends on environment, version, configuration, or business logic
+- Encourage review against official documentation, company standards, or expert guidance for production work
+
+The AI Tutor should not:
+
+- Pretend to have access to the user's IBM i system
+- Claim it has verified production behavior
+- Ask for private code, credentials, or sensitive logs
+- Provide risky production instructions without caution
+- Present generated answers as guaranteed facts
+- Replace expert review for production decisions
+
+---
+
+## 15.6 AI Response Style
+
+AI responses should follow a consistent product style.
+
+Responses should generally be:
+
+- Clear
+- Practical
+- Structured
+- Beginner-friendly when needed
+- Technically respectful
+- Focused on IBM i context
+- Honest about uncertainty
+- Safe for learning use
+
+For beginner users, responses should avoid overwhelming detail and should explain terminology.
+
+For working developers, responses may be more direct and practical, but should still remain clear and trustworthy.
+
+---
+
+## 15.7 AI Trust Boundaries
+
+Trust boundaries are required because IBMiHub AI deals with technical learning and future productivity workflows.
+
+The AI Tutor must communicate that:
+
+- AI output may be incomplete or incorrect
+- Production usage requires validation
+- Company-specific implementations may differ
+- IBM i behavior can depend on system version, configuration, object authorities, job settings, and local standards
+- Users should not share sensitive production data in the MVP
+
+The product should avoid language that implies the AI Tutor is always correct or production-certified.
+
+---
+
+## 15.8 AI and Learning Content Relationship
+
+The AI Tutor should support learning content, not replace it.
+
+Structured lessons remain the foundation of the learning experience.
+
+AI should help users:
+
+- Understand lesson concepts
+- Ask follow-up questions
+- Get alternate explanations
+- Clarify terminology
+- Connect concepts to practical examples
+- Continue learning when they are stuck
+
+The product should avoid replacing the Learning Center with a blank chatbot experience.
+
+The AI Tutor should strengthen the learning journey, not bypass it.
+
+---
+
+## 15.9 AI and Original Content Policy
+
+IBMiHub AI must maintain its original content policy.
+
+AI may assist the product team in drafting, brainstorming, simplifying, or reviewing content, but published learning content should be reviewed and approved before being treated as official IBMiHub AI content.
+
+AI-generated content must not be used to copy or closely imitate external tutorials, documentation, books, courses, or websites.
+
+The product should maintain its own voice, structure, examples, and learning flow.
+
+---
+
+## 15.10 AI Feedback and Quality Signals
+
+The MVP should collect feedback that helps evaluate AI usefulness.
+
+Useful AI quality signals include:
+
+- Helpful / not helpful ratings
+- Common user question topics
+- Questions where users ask repeated follow-ups
+- User-reported incorrect or confusing AI responses
+- Topics where AI struggles
+- Topics users ask for most often
+- Repeat usage after AI Tutor interaction
+
+This feedback should help improve product direction, lesson content, AI behavior, and future AI roadmap decisions.
+
+---
+
+## 15.11 AI Metrics
+
+AI success should be measured by usefulness and trust, not just usage volume.
+
+Possible MVP AI metrics include:
+
+- Number of AI Tutor questions asked
+- Percentage of users who ask at least one AI question
+- AI Tutor usage after lesson reading
+- Helpful response rating
+- Not helpful response rating
+- Follow-up question rate
+- Repeat usage after AI Tutor session
+- Common topic categories
+- Reported incorrect or unsafe responses
+
+High AI question volume alone does not prove success.
+
+The better signal is whether AI helps users learn, return, trust the platform, and continue using the product.
+
+---
+
+## 15.12 AI Provider and Implementation Strategy
+
+The PRD should remain provider-neutral at this stage.
+
+The product should not lock itself into any specific AI provider, model, orchestration framework, embedding database, RAG architecture, or hosting decision inside the PRD.
+
+Provider and implementation decisions should be handled later through:
+
+- Architecture documents
+- ADRs
+- AI implementation plans
+- Security and privacy review
+- Cost and scalability analysis
+- SDD feature specs
+
+The product requirement is that AI must be useful, focused, safe, and maintainable.
+
+The engineering solution should be decided separately.
+
+---
+
+## 15.13 AI Cost and Usage Considerations
+
+AI usage can create operating cost.
+
+The MVP should be designed with future cost awareness, but cost optimization should not dominate the first product definition.
+
+Product-level considerations include:
+
+- AI usage should support real learning value
+- Abuse or excessive usage should be controllable in future versions
+- Paid plans may later include higher AI usage limits
+- Enterprise plans may later require separate controls
+- AI cost should be monitored once real users begin using the product
+
+Detailed AI cost controls should be defined later during architecture and implementation planning.
+
+---
+
+## 15.14 Future AI Capabilities
+
+Future AI capabilities may include:
+
+### Lesson-Aware AI Tutor
+
+AI that has stronger awareness of the current lesson, learning path, and user progress.
+
+### RPGLE / CLLE Code Explanation
+
+AI-assisted explanation of user-provided or sample RPGLE and CLLE code.
+
+### Job Log Explanation
+
+AI-assisted explanation of job logs and likely investigation areas.
+
+### Documentation Assistant
+
+AI-assisted creation of program summaries, process notes, onboarding documents, or technical documentation.
+
+### Interview Coach
+
+AI-assisted interview preparation, mock questions, and explanation support.
+
+### Practice Lab Assistant
+
+AI assistance inside future 5250 simulations, RPG exercises, and job log scenarios.
+
+### Enterprise AI Controls
+
+Future controls for enterprise privacy, data handling, usage limits, and organization-specific policies.
+
+These capabilities are future possibilities, not MVP commitments.
+
+Each should require separate approval, privacy review, security review, and SDD specification.
+
+---
+
+## 15.15 AI Risks
+
+Key AI risks include:
+
+| Risk | Description | Mitigation Direction |
+|---|---|---|
+| Incorrect answers | AI may provide incomplete or wrong technical explanations | Use caution messaging, feedback, review loops, and future grounding |
+| Overconfidence | AI may sound certain even when context is missing | Require uncertainty handling and production-use caution |
+| Privacy leakage | Users may share sensitive code, logs, or business data | Warn users not to share sensitive data; block sensitive upload features in MVP |
+| Generic answers | AI may not feel IBM i-specific enough | Guide AI behavior around IBM i context and product learning paths |
+| Scope creep | AI may encourage advanced features too early | Keep MVP AI limited to AI Tutor learning support |
+| Cost growth | AI usage may become expensive as usage grows | Monitor usage and define future limits or paid tiers |
+| Trust damage | Poor AI answers may reduce credibility | Collect feedback and improve content, prompts, and AI behavior over time |
+
+---
+
+## 15.16 MVP AI Readiness Checklist
+
+The MVP AI Tutor should not be considered ready unless:
+
+- Users can ask IBM i-related questions.
+- Responses are understandable and useful for learning.
+- Responses avoid guaranteed correctness claims.
+- Responses discourage sharing sensitive production data.
+- AI Tutor is accessible from core product flows.
+- AI feedback can be captured.
+- The product does not allow private production code upload.
+- The product does not allow sensitive job log upload.
+- The product does not connect to real IBM i systems.
+- Product Owner has reviewed and approved AI behavior for MVP release.
+
+---
+
+### Summary
+
+AI is central to IBMiHub AI, but it must be focused, safe, and aligned with structured learning.
+
+For the MVP, AI should be limited to an IBM i-focused AI Tutor that helps users understand concepts, clarify lessons, ask questions, and continue learning.
+
+The product should avoid real IBM i connectivity, sensitive uploads, production troubleshooting guarantees, autonomous actions, or enterprise AI governance in the MVP.
+
+Future AI capabilities such as code explanation, job log analysis, documentation generation, practice assistance, and enterprise controls should be introduced only after MVP validation and explicit Product Owner approval.
 
 ---
 
 ## 16. Learning & Content Strategy
 
-- **Purpose:** Define how educational value is created, structured, and kept current.
-- **Description:** Curriculum structure, content sourcing and originality policy, skill progression model, certification/gamification approach, and content governance.
-- **Audience:** Product, Content/Curriculum team, Engineering.
-- **Approximate size:** 2–4 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define how IBMiHub AI will create, structure, govern, and improve IBM i learning content.
+
+Learning content is one of the core foundations of the product. The AI Tutor is important, but the product should not become only a chatbot. Structured learning content gives users a guided path, reduces confusion, supports progress tracking, and creates a foundation for future labs, quizzes, practice, interview preparation, and enterprise training.
+
+This section defines:
+
+- The learning strategy
+- MVP curriculum scope
+- Content principles
+- Lesson structure
+- Original content policy
+- Content governance
+- AI-assisted content creation boundaries
+- Skill progression model
+- Future content expansion direction
+
+This section does not create actual lessons. Actual lesson content should be created later through approved content plans, curriculum specs, and review workflows.
+
+---
+
+### Learning Strategy Statement
+
+IBMiHub AI should provide structured, original, practical IBM i learning content supported by AI guidance.
+
+The learning strategy is:
+
+**Help users move from confusion to confidence through guided IBM i learning paths, clear explanations, practical examples, AI-assisted clarification, and gradual skill progression.**
+
+The product should not simply publish random IBM i articles. It should guide users through a logical journey from basic orientation to practical understanding.
+
+---
+
+## 16.1 Role of Learning Content in the Product
+
+Learning content plays several important roles in IBMiHub AI.
+
+### 1. Foundation for Beginners
+
+Beginners need a clear place to start. Structured lessons should reduce fear and confusion by explaining IBM i concepts in a simple, practical sequence.
+
+### 2. Reference for Working Developers
+
+Working developers may use learning content to refresh concepts, clarify terminology, or understand topics they do not use daily.
+
+### 3. Context for AI Tutor
+
+The AI Tutor should support and reinforce learning content. Users should be able to ask questions around lessons and get clarification without leaving the learning flow.
+
+### 4. Foundation for Future Practice
+
+Future 5250 labs, RPGLE exercises, CLLE exercises, job log scenarios, quizzes, and interview preparation should connect back to structured learning content.
+
+### 5. Trust Builder
+
+High-quality original content is essential for credibility. The IBM i community will trust the product only if the content is accurate, practical, respectful, and not copied.
+
+---
+
+## 16.2 MVP Learning Scope
+
+The MVP learning scope should remain focused.
+
+The MVP should not attempt to become a complete IBM i academy. It should provide enough structured content to validate whether users find the product useful and want to continue learning.
+
+### MVP Learning Goal
+
+The MVP learning goal is:
+
+**Help a beginner understand the IBM i platform at a basic level and help a working developer quickly refresh foundational IBM i concepts.**
+
+### MVP In-Scope Learning Areas
+
+The MVP learning content may include:
+
+- IBM i overview
+- IBM i terminology
+- Libraries and objects
+- 5250 screen basics
+- Physical files and logical files
+- RPGLE introduction
+- CLLE introduction
+- DB2 for i introduction
+- Job logs and spool files basics
+- Basic IBM i development workflow
+- Modern IBM i tooling overview at a high level
+
+### MVP Out-of-Scope Learning Areas
+
+The MVP should not include:
+
+- Complete RPGLE mastery course
+- Complete CLLE mastery course
+- Advanced DB2 for i optimization
+- Advanced system administration
+- Full security administration curriculum
+- Full modernization program
+- Enterprise onboarding curriculum
+- Certification curriculum
+- Paid course bundles
+- User-generated courses
+- Instructor-led training
+- Vendor-specific product training
+
+These may be considered in later phases after MVP validation.
+
+---
+
+## 16.3 Target Learning Audiences
+
+The MVP learning strategy should focus on two primary audiences.
+
+### Beginner IBM i Learner
+
+This user needs:
+
+- Simple explanations
+- Clear sequencing
+- Terminology support
+- Confidence-building examples
+- A safe way to ask questions
+- Guidance on what to learn next
+
+### Working IBM i Developer
+
+This user needs:
+
+- Practical explanations
+- Fast concept refreshers
+- Clear IBM i-specific context
+- AI clarification support
+- Pathways into deeper future content
+
+Other audiences such as team leads, architects, enterprise buyers, and interview candidates should inform future content strategy but should not dominate the MVP curriculum.
+
+---
+
+## 16.4 Learning Path Strategy
+
+IBMiHub AI should organize content into learning paths.
+
+A learning path is a guided sequence of lessons designed to help users progress from one level of understanding to the next.
+
+### MVP Learning Path
+
+The MVP should include one primary learning path:
+
+**IBM i Fundamentals**
+
+This path should introduce users to the IBM i platform, basic terminology, system concepts, development concepts, and common workflows.
+
+Suggested lesson sequence:
+
+1. What is IBM i?
+2. Why IBM i still matters
+3. IBM i platform overview
+4. Libraries and objects
+5. 5250 screen basics
+6. Physical files and logical files
+7. Introduction to RPGLE
+8. Introduction to CLLE
+9. Introduction to DB2 for i
+10. Job logs and spool files basics
+11. Basic IBM i development workflow
+12. Where to go next
+
+This sequence may be refined later, but the MVP should remain focused on fundamentals.
+
+---
+
+## 16.5 Skill Progression Model
+
+IBMiHub AI should support gradual skill progression.
+
+The product should help users move through levels over time.
+
+| Level | Description | MVP Status |
+|---|---|---|
+| Level 0: Orientation | Understand what IBM i is and why it exists | In Scope |
+| Level 1: Fundamentals | Understand basic IBM i terminology and concepts | In Scope |
+| Level 2: Beginner Development | Understand basic RPGLE, CLLE, files, and workflow concepts | Partial MVP / Post-MVP |
+| Level 3: Practical Developer | Read simple programs, understand job logs, and follow common workflows | Post-MVP |
+| Level 4: Productive Professional | Troubleshoot, document, and work with real-world systems more confidently | Future |
+| Level 5: Advanced / Enterprise | Modernization, architecture, onboarding, enterprise training, and advanced tooling | Future |
+
+The MVP should focus mainly on Level 0 and Level 1, with limited introduction to Level 2.
+
+---
+
+## 16.6 Lesson Design Principles
+
+Each lesson should be designed to make learning easier, not just to present information.
+
+Lessons should follow these principles:
+
+### 1. Start Simple
+
+Begin with the concept in plain language before adding technical detail.
+
+### 2. Explain Why It Matters
+
+Users should understand why the concept is important in real IBM i work.
+
+### 3. Use Practical Examples
+
+Examples should be simple, original, and connected to realistic IBM i scenarios.
+
+### 4. Avoid Overloading Beginners
+
+Do not introduce too many advanced terms at once.
+
+### 5. Connect to the Next Topic
+
+Each lesson should help users understand what comes next.
+
+### 6. Encourage AI Clarification
+
+Users should be encouraged to ask the AI Tutor when they are confused.
+
+### 7. Support Review and Improvement
+
+Lessons should be easy to update based on user feedback.
+
+---
+
+## 16.7 Standard Lesson Structure
+
+MVP lessons should follow a consistent structure.
+
+Suggested lesson structure:
+
+| Section | Purpose |
+|---|---|
+| Lesson Title | Clearly state the topic |
+| Learning Objective | Explain what the user should understand after the lesson |
+| Simple Explanation | Explain the concept in beginner-friendly language |
+| Why It Matters | Connect the concept to real IBM i work |
+| Practical Example | Provide an original example or scenario |
+| Common Confusions | Address likely beginner misunderstandings |
+| Quick Recap | Summarize the key points |
+| Try Asking AI Tutor | Suggest one or two relevant AI Tutor questions |
+| Mark Complete | Allow progress tracking |
+| Next Lesson | Guide the user forward |
+
+This structure may be simplified for very short lessons, but consistency should remain a goal.
+
+---
+
+## 16.8 Content Style Guidelines
+
+IBMiHub AI content should have a consistent voice.
+
+The content should be:
+
+- Clear
+- Practical
+- Beginner-friendly
+- Respectful of IBM i professionals
+- Technically careful
+- Original
+- Structured
+- Easy to scan
+- Honest about complexity
+- Connected to real IBM i work
+
+The content should avoid:
+
+- Copying external explanations
+- Excessive jargon without explanation
+- Overly academic writing
+- Unverified technical claims
+- Overpromising AI capabilities
+- Making IBM i sound obsolete
+- Disrespecting existing IBM i resources or experts
+
+The tone should feel like a patient senior IBM i mentor explaining concepts clearly.
+
+---
+
+## 16.9 Original Content Policy
+
+Original content is a core product requirement.
+
+IBMiHub AI must not copy content from:
+
+- IBM documentation
+- Go4AS400
+- IT Jungle
+- Blogs
+- Books
+- Online courses
+- Training providers
+- Forum answers
+- Vendor documentation
+- Competitor websites
+
+External resources may be used for research, validation, and fact-checking, but final published content must be written in IBMiHub AI's own words, structure, examples, and teaching style.
+
+Examples, scenarios, quizzes, and explanations should be created specifically for IBMiHub AI.
+
+This protects the product legally, ethically, and strategically.
+
+---
+
+## 16.10 Research and Reference Policy
+
+Learning content may require research and validation.
+
+When external sources are used:
+
+- Use reliable sources where possible
+- Prefer official documentation for factual validation
+- Do not copy phrasing or structure
+- Do not reuse proprietary examples
+- Credit external references where appropriate
+- Keep research references in a suitable appendix or internal notes
+- Review content before treating it as approved
+
+The purpose of research is to improve accuracy, not to duplicate existing content.
+
+---
+
+## 16.11 AI-Assisted Content Creation Policy
+
+AI may assist with content creation, but AI should not be treated as the final authority.
+
+AI may be used to:
+
+- Brainstorm lesson outlines
+- Simplify explanations
+- Generate original example ideas
+- Identify likely beginner confusion points
+- Create draft quizzes or recap questions
+- Review clarity
+- Suggest alternate explanations
+
+AI must not be used to:
+
+- Copy external content
+- Generate unreviewed official lessons
+- Invent unsupported technical claims
+- Produce final content without human review
+- Create content that imitates a specific website, author, book, or course
+- Bypass the originality policy
+
+Published content should be reviewed and approved before being considered official IBMiHub AI learning material.
+
+---
+
+## 16.12 Content Governance
+
+Content governance is required to maintain trust and consistency.
+
+For the MVP, governance can remain simple.
+
+MVP governance should include:
+
+- Content written or reviewed by the Product Owner
+- Originality check through manual review
+- Technical review for important lessons
+- Version control for lesson content
+- Feedback collection from users
+- Updates based on confusion points or reported errors
+
+The MVP does not require a full content management system, editorial dashboard, multi-author workflow, or marketplace.
+
+Those capabilities may be considered later if content operations grow.
+
+---
+
+## 16.13 Content Lifecycle
+
+Learning content should follow a lifecycle.
+
+Suggested lifecycle:
+
+1. Topic selected from approved curriculum
+2. Lesson outline drafted
+3. Lesson content drafted in original style
+4. Technical accuracy reviewed
+5. Clarity and beginner-friendliness reviewed
+6. Content approved for publication
+7. User feedback collected
+8. Lesson improved over time
+
+This lifecycle should remain lightweight during MVP but should establish good habits early.
+
+---
+
+## 16.14 Content Quality Criteria
+
+A lesson should be considered good enough for MVP when:
+
+- It supports the approved learning path
+- It has a clear learning objective
+- It explains the concept in original language
+- It is understandable for the intended audience
+- It avoids unnecessary complexity
+- It includes practical context where useful
+- It does not copy external material
+- It avoids unsupported claims
+- It connects to the next learning step
+- It can be improved based on feedback
+
+Content quality should be measured through user feedback, completion patterns, reported confusion points, and Product Owner review.
+
+---
+
+## 16.15 Relationship Between Lessons, AI Tutor, and Progress
+
+The Learning Center, AI Tutor, and progress tracking should work together.
+
+Lessons provide structure.
+
+The AI Tutor provides clarification.
+
+Progress tracking provides continuity.
+
+The product should avoid treating these as disconnected features. A user should be able to read a lesson, ask AI Tutor questions, mark progress, and continue to the next lesson as part of one learning journey.
+
+---
+
+## 16.16 Quizzes and Knowledge Checks
+
+Quizzes and knowledge checks are useful but should remain lightweight for MVP.
+
+If included in MVP, they should:
+
+- Reinforce lesson understanding
+- Use simple questions
+- Provide short explanations
+- Avoid feeling like high-pressure exams
+- Avoid certification-style scoring
+
+Post-MVP, quizzes may evolve into:
+
+- Topic-level assessments
+- Readiness checks
+- Interview preparation
+- Certification preparation
+- Skill confidence indicators
+
+These should not overload the MVP.
+
+---
+
+## 16.17 Glossary Strategy
+
+A glossary can help reduce beginner confusion.
+
+For MVP, glossary support may be lightweight.
+
+Glossary entries should:
+
+- Use beginner-friendly definitions
+- Be short and clear
+- Connect to lessons where relevant
+- Grow based on user confusion points
+- Avoid becoming a copied dictionary of external definitions
+
+The glossary should support learning, not become the main product experience.
+
+---
+
+## 16.18 Future Learning Expansion
+
+After MVP validation, learning content may expand into additional paths.
+
+Possible future paths include:
+
+- RPGLE Fundamentals
+- CLLE Fundamentals
+- DB2 for i and SQL
+- DDS and database files
+- 5250 workflows
+- Job log reading
+- IBM i development workflow
+- Modern IBM i tooling
+- API and integration basics
+- Production support basics
+- Interview preparation
+- Modernization fundamentals
+- Team onboarding paths
+- Enterprise training paths
+
+Each future learning path should require its own content plan and Product Owner approval.
+
+---
+
+## 16.19 Learning Content Risks
+
+Key risks include:
+
+| Risk | Description | Mitigation Direction |
+|---|---|---|
+| Content inaccuracy | Lessons may contain technical mistakes | Review important content before publishing |
+| Content copying | Content may unintentionally resemble external material | Enforce originality policy and manual review |
+| Scope overload | Curriculum may grow too large before MVP validation | Keep MVP focused on fundamentals |
+| Beginner overwhelm | Lessons may become too advanced too quickly | Use progressive sequencing and simple explanations |
+| Low trust | Users may not trust content quality | Maintain review process and update based on feedback |
+| AI-generated errors | AI-assisted drafts may include incorrect claims | Human review required before publication |
+| Fragmentation | Lessons may become disconnected articles | Maintain learning paths and standard structure |
+
+---
+
+## 16.20 MVP Learning Readiness Checklist
+
+The MVP learning experience should not be considered ready unless:
+
+- A beginner IBM i learning path exists.
+- Initial lessons are written in original IBMiHub AI style.
+- Lessons follow a clear structure.
+- Lessons are reviewed before release.
+- Lessons avoid copied content.
+- Users can navigate lesson sequence.
+- Users can ask AI Tutor questions from the learning flow.
+- Users can track lesson completion.
+- Users can provide lesson feedback.
+- Product Owner has approved the initial learning content.
+
+---
+
+### Summary
+
+Learning content is central to IBMiHub AI.
+
+The MVP should provide a focused IBM i Fundamentals learning path supported by AI Tutor clarification and basic progress tracking.
+
+The content should be original, practical, structured, beginner-friendly, and reviewed before publication.
+
+The product should avoid becoming a random article library or generic chatbot. The learning strategy should help users progress from confusion to confidence while creating a foundation for future labs, quizzes, job log scenarios, RPGLE practice, enterprise training, and certifications.
 
 ---
 
 ## 17. Monetization Strategy
 
-- **Purpose:** Define how the product generates revenue at each stage of growth.
-- **Description:** Pricing tiers (Free / Pro / Enterprise), packaging, enterprise/corporate training offering, certification revenue, future marketplace model.
-- **Audience:** Product, Leadership, Sales/Business.
-- **Approximate size:** 2–4 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define the product-level monetization direction for IBMiHub AI.
+
+IBMiHub AI is being designed as a real SaaS product, but monetization should be introduced carefully. The first priority is to validate user value, trust, engagement, learning outcomes, and AI usefulness. Revenue should follow demonstrated value rather than drive premature product complexity.
+
+This section defines:
+
+- Monetization philosophy
+- MVP monetization position
+- Potential pricing tiers
+- Buyer types
+- Revenue expansion stages
+- Value drivers
+- Future paid capabilities
+- Monetization risks
+- What is explicitly out of scope for MVP
+
+This section does not define exact pricing, billing implementation, payment provider, tax handling, invoice workflow, subscription system, or revenue forecast. Those decisions should be made later after MVP validation and business review.
+
+---
+
+### Monetization Strategy Statement
+
+IBMiHub AI should monetize by delivering practical IBM i learning, AI assistance, productivity, onboarding, and enterprise training value.
+
+The monetization strategy is:
+
+**Start free or beta-first to validate trust and usage, then introduce paid individual, team, and enterprise plans only after users demonstrate repeated engagement and willingness to pay for advanced value.**
+
+The product should not attempt to monetize before proving that users find the platform useful.
+
+---
+
+## 17.1 Monetization Philosophy
+
+IBMiHub AI should follow these monetization principles.
+
+### 1. Value Before Revenue
+
+The product must first prove that users find value in structured IBM i learning and AI-assisted guidance.
+
+Revenue should come after users understand the product, use it repeatedly, and ask for more advanced capability.
+
+### 2. Trust Before Paywall
+
+IBM i professionals and companies need to trust the content, AI behavior, privacy boundaries, and product quality before paying.
+
+A premature paywall could slow adoption and reduce feedback during MVP validation.
+
+### 3. Free Entry, Paid Depth
+
+The product should eventually allow users to start learning for free, while reserving deeper learning, higher AI usage, practice labs, advanced tools, team features, and enterprise controls for paid plans.
+
+### 4. Individual First, Enterprise Later
+
+The first users are likely to be individual learners and working developers.
+
+Enterprise monetization is important long-term, but should come after the product proves individual value.
+
+### 5. Evidence-Driven Pricing
+
+Pricing should not be guessed too early.
+
+Pricing should be informed by user interviews, beta feedback, AI usage cost, content value, comparable SaaS expectations, and willingness-to-pay signals.
+
+### 6. Avoid MVP Complexity
+
+Billing, subscriptions, invoices, plan limits, and payment workflows should not be part of the MVP unless separately approved later.
+
+---
+
+## 17.2 MVP Monetization Position
+
+The MVP should not include paid subscriptions or billing.
+
+The MVP should focus on:
+
+- Attracting early users
+- Validating learning engagement
+- Validating AI Tutor usefulness
+- Collecting feedback
+- Measuring retention
+- Understanding willingness to pay
+- Identifying which advanced features users value most
+
+### MVP Monetization Status
+
+| Item | MVP Status |
+|---|---|
+| Paid subscriptions | Out of Scope |
+| Billing / checkout | Out of Scope |
+| Payment provider integration | Out of Scope |
+| Pricing page with final paid tiers | Out of Scope |
+| Enterprise sales workflow | Out of Scope |
+| Free beta access | In Scope |
+| Waitlist or beta interest capture | In Scope |
+| Willingness-to-pay feedback | In Scope |
+| Future plan messaging | Optional / Should be careful |
+
+The MVP may mention future premium capabilities, but it should not imply that unavailable paid features already exist.
+
+---
+
+## 17.3 Primary Buyer Types
+
+IBMiHub AI may eventually serve multiple buyer types.
+
+### 1. Individual Learners
+
+These users may pay for deeper learning paths, more AI Tutor usage, practice labs, quizzes, interview preparation, and skill validation.
+
+### 2. Working IBM i Developers
+
+These users may pay for advanced AI assistance, RPGLE / CLLE explanations, job log learning, documentation help, practice scenarios, and productivity-oriented tools.
+
+### 3. Team Leads and Mentors
+
+These users may influence team purchases if the product helps onboard juniors and reduce repeated basic questions.
+
+### 4. Companies and Enterprise Teams
+
+These buyers may pay for team learning, onboarding programs, progress reporting, privacy controls, admin features, and enterprise support.
+
+### 5. Interview Candidates and Career Switchers
+
+These users may pay for structured preparation paths, mock quizzes, practice scenarios, and future assessment or certification features.
+
+---
+
+## 17.4 Potential Pricing Tiers
+
+The following tier structure is a product direction, not final pricing.
+
+Exact prices are not approved in this PRD.
+
+### Tier 1: Free
+
+The Free tier should help users experience the product and build trust.
+
+Potential Free tier value:
+
+- Access to selected beginner lessons
+- Limited AI Tutor usage
+- Basic progress tracking
+- Basic glossary access if available
+- Product feedback submission
+- Access to beta learning content
+
+Purpose:
+
+- Build awareness
+- Validate demand
+- Support community adoption
+- Help beginners start without friction
+- Create conversion path to paid plans later
+
+### Tier 2: Pro / Individual
+
+The Pro tier may serve serious learners and working developers.
+
+Potential Pro value:
+
+- Full individual learning paths
+- Higher AI Tutor usage
+- Advanced IBM i topics
+- Expanded quizzes or checks
+- Future practice exercises
+- Interview preparation content
+- Future job log and code explanation tools when approved
+
+Purpose:
+
+- Monetize individual value
+- Support users who want deeper learning
+- Support working developers who want productivity help
+- Create recurring revenue from individual professionals
+
+### Tier 3: Team
+
+The Team tier may serve small teams, team leads, mentors, and companies onboarding multiple learners.
+
+Potential Team value:
+
+- Multiple user seats
+- Team learning paths
+- Shared onboarding tracks
+- Basic team progress visibility
+- Assigned lessons or recommended paths
+- Team-level feedback and learning insights
+
+Purpose:
+
+- Support team onboarding
+- Reduce senior developer mentoring burden
+- Create a bridge between individual and enterprise plans
+
+### Tier 4: Enterprise
+
+The Enterprise tier may serve organizations that require training, privacy, controls, reporting, and support.
+
+Potential Enterprise value:
+
+- Enterprise learning access
+- Admin controls
+- Role-based learning paths
+- Progress reporting
+- Corporate onboarding packages
+- Enterprise privacy and security controls
+- Enterprise support
+- Future SSO and compliance features when approved
+
+Purpose:
+
+- Support larger organizations
+- Monetize corporate training and onboarding value
+- Provide long-term business scalability
+
+### Future Add-On Revenue
+
+Future add-ons may include:
+
+- Certification or assessment programs
+- Interview preparation packages
+- Advanced practice labs
+- Enterprise onboarding packages
+- Workshops or cohort-based learning
+- Premium productivity tools
+- Custom corporate learning paths
+
+These are future possibilities, not MVP commitments.
+
+---
+
+## 17.5 Packaging Strategy
+
+IBMiHub AI should package value around user outcomes rather than feature volume.
+
+### Learning Value
+
+Users may pay because they can learn IBM i in a clearer, more structured way.
+
+### AI Assistance Value
+
+Users may pay because AI Tutor helps them understand concepts faster and reduces time spent searching across scattered resources.
+
+### Practice Value
+
+Users may pay for future hands-on practice, labs, quizzes, job log scenarios, and RPGLE / CLLE exercises.
+
+### Productivity Value
+
+Working developers may pay for future tools that help explain code, job logs, documentation, and legacy behavior.
+
+### Team Onboarding Value
+
+Companies may pay because the platform helps reduce onboarding time and dependence on senior experts.
+
+### Enterprise Trust Value
+
+Enterprise customers may pay for privacy, security, administration, reporting, support, and structured training programs.
+
+---
+
+## 17.6 Revenue Stage Strategy
+
+Monetization should evolve in stages.
+
+### Stage 0: MVP / Free Beta
+
+Goal:
+
+- Validate value and trust.
+
+Focus:
+
+- Free access or invite-based beta
+- User feedback
+- Learning engagement
+- AI Tutor usefulness
+- Retention
+- Willingness-to-pay signals
+
+Revenue:
+
+- No revenue required
+
+### Stage 1: Early Individual Paid Plan
+
+Goal:
+
+- Test whether individual users will pay for deeper learning or higher AI value.
+
+Possible paid value:
+
+- Full learning paths
+- Higher AI usage limits
+- Advanced topics
+- Practice exercises
+- Interview preparation
+
+Revenue:
+
+- Individual subscription or one-time learning package may be explored later
+
+### Stage 2: Team Plan
+
+Goal:
+
+- Support small teams and onboarding use cases.
+
+Possible paid value:
+
+- Team seats
+- Shared learning paths
+- Progress visibility
+- Onboarding tracks
+
+Revenue:
+
+- Per-seat or team package may be explored later
+
+### Stage 3: Enterprise Plan
+
+Goal:
+
+- Support organizations with larger IBM i training and onboarding needs.
+
+Possible paid value:
+
+- Enterprise controls
+- Reporting
+- Privacy and security controls
+- Custom onboarding paths
+- Support
+
+Revenue:
+
+- Enterprise subscription, annual contracts, or corporate training packages may be explored later
+
+### Stage 4: Expanded Revenue Lines
+
+Goal:
+
+- Monetize advanced product maturity.
+
+Possible revenue lines:
+
+- Certifications
+- Advanced labs
+- Premium productivity tools
+- Workshops
+- Enterprise onboarding packages
+- Community or expert-led offerings
+
+These should only be considered after the core platform has enough trust and usage.
+
+---
+
+## 17.7 Free-to-Paid Conversion Strategy
+
+Free-to-paid conversion should be based on natural user progression.
+
+Possible conversion triggers include:
+
+- User completes available free lessons and wants more
+- User reaches AI Tutor free usage limits
+- User asks for advanced RPGLE, CLLE, SQL, or job log content
+- User wants practice labs or quizzes
+- User wants interview preparation
+- User wants to track deeper progress
+- User wants to use the platform for team onboarding
+- User requests enterprise controls or reporting
+
+The product should avoid aggressive monetization that disrupts early trust.
+
+---
+
+## 17.8 Enterprise Monetization Direction
+
+Enterprise monetization should be treated as a future growth path.
+
+Enterprise buyers may care about:
+
+- Reducing IBM i onboarding time
+- Standardizing training
+- Preserving legacy knowledge
+- Reducing dependency on senior experts
+- Supporting modernization initiatives
+- Tracking learner progress
+- Privacy and security controls
+- Corporate support
+
+Enterprise monetization should not be attempted seriously until the product has:
+
+- Strong individual learning experience
+- Trusted content
+- Useful AI Tutor behavior
+- Basic usage evidence
+- Clear onboarding value
+- Security and privacy readiness
+
+---
+
+## 17.9 Pricing Approach
+
+Exact pricing is not approved in this PRD.
+
+Future pricing decisions should consider:
+
+- User willingness to pay
+- Value delivered by learning content
+- Value delivered by AI assistance
+- AI operating cost
+- Content creation and maintenance cost
+- Market expectations for developer learning products
+- Individual vs team vs enterprise buyer differences
+- Regional affordability
+- Monthly vs annual subscription options
+- Founder-led beta feedback
+- Competitive positioning
+
+Pricing should be tested carefully and should remain flexible during early stages.
+
+---
+
+## 17.10 Monetization Metrics
+
+Early monetization-related metrics may include:
+
+- Waitlist sign-ups
+- Beta users asking for paid features
+- Users requesting more lessons
+- Users requesting higher AI limits
+- Users asking for practice labs
+- Users asking for team onboarding features
+- Willingness-to-pay survey responses
+- Free-to-paid conversion once paid plans exist
+- Paid subscriber count once paid plans exist
+- Monthly recurring revenue once paid plans exist
+- Churn once paid plans exist
+- Enterprise inquiries
+- Team plan inquiries
+
+During MVP, the most important monetization signal is not revenue.
+
+The most important signal is whether users find enough value to return, recommend, request more, and show future willingness to pay.
+
+---
+
+## 17.11 Monetization Risks
+
+| Risk | Description | Mitigation Direction |
+|---|---|---|
+| Monetizing too early | Users may not trust the product enough yet | Keep MVP free or beta-first |
+| Pricing too high | Individual IBM i learners may not convert | Validate willingness to pay before final pricing |
+| Pricing too low | Product may not cover AI and content costs | Consider AI usage, content cost, and paid depth |
+| Free users never convert | Free tier may provide too much value without upgrade path | Keep free useful but reserve deeper value for paid plans |
+| Enterprise complexity too early | Enterprise features may distract from MVP | Defer enterprise until individual value is validated |
+| AI cost pressure | Heavy AI usage may increase operating cost | Monitor usage and define future limits |
+| Weak differentiation | Users may compare against free resources | Build value through structure, AI, practice, and trust |
+| Trust concerns | Users may hesitate to pay for AI-generated technical guidance | Maintain original content, review, feedback, and AI boundaries |
+
+---
+
+## 17.12 MVP Monetization Readiness Checklist
+
+The MVP should not be monetized until there is evidence that:
+
+- Users understand the product value.
+- Users start and complete lessons.
+- Users ask meaningful AI Tutor questions.
+- Users return for additional sessions.
+- Users provide positive qualitative feedback.
+- Users request more lessons or advanced features.
+- Users show willingness to pay.
+- The platform has enough trust and quality to support paid expectations.
+- AI usage cost and limits are understood at a basic level.
+- Product Owner approves monetization readiness.
+
+---
+
+## 17.13 Explicitly Out of Scope for MVP Monetization
+
+The following are out of scope for MVP:
+
+- Paid subscriptions
+- Billing
+- Payment provider integration
+- Checkout
+- Invoices
+- Paid plans
+- Pricing page with final prices
+- Paywalls
+- Enterprise contracts
+- Team billing
+- Coupon codes
+- Refund workflow
+- Tax handling
+- Subscription management
+- Certification payments
+- Marketplace revenue
+
+These may be introduced later only after MVP validation and explicit Product Owner approval.
+
+---
+
+### Summary
+
+IBMiHub AI should monetize gradually.
+
+The MVP should focus on free or beta access, user validation, learning engagement, AI Tutor usefulness, retention, and willingness-to-pay signals.
+
+Future monetization may include Free, Pro, Team, and Enterprise tiers, with possible additional revenue from certifications, practice labs, interview preparation, workshops, and advanced productivity tools.
+
+The product should not add billing or paid access before proving that users trust and value the platform.
 
 ---
 
 ## 18. Technical Constraints & Dependencies
 
-- **Purpose:** Capture product-relevant constraints that originate from technology, vendors, or platform realities — without prescribing architecture.
-- **Description:** Known constraints (e.g., AI provider limitations, hosting model implications, IBM i connectivity realities), and dependencies on the Engineering Review's open technical decisions.
-- **Audience:** Product, Engineering.
-- **Approximate size:** 1–2 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to capture product-relevant technical constraints and dependencies that must be respected while building IBMiHub AI.
+
+This section does not define the final architecture. It does not select a specific framework, hosting provider, database, authentication provider, AI provider, vector database, payment provider, analytics tool, or infrastructure design.
+
+Those decisions should be made later through architecture documents, ADRs, SDD specifications, security review, and implementation planning.
+
+This section defines:
+
+- Product-level technical constraints
+- MVP technology boundaries
+- External dependency categories
+- AI-related constraints
+- Data and privacy constraints
+- IBM i connectivity constraints
+- Future technical dependencies
+- Decisions that must be made before implementation
+
+---
+
+### Technical Constraint Strategy Statement
+
+IBMiHub AI should be built as a modern, maintainable, secure, web-based SaaS product, but the MVP should avoid unnecessary complexity.
+
+The technical strategy is:
+
+**Build a simple, extensible MVP that supports structured learning, AI Tutor usage, progress tracking, and feedback collection while avoiding risky or complex capabilities such as real IBM i connectivity, production code upload, sensitive log upload, billing, enterprise administration, and advanced AI workflows.**
+
+The product should remain flexible enough to support future growth, but the MVP should not be overengineered.
+
+---
+
+## 18.1 Constraint Scope
+
+The constraints in this section apply primarily to the approved MVP:
+
+- Public Landing Experience
+- User Account and Basic Onboarding
+- User Dashboard
+- Learning Center
+- AI Tutor
+- Basic Progress Tracking
+- Basic Feedback Collection
+- Basic Content Governance
+
+Future modules such as 5250 Practice Lab, RPG Playground, Job Log Analyzer, Code Explanation, Documentation Generator, Enterprise Training, Community, Mobile App, VS Code Extension, and real IBM i connectivity may require additional constraints later.
+
+---
+
+## 18.2 MVP Technical Boundary
+
+The MVP must remain technically limited to a safe learning and AI-assistance experience.
+
+### In Scope for MVP
+
+The MVP may require technical support for:
+
+- Public web pages
+- User accounts
+- Basic onboarding
+- User dashboard
+- Learning content display
+- Lesson navigation
+- Lesson completion tracking
+- AI Tutor question and response flow
+- AI Tutor feedback
+- Lesson feedback
+- Basic usage signals
+- Basic content update process
+
+### Out of Scope for MVP
+
+The MVP must not include technical support for:
+
+- Real IBM i connectivity
+- Live 5250 terminal sessions
+- Production source code upload
+- Sensitive job log upload
+- Real code compilation or execution
+- Automated code changes
+- Enterprise SSO
+- Organization management
+- Team dashboards
+- Billing and payments
+- Certification engine
+- Public APIs
+- Mobile application
+- VS Code extension
+- Marketplace
+- Customer-specific AI training
+- Autonomous agents acting on external systems
+
+These exclusions are important because they reduce security, privacy, compliance, operational, and engineering risk during MVP validation.
+
+---
+
+## 18.3 Architecture Neutrality Constraint
+
+The PRD must remain architecture-neutral.
+
+The PRD may define product needs, constraints, and quality expectations, but it should not prescribe:
+
+- Frontend framework
+- Backend framework
+- Hosting provider
+- Database engine
+- Authentication provider
+- AI provider
+- AI orchestration framework
+- Vector database
+- Analytics provider
+- Payment provider
+- Deployment pipeline
+- Infrastructure model
+
+These choices should be decided later through engineering review, architecture design, ADRs, and implementation planning.
+
+---
+
+## 18.4 Web-Based SaaS Constraint
+
+IBMiHub AI MVP should be delivered as a web-based product.
+
+This means:
+
+- Users should be able to access the product through a browser.
+- No desktop installation should be required for MVP.
+- No native mobile app should be required for MVP.
+- No IBM i client software should be required for MVP.
+- The product should support common desktop and mobile browser usage reasonably well.
+
+A web-based MVP supports faster validation, easier sharing, simpler onboarding, and lower operational complexity.
+
+---
+
+## 18.5 AI Provider and Model Constraints
+
+The MVP depends on an AI capability, but the PRD should not lock the provider or model.
+
+Product-level AI constraints include:
+
+- AI must support IBM i-focused learning and explanation.
+- AI responses must respect safety and trust boundaries.
+- AI must not claim guaranteed correctness.
+- AI must discourage sharing sensitive production data.
+- AI must not require real IBM i connectivity in MVP.
+- AI must be maintainable and replaceable if provider needs change.
+- AI usage should be monitored for quality, cost, and reliability once real users begin using it.
+
+Provider selection, model selection, prompt design, RAG strategy, cost controls, fallback behavior, and AI monitoring should be defined in later AI architecture and implementation documents.
+
+---
+
+## 18.6 AI Cost and Rate Limit Constraints
+
+AI usage introduces cost and usage-limit considerations.
+
+The MVP should be designed with awareness that:
+
+- AI responses may create variable operating cost.
+- AI providers may have rate limits.
+- AI response latency may vary.
+- Heavy usage may require future usage controls.
+- Paid plans may later require AI usage limits.
+- Enterprise plans may later require separate controls.
+
+The MVP does not need a full monetized usage-limit system, but engineering should avoid choices that make future AI usage management impossible.
+
+---
+
+## 18.7 Data Privacy Constraints
+
+The MVP must avoid high-risk data handling.
+
+The product must not request or store:
+
+- Production IBM i source code
+- Sensitive production job logs
+- Credentials
+- Passwords entered into AI prompts
+- Customer data
+- Proprietary business data
+- Real IBM i connection details
+
+User data collection should remain minimal and limited to what is needed for the MVP learning experience, progress tracking, feedback, and product validation.
+
+Future support for code upload, job log upload, enterprise knowledge bases, or customer-specific content must require separate privacy, security, and compliance review.
+
+---
+
+## 18.8 Security Constraints
+
+Security must be treated as a baseline requirement even during MVP.
+
+Product-level security constraints include:
+
+- User account access must be protected.
+- User progress and feedback must not be publicly exposed.
+- Internal content update processes must be protected from unauthorized changes.
+- Secure communication should be used for user-facing traffic.
+- Authentication must not rely on unsafe or improvised handling.
+- Secrets and credentials must not be exposed in source code or public repositories.
+- Security-sensitive decisions should be documented before implementation.
+
+Detailed security architecture should be defined later by engineering.
+
+---
+
+## 18.9 Authentication and User Account Dependencies
+
+The MVP depends on a way to identify users and associate progress with them.
+
+The product needs:
+
+- Basic account creation or beta access
+- Login capability
+- Basic user profile
+- Association between user and progress
+- Association between user and feedback where appropriate
+
+The PRD does not choose an authentication provider or implementation approach.
+
+Enterprise identity features are out of scope for MVP, including:
+
+- Enterprise SSO
+- SAML
+- SCIM
+- Organization-level identity management
+- Role-based enterprise permissions
+
+---
+
+## 18.10 Learning Content Management Constraints
+
+The MVP requires a way to publish and maintain learning content.
+
+However, the MVP does not require a full content management system.
+
+Acceptable MVP direction:
+
+- Content can be managed through a simple internal workflow.
+- Content should be version-controlled or otherwise traceable.
+- Content should support review before publishing.
+- Content should be easy enough to update as feedback comes in.
+
+Out of scope for MVP:
+
+- Full CMS
+- Multi-author editorial workflow
+- User-generated content
+- Content marketplace
+- Public authoring tools
+- Complex editorial dashboard
+
+The exact content storage and management approach should be decided during architecture and implementation planning.
+
+---
+
+## 18.11 Progress Tracking Dependencies
+
+The MVP depends on simple progress tracking.
+
+The product needs a way to track:
+
+- Lessons started, if feasible
+- Lessons completed
+- Current or recommended learning path
+- Basic progress summary
+- Continue learning state
+
+Progress tracking should remain simple for MVP and should not become a skill scoring, certification, or enterprise reporting system.
+
+---
+
+## 18.12 Feedback Collection Dependencies
+
+The MVP depends on feedback collection to validate product direction.
+
+The product needs a way to collect:
+
+- Lesson feedback
+- AI Tutor helpfulness feedback
+- General product feedback
+- Topic requests
+- User confusion points
+
+The MVP does not require a full support ticketing system or customer success platform.
+
+Feedback should be reviewable by the Product Owner so future decisions can be evidence-driven.
+
+---
+
+## 18.13 Analytics and Observability Dependencies
+
+The MVP needs basic visibility into usage and failure points.
+
+The product should be able to support basic understanding of:
+
+- User activation
+- Lesson starts and completions
+- AI Tutor usage
+- AI feedback
+- Returning usage
+- Feedback submissions
+- Core flow failures
+
+The MVP should avoid collecting unnecessary or sensitive data.
+
+Advanced observability dashboards, enterprise analytics, and complex event pipelines are not required for MVP.
+
+---
+
+## 18.14 IBM i Connectivity Constraint
+
+Real IBM i connectivity is explicitly out of scope for the MVP.
+
+The MVP must not connect to:
+
+- Customer IBM i systems
+- Production IBM i systems
+- Live 5250 sessions
+- Real IBM i databases
+- Real job queues
+- Real output queues
+- Real source libraries
+- Real object libraries
+
+This constraint protects the product from major security, privacy, compliance, operational, and support complexity during MVP.
+
+Future IBM i connectivity may be considered only after:
+
+- MVP validation
+- Security review
+- Privacy review
+- Architecture review
+- Clear customer use case approval
+- Explicit Product Owner approval
+
+---
+
+## 18.15 Production Code and Job Log Constraint
+
+The MVP must not support upload or storage of private production code or sensitive job logs.
+
+Users may ask conceptual questions about RPGLE, CLLE, SQL, DDS, job logs, and IBM i behavior, but the product should discourage sharing sensitive real-world production material.
+
+Future code or log analysis features should require:
+
+- Clear upload policy
+- Data retention policy
+- Privacy controls
+- Security review
+- Terms of use review
+- Enterprise controls where needed
+- Explicit Product Owner approval
+
+---
+
+## 18.16 Payment and Billing Constraint
+
+Billing is out of scope for MVP.
+
+The MVP must not require:
+
+- Payment provider integration
+- Checkout
+- Paid subscriptions
+- Invoice generation
+- Coupon handling
+- Tax handling
+- Subscription management
+- Paid access control
+- Refund workflow
+
+Future monetization may require these capabilities, but only after MVP validation and explicit approval.
+
+---
+
+## 18.17 Enterprise Feature Constraints
+
+Enterprise features are out of scope for MVP.
+
+The MVP should not include:
+
+- Organization accounts
+- Team administration
+- Admin dashboards
+- Enterprise SSO
+- Role-based enterprise permissions
+- Compliance certifications
+- Enterprise audit logs
+- Corporate training contracts
+- Manager reporting
+
+However, engineering should avoid decisions that make future enterprise expansion unnecessarily difficult.
+
+---
+
+## 18.18 External Dependency Categories
+
+IBMiHub AI may eventually depend on several external service categories.
+
+Possible dependency categories include:
+
+| Dependency Category | Product Need | MVP Relevance |
+|---|---|---|
+| Hosting / Deployment | Run the web application | Required |
+| Database / Storage | Store users, progress, feedback, and content metadata | Required |
+| Authentication | Support login and user identity | Required |
+| AI Provider | Power AI Tutor responses | Required |
+| Email / Notifications | Account or beta communication if needed | Optional |
+| Analytics | Understand MVP usage and validation signals | Optional / Should Have |
+| Error Monitoring | Understand failures and improve reliability | Optional / Should Have |
+| Payment Provider | Future subscriptions and billing | Future |
+| Enterprise Identity | Future SSO and organization controls | Future |
+| File Storage | Future uploads or content assets | Future |
+| Vector Search / Retrieval | Future grounded AI or content-aware AI | Future |
+
+The PRD does not select vendors for these categories.
+
+---
+
+## 18.19 Engineering Decisions Required Later
+
+Before Sprint 1 implementation begins, engineering should define or confirm:
+
+- MVP technology stack
+- Application architecture
+- Hosting and deployment approach
+- Database and data model direction
+- Authentication approach
+- AI provider and model approach
+- AI prompt and safety strategy
+- Content storage approach
+- Progress tracking approach
+- Feedback storage and review approach
+- Analytics approach
+- Error monitoring approach
+- Environment and secrets management
+- Basic security posture
+- Development workflow
+- Testing strategy
+
+These decisions should be captured in architecture documents, ADRs, implementation plans, or SDD specs as appropriate.
+
+---
+
+## 18.20 Technical Dependency Risks
+
+| Risk | Description | Mitigation Direction |
+|---|---|---|
+| AI provider dependency | AI quality, cost, latency, or availability may affect product experience | Keep provider decision documented and avoid unnecessary lock-in |
+| Cost unpredictability | AI usage may create variable cost | Monitor usage and define future limits |
+| Authentication complexity | Poor auth choices may create security or UX issues | Use a secure, well-understood approach |
+| Content management complexity | Building a full CMS too early may delay MVP | Use a simple maintainable MVP process |
+| Analytics overcollection | Excessive tracking may create privacy concerns | Collect only useful MVP validation signals |
+| Real IBM i connectivity pressure | Users may request live integration too early | Keep connectivity out of MVP and revisit after validation |
+| Future enterprise needs | Early choices may limit enterprise growth | Document trade-offs and use ADRs |
+| Vendor lock-in | Early provider choices may be hard to change | Keep abstraction and portability in mind where practical |
+
+---
+
+## 18.21 MVP Technical Readiness Checklist
+
+The MVP technical foundation should not be considered ready unless:
+
+- Users can access the product through a browser.
+- User account and basic onboarding flows are supported.
+- Learning content can be displayed and updated.
+- Lesson progress can be tracked.
+- AI Tutor can answer IBM i learning questions.
+- AI Tutor respects trust and privacy boundaries.
+- Feedback can be submitted and reviewed.
+- User data is protected appropriately.
+- No real IBM i connectivity exists in MVP.
+- No production code upload exists in MVP.
+- No sensitive job log upload exists in MVP.
+- No billing or paid access exists in MVP.
+- Key architecture decisions are documented before implementation.
+- Product Owner has reviewed and approved the MVP technical boundaries.
+
+---
+
+### Summary
+
+IBMiHub AI should be built as a simple, secure, maintainable, web-based SaaS MVP.
+
+The MVP should support learning, AI Tutor, progress tracking, and feedback without introducing risky or complex capabilities too early.
+
+The PRD remains architecture-neutral. Specific technology choices should be made later through engineering architecture, ADRs, SDD specs, and implementation planning.
+
+The most important MVP technical boundary is clear: no real IBM i connectivity, no production code upload, no sensitive job log upload, no billing, and no enterprise complexity until product value is validated.
 
 ---
 
 ## 19. Risk Analysis
 
-- **Purpose:** Surface product-level risks early so they can be actively managed.
-- **Description:** Scope risk, AI trust/accuracy risk, data privacy risk, competitive risk, monetization risk — each with likelihood, impact, and mitigation owner.
-- **Audience:** Product, Engineering, Leadership.
-- **Approximate size:** 2–3 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to identify the major product, market, AI, content, privacy, technical, execution, and monetization risks for IBMiHub AI.
+
+Risk analysis is important because IBMiHub AI has a broad long-term vision. Without active risk management, the product could become too large, too complex, too generic, too expensive, or too risky before validating real user value.
+
+This section defines:
+
+- Key product risks
+- MVP risks
+- AI trust and safety risks
+- Content quality and originality risks
+- Security and privacy risks
+- Market and adoption risks
+- Execution risks
+- Monetization risks
+- Technical dependency risks
+- Risk ownership and mitigation direction
+
+This section does not solve every risk in detail. Detailed mitigation plans should be handled through SDD specs, architecture documents, implementation plans, QA plans, security review, content review, and Product Owner decisions.
+
+---
+
+### Risk Strategy Statement
+
+IBMiHub AI should manage risk by staying focused, validating early, avoiding sensitive capabilities in MVP, maintaining original content, setting clear AI trust boundaries, and expanding only after evidence of user value.
+
+The risk strategy is:
+
+**Start with a narrow, safe, useful MVP; learn from real users; protect trust; avoid premature complexity; and only expand into advanced AI, IBM i connectivity, enterprise, billing, and productivity workflows after explicit review and approval.**
+
+---
+
+## 19.1 Risk Rating Definitions
+
+The following rating definitions should be used consistently.
+
+### Likelihood
+
+| Rating | Meaning |
+|---|---|
+| Low | Unlikely during MVP if current constraints are followed |
+| Medium | Possible and should be actively monitored |
+| High | Likely unless actively managed |
+
+### Impact
+
+| Rating | Meaning |
+|---|---|
+| Low | Limited inconvenience or minor delay |
+| Medium | Could affect user trust, delivery timeline, or MVP validation |
+| High | Could seriously damage product trust, security, delivery, or business viability |
+
+### Ownership
+
+Risk ownership indicates who should monitor and drive mitigation.
+
+| Owner | Responsibility |
+|---|---|
+| Product | Scope, positioning, content direction, user validation, roadmap |
+| Engineering | Implementation quality, reliability, security, technical decisions |
+| Product + Engineering | Shared risks requiring product and technical decisions |
+| Founder / Business | Monetization, go-to-market, community trust, partnerships |
+
+---
+
+## 19.2 Risk Summary
+
+| Risk Category | Overall MVP Risk Level | Primary Owner |
+|---|---|---|
+| Scope Creep | High | Product |
+| AI Accuracy and Trust | High | Product + Engineering |
+| Privacy and Sensitive Data | High | Product + Engineering |
+| Content Quality and Originality | High | Product |
+| Market Adoption | Medium | Founder / Business |
+| Execution and Delivery | Medium | Product + Engineering |
+| Technical Dependencies | Medium | Engineering |
+| Monetization Timing | Medium | Founder / Business |
+| User Experience Complexity | Medium | Product |
+| Community Reputation | Medium | Founder / Business |
+| Security | Medium | Engineering |
+| Future Enterprise Readiness | Low / Future | Product + Engineering |
+
+The highest MVP risks are scope creep, AI trust, privacy, and content quality.
+
+These risks should be actively managed from the beginning.
+
+---
+
+## 19.3 Scope Creep Risk
+
+### Risk Description
+
+IBMiHub AI has a broad long-term vision that includes learning, AI Tutor, 5250 labs, RPG playground, job log analyzer, code explanation, documentation generator, enterprise training, certifications, community, mobile app, and VS Code extension.
+
+The risk is that the team may try to build too many modules before validating the core MVP.
+
+### Likelihood
+
+High
+
+### Impact
+
+High
+
+### Why This Matters
+
+Scope creep could delay MVP launch, increase complexity, reduce product focus, and make the first release harder to test with real users.
+
+### Mitigation Direction
+
+- Keep MVP limited to approved Sections 11–18.
+- Treat future modules as future, not current.
+- Do not add real IBM i connectivity, billing, enterprise features, or advanced tools to MVP.
+- Use Product Owner approval before adding any new feature.
+- Use SDD specs before implementation.
+- Prioritize Learning Center, AI Tutor, Dashboard, Progress Tracking, and Feedback.
+
+### Risk Owner
+
+Product
+
+### Monitoring Signals
+
+- New features being added without PRD approval
+- Claude or engineering generating code outside approved scope
+- MVP discussions shifting toward future modules
+- Sprint 1 planning becoming too large
+- Delays caused by non-MVP work
+
+---
+
+## 19.4 AI Accuracy and Trust Risk
+
+### Risk Description
+
+The AI Tutor may produce incomplete, incorrect, generic, or overconfident technical explanations.
+
+Because IBM i is a specialized technical ecosystem, poor AI answers could damage user trust quickly.
+
+### Likelihood
+
+High
+
+### Impact
+
+High
+
+### Why This Matters
+
+AI is one of the product's main differentiators. If users do not trust the AI Tutor, the product may be perceived as unreliable or generic.
+
+### Mitigation Direction
+
+- Keep MVP AI limited to learning and explanation.
+- Avoid production troubleshooting guarantees.
+- Clearly state that AI output should be validated.
+- Discourage sharing private code, logs, credentials, or sensitive business data.
+- Collect helpful / not helpful feedback.
+- Review common AI failure patterns.
+- Improve prompts, content, and guardrails over time.
+- Keep AI provider and implementation decisions documented later through architecture and ADRs.
+
+### Risk Owner
+
+Product + Engineering
+
+### Monitoring Signals
+
+- Users marking AI answers as not helpful
+- Users reporting incorrect AI responses
+- AI answers sounding generic or non-IBM i-specific
+- Repeated follow-ups due to confusion
+- Users applying AI guidance as production truth
+- AI giving overconfident answers without context
+
+---
+
+## 19.5 Privacy and Sensitive Data Risk
+
+### Risk Description
+
+Users may paste private production source code, sensitive job logs, credentials, customer data, or proprietary business information into the AI Tutor.
+
+Even if the MVP does not support upload features, users may still enter sensitive text into prompts.
+
+### Likelihood
+
+Medium / High
+
+### Impact
+
+High
+
+### Why This Matters
+
+Privacy mistakes could damage user trust and create legal, security, or enterprise adoption concerns.
+
+### Mitigation Direction
+
+- MVP must not support production code upload.
+- MVP must not support sensitive job log upload.
+- AI Tutor should discourage users from sharing sensitive data.
+- Product messaging should clearly define safe usage.
+- User data collection should remain minimal.
+- Future code/log upload should require security, privacy, and compliance review.
+- Terms, privacy messaging, and acceptable-use guidance should be defined before broader launch.
+
+### Risk Owner
+
+Product + Engineering
+
+### Monitoring Signals
+
+- Users attempting to paste production code
+- Users asking whether real logs or code can be uploaded
+- AI prompts containing sensitive-looking material
+- Enterprise users asking about data handling
+- Confusion around what data is safe to share
+
+---
+
+## 19.6 Content Quality Risk
+
+### Risk Description
+
+Learning content may be unclear, inaccurate, too shallow, too advanced, or inconsistent.
+
+The MVP depends heavily on content quality because Learning Center is the core product foundation.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+High
+
+### Why This Matters
+
+If content is weak, users may see the product as another low-quality tutorial site rather than a trusted IBM i learning platform.
+
+### Mitigation Direction
+
+- Use the approved Learning & Content Strategy.
+- Start with a focused IBM i Fundamentals path.
+- Follow a consistent lesson structure.
+- Review important lessons before publishing.
+- Collect lesson feedback.
+- Improve content based on confusion points.
+- Avoid overloading beginners.
+- Ensure working developers still find practical value.
+
+### Risk Owner
+
+Product
+
+### Monitoring Signals
+
+- Low lesson completion
+- Lesson feedback marked not helpful
+- Users reporting confusion
+- Users asking basic questions that lessons should answer
+- High drop-off after first lesson
+- Content feeling disconnected or random
+
+---
+
+## 19.7 Originality and Copying Risk
+
+### Risk Description
+
+IBMiHub AI may unintentionally copy or closely imitate external IBM i tutorials, documentation, blogs, books, examples, or courses.
+
+This could create legal, ethical, and reputation risks.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+High
+
+### Why This Matters
+
+Original content is a core product principle and a key differentiator. Copying existing content would damage trust and weaken the product's strategic position.
+
+### Mitigation Direction
+
+- Enforce original content policy.
+- Use external sources only for research and validation.
+- Do not copy phrasing, structure, examples, or lesson flow.
+- Create original scenarios and examples.
+- Review content before publishing.
+- Credit external references where appropriate.
+- Avoid asking AI to imitate specific websites, authors, books, or courses.
+
+### Risk Owner
+
+Product
+
+### Monitoring Signals
+
+- Content closely resembles known tutorial sites
+- AI-generated content uses familiar copied phrasing
+- Lessons rely too heavily on external structure
+- Missing references for externally validated claims
+- User or community concerns about copied content
+
+---
+
+## 19.8 Market Adoption Risk
+
+### Risk Description
+
+The IBM i audience is specialized. The market may be smaller, harder to reach, or slower to adopt than expected.
+
+Users may prefer existing resources, internal mentoring, official documentation, community groups, or generic AI tools.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+High
+
+### Why This Matters
+
+Even a well-built product can fail if the target users do not adopt it, do not return, or do not see enough value.
+
+### Mitigation Direction
+
+- Start with founder-led and community-led validation.
+- Share early demos and learning content.
+- Build credibility with original, practical content.
+- Focus on users who feel the pain most strongly.
+- Track activation, retention, AI usage, and qualitative feedback.
+- Avoid large investment in advanced features before validation.
+- Use beta feedback to refine positioning.
+
+### Risk Owner
+
+Founder / Business
+
+### Monitoring Signals
+
+- Low waitlist or beta interest
+- Users visit but do not start lessons
+- Users start but do not return
+- Low AI Tutor usage
+- Weak LinkedIn/community response
+- Users say existing resources are enough
+- Users do not request more content or features
+
+---
+
+## 19.9 Positioning Risk
+
+### Risk Description
+
+Users may misunderstand IBMiHub AI as:
+
+- A generic chatbot
+- Another static tutorial website
+- A replacement for IBM documentation
+- A production troubleshooting tool
+- A full IBM i lab environment
+- A coding assistant or IDE replacement
+
+### Likelihood
+
+Medium
+
+### Impact
+
+Medium / High
+
+### Why This Matters
+
+Wrong positioning can attract the wrong users, create unrealistic expectations, or reduce trust when future features are not available in MVP.
+
+### Mitigation Direction
+
+- Keep landing page messaging clear.
+- Explain MVP capabilities honestly.
+- Distinguish current MVP from future roadmap.
+- Emphasize structured learning and AI-assisted guidance.
+- Avoid overpromising future modules.
+- Make AI trust boundaries visible.
+- Position as complementary to IBM documentation and community resources.
+
+### Risk Owner
+
+Product + Founder / Business
+
+### Monitoring Signals
+
+- Users ask for unavailable features immediately
+- Users think the product connects to real IBM i systems
+- Users ask where the RPG playground or job log analyzer is
+- Users compare it only to generic AI chatbots
+- Users misunderstand what is free, beta, or future
+
+---
+
+## 19.10 Execution and Delivery Risk
+
+### Risk Description
+
+The project may slow down due to too much documentation, unclear ownership, too many open decisions, or premature coding without approved specs.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+Medium
+
+### Why This Matters
+
+The project is using a disciplined SDD approach. This improves quality, but it must not become so heavy that delivery stalls.
+
+### Mitigation Direction
+
+- Complete PRD section by section.
+- Keep Sprint 0 focused on documentation foundation.
+- Move to SDD specs after PRD reaches sufficient maturity.
+- Keep Product, Architecture, and Implementation decisions separate.
+- Use PROJECT_STATE.md to track progress.
+- Avoid coding before approved specs.
+- Keep Sprint 1 implementation narrow.
+
+### Risk Owner
+
+Product + Engineering
+
+### Monitoring Signals
+
+- Many documents but no clear next implementation path
+- Repeated changes to approved scope
+- Claude generates source code too early
+- Sprint 1 cannot be planned from PRD
+- Open questions block progress
+- Documentation becomes inconsistent
+
+---
+
+## 19.11 Technical Dependency Risk
+
+### Risk Description
+
+The product will depend on external services for hosting, authentication, database/storage, AI, analytics, and possibly email or monitoring.
+
+Provider limitations, cost, latency, outages, or lock-in could affect product quality.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+Medium
+
+### Why This Matters
+
+Even though the PRD remains architecture-neutral, future engineering decisions will affect cost, scalability, maintainability, reliability, and user experience.
+
+### Mitigation Direction
+
+- Make technical decisions through architecture documents and ADRs.
+- Avoid unnecessary provider lock-in where practical.
+- Keep AI provider replaceability in mind.
+- Monitor AI usage cost and latency.
+- Use secure and maintainable authentication.
+- Avoid overengineering the MVP.
+- Document trade-offs before implementation.
+
+### Risk Owner
+
+Engineering
+
+### Monitoring Signals
+
+- AI latency is poor
+- AI cost grows unexpectedly
+- Authentication implementation becomes complex
+- Provider limits affect beta users
+- Engineering decisions are undocumented
+- Technology choices block future modules
+
+---
+
+## 19.12 Security Risk
+
+### Risk Description
+
+User accounts, progress data, feedback data, content management, and AI interactions may be mishandled if security is treated as a later concern.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+High
+
+### Why This Matters
+
+Trust is central to IBMiHub AI. Security issues could damage user confidence and block future enterprise adoption.
+
+### Mitigation Direction
+
+- Use secure authentication practices.
+- Protect user data and feedback.
+- Do not expose private user data through public pages or URLs.
+- Do not store secrets in source code.
+- Use secure communication for application traffic.
+- Keep sensitive features out of MVP.
+- Review security-sensitive decisions before implementation.
+
+### Risk Owner
+
+Engineering
+
+### Monitoring Signals
+
+- Unclear authentication approach
+- User data visible without proper access control
+- Secrets or keys appear in code or repository
+- Feedback or AI history exposed incorrectly
+- Security decisions not documented
+- Users ask about privacy and security but answers are unclear
+
+---
+
+## 19.13 Monetization Risk
+
+### Risk Description
+
+The product may monetize too early, too late, too aggressively, or with unclear value packaging.
+
+Users may not be willing to pay unless the product proves strong learning, AI, practice, or productivity value.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+Medium / High
+
+### Why This Matters
+
+IBMiHub AI is intended to become a business, but monetization before trust can harm adoption. Delaying monetization too long may also make sustainability difficult later.
+
+### Mitigation Direction
+
+- Keep MVP free or beta-first.
+- Collect willingness-to-pay signals.
+- Do not add billing to MVP.
+- Validate which features users value most.
+- Introduce paid plans only after repeated engagement.
+- Keep pricing flexible until enough data exists.
+- Consider AI cost when designing future paid tiers.
+
+### Risk Owner
+
+Founder / Business
+
+### Monitoring Signals
+
+- Users do not return after free usage
+- Users request more but resist paying
+- AI costs grow without monetization path
+- Paid plan ideas are unclear
+- Enterprise interest appears before product is ready
+- Pricing decisions are made without validation
+
+---
+
+## 19.14 Community and Reputation Risk
+
+### Risk Description
+
+The IBM i community may reject the product if it appears disrespectful, inaccurate, copied, overhyped, or dismissive of existing IBM i experts and resources.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+High
+
+### Why This Matters
+
+Community trust is critical in a specialized ecosystem. A small number of negative impressions could slow adoption.
+
+### Mitigation Direction
+
+- Respect existing IBM i resources and experts.
+- Position IBMiHub AI as complementary.
+- Avoid claiming to replace IBM documentation or human expertise.
+- Be transparent about AI limitations.
+- Create original, useful content.
+- Share progress humbly.
+- Invite feedback from experienced IBM i professionals.
+
+### Risk Owner
+
+Founder / Business
+
+### Monitoring Signals
+
+- Negative community feedback
+- Concerns about AI accuracy
+- Concerns about copied content
+- Users feel IBM i is being misrepresented
+- Experts feel the product overclaims
+- Low willingness to recommend
+
+---
+
+## 19.15 User Experience Risk
+
+### Risk Description
+
+The MVP may become confusing if users see too many modules, future features, technical terms, or unclear next steps.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+Medium
+
+### Why This Matters
+
+The first MVP must make it easy for beginners and working developers to reach value quickly.
+
+### Mitigation Direction
+
+- Keep onboarding simple.
+- Make next lesson obvious.
+- Keep dashboard uncluttered.
+- Avoid exposing too many future modules.
+- Separate beginner and working-developer needs where feasible.
+- Use clear language and practical examples.
+- Collect feedback on confusion points.
+
+### Risk Owner
+
+Product
+
+### Monitoring Signals
+
+- Users do not know where to start
+- Users abandon onboarding
+- Users do not start first lesson
+- Users ignore dashboard recommendations
+- Users ask what the product is supposed to do
+- Users confuse future features with MVP features
+
+---
+
+## 19.16 Content Maintenance Risk
+
+### Risk Description
+
+Content may become outdated, inconsistent, incomplete, or difficult to manage as the product grows.
+
+### Likelihood
+
+Medium
+
+### Impact
+
+Medium
+
+### Why This Matters
+
+IBMiHub AI depends on content as a core asset. Poor content maintenance can reduce trust over time.
+
+### Mitigation Direction
+
+- Keep content version-controlled or traceable.
+- Use a consistent lesson structure.
+- Start with a focused content scope.
+- Update lessons based on feedback.
+- Avoid multi-author complexity during MVP.
+- Define future content governance before scaling.
+
+### Risk Owner
+
+Product
+
+### Monitoring Signals
+
+- Lessons become inconsistent
+- Feedback identifies repeated errors
+- Content updates are difficult to track
+- Many new lessons are started but not reviewed
+- Users ask for corrections
+- Product voice becomes inconsistent
+
+---
+
+## 19.17 Future Enterprise Risk
+
+### Risk Description
+
+The product may eventually need enterprise-grade privacy, security, reporting, SSO, administration, and support, but building these too early would overload MVP.
+
+### Likelihood
+
+Low during MVP / Medium later
+
+### Impact
+
+Medium / High later
+
+### Why This Matters
+
+Enterprise revenue may be important long-term, but enterprise requirements can create major complexity.
+
+### Mitigation Direction
+
+- Keep enterprise features out of MVP.
+- Avoid early decisions that block future enterprise expansion.
+- Revisit enterprise requirements after individual value is validated.
+- Define enterprise features through separate PRD updates and SDD specs.
+- Conduct security and privacy review before enterprise workflows.
+
+### Risk Owner
+
+Product + Engineering
+
+### Monitoring Signals
+
+- Enterprise prospects ask for SSO or admin dashboards
+- Team features requested before MVP validation
+- Architecture choices make enterprise expansion difficult
+- Privacy or security concerns block enterprise conversations
+- Product roadmap shifts too early toward enterprise
+
+---
+
+## 19.18 Risk Mitigation Priorities for MVP
+
+The most important MVP mitigation priorities are:
+
+| Priority | Risk Area | Mitigation Focus |
+|---|---|---|
+| 1 | Scope Creep | Keep MVP limited to learning, AI Tutor, progress, feedback |
+| 2 | AI Trust | Use caution, feedback, and IBM i-specific behavior |
+| 3 | Privacy | Avoid sensitive uploads and discourage sensitive prompt sharing |
+| 4 | Content Quality | Review original beginner-focused lessons |
+| 5 | User Activation | Make onboarding and first lesson simple |
+| 6 | Market Validation | Test with real IBM i users early |
+| 7 | Technical Simplicity | Avoid overengineering and risky integrations |
+| 8 | Monetization Timing | Keep MVP free/beta-first until value is proven |
+
+---
+
+## 19.19 MVP Risk Readiness Checklist
+
+Before MVP release, the Product Owner should confirm:
+
+- MVP scope has not expanded beyond approved sections.
+- AI Tutor does not claim guaranteed correctness.
+- AI Tutor discourages sensitive data sharing.
+- Product does not support real IBM i connectivity.
+- Product does not support production code upload.
+- Product does not support sensitive job log upload.
+- Product does not include billing or paid access.
+- Learning content is original and reviewed.
+- Landing page does not overpromise future features.
+- Users have a clear first learning action.
+- Feedback collection exists.
+- Basic security and privacy expectations are addressed.
+- Key technical decisions are documented before implementation.
+- Product Owner has approved MVP release boundaries.
+
+---
+
+## 19.20 Risk Review Process
+
+Risk review should not be a one-time activity.
+
+Risks should be revisited:
+
+- Before Sprint 1 implementation
+- Before MVP beta release
+- After early user feedback
+- Before adding any advanced AI feature
+- Before allowing code or log uploads
+- Before enabling billing
+- Before pursuing enterprise customers
+- Before launching community features
+
+Risk status should be reflected in PROJECT_STATE.md when relevant.
+
+---
+
+### Summary
+
+IBMiHub AI has a strong opportunity, but it also has meaningful risks.
+
+The biggest early risks are scope creep, AI trust, privacy, content quality, and market adoption.
+
+The best mitigation is to keep the MVP narrow, safe, original, useful, and evidence-driven.
+
+The product should validate learning and AI assistance first, then expand into advanced tools, enterprise features, monetization, community, and real IBM i workflows only after explicit review and Product Owner approval.
 
 ---
 
 ## 20. Assumptions & Open Questions
 
-- **Purpose:** Make hidden assumptions explicit and track unresolved product questions to closure.
-- **Description:** Running log of assumptions made in absence of data, and open questions requiring Product Owner decisions, each with an owner and target resolution date.
-- **Audience:** Product, Engineering.
-- **Approximate size:** 1–2 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to make current assumptions explicit and track open questions that must be resolved before implementation, MVP launch, or later product expansion.
+
+Assumptions are things the product is currently treating as true, but which may still need validation.
+
+Open questions are unresolved decisions that require Product Owner, Engineering, Business, Legal, Security, or future user input.
+
+This section helps prevent hidden assumptions from becoming accidental product decisions.
+
+---
+
+### Assumption and Question Management Strategy
+
+IBMiHub AI should manage assumptions and open questions through disciplined review.
+
+The strategy is:
+
+**Make assumptions visible, validate them through user feedback and delivery learning, and resolve open questions before they block Sprint 1, MVP release, monetization, or future expansion.**
+
+Assumptions should not be treated as permanent truth.
+
+Open questions should not be silently converted into implementation decisions.
+
+---
+
+## 20.1 Status Definitions
+
+### Assumption Status
+
+| Status | Meaning |
+|---|---|
+| Active | Currently assumed true and used for planning |
+| Needs Validation | Requires user, market, technical, or business validation |
+| Validated | Supported by evidence or explicit Product Owner approval |
+| Invalidated | Proven false or no longer appropriate |
+| Replaced | Superseded by a better assumption or approved decision |
+
+### Question Status
+
+| Status | Meaning |
+|---|---|
+| Open | Decision still needed |
+| In Review | Being evaluated by Product Owner, Engineering, or Business |
+| Decided | Decision has been made and should be reflected in relevant documents |
+| Deferred | Not needed for MVP or current phase |
+| Blocker | Must be resolved before progress can continue |
+
+---
+
+## 20.2 Product Assumptions
+
+| ID | Assumption | Status | Owner | Validation Method |
+|---|---|---|---|---|
+| ASM-PROD-001 | A focused IBM i learning and AI assistance MVP is valuable enough to test with early users. | Active | Product | Beta usage, feedback, retention |
+| ASM-PROD-002 | The first MVP should focus on Beginner IBM i Learners and Working IBM i Developers. | Active | Product | User interviews, beta engagement |
+| ASM-PROD-003 | Structured learning plus AI Tutor is a better starting point than advanced tools such as 5250 labs or job log analyzer. | Active | Product | MVP engagement and feature requests |
+| ASM-PROD-004 | Users will prefer a guided IBM i learning path over disconnected article-style content. | Needs Validation | Product | Lesson completion and qualitative feedback |
+| ASM-PROD-005 | Working IBM i developers will find value in AI-assisted concept refreshers even without production code upload. | Needs Validation | Product | AI Tutor usage and feedback |
+| ASM-PROD-006 | MVP should remain narrow even if users request future features early. | Active | Product | Scope review and Product Owner approval |
+
+---
+
+## 20.3 Market and User Assumptions
+
+| ID | Assumption | Status | Owner | Validation Method |
+|---|---|---|---|---|
+| ASM-MKT-001 | There is enough early interest in the IBM i community to validate the product through a beta. | Needs Validation | Founder / Business | Waitlist, LinkedIn response, direct outreach |
+| ASM-MKT-002 | IBM i professionals will respond positively to a respectful AI-first product positioned as complementary to existing resources. | Needs Validation | Founder / Business | Community feedback |
+| ASM-MKT-003 | Early users can be reached through founder network, LinkedIn, IBM i community groups, and direct outreach. | Active | Founder / Business | Outreach response rate |
+| ASM-MKT-004 | The first market does not require broad paid advertising. | Active | Founder / Business | Organic beta interest |
+| ASM-MKT-005 | English-language content is sufficient for MVP validation. | Active | Product | Beta user profile and feedback |
+| ASM-MKT-006 | Enterprise buyers should not drive first MVP scope. | Active | Product | Product scope review |
+
+---
+
+## 20.4 Learning and Content Assumptions
+
+| ID | Assumption | Status | Owner | Validation Method |
+|---|---|---|---|---|
+| ASM-CONT-001 | IBM i Fundamentals is the right first learning path. | Active | Product | Lesson engagement and feedback |
+| ASM-CONT-002 | Initial learning content can be created originally without copying external tutorials or documentation. | Active | Product | Manual content review |
+| ASM-CONT-003 | A consistent lesson structure will improve content quality and user confidence. | Active | Product | Lesson feedback |
+| ASM-CONT-004 | The Product Owner can write or review initial MVP lessons. | Active | Product | Content delivery progress |
+| ASM-CONT-005 | Users will provide enough feedback to improve lessons after beta. | Needs Validation | Product | Feedback submissions |
+| ASM-CONT-006 | Lightweight quizzes and glossary can be deferred or kept optional if they slow MVP. | Active | Product | MVP prioritization review |
+
+---
+
+## 20.5 AI Assumptions
+
+| ID | Assumption | Status | Owner | Validation Method |
+|---|---|---|---|---|
+| ASM-AI-001 | An AI Tutor can provide useful IBM i learning explanations within MVP scope. | Needs Validation | Product + Engineering | AI response testing and user feedback |
+| ASM-AI-002 | AI Tutor should remain provider-neutral at PRD stage. | Active | Product + Engineering | Architecture review |
+| ASM-AI-003 | AI Tutor should not support production troubleshooting guarantees in MVP. | Active | Product | Scope and risk review |
+| ASM-AI-004 | Users can receive value from conceptual AI help without uploading production code or logs. | Needs Validation | Product | AI Tutor usage and qualitative feedback |
+| ASM-AI-005 | AI caution and privacy messaging will reduce unsafe sharing of sensitive information. | Needs Validation | Product + Engineering | Prompt review and user behavior |
+| ASM-AI-006 | Helpful / not helpful feedback is enough for initial AI quality learning. | Needs Validation | Product | Feedback quality review |
+
+---
+
+## 20.6 Technical Assumptions
+
+| ID | Assumption | Status | Owner | Validation Method |
+|---|---|---|---|---|
+| ASM-TECH-001 | A web-based SaaS MVP is the right delivery model. | Active | Product + Engineering | Architecture review |
+| ASM-TECH-002 | MVP can be built without real IBM i connectivity. | Active | Product + Engineering | Scope validation |
+| ASM-TECH-003 | Basic authentication, progress tracking, AI Tutor, and feedback can be implemented without enterprise complexity. | Active | Engineering | Sprint 1 planning |
+| ASM-TECH-004 | Content can be managed through a simple internal workflow rather than a full CMS. | Active | Product + Engineering | Content workflow test |
+| ASM-TECH-005 | Basic analytics and feedback review can support MVP validation without heavy observability tooling. | Active | Product + Engineering | MVP measurement review |
+| ASM-TECH-006 | Technology choices can be deferred to architecture and ADR documents. | Active | Engineering | Architecture planning |
+
+---
+
+## 20.7 Business and Monetization Assumptions
+
+| ID | Assumption | Status | Owner | Validation Method |
+|---|---|---|---|---|
+| ASM-BIZ-001 | MVP should be free or beta-first. | Active | Founder / Business | MVP launch plan |
+| ASM-BIZ-002 | Paid plans should be introduced only after repeated value is demonstrated. | Active | Founder / Business | Engagement and willingness-to-pay signals |
+| ASM-BIZ-003 | Future monetization may include Free, Pro, Team, and Enterprise tiers. | Active | Founder / Business | User and buyer validation |
+| ASM-BIZ-004 | Exact pricing should not be locked before MVP validation. | Active | Founder / Business | Pricing research |
+| ASM-BIZ-005 | Individual value should be validated before enterprise monetization. | Active | Founder / Business | Beta usage and enterprise inquiry review |
+| ASM-BIZ-006 | AI usage cost will become important once real users begin using AI Tutor. | Active | Product + Engineering | AI usage monitoring |
+
+---
+
+## 20.8 Open Product Questions
+
+| ID | Question | Owner | Needed Before | Status |
+|---|---|---|---|---|
+| OQ-PROD-001 | Should MVP beta be invite-only, public beta, or limited-access waitlist? | Product / Founder | MVP launch | Open |
+| OQ-PROD-002 | What is the minimum number of lessons required for MVP release? | Product | Sprint 1 planning | Open |
+| OQ-PROD-003 | Should MVP include quizzes or defer them to early post-MVP? | Product | Sprint 1 planning | Open |
+| OQ-PROD-004 | Should MVP include a glossary or defer it to early post-MVP? | Product | Sprint 1 planning | Open |
+| OQ-PROD-005 | Should users be required to create an account before viewing lessons? | Product | MVP UX design | Open |
+| OQ-PROD-006 | What onboarding question set should be used to separate beginners from working developers? | Product | MVP UX design | Open |
+| OQ-PROD-007 | What exact landing page call-to-action should be used: Start Learning, Join Beta, or Join Waitlist? | Product / Founder | Landing page spec | Open |
+| OQ-PROD-008 | What MVP success threshold is good enough to move into post-MVP expansion? | Product / Founder | MVP evaluation | Open |
+
+---
+
+## 20.9 Open AI Questions
+
+| ID | Question | Owner | Needed Before | Status |
+|---|---|---|---|---|
+| OQ-AI-001 | Which AI provider and model should power the MVP AI Tutor? | Engineering | AI architecture | Open |
+| OQ-AI-002 | Should AI Tutor be available only after login or partially available publicly? | Product + Engineering | MVP UX design | Open |
+| OQ-AI-003 | Should AI Tutor use only prompt guidance in MVP or also include lesson-aware context? | Product + Engineering | AI implementation spec | Open |
+| OQ-AI-004 | Should AI conversation history be stored, and if yes, for how long? | Product + Engineering | Privacy review | Open |
+| OQ-AI-005 | What exact privacy warning should appear near the AI Tutor input? | Product | AI Tutor spec | Open |
+| OQ-AI-006 | Should the product detect or block sensitive-looking prompts in MVP? | Product + Engineering | Security / privacy review | Open |
+| OQ-AI-007 | What AI feedback options are required for MVP: helpful/not helpful only, or additional reason capture? | Product | AI Tutor spec | Open |
+
+---
+
+## 20.10 Open Content Questions
+
+| ID | Question | Owner | Needed Before | Status |
+|---|---|---|---|---|
+| OQ-CONT-001 | What exact lessons should be included in the first IBM i Fundamentals path? | Product | Content planning | Open |
+| OQ-CONT-002 | What is the approved standard lesson template for MVP content? | Product | Content planning | Open |
+| OQ-CONT-003 | Who will technically review IBM i lesson content before MVP release? | Product | MVP release | Open |
+| OQ-CONT-004 | Where should content references and research notes be stored? | Product | Content workflow | Open |
+| OQ-CONT-005 | What is the minimum content quality checklist before publishing a lesson? | Product | Content workflow | Open |
+| OQ-CONT-006 | Should lessons include explicit links to official IBM documentation where appropriate? | Product | Content policy | Open |
+| OQ-CONT-007 | Should lesson content be stored as files, database records, or another content format? | Engineering | Architecture planning | Open |
+
+---
+
+## 20.11 Open Technical Questions
+
+| ID | Question | Owner | Needed Before | Status |
+|---|---|---|---|---|
+| OQ-TECH-001 | What technology stack should be used for the MVP web application? | Engineering | Sprint 1 implementation | Open |
+| OQ-TECH-002 | What hosting and deployment approach should be used? | Engineering | Sprint 1 implementation | Open |
+| OQ-TECH-003 | What database or storage approach should be used for users, progress, content metadata, and feedback? | Engineering | Architecture planning | Open |
+| OQ-TECH-004 | What authentication approach should be used for MVP? | Engineering | Architecture planning | Open |
+| OQ-TECH-005 | What analytics approach should be used for MVP validation? | Product + Engineering | MVP launch | Open |
+| OQ-TECH-006 | What error monitoring approach should be used? | Engineering | MVP launch | Open |
+| OQ-TECH-007 | What development, branching, and deployment workflow should be followed? | Engineering | Sprint 1 implementation | Open |
+| OQ-TECH-008 | What testing strategy is required before MVP beta release? | Engineering | Sprint 1 planning | Open |
+| OQ-TECH-009 | What SDD specs must be created before coding begins? | Product + Engineering | Sprint 1 planning | Open |
+
+---
+
+## 20.12 Open Security, Privacy, and Legal Questions
+
+| ID | Question | Owner | Needed Before | Status |
+|---|---|---|---|---|
+| OQ-SEC-001 | What privacy messaging is required before MVP beta launch? | Product / Founder | MVP launch | Open |
+| OQ-SEC-002 | What acceptable-use guidance should be shown to users? | Product | MVP launch | Open |
+| OQ-SEC-003 | What should the product say about not sharing production code, logs, credentials, or customer data? | Product | AI Tutor spec | Open |
+| OQ-SEC-004 | Are Terms of Use and Privacy Policy required before public beta? | Founder / Business | Public beta | Open |
+| OQ-SEC-005 | What user data should be retained during beta? | Product + Engineering | Privacy review | Open |
+| OQ-SEC-006 | Should AI interactions be stored, anonymized, or discarded in MVP? | Product + Engineering | AI implementation spec | Open |
+
+---
+
+## 20.13 Open Business and Go-To-Market Questions
+
+| ID | Question | Owner | Needed Before | Status |
+|---|---|---|---|---|
+| OQ-BIZ-001 | Who are the first target beta users? | Founder / Business | Beta planning | Open |
+| OQ-BIZ-002 | Should the first launch be shared publicly on LinkedIn or kept limited to private testers? | Founder / Business | MVP launch | Open |
+| OQ-BIZ-003 | What beta feedback process should be used? | Founder / Business | Beta launch | Open |
+| OQ-BIZ-004 | Should future pricing direction be shown publicly during MVP? | Founder / Business | Landing page spec | Open |
+| OQ-BIZ-005 | What signals will indicate willingness to pay? | Founder / Business | MVP evaluation | Open |
+| OQ-BIZ-006 | When should monetization experiments begin? | Founder / Business | Post-MVP planning | Open |
+
+---
+
+## 20.14 Sprint 1 Decision Readiness
+
+Before Sprint 1 implementation planning begins, the following questions should be resolved or explicitly deferred:
+
+- OQ-PROD-001: Beta access model
+- OQ-PROD-002: Minimum MVP lesson count
+- OQ-PROD-003: Quiz inclusion or deferral
+- OQ-PROD-004: Glossary inclusion or deferral
+- OQ-PROD-005: Account requirement before lesson access
+- OQ-PROD-006: MVP onboarding questions
+- OQ-AI-001: AI provider and model direction
+- OQ-AI-003: Prompt-only or lesson-aware AI Tutor
+- OQ-AI-004: AI conversation storage decision
+- OQ-CONT-001: Exact first learning path lessons
+- OQ-CONT-002: Standard lesson template
+- OQ-TECH-001: MVP technology stack
+- OQ-TECH-002: Hosting and deployment approach
+- OQ-TECH-003: Database or storage approach
+- OQ-TECH-004: Authentication approach
+- OQ-TECH-009: Required SDD specs before coding
+
+Questions that do not block Sprint 1 should be marked as deferred and revisited before MVP beta release or post-MVP planning.
+
+---
+
+## 20.15 MVP Launch Decision Readiness
+
+Before MVP beta launch, the following questions should be resolved or explicitly deferred:
+
+- Privacy messaging
+- Acceptable-use guidance
+- AI sensitive data warning
+- Beta user access model
+- Landing page call-to-action
+- Feedback collection process
+- MVP success threshold
+- Minimum content quality checklist
+- Technical review of initial lessons
+- Basic analytics and feedback review process
+- Terms of Use and Privacy Policy requirement for public beta
+- AI interaction storage and retention policy
+
+---
+
+## 20.16 Assumption Review Process
+
+Assumptions should be reviewed:
+
+- Before Sprint 1 planning
+- Before coding begins
+- Before MVP beta release
+- After early beta feedback
+- Before post-MVP scope expansion
+- Before monetization
+- Before enterprise feature planning
+- Before sensitive data handling features
+
+When an assumption is validated, invalidated, or replaced, the PRD, PROJECT_STATE.md, and relevant specs should be updated where needed.
+
+---
+
+## 20.17 Open Question Review Process
+
+Open questions should be reviewed regularly.
+
+Each open question should eventually be:
+
+- Decided
+- Deferred
+- Converted into an SDD requirement
+- Converted into an ADR
+- Converted into a roadmap item
+- Removed if no longer relevant
+
+Open questions that affect Sprint 1 should not remain unresolved when implementation begins unless explicitly deferred by the Product Owner.
+
+---
+
+### Summary
+
+IBMiHub AI has a clear MVP direction, but several assumptions and questions still need validation or decisions.
+
+The most important unresolved areas are beta access model, exact MVP lesson count, onboarding flow, AI provider and AI data handling, content workflow, technology stack, authentication, analytics, and required SDD specs before coding.
+
+This section should be treated as a live decision tracker. Its purpose is to prevent hidden assumptions from becoming accidental product decisions and to ensure Sprint 1 begins with enough clarity.
 
 ---
 
 ## 21. Roadmap
 
-- **Purpose:** Sequence the product's evolution across releases.
-- **Description:** Phased roadmap from MVP through subsequent releases (post-MVP modules, enterprise readiness, platform expansion), time-horizon framed (Now / Next / Later) rather than fixed dates where uncertainty is high.
-- **Audience:** Product, Engineering, Leadership, Investors.
-- **Approximate size:** 2–3 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to describe how IBMiHub AI should evolve across phases.
+
+The roadmap is a product direction document. It helps sequence work, manage scope, and align product, engineering, content, AI, and business decisions.
+
+This roadmap should not be treated as a fixed delivery promise. Timelines may change based on user feedback, technical complexity, market response, founder capacity, engineering capacity, AI cost, and product validation results.
+
+This section defines:
+
+- Roadmap strategy
+- Roadmap principles
+- MVP phase
+- Beta validation phase
+- Early post-MVP phase
+- Future platform expansion
+- Roadmap gates
+- Scope discipline
+- What should not be built too early
+
+---
+
+### Roadmap Strategy Statement
+
+IBMiHub AI should grow in focused phases.
+
+The roadmap strategy is:
+
+**Start with a narrow, trusted MVP focused on structured IBM i learning and AI Tutor assistance; validate real user value; then expand gradually into deeper learning, practice, productivity tools, team onboarding, monetization, and enterprise capabilities.**
+
+The product should not attempt to build the full long-term vision at once.
+
+---
+
+## 21.1 Roadmap Principles
+
+The roadmap should follow these principles.
+
+### 1. Validate Before Expanding
+
+Each phase should prove enough value before moving into the next phase.
+
+### 2. MVP First, Platform Later
+
+The first release should validate learning and AI assistance. Advanced platform capabilities should come later.
+
+### 3. Learning Foundation Before Advanced Tools
+
+The product should establish strong learning paths before expanding into full labs, job log analyzers, code tools, or documentation generators.
+
+### 4. Trust Before Sensitive Data
+
+The product should not support production code upload, sensitive job log upload, real IBM i connectivity, or enterprise AI workflows until privacy, security, and trust are ready.
+
+### 5. Community Credibility Before Aggressive Monetization
+
+The product should build credibility with IBM i professionals before introducing paid plans.
+
+### 6. Evidence Over Excitement
+
+Roadmap priority should be based on user engagement, feedback, retention, willingness to pay, and product risk — not only founder excitement or feature ideas.
+
+---
+
+## 21.2 Roadmap Horizon Model
+
+The roadmap should use horizon-based planning rather than fixed dates.
+
+| Horizon | Meaning | Commitment Level |
+|---|---|---|
+| Now | Current planning and MVP foundation | High |
+| Next | Early post-MVP improvements after validation | Medium |
+| Later | Larger product expansion | Directional |
+| Future | Long-term platform vision | Exploratory |
+
+This helps avoid unrealistic promises while keeping long-term direction visible.
+
+---
+
+## 21.3 Roadmap Overview
+
+| Phase | Focus | Primary Goal |
+|---|---|---|
+| Phase 0: Sprint 0 Foundation | Documentation, PRD, scope, decisions | Prepare for disciplined implementation |
+| Phase 1: MVP Build | Learning Center, AI Tutor, dashboard, progress, feedback | Build first usable product |
+| Phase 2: MVP Beta Validation | Real users, feedback, retention, AI quality | Validate demand and trust |
+| Phase 3: Early Post-MVP | Expand learning, quizzes, glossary, AI improvements | Improve engagement and learning depth |
+| Phase 4: Practice and Productivity Expansion | 5250 simulation, RPGLE / CLLE practice, job log learning | Move toward learn-by-doing |
+| Phase 5: Team and Monetization Readiness | Pro, Team, onboarding, deeper value | Prepare business model |
+| Phase 6: Enterprise and Platform Expansion | Enterprise training, advanced AI tools, ecosystem | Long-term platform growth |
+
+---
+
+## 21.4 Phase 0: Sprint 0 Foundation
+
+### Status
+
+Current / In Progress
+
+### Goal
+
+Create the product and documentation foundation before implementation begins.
+
+### Key Outcomes
+
+- Product vision documented
+- PRD created and reviewed section by section
+- MVP scope defined
+- Functional and non-functional requirements defined
+- AI Strategy defined
+- Learning & Content Strategy defined
+- Monetization direction defined
+- Technical constraints defined
+- Risk analysis documented
+- Assumptions and open questions documented
+- Project state and master index maintained
+- AI assistant rules and prompt library created
+
+### Exit Criteria
+
+Phase 0 should be considered complete when:
+
+- PRD reaches sufficient maturity for Sprint 1 planning
+- MVP scope is clear
+- Required Sprint 1 decisions are resolved or explicitly deferred
+- Initial SDD specs are identified
+- Engineering is ready to produce implementation plans without guessing product requirements
+
+### Not in Scope
+
+Phase 0 should not include:
+
+- Application coding
+- UI implementation
+- Backend implementation
+- Database schemas
+- AI provider integration
+- Production deployment
+
+---
+
+## 21.5 Phase 1: MVP Build
+
+### Horizon
+
+Now / Next
+
+### Goal
+
+Build the first usable MVP of IBMiHub AI.
+
+The MVP should validate the core product promise:
+
+**A structured IBM i learning platform with AI-assisted guidance.**
+
+### Primary Users
+
+- Beginner IBM i Learner
+- Working IBM i Developer
+
+### In-Scope Product Areas
+
+- Public Landing Experience
+- User Account and Basic Onboarding
+- User Dashboard
+- Learning Center
+- Lesson Experience
+- AI Tutor
+- Basic Progress Tracking
+- Basic Feedback Collection
+- Basic Content Governance
+
+### MVP Build Priorities
+
+| Priority | Area | Reason |
+|---|---|---|
+| 1 | Public Landing Experience | Communicates value and attracts early users |
+| 2 | Basic Account / Onboarding | Supports personalized learning and progress |
+| 3 | Learning Center | Core product foundation |
+| 4 | Lesson Experience | Converts content into usable learning |
+| 5 | AI Tutor | Main MVP differentiator |
+| 6 | Progress Tracking | Supports learning continuity |
+| 7 | Feedback Collection | Enables MVP validation |
+| 8 | Content Governance | Protects quality and originality |
+
+### MVP Build Exit Criteria
+
+Phase 1 should be considered complete when:
+
+- Users can access the product through a browser.
+- Users can understand the product from the landing page.
+- Users can enter the learning experience.
+- Users can see a dashboard.
+- Users can open and complete lessons.
+- Users can ask IBM i-related AI Tutor questions.
+- Users can see basic progress.
+- Users can provide feedback.
+- Product does not include excluded risky features.
+- Product Owner approves beta readiness.
+
+### Explicitly Not in Scope
+
+Phase 1 must not include:
+
+- Real IBM i connectivity
+- Production code upload
+- Sensitive job log upload
+- Full RPG playground
+- Full 5250 lab
+- Full job log analyzer
+- Billing or paid access
+- Enterprise accounts
+- Team dashboards
+- Certifications
+- Community forum
+- Mobile app
+- VS Code extension
+
+---
+
+## 21.6 Phase 2: MVP Beta Validation
+
+### Horizon
+
+Next
+
+### Goal
+
+Test the MVP with real users and validate whether the product creates meaningful value.
+
+### Validation Focus
+
+The beta should help answer:
+
+- Do users understand the product value?
+- Do beginners start the learning path?
+- Do users complete lessons?
+- Do users ask AI Tutor questions?
+- Do users return after the first session?
+- Do users trust the AI Tutor?
+- Which topics create the most engagement?
+- What confuses users?
+- What features do users request next?
+- Is there early willingness to pay later?
+
+### Key Activities
+
+- Invite or onboard beta users
+- Collect qualitative feedback
+- Review lesson completion
+- Review AI Tutor usage
+- Review AI feedback
+- Identify confusing lessons
+- Identify requested topics
+- Monitor privacy and sensitive-data risks
+- Refine positioning and onboarding
+
+### Exit Criteria
+
+Phase 2 should be considered successful if there is evidence of:
+
+- Meaningful learning engagement
+- Positive qualitative feedback
+- Repeated usage
+- AI Tutor usefulness
+- Clear user demand for more content or features
+- No major trust, privacy, or positioning failures
+
+### Possible Outcomes
+
+After beta validation, the product may:
+
+- Continue improving MVP
+- Expand learning content
+- Add lightweight quizzes or glossary
+- Improve AI Tutor behavior
+- Begin early monetization exploration
+- Reconsider scope if validation is weak
+
+---
+
+## 21.7 Phase 3: Early Post-MVP Improvements
+
+### Horizon
+
+Next
+
+### Goal
+
+Improve the product based on MVP validation.
+
+This phase should deepen learning value without jumping too quickly into complex advanced tools.
+
+### Possible In-Scope Areas
+
+- Expanded IBM i Fundamentals lessons
+- RPGLE Fundamentals path
+- CLLE Fundamentals path
+- DB2 for i / SQL basics path
+- Lightweight quizzes
+- Beginner glossary
+- Improved dashboard
+- Improved onboarding
+- Lesson-aware AI Tutor
+- Better AI feedback capture
+- Improved content review workflow
+- More useful progress indicators
+
+### Priority Drivers
+
+Post-MVP priorities should be based on:
+
+- Beta feedback
+- Lesson completion patterns
+- AI Tutor question patterns
+- User requests
+- Retention signals
+- Content quality issues
+- Founder-led user interviews
+
+### Not in Scope Without Separate Approval
+
+- Real IBM i connectivity
+- Production code upload
+- Sensitive log upload
+- Enterprise administration
+- Billing
+- Full job log analyzer
+- Full RPG playground
+- Community forum
+
+---
+
+## 21.8 Phase 4: Practice and Productivity Expansion
+
+### Horizon
+
+Later
+
+### Goal
+
+Move IBMiHub AI from structured learning toward practical skill-building and productivity support.
+
+This phase should happen only after the learning and AI Tutor foundation shows strong value.
+
+### Possible Product Areas
+
+#### 1. 5250 Practice Lab
+
+A simulated 5250 learning experience for safe practice.
+
+Potential capabilities:
+
+- Simulated command line
+- Guided navigation exercises
+- Basic object and library workflows
+- Non-production practice scenarios
+
+#### 2. RPGLE and CLLE Practice
+
+Practice experiences for code reading and basic programming concepts.
+
+Potential capabilities:
+
+- Code interpretation exercises
+- Simple RPGLE scenarios
+- CLLE command flow exercises
+- AI-assisted explanation of sample code
+
+#### 3. Job Log Learning
+
+Learning-oriented job log examples and explanations.
+
+Potential capabilities:
+
+- Sample job log walkthroughs
+- Common message explanation
+- Troubleshooting learning scenarios
+
+#### 4. Documentation Assistance
+
+Future support for generating simple learning or technical documentation from approved inputs.
+
+Potential capabilities:
+
+- Program summary examples
+- Process explanation templates
+- Onboarding notes
+
+### Important Constraint
+
+This phase should still avoid sensitive production workflows until privacy, security, and data handling are ready.
+
+---
+
+## 21.9 Phase 5: Monetization and Team Readiness
+
+### Horizon
+
+Later
+
+### Goal
+
+Prepare IBMiHub AI for paid individual and team value after strong validation.
+
+### Possible Product Areas
+
+- Pro individual plan exploration
+- Higher AI Tutor usage limits
+- Premium learning paths
+- Interview preparation content
+- More advanced quizzes or assessments
+- Team learning paths
+- Team onboarding support
+- Basic team progress visibility
+- Early team plan discovery
+
+### Monetization Gate
+
+Paid plans should not be introduced until there is evidence that:
+
+- Users return repeatedly
+- Users complete learning content
+- Users trust the platform
+- Users ask for more advanced value
+- AI usage cost is understood
+- Willingness-to-pay signals exist
+- Product Owner approves monetization readiness
+
+### Not in Scope Until Approved
+
+- Full enterprise contracts
+- Enterprise SSO
+- Advanced compliance workflows
+- Complex billing operations
+- Certification payments
+- Marketplace revenue
+
+---
+
+## 21.10 Phase 6: Enterprise and Platform Expansion
+
+### Horizon
+
+Future
+
+### Goal
+
+Expand IBMiHub AI into a broader platform for IBM i learning, productivity, onboarding, and enterprise training.
+
+### Possible Product Areas
+
+- Enterprise training
+- Team accounts
+- Admin dashboards
+- Progress reporting
+- Role-based learning paths
+- Corporate onboarding packages
+- Enterprise privacy and security controls
+- Advanced AI governance
+- Advanced code explanation
+- Advanced job log analysis
+- Documentation generator
+- Certification or skill validation
+- Community features
+- Mobile companion experience
+- VS Code extension
+- Public API
+- Ecosystem partnerships
+
+### Important Constraint
+
+These are long-term possibilities, not MVP commitments.
+
+Each major future area should require:
+
+- Product Owner approval
+- Updated PRD scope if needed
+- SDD specification
+- Architecture review
+- Security and privacy review where applicable
+- Clear validation evidence
+
+---
+
+## 21.11 Roadmap by Product Area
+
+| Product Area | MVP | Early Post-MVP | Later | Future |
+|---|---|---|---|---|
+| Landing / Marketing | Simple landing page | Improved positioning | Content marketing | Full growth engine |
+| Learning Center | IBM i Fundamentals | More paths | Advanced learning | Enterprise curriculum |
+| AI Tutor | Conceptual Q&A | Lesson-aware help | Code/log learning support | Advanced AI workflows |
+| Progress Tracking | Basic completion | Better progress indicators | Skill confidence | Team / enterprise reporting |
+| Quizzes | Optional / lightweight | Lesson quizzes | Assessments | Certification readiness |
+| Glossary | Optional / lightweight | Searchable glossary | Concept explorer | Integrated learning graph |
+| 5250 Practice | Out of scope | Planning only | Simulated lab | Advanced labs |
+| RPGLE / CLLE Practice | Out of scope | Planning only | Practice scenarios | Playground |
+| Job Logs | Conceptual basics | Sample scenarios | Job log learning | Analyzer |
+| Documentation | Out of scope | Templates / examples | Assistant | Generator |
+| Monetization | Out of scope | Research | Pro / Team tests | Enterprise |
+| Enterprise | Out of scope | Discovery | Team readiness | Full enterprise platform |
+| Community | Out of scope | Discovery | Limited community | Ecosystem platform |
+| Mobile App | Out of scope | Out of scope | Consider later | Possible companion app |
+| VS Code Extension | Out of scope | Out of scope | Consider later | Possible developer tool |
+
+---
+
+## 21.12 Roadmap Gates
+
+The product should not move to a larger phase just because the roadmap says so.
+
+Progression should depend on gates.
+
+### Gate 1: Move from Sprint 0 to Sprint 1
+
+Required signals:
+
+- PRD is sufficiently complete
+- MVP scope is clear
+- Key Sprint 1 open questions are resolved or deferred
+- SDD specs are identified
+- Architecture planning is ready
+
+### Gate 2: Move from MVP Build to Beta
+
+Required signals:
+
+- Core MVP flows work
+- Initial content is ready
+- AI Tutor is usable and bounded
+- Feedback collection works
+- No excluded risky features are present
+- Product Owner approves beta readiness
+
+### Gate 3: Move from Beta to Post-MVP Expansion
+
+Required signals:
+
+- Users complete lessons
+- Users ask meaningful AI Tutor questions
+- Users return
+- Feedback is positive enough to continue
+- Top improvement areas are clear
+- Product direction is validated enough to expand
+
+### Gate 4: Move Toward Monetization
+
+Required signals:
+
+- Repeat usage exists
+- Users ask for deeper value
+- Willingness-to-pay signals exist
+- AI cost is understood
+- Free vs paid packaging is clearer
+- Product Owner approves monetization experiments
+
+### Gate 5: Move Toward Enterprise
+
+Required signals:
+
+- Individual value is validated
+- Team onboarding interest exists
+- Privacy and security posture is stronger
+- Product can support team workflows
+- Enterprise requirements are documented separately
+
+---
+
+## 21.13 Roadmap Dependencies
+
+Roadmap progress depends on several areas.
+
+| Dependency | Why It Matters |
+|---|---|
+| PRD Completion | Provides product direction |
+| SDD Specs | Converts PRD into implementable features |
+| Architecture Decisions | Defines technical approach |
+| Content Creation | Learning Center cannot launch without original lessons |
+| AI Tutor Implementation | Core MVP differentiator |
+| Feedback System | Required for validation |
+| User Outreach | Required for beta validation |
+| Privacy Messaging | Required before broader beta |
+| Product Owner Review | Required before scope expansion |
+
+---
+
+## 21.14 What Should Not Be Built Too Early
+
+The roadmap should avoid building the following too early:
+
+- Real IBM i connectivity
+- Live 5250 production terminal
+- Production code upload
+- Sensitive job log upload
+- Full RPG playground
+- Full job log analyzer
+- Full documentation generator
+- Enterprise accounts
+- Admin dashboards
+- Enterprise SSO
+- Billing and paid subscriptions
+- Certification engine
+- Community forum
+- Mobile app
+- VS Code extension
+- Public API
+- Marketplace
+
+These may be valuable later, but building them too early would increase complexity before the core product value is validated.
+
+---
+
+## 21.15 Roadmap Review Process
+
+The roadmap should be reviewed:
+
+- After PRD completion
+- Before Sprint 1 planning
+- Before MVP beta launch
+- After early beta feedback
+- Before post-MVP expansion
+- Before monetization
+- Before enterprise planning
+- Whenever major assumptions change
+
+Roadmap updates should be reflected in PRD, PROJECT_STATE.md, and relevant SDD specs when needed.
+
+---
+
+### Summary
+
+The IBMiHub AI roadmap should move from focused validation to gradual platform expansion.
+
+The immediate priority is to complete planning, then build a narrow MVP around structured IBM i learning, AI Tutor, dashboard, progress tracking, and feedback.
+
+After real user validation, the product can expand into deeper content, quizzes, glossary, lesson-aware AI, practice labs, job log learning, productivity tools, monetization, team onboarding, enterprise training, and broader ecosystem features.
+
+The roadmap should remain disciplined, evidence-driven, and gated by user value.
 
 ---
 
 ## 22. Future Vision
 
-- **Purpose:** Describe the multi-year aspiration beyond the current roadmap horizon.
-- **Description:** Platform expansion (mobile, desktop, VS Code extension, enterprise SaaS), ecosystem and marketplace ambitions, and how today's decisions preserve future optionality.
-- **Audience:** Leadership, Investors, Product.
-- **Approximate size:** 1–2 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to describe the long-term product ambition for IBMiHub AI beyond the MVP and near-term roadmap.
+
+The future vision helps preserve strategic direction while keeping the MVP focused. It describes what IBMiHub AI may become over multiple phases if the product validates real user value, earns trust, and grows responsibly.
+
+This section does not change MVP scope. It does not create fixed delivery commitments. It does not approve future features for immediate implementation.
+
+Future capabilities mentioned here should require separate validation, Product Owner approval, PRD updates where needed, SDD specifications, architecture review, and security/privacy review where applicable.
+
+---
+
+### Future Vision Statement
+
+IBMiHub AI should evolve into the leading AI-powered learning, practice, productivity, onboarding, and knowledge platform for IBM i professionals.
+
+The long-term vision is:
+
+**To become the trusted platform where IBM i learners, developers, teams, consultants, and enterprises learn, practice, troubleshoot, document, modernize, and transfer IBM i knowledge using structured content, AI assistance, hands-on practice, and productivity workflows.**
+
+The first MVP is only the starting point.
+
+The long-term opportunity is to build a durable product ecosystem around IBM i knowledge, skills, productivity, and modernization.
+
+---
+
+## 22.1 Long-Term Platform Ambition
+
+IBMiHub AI should not remain only a beginner learning website.
+
+If the MVP validates user demand, the product may grow into a broader platform with multiple connected product areas:
+
+- Structured IBM i learning
+- AI-assisted explanations
+- Hands-on practice
+- 5250 simulation
+- RPGLE and CLLE practice
+- Job log learning and analysis
+- Code explanation
+- Documentation assistance
+- Interview preparation
+- Team onboarding
+- Enterprise training
+- Community and ecosystem participation
+- Certification or skill validation
+
+These areas should evolve gradually and only after the product proves value in earlier phases.
+
+---
+
+## 22.2 Future Product Pillars
+
+The long-term platform may be organized around several product pillars.
+
+### Pillar 1: IBMiHub Learn
+
+A structured learning platform for IBM i professionals.
+
+Possible future capabilities:
+
+- Beginner-to-advanced learning paths
+- RPGLE learning paths
+- CLLE learning paths
+- DB2 for i and SQL learning paths
+- DDS and database file learning paths
+- Job log and production support learning paths
+- Modern IBM i tooling learning paths
+- Interview preparation paths
+- Progress tracking and learning history
+
+### Pillar 2: IBMiHub AI Tutor
+
+An IBM i-focused AI assistant that supports learning, clarification, and productivity.
+
+Possible future capabilities:
+
+- Lesson-aware AI Tutor
+- User-level-aware explanations
+- Suggested follow-up questions
+- AI-assisted topic recommendations
+- AI explanation of approved sample code
+- AI-assisted learning recap
+- AI feedback loops for quality improvement
+
+### Pillar 3: IBMiHub Labs
+
+A safe practice environment for IBM i learning.
+
+Possible future capabilities:
+
+- Simulated 5250 workflows
+- Guided command practice
+- Object and library practice scenarios
+- RPGLE and CLLE reading exercises
+- Job log walkthroughs
+- Practice quizzes and exercises
+- Scenario-based learning
+
+Early labs should remain simulated and non-production unless future security, privacy, and architecture reviews approve deeper capabilities.
+
+### Pillar 4: IBMiHub Productivity
+
+AI-assisted tools for working IBM i professionals.
+
+Possible future capabilities:
+
+- Code explanation
+- Job log explanation
+- Documentation assistance
+- Process summary generation
+- Legacy system understanding support
+- Modernization learning support
+- Developer productivity workflows
+
+These tools should be introduced carefully because they may involve higher trust, privacy, and accuracy requirements.
+
+### Pillar 5: IBMiHub Teams
+
+Team-oriented learning and onboarding capabilities.
+
+Possible future capabilities:
+
+- Team learning paths
+- Onboarding tracks
+- Shared progress visibility
+- Assigned lessons
+- Team-level learning insights
+- Mentor-supported learning workflows
+
+Team features should be introduced only after individual learning value is validated.
+
+### Pillar 6: IBMiHub Enterprise
+
+Enterprise training and enablement capabilities.
+
+Possible future capabilities:
+
+- Enterprise accounts
+- Admin dashboards
+- Role-based learning paths
+- Progress reporting
+- Corporate onboarding programs
+- Privacy and security controls
+- Enterprise support
+- Future SSO and compliance readiness
+
+Enterprise capabilities should require separate product, security, privacy, legal, and architecture review.
+
+### Pillar 7: IBMiHub Community
+
+A future ecosystem space for IBM i professionals.
+
+Possible future capabilities:
+
+- Community discussions
+- Expert Q&A
+- Content suggestions
+- Learning requests
+- Community feedback loops
+- Founder-led knowledge sharing
+- Partnerships with IBM i experts or trainers
+
+Community features should be added only when moderation, content quality, and trust can be handled properly.
+
+---
+
+## 22.3 Product Evolution Vision
+
+The product should evolve from a focused MVP into a broader platform through disciplined stages.
+
+### Stage 1: Learning and AI Foundation
+
+The first stage validates whether users want structured IBM i learning and AI Tutor guidance.
+
+### Stage 2: Deeper Learning and Engagement
+
+The second stage expands lessons, quizzes, glossary, learning paths, and AI Tutor context.
+
+### Stage 3: Practice and Skill Building
+
+The third stage introduces hands-on simulated practice, guided workflows, and scenario-based learning.
+
+### Stage 4: Productivity Support
+
+The fourth stage adds carefully bounded AI productivity tools for code, logs, documentation, and legacy understanding.
+
+### Stage 5: Team and Enterprise Expansion
+
+The fifth stage introduces team onboarding, reporting, enterprise controls, and corporate training value.
+
+### Stage 6: Ecosystem Platform
+
+The final long-term stage may include community, certifications, integrations, partnerships, and broader IBM i ecosystem participation.
+
+This evolution should remain flexible and evidence-driven.
+
+---
+
+## 22.4 Future User Experience Vision
+
+In the long term, a user should be able to come to IBMiHub AI and follow a complete IBM i growth journey.
+
+A beginner may:
+
+- Start with IBM i fundamentals
+- Ask the AI Tutor basic questions
+- Complete lessons and quizzes
+- Practice 5250 workflows
+- Learn RPGLE and CLLE basics
+- Prepare for interviews
+- Build confidence for real project work
+
+A working developer may:
+
+- Refresh IBM i concepts
+- Ask practical AI questions
+- Review sample RPGLE or CLLE examples
+- Learn job log investigation patterns
+- Generate documentation drafts from approved inputs
+- Explore modernization topics
+- Improve productivity over time
+
+A team lead may:
+
+- Recommend learning paths to juniors
+- Use content for onboarding
+- Track team learning progress
+- Reduce repeated basic questions
+- Improve consistency of IBM i knowledge transfer
+
+An enterprise buyer may:
+
+- Use IBMiHub AI for structured onboarding
+- Train multiple employees
+- Track learning progress
+- Support modernization initiatives
+- Reduce dependency on tribal knowledge
+- Improve long-term IBM i capability
+
+---
+
+## 22.5 Future AI Vision
+
+AI should remain a core part of the platform, but it should grow responsibly.
+
+Future AI capabilities may include:
+
+- Lesson-aware tutoring
+- Learning-path-aware guidance
+- AI-assisted practice support
+- Sample code explanation
+- Job log learning assistance
+- Documentation drafting
+- Interview coaching
+- Team onboarding support
+- Enterprise AI controls
+
+The AI future should follow these principles:
+
+- AI should support structured learning, not replace it.
+- AI should remain IBM i-focused.
+- AI should be transparent about uncertainty.
+- AI should avoid production-safe guarantees.
+- AI should protect privacy and sensitive information.
+- AI should be improved through user feedback and review.
+- AI should not perform risky actions without explicit future approval.
+
+---
+
+## 22.6 Future Practice Vision
+
+IBMiHub AI should eventually move from learning-by-reading to learning-by-doing.
+
+Future practice experiences may include:
+
+- Simulated 5250 command flows
+- Object and library exercises
+- RPGLE reading exercises
+- CLLE workflow exercises
+- DB2 for i query examples
+- Job log walkthroughs
+- Debugging-style scenarios
+- Guided practice paths
+
+Practice features should help users build confidence safely.
+
+The product should avoid connecting to real production systems until security, privacy, compliance, and support models are mature enough.
+
+---
+
+## 22.7 Future Productivity Vision
+
+Working IBM i professionals may eventually use IBMiHub AI as a productivity companion.
+
+Future productivity support may include:
+
+- Understanding unfamiliar IBM i concepts
+- Explaining sample code
+- Explaining pasted non-sensitive snippets when allowed by policy
+- Interpreting sample job logs
+- Creating documentation drafts
+- Summarizing process flows
+- Supporting modernization learning
+- Helping with onboarding notes
+
+These productivity capabilities should be introduced only after trust, privacy, and accuracy expectations are strong enough.
+
+---
+
+## 22.8 Future Enterprise Vision
+
+Enterprise value is a major long-term opportunity, but it should not dominate the MVP.
+
+Future enterprise capabilities may include:
+
+- Corporate onboarding programs
+- Team learning paths
+- Admin controls
+- Progress reporting
+- Role-based learning
+- Enterprise privacy controls
+- Enterprise support
+- Future SSO
+- Compliance readiness
+- Custom training packages
+
+Enterprise expansion should happen only after the platform proves individual value and has stronger security, privacy, and operational maturity.
+
+---
+
+## 22.9 Future Community and Ecosystem Vision
+
+IBMiHub AI should eventually become a trusted contributor to the IBM i ecosystem.
+
+The long-term community vision may include:
+
+- Sharing original IBM i learning resources
+- Supporting community feedback
+- Highlighting practical IBM i learning topics
+- Collaborating with experienced IBM i professionals
+- Encouraging modern IBM i learning practices
+- Helping preserve IBM i knowledge for future generations
+
+The product should respect existing IBM i documentation, experts, websites, user groups, training providers, and vendors.
+
+The goal is not to replace the ecosystem.
+
+The goal is to strengthen it.
+
+---
+
+## 22.10 Future Certification and Skill Validation Vision
+
+Certification and skill validation may become valuable after the platform has mature learning paths and practice experiences.
+
+Possible future directions include:
+
+- Completion badges
+- Skill readiness checks
+- Interview preparation assessments
+- Topic-level quizzes
+- Practical scenario assessments
+- Corporate training completion reports
+- Future certification-style programs
+
+These should not be introduced too early.
+
+The product should first prove that users trust the learning content, AI Tutor, and practice experience.
+
+---
+
+## 22.11 Future Platform Optionality
+
+Current product and engineering decisions should preserve future optionality.
+
+The product should avoid choices that block:
+
+- More learning paths
+- AI Tutor improvements
+- Practice labs
+- Team features
+- Enterprise features
+- Monetization
+- Community features
+- Mobile-friendly experiences
+- Developer workflow integrations
+- Future ecosystem partnerships
+
+However, preserving optionality does not mean building everything now.
+
+The MVP should remain narrow while the foundation remains extensible.
+
+---
+
+## 22.12 Future Vision Boundaries
+
+The future vision must not be confused with approved MVP scope.
+
+The following remain out of scope for MVP:
+
+- Real IBM i connectivity
+- Production code upload
+- Sensitive job log upload
+- Full 5250 lab
+- Full RPG playground
+- Full job log analyzer
+- Full documentation generator
+- Billing and paid subscriptions
+- Enterprise accounts
+- Admin dashboards
+- Enterprise SSO
+- Certification engine
+- Community forum
+- Mobile app
+- VS Code extension
+- Public API
+- Marketplace
+
+These items may be explored later only through proper approval, validation, SDD specs, and architecture review.
+
+---
+
+## 22.13 Future Success Indicators
+
+Long-term success may be indicated by:
+
+- Learners completing structured IBM i paths
+- Working developers returning for AI-assisted explanations
+- Teams using IBMiHub AI for onboarding
+- Enterprises showing interest in training programs
+- Users requesting advanced practice and productivity tools
+- Positive reputation in the IBM i community
+- Strong content quality and originality
+- AI Tutor becoming trusted for learning support
+- Evidence of willingness to pay for deeper value
+- Sustainable product growth over time
+
+The strongest signal will be repeated trust-based usage, not just traffic.
+
+---
+
+## 22.14 Future Vision Risks
+
+Future expansion has risks.
+
+| Risk | Description | Mitigation Direction |
+|---|---|---|
+| Expanding too fast | Product may become too broad before core value is validated | Use roadmap gates |
+| Overpromising | Users may expect future features before they exist | Separate MVP from future vision |
+| AI trust issues | Advanced AI tools may create accuracy and privacy concerns | Expand AI carefully with review |
+| Enterprise complexity | Enterprise needs may overload the product | Validate individual value first |
+| Content quality dilution | More content may reduce quality consistency | Maintain content governance |
+| Community trust risk | Product may be seen as overhyped or disrespectful | Stay humble, original, and ecosystem-friendly |
+
+---
+
+### Summary
+
+The future vision for IBMiHub AI is to become the trusted AI-powered learning, practice, productivity, onboarding, and knowledge platform for IBM i professionals.
+
+The product may eventually include deeper learning paths, AI tutoring, hands-on labs, RPGLE and CLLE practice, job log learning, documentation assistance, team onboarding, enterprise training, community, and certification-style capabilities.
+
+However, the MVP remains focused.
+
+The product should first validate structured IBM i learning and AI Tutor value, then expand gradually based on user trust, feedback, engagement, and explicit Product Owner approval.
 
 ---
 
 ## 23. Glossary & Terminology
 
-- **Purpose:** Ensure shared, unambiguous language across product, engineering, and business stakeholders.
-- **Description:** Definitions of domain terms (RPGLE, CLLE, DDS, 5250, job log, etc.) and product-specific terminology.
-- **Audience:** All stakeholders, especially new contributors.
-- **Approximate size:** 1 page.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to define important terms used throughout the IBMiHub AI PRD.
+
+This glossary helps keep product, engineering, content, AI, business, and roadmap discussions consistent.
+
+The glossary is not intended to be a complete IBM i training guide. It provides short PRD-level definitions so contributors can understand the meaning of terms used in this document.
+
+Detailed educational explanations should be created later inside approved learning content, lesson plans, glossary features, or curriculum specifications.
+
+---
+
+### Glossary Principles
+
+Glossary definitions should follow these principles:
+
+- Use clear and simple language.
+- Define terms in the context of IBMiHub AI.
+- Avoid unnecessary technical depth.
+- Avoid copying definitions from external sources.
+- Keep definitions useful for product and planning discussions.
+- Expand glossary terms only when needed.
+- Treat this section as a living reference.
+
+---
+
+## 23.1 Product and Planning Terms
+
+| Term | Definition |
+|---|---|
+| IBMiHub AI | The AI-powered SaaS platform being designed to help IBM i professionals learn, practice, understand, document, and improve productivity. |
+| PRD | Product Requirements Document. The source of truth for what the product is, why it exists, who it serves, and what it should achieve. |
+| SDD | Spec-Driven Development. A disciplined approach where detailed specs are created before implementation begins. |
+| MVP | Minimum Viable Product. The first focused version of IBMiHub AI used to validate core user value. |
+| Product Owner | The person responsible for product direction, scope approval, prioritization, and final product decisions. |
+| Roadmap | A phased product direction that explains how the product may evolve over time. |
+| Scope | The set of features, capabilities, and boundaries approved for a phase or release. |
+| Out of Scope | A feature or capability that is explicitly not included in the current phase or MVP. |
+| Requirement | A product need or behavior that the product must, should, or may support. |
+| Functional Requirement | A requirement describing what the product must do. |
+| Non-Functional Requirement | A requirement describing how well the product should behave, such as security, reliability, performance, or usability. |
+| Assumption | Something currently treated as true for planning, but which may need validation. |
+| Open Question | An unresolved decision that must be answered, deferred, or converted into a future task. |
+| Risk | A possible issue that could negatively affect product trust, delivery, adoption, security, cost, or business success. |
+| Beta | An early release used with selected or public users to validate product value and collect feedback. |
+| Sprint 0 | The planning and foundation phase before implementation starts. |
+| Sprint 1 | The first implementation phase after enough product and technical clarity exists. |
+
+---
+
+## 23.2 User and Market Terms
+
+| Term | Definition |
+|---|---|
+| Persona | A representative user type with specific goals, pain points, motivations, and product needs. |
+| Beginner IBM i Learner | A primary MVP persona who is new to IBM i and needs structured, beginner-friendly learning. |
+| Working IBM i Developer | A primary MVP persona who already works with IBM i and needs practical explanations, refreshers, and future productivity support. |
+| Team Lead / Mentor | A secondary persona responsible for helping others learn, onboard, and become productive. |
+| Enterprise Training Buyer | A future buyer persona responsible for training, onboarding, and team capability development. |
+| Interview Candidate / Career Switcher | A user preparing for IBM i roles or transitioning into IBM i work. |
+| User Journey | The path a user follows from discovery to onboarding, activation, engagement, and possible advocacy or upgrade. |
+| Activation | The moment when a user experiences meaningful product value for the first time. |
+| Retention | The degree to which users return and continue using the product over time. |
+| Early Adopter | A user willing to try the product before it is mature and provide feedback. |
+
+---
+
+## 23.3 Learning and Content Terms
+
+| Term | Definition |
+|---|---|
+| Learning Center | The product area where users access structured IBM i learning content. |
+| Learning Path | A guided sequence of lessons designed to help users build understanding step by step. |
+| Lesson | A focused learning unit covering one concept, topic, or practical idea. |
+| IBM i Fundamentals | The first proposed MVP learning path focused on basic IBM i platform concepts. |
+| Lesson Completion | A user action or state showing that a lesson has been completed. |
+| Progress Tracking | The product capability that records and displays a user's learning progress. |
+| Knowledge Check | A lightweight question or activity used to reinforce understanding. |
+| Quiz | A structured set of questions used to test or reinforce learning. For MVP, quizzes are optional and lightweight. |
+| Glossary | A reference list of terms and short explanations. |
+| Original Content | Content written specifically for IBMiHub AI without copying external tutorials, documentation, books, blogs, or courses. |
+| Content Governance | The process used to protect content quality, originality, consistency, and maintainability. |
+| Content Review | The process of checking content for clarity, accuracy, originality, and usefulness before publication. |
+| Content Lifecycle | The process by which content is selected, drafted, reviewed, published, improved, and maintained. |
+
+---
+
+## 23.4 AI Terms
+
+| Term | Definition |
+|---|---|
+| AI Tutor | The MVP AI experience that helps users ask IBM i-related questions and receive learning-focused explanations. |
+| AI-Assisted Learning | Learning supported by AI explanations, clarification, examples, and follow-up guidance. |
+| AI Response | The answer or explanation generated by the AI Tutor. |
+| AI Feedback | User feedback indicating whether an AI response was helpful, not helpful, confusing, or possibly incorrect. |
+| Prompt | The user's question or instruction to the AI Tutor. |
+| Lesson-Aware AI | A future AI capability where AI responses consider the current lesson or learning path context. |
+| AI Trust Boundary | A product rule that limits what users should expect from AI, especially around correctness, privacy, and production use. |
+| AI Provider | The external or internal AI service that may power AI responses. The PRD does not select a provider. |
+| Model | The AI model used to generate responses. The PRD does not select a model. |
+| AI Hallucination | A situation where AI generates incorrect, unsupported, or misleading information. |
+| Grounding | A future AI approach where responses may be supported by approved content or trusted references. |
+| RAG | Retrieval-Augmented Generation. A possible future technical approach where AI uses retrieved content to improve answers. The PRD does not require this for MVP. |
+| AI Governance | Policies, controls, and review processes used to manage AI quality, privacy, safety, and usage. |
+
+---
+
+## 23.5 IBM i Platform Terms
+
+| Term | Definition |
+|---|---|
+| IBM i | An integrated operating environment used by many organizations for business-critical applications. |
+| AS/400 | An older name commonly associated with the IBM midrange platform lineage. Many users still use this term informally. |
+| IBM Power | The hardware platform family commonly associated with IBM i workloads. |
+| 5250 | A terminal-style interface commonly used to interact with IBM i applications and command screens. |
+| Green Screen | An informal term often used for 5250-style terminal screens. |
+| Library | A container-like IBM i concept used to organize objects. |
+| Object | A named IBM i system item such as a program, file, command, job queue, or output queue. |
+| Library List | The ordered list of libraries that IBM i uses to find objects during execution or commands. |
+| Physical File | A database file that stores actual data records. |
+| Logical File | A database access path or view-like structure over one or more physical files. |
+| Source File | A file used to store source members such as RPGLE, CLLE, DDS, or SQL source. |
+| Source Member | A named source entry inside a source file. |
+| Program | An executable object created from source code or compiled logic. |
+| Service Program | An IBM i object that can provide reusable procedures or services to programs. |
+| Command | An IBM i instruction used to perform an action, such as working with objects, jobs, files, or system settings. |
+| Job | A unit of work running on IBM i. |
+| Job Queue | A queue where batch jobs wait before running. |
+| Output Queue | A queue where spool files or printed output can be placed. |
+| Spool File | Output generated by jobs or programs, often viewed or printed later. |
+| Job Log | A record of messages and events related to a job's execution. |
+| Message | Information, warning, inquiry, or error communication generated by IBM i or an application. |
+| Batch Job | A job that runs without direct interactive user control. |
+| Interactive Job | A job associated with an interactive user session. |
+| Subsystem | An IBM i environment that controls where and how jobs run. |
+| Authority | Permission or access control related to IBM i objects and operations. |
+
+---
+
+## 23.6 IBM i Development Terms
+
+| Term | Definition |
+|---|---|
+| RPGLE | A modern form of RPG used for IBM i application development. |
+| CLLE | Control Language with ILE support, commonly used for scripting, job control, and system-level workflows on IBM i. |
+| SQLRPGLE | RPGLE source that includes embedded SQL. |
+| DDS | Data Description Specifications, historically used to define physical files, logical files, display files, and printer files. |
+| DB2 for i | The integrated relational database on IBM i. |
+| Display File | A screen definition object commonly used by traditional IBM i applications. |
+| Printer File | A definition used to produce formatted printed or spool output. |
+| Module | A compiled unit that may be bound into a program or service program. |
+| Procedure | A reusable block of logic, often used in modern RPGLE development. |
+| Binding | The process of combining modules and service programs into executable objects. |
+| Compile | The process of turning source code into executable or usable IBM i objects. |
+| Debugging | The process of investigating and fixing program behavior or errors. |
+| Legacy Code | Existing code that may be old, business-critical, underdocumented, or difficult to understand. |
+| Modernization | Improving existing IBM i applications, workflows, interfaces, tooling, or integrations without necessarily replacing the platform. |
+| API | An interface that allows systems or programs to communicate. |
+| Integration | A connection or workflow between IBM i and another system, application, or service. |
+
+---
+
+## 23.7 Security, Privacy, and Data Terms
+
+| Term | Definition |
+|---|---|
+| Sensitive Data | Information that should not be shared casually, such as credentials, customer data, proprietary code, production logs, or business-sensitive information. |
+| Production Code | Real source code used in a live business system. Production code upload is out of scope for MVP. |
+| Sensitive Job Log | A real job log that may contain customer, business, system, or operational information. Sensitive job log upload is out of scope for MVP. |
+| Credentials | Passwords, tokens, keys, connection details, or other secrets used to access systems. |
+| Privacy Messaging | Product text explaining how users should think about data sharing and privacy. |
+| Acceptable Use | Guidance explaining what users should and should not do inside the product. |
+| Data Retention | The policy or decision describing how long user or product data is stored. |
+| Enterprise SSO | Single sign-on for organizations. This is out of scope for MVP. |
+| Compliance | Legal, security, privacy, or regulatory expectations that may apply to future enterprise use. |
+
+---
+
+## 23.8 Business and Monetization Terms
+
+| Term | Definition |
+|---|---|
+| Free Tier | A possible future entry-level plan allowing users to experience selected product value without payment. |
+| Pro Plan | A possible future individual paid plan for deeper learning or higher AI usage. |
+| Team Plan | A possible future plan for multiple users, onboarding, and team learning. |
+| Enterprise Plan | A possible future plan for organizations needing training, controls, reporting, support, and privacy features. |
+| Willingness to Pay | Evidence that users may pay for the value offered by the product. |
+| MRR | Monthly Recurring Revenue. A future business metric once paid subscriptions exist. |
+| Churn | The rate at which paying users cancel or stop using the product. |
+| Conversion | The movement of a user from one stage to another, such as visitor to beta user or free user to paid user. |
+| GTM | Go-To-Market. The approach used to reach users, explain value, and drive adoption. |
+| Founder-Led Growth | Early growth driven directly by the founder through outreach, content, demos, community activity, and user conversations. |
+
+---
+
+## 23.9 Roadmap and Future Feature Terms
+
+| Term | Definition |
+|---|---|
+| Future Vision | The long-term ambition for what IBMiHub AI may become after validation and responsible expansion. |
+| Roadmap Gate | A decision point that must be passed before the product moves into a larger phase. |
+| Post-MVP | Work considered after the first MVP has been built and validated. |
+| 5250 Practice Lab | A possible future simulated practice experience for IBM i workflows. |
+| RPG Playground | A possible future environment for RPGLE learning or practice. Not part of MVP. |
+| Job Log Analyzer | A possible future feature for explaining job logs. Not part of MVP. |
+| Documentation Generator | A possible future feature for helping create documentation from approved inputs. Not part of MVP. |
+| Community Forum | A possible future community feature. Not part of MVP. |
+| Certification | A possible future skill validation or assessment offering. Not part of MVP. |
+| VS Code Extension | A possible future developer workflow integration. Not part of MVP. |
+| Public API | A possible future interface for external systems or developers. Not part of MVP. |
+| Marketplace | A possible future business or ecosystem capability. Not part of MVP. |
+
+---
+
+## 23.10 Glossary Maintenance
+
+This glossary should be updated when:
+
+- A new term becomes important to product decisions.
+- A term is used repeatedly across PRD, specs, roadmap, or architecture documents.
+- A definition is unclear or disputed.
+- A term creates confusion during planning or implementation.
+- New approved product areas are added.
+
+Glossary updates should remain concise and should not turn this section into full training content.
+
+Detailed explanations should live in Learning Center content, curriculum specs, or future glossary product features.
+
+---
+
+### Summary
+
+The glossary defines key terms used across the IBMiHub AI PRD.
+
+It helps keep product planning, engineering discussions, AI strategy, content strategy, roadmap decisions, and business planning consistent.
+
+This glossary is intentionally concise. It should support clarity without replacing detailed IBM i learning content.
 
 ---
 
 ## 24. Appendix
 
-- **Purpose:** House supporting material that would otherwise clutter the core narrative.
-- **Description:** Research references, source data for market sizing, supplementary diagrams, links to related documents (Engineering Review, Sprint 0 Roadmap, journal).
-- **Audience:** Product, Engineering (as needed).
-- **Approximate size:** Variable.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this appendix is to provide supporting references, related document links, and supplementary planning notes that support the IBMiHub AI PRD.
+
+The appendix should help contributors understand where supporting information lives without cluttering the main PRD sections.
+
+This section does not introduce new product scope, new MVP requirements, technical architecture decisions, legal commitments, pricing commitments, or implementation tasks.
+
+If any appendix item conflicts with the approved PRD sections, the approved PRD sections should take priority.
+
+---
+
+### Appendix Usage Principles
+
+The appendix should follow these principles:
+
+- Support the PRD without replacing it.
+- Keep references organized and easy to maintain.
+- Avoid duplicating long content from other documents.
+- Avoid adding unapproved product requirements.
+- Avoid copying external source material.
+- Keep research references separate from final product claims.
+- Update links and references as the project evolves.
+- Use this section as supporting context, not as the product source of truth.
+
+---
+
+## 24.1 Source of Truth Hierarchy
+
+The following hierarchy should be used when product or implementation questions arise.
+
+| Level | Document / Artifact Type | Purpose |
+|---|---|---|
+| 1 | PRD.md | Defines approved product direction, scope, requirements, constraints, risks, and roadmap |
+| 2 | PROJECT_CONTEXT.md | Defines project background, vision, principles, and working context |
+| 3 | PROJECT_STATE.md | Tracks current project phase, progress, blockers, next actions, and active status |
+| 4 | PROJECT_MASTER_INDEX.md | Provides navigation across major project documents |
+| 5 | SDD Specs | Define detailed feature-level requirements derived from the PRD |
+| 6 | Architecture Documents / ADRs | Define technical decisions and trade-offs |
+| 7 | Implementation Plans / Tasks | Define how approved specs will be built |
+| 8 | Source Code | Implements approved requirements and specs |
+
+When conflicts exist, product scope should be resolved at the PRD or Product Owner level before implementation continues.
+
+---
+
+## 24.2 Related Project Documents
+
+The following documents are expected to support IBMiHub AI planning and execution.
+
+| Document | Purpose |
+|---|---|
+| PROJECT_CONTEXT.md | Captures project vision, background, principles, and long-term context |
+| PROJECT_STATE.md | Tracks current status, phase, blockers, risks, and next actions |
+| PROJECT_MASTER_INDEX.md | Provides a master navigation index for project documents |
+| AI_RULES.md | Defines rules for AI assistants working on the project |
+| PROMPT_LIBRARY.md | Stores reusable prompts for product, engineering, SDD, review, and documentation work |
+| Engineering Review | Captures engineering recommendations, risks, stack considerations, and architectural concerns |
+| Sprint 0 Documentation Roadmap | Lists documentation needed before implementation begins |
+| PRD.md | Master product requirements document |
+| Future SDD Specs | Feature-level specifications created before implementation |
+| Future ADRs | Records of important architecture and technology decisions |
+
+This list may be expanded as the project grows.
+
+---
+
+## 24.3 Expected Future SDD Specifications
+
+Before implementation begins, the following SDD specs may be needed.
+
+These are not approved implementation tasks yet. They are likely candidate specs derived from the PRD.
+
+| Possible Spec | Purpose |
+|---|---|
+| Public Landing Experience Spec | Define landing page content, positioning, CTA, and user entry flow |
+| User Account and Onboarding Spec | Define sign-up, login, onboarding questions, and initial user path |
+| Dashboard Spec | Define what users see after login and how they continue learning |
+| Learning Center Spec | Define learning path display, lesson listing, and lesson access |
+| Lesson Experience Spec | Define lesson page behavior, completion, navigation, and feedback |
+| AI Tutor Spec | Define AI Tutor behavior, boundaries, UX, feedback, and privacy messaging |
+| Progress Tracking Spec | Define basic lesson completion and progress display |
+| Feedback Collection Spec | Define lesson feedback, AI feedback, and general product feedback |
+| Content Governance Spec | Define how MVP content is created, reviewed, approved, and maintained |
+
+The exact list should be finalized before Sprint 1 planning.
+
+---
+
+## 24.4 Expected Future Architecture / ADR Topics
+
+The PRD intentionally avoids architecture decisions.
+
+The following topics should likely be handled later through architecture documents or ADRs.
+
+| Topic | Why It Matters |
+|---|---|
+| MVP technology stack | Determines implementation foundation |
+| Hosting and deployment | Determines how the web application is released and operated |
+| Database / storage approach | Supports users, progress, content metadata, and feedback |
+| Authentication approach | Supports secure user identity |
+| AI provider and model approach | Powers AI Tutor and affects quality, cost, latency, and safety |
+| AI prompt and safety strategy | Defines how AI behavior is controlled |
+| Content storage approach | Determines how lessons are authored, reviewed, and delivered |
+| Analytics approach | Supports MVP validation without overcollecting data |
+| Error monitoring approach | Helps identify product failures |
+| Secrets and environment management | Protects sensitive configuration |
+| Testing strategy | Supports release quality and confidence |
+| Deployment workflow | Supports safe delivery and iteration |
+
+These decisions should not be embedded directly into the PRD unless they become product-level constraints.
+
+---
+
+## 24.5 Research and Reference Notes
+
+Research may be used to validate product direction, market assumptions, competitive positioning, IBM i terminology, and technical accuracy.
+
+Research notes should follow these rules:
+
+- Prefer reliable and authoritative sources when validating facts.
+- Use official documentation where factual precision matters.
+- Do not copy external wording into product content.
+- Do not copy lesson structure from external tutorials.
+- Record references where they influenced product or content decisions.
+- Separate research notes from final approved content.
+- Revalidate time-sensitive information when needed.
+- Avoid making unsupported market-size or revenue claims.
+
+Research supports decision-making, but it does not automatically create product requirements.
+
+---
+
+## 24.6 Content Reference Policy
+
+IBMiHub AI content must remain original.
+
+External resources may be used for research, validation, and fact-checking, but final learning content should be written in IBMiHub AI's own words, structure, examples, and teaching style.
+
+The appendix may contain reference links or notes, but it must not contain copied tutorial content, copied documentation text, copied examples, or copied course material.
+
+---
+
+## 24.7 MVP Validation Evidence to Capture Later
+
+After MVP beta begins, the appendix or supporting documents may reference evidence such as:
+
+- Beta user feedback summaries
+- Lesson completion observations
+- AI Tutor usage observations
+- Common user confusion points
+- Feature request themes
+- Willingness-to-pay signals
+- User interview notes
+- Community response notes
+- Product decision summaries
+
+Detailed evidence may live outside the PRD, but the PRD may reference it when it affects product decisions.
+
+---
+
+## 24.8 Decision Records to Maintain Later
+
+As the project moves from planning to implementation, important decisions should be captured in appropriate documents.
+
+Examples include:
+
+- MVP beta access model
+- Minimum MVP lesson count
+- Quiz inclusion or deferral
+- Glossary inclusion or deferral
+- Account requirement before lesson access
+- AI provider decision
+- AI conversation storage decision
+- Technology stack decision
+- Authentication decision
+- Analytics decision
+- Content storage decision
+- Required SDD specs before coding
+
+Decisions that affect architecture should be recorded in ADRs.
+
+Decisions that affect scope should be reflected in the PRD.
+
+Decisions that affect current execution should be reflected in PROJECT_STATE.md.
+
+---
+
+## 24.9 Appendix Maintenance
+
+This appendix should be reviewed:
+
+- Before Sprint 1 planning
+- When new supporting documents are created
+- When architecture decisions are made
+- When SDD specs are created
+- Before MVP beta release
+- After major roadmap changes
+- Before final PRD approval
+
+The appendix should remain concise.
+
+If supporting material becomes too large, it should be moved into a separate document and referenced from this section.
+
+---
+
+### Summary
+
+The appendix supports the PRD by organizing related documents, future spec candidates, future architecture decision topics, research guidance, content reference rules, validation evidence, and decision records.
+
+It should not introduce new product scope or implementation decisions.
+
+The PRD remains the product source of truth, while the appendix serves as a supporting reference layer.
 
 ---
 
 ## 25. Revision History
 
+### Purpose of This Section
+
+The purpose of this section is to track major PRD changes over time.
+
+Revision history helps contributors understand how the PRD evolved from an initial structure into a complete planning document.
+
+This section should capture meaningful content, scope, structure, and status changes. Minor typo fixes do not need separate revision entries unless they affect interpretation.
+
+---
+
+### Revision History
+
 | Date | Version | Summary |
 |---|---|---|
-| 2026-06-30 | 0.1 | Initial structure created — table of contents and section placeholders only; no content drafted |
-| 2026-06-30 | 0.2 | Renamed to PRD.md; inserted new section 6 "Product Principles" after Success Metrics & KPIs; renumbered sections 6–24 to 7–25 |
+| 2026-06-30 | 0.1 | Initial PRD structure created with table of contents and section placeholders |
+| 2026-06-30 | 0.2 | Renamed PRODUCT_REQUIREMENTS.md to PRD.md; added Product Principles section; renumbered later sections |
 | 2026-06-30 | 0.3 | Added approved Executive Summary content |
 | 2026-07-01 | 0.4 | Added approved Vision & Mission content |
 | 2026-07-01 | 0.5 | Added approved Problem Statement content |
@@ -4157,3 +9340,39 @@ These requirements should guide the first SDD feature specifications and Sprint 
 | 2026-07-01 | 1.3 | Added approved Product Scope content |
 | 2026-07-01 | 1.4 | Added approved MVP Definition content |
 | 2026-07-01 | 1.5 | Added approved Functional Requirements content |
+| 2026-07-01 | 1.6 | Added approved Non-Functional Requirements content |
+| 2026-07-01 | 1.7 | Added approved AI Strategy content |
+| 2026-07-01 | 1.8 | Added approved Learning & Content Strategy content |
+| 2026-07-01 | 1.9 | Added approved Monetization Strategy content |
+| 2026-07-01 | 2.0 | Added approved Technical Constraints & Dependencies content |
+| 2026-07-01 | 2.1 | Added approved Risk Analysis content |
+| 2026-07-01 | 2.2 | Added approved Assumptions & Open Questions content |
+| 2026-07-01 | 2.3 | Added approved Roadmap content |
+| 2026-07-01 | 2.4 | Added approved Future Vision content |
+| 2026-07-01 | 2.5 | Added approved Glossary & Terminology content |
+| 2026-07-01 | 2.6 | Added approved Appendix content |
+| 2026-07-01 | 2.7 | Completed Document Control, Revision History, and final PRD cleanup |
+
+---
+
+### Current Version Summary
+
+Version 2.7 completes the first full draft of the IBMiHub AI PRD.
+
+At this stage:
+
+- All planned PRD sections contain draft content.
+- MVP scope is documented.
+- Functional and non-functional requirements are documented.
+- AI strategy is documented.
+- Learning, content, monetization, technical constraints, risks, assumptions, roadmap, future vision, glossary, and appendix are documented.
+- The PRD is ready for full Product Owner review.
+- Sprint 1 implementation should not begin until required decisions and SDD specs are prepared.
+
+---
+
+### Summary
+
+The PRD has now moved from section-by-section drafting to complete-document review readiness.
+
+The next major step is not to add more PRD content, but to review the PRD as a whole, resolve Sprint 1 open questions, and create downstream SDD specifications for MVP implementation.
