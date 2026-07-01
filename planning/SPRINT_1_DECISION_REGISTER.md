@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Track and resolve all decisions that must be made before Sprint 1 implementation can begin
-- Version: 0.2
-- Status: Partially Decided — Product and Content decisions resolved; Engineering decisions pending
+- Version: 0.3
+- Status: Decided — Sprint 1 blocking decisions resolved; ready for SDD spec creation
 - Last Updated: 2026-07-01
 - Owner: Both
 
@@ -205,13 +205,13 @@ Rationale: One question keeps onboarding lightweight and helps route users witho
 | Question | Which AI provider and model should power the MVP AI Tutor? |
 | Owner | Engineering |
 | Needed Before | AI architecture |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** This decision belongs to Engineering and should be captured in an ADR after comparing available providers against cost, IBM i domain coverage, response quality, latency, and terms of service. The PRD is intentionally provider-neutral.
 
-**Approved Decision:** _To be filled in by Engineering via ADR._
+**Approved Decision:** Use Anthropic as the AI provider, with Claude Sonnet 4.6 as the initial MVP AI Tutor model. Maintain Claude Haiku 4.5 as a cost fallback option after quality review. Implement a provider abstraction layer so the application is not tightly coupled to Anthropic SDK usage outside the AI service layer.
 
-**Notes:** Whichever provider is selected, the AI Tutor must satisfy trust and safety requirements in PRD Sections 13.8, 14.8, and 15. Cost awareness should be built in from the start (PRD 15.13, 18.6).
+**Notes:** Whichever provider is selected, the AI Tutor must satisfy trust and safety requirements in PRD Sections 13.8, 14.8, and 15. Cost awareness should be built in from the start (PRD 15.13, 18.6). Model names, model IDs, pricing, and rate limits must be re-verified against official provider documentation before implementation begins and again before MVP beta release.
 
 ---
 
@@ -377,13 +377,13 @@ Rationale: This gives all MVP lessons a consistent structure and supports both b
 | Question | What technology stack should be used for the MVP web application? |
 | Owner | Engineering |
 | Needed Before | Sprint 1 implementation |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** This decision belongs to Engineering and should be captured in an ADR. The PRD intentionally does not select a technology stack. The existing workspace scaffold (Next.js + TypeScript) was created before the PRD was approved and may or may not be adopted.
 
-**Approved Decision:** _To be filled in by Engineering via ADR._
+**Approved Decision:** Adopt the existing Next.js + TypeScript scaffold for the MVP web application. Add Tailwind CSS, TypeScript strict mode, and a lightweight component library such as shadcn/ui during implementation.
 
-**Notes:** The stack must support web-based delivery, user accounts, AI Tutor integration, lesson content display, progress tracking, and feedback collection. Engineering should evaluate the existing scaffold and decide whether to adopt, replace, or modify it.
+**Notes:** See ADR-001 for full rationale. The stack must support web-based delivery, user accounts, AI Tutor integration, lesson content display, progress tracking, and feedback collection.
 
 ---
 
@@ -397,13 +397,13 @@ Rationale: This gives all MVP lessons a consistent structure and supports both b
 | Question | What hosting and deployment approach should be used for MVP? |
 | Owner | Engineering |
 | Needed Before | Sprint 1 implementation |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** This decision belongs to Engineering and should be captured in an ADR. A simple serverless or platform-as-a-service approach is appropriate for MVP given the scope. Avoid over-engineering hosting infrastructure before user demand is known.
 
-**Approved Decision:** _To be filled in by Engineering via ADR._
+**Approved Decision:** Use Vercel for MVP hosting and deployment, with GitHub-connected deployments and preview deployments for pull requests.
 
-**Notes:** MVP hosting should support fast iteration, low operational overhead, and basic scaling for a beta user base. Cost awareness matters given AI usage will add operating cost.
+**Notes:** See ADR-002 for full rationale. MVP hosting should support fast iteration, low operational overhead, and basic scaling for a beta user base. Cost awareness matters given AI usage will add operating cost.
 
 ---
 
@@ -417,13 +417,13 @@ Rationale: This gives all MVP lessons a consistent structure and supports both b
 | Question | What database or storage approach should be used for users, progress, content metadata, and feedback? |
 | Owner | Engineering |
 | Needed Before | Architecture planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** This decision belongs to Engineering and should be captured in an ADR. A relational database is appropriate for user accounts, progress tracking, and feedback. Content storage format (files vs database records) depends on the content management workflow decision (OQ-CONT-007).
 
-**Approved Decision:** _To be filled in by Engineering via ADR._
+**Approved Decision:** Use Supabase PostgreSQL as the primary database for MVP users, progress records, content metadata, and feedback. Store MVP lesson content as version-controlled markdown or structured content files in the repository, with dynamic user-specific data stored in the database.
 
-**Notes:** The PRD intentionally does not select a database provider. Engineering should choose a well-supported, maintainable approach that avoids over-complexity for MVP scale.
+**Notes:** See ADR-003 for full rationale. Lesson content in Git supports content governance and review workflows (D-CONT-002). Supabase is consistent with the authentication decision (D-TECH-004).
 
 ---
 
@@ -437,13 +437,13 @@ Rationale: This gives all MVP lessons a consistent structure and supports both b
 | Question | What authentication approach should be used for MVP? |
 | Owner | Engineering |
 | Needed Before | Architecture planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** This decision belongs to Engineering and should be captured in an ADR. A managed authentication provider (rather than a custom-built solution) is appropriate for MVP. The PRD does not select a provider. The choice should prioritize security, ease of integration, and minimal operational overhead.
 
-**Approved Decision:** _To be filled in by Engineering via ADR._
+**Approved Decision:** Use Supabase Auth as the managed authentication provider for MVP. Allow public access to landing page and first lesson preview, and require authentication for AI Tutor usage, progress tracking, and dashboard access.
 
-**Notes:** The authentication approach must support basic sign-up, login, and user profile. Enterprise SSO is explicitly out of scope for MVP. The decision should align with D-PROD-005 (account requirement before lessons).
+**Notes:** See ADR-004 for full rationale. Consistent with D-TECH-003 (Supabase database). Enterprise SSO is explicitly out of scope for MVP. Aligns with D-PROD-005 (account requirement before lessons).
 
 ---
 
@@ -501,15 +501,15 @@ Rationale: These specs cover the approved MVP scope and should be completed befo
 | D-PROD-004 | Product | Glossary in MVP or deferred? | Decided | Product |
 | D-PROD-005 | Product | Account required before lessons? | Decided | Product |
 | D-PROD-006 | Product | Onboarding question design | Decided | Product |
-| D-AI-001 | AI | AI provider and model | Open | Engineering |
+| D-AI-001 | AI | AI provider and model | Decided | Engineering |
 | D-AI-003 | AI | Prompt-only or lesson-aware AI Tutor | Decided | Product + Engineering |
 | D-AI-004 | AI | AI conversation history storage | Decided | Product + Engineering |
 | D-CONT-001 | Content | Exact first learning path lessons | Decided | Product |
 | D-CONT-002 | Content | Standard lesson template | Decided | Product |
-| D-TECH-001 | Technical | MVP technology stack | Open | Engineering |
-| D-TECH-002 | Technical | Hosting and deployment | Open | Engineering |
-| D-TECH-003 | Technical | Database or storage approach | Open | Engineering |
-| D-TECH-004 | Technical | Authentication approach | Open | Engineering |
+| D-TECH-001 | Technical | MVP technology stack | Decided | Engineering |
+| D-TECH-002 | Technical | Hosting and deployment | Decided | Engineering |
+| D-TECH-003 | Technical | Database or storage approach | Decided | Engineering |
+| D-TECH-004 | Technical | Authentication approach | Decided | Engineering |
 | D-TECH-009 | Technical | Required SDD specs before coding | Decided | Product + Engineering |
 
 ---
@@ -532,3 +532,4 @@ Rationale: These specs cover the approved MVP scope and should be completed befo
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial Sprint 1 decision register created from PRD Section 20.14 open questions |
 | 2026-07-01 | 0.2 | Product Owner resolved 11 decisions: D-PROD-001 through D-PROD-006, D-AI-003, D-AI-004, D-CONT-001, D-CONT-002, D-TECH-009. Engineering decisions D-AI-001, D-TECH-001–004 remain open. |
+| 2026-07-01 | 0.3 | Accepted Engineering ADRs and resolved remaining Sprint 1 blocking decisions |
