@@ -8,8 +8,8 @@
 |---|---|
 | Spec ID | 002 |
 | Feature | Learning Center |
-| Status | Review Ready |
-| Version | 0.2 |
+| Status | Approved |
+| Version | 1.0 |
 | Owner | Product + Engineering |
 | Last Updated | 2026-07-01 |
 
@@ -62,7 +62,7 @@ The MVP Learning Center provides a single guided learning path — IBM i Fundame
 | Authenticated progress tracking | Lesson completion state is stored per authenticated user; progress is displayed on the lesson list and dashboard |
 | Mark complete behavior | At the end of each lesson, the user can explicitly mark the lesson as complete |
 | Link to AI Tutor | Each lesson provides access to the AI Tutor so users can ask questions during or after reading a lesson |
-| Version-controlled content | Lesson content is stored as markdown or structured content files in the repository, not in a database (ADR-003) |
+| Version-controlled content | Lesson content is stored as plain Markdown (.md) files in the repository, not in a database (ADR-003) |
 | Lesson metadata management | Lesson metadata (title, slug, order, description, status, estimated reading time) is managed separately from lesson body content |
 
 ---
@@ -297,7 +297,7 @@ Each lesson page must provide access to the AI Tutor.
 
 Lesson content must be loaded from version-controlled content files, not from a content management system.
 
-- Lesson body content is stored as markdown or structured content files in the repository (ADR-003 content storage decision)
+- Lesson body content is stored as plain Markdown (.md) files in the repository (ADR-003 content storage decision)
 - Lesson metadata (title, slug, order, description, status, estimated reading time) is stored separately from lesson body content
 - Only lessons with a published/reviewed status flag set to true must be visible in the public lesson list
 - The content loading mechanism must handle gracefully the case where a lesson file is missing or cannot be loaded
@@ -673,3 +673,4 @@ This specification must be reviewed and approved by the Product Owner before any
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial draft — full MVP Learning Center spec based on PRD v2.9, Sprint 1 Decision Register v0.3, and Spec 001 |
 | 2026-07-01 | 0.2 | Cleanup after review; resolved Learning Center content format, preview, route, reading time, and unpublished lesson questions |
+| 2026-07-01 | 1.0 | Approved Learning Center SDD spec for implementation planning |
