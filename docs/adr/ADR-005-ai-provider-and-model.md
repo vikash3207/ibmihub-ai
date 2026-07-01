@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed
+Accepted
 
 ## Context
 
@@ -169,6 +169,8 @@ Claude Sonnet 4.6 is the most appropriate starting model for the IBM i AI Tutor 
 - Sonnet 4.6 at $3/$15 per MTok is more expensive than the cheapest options (Haiku 4.5, GPT-4o-mini); cost must be monitored and included in any future paid plan design (PRD 17.4, 17.9)
 - No RAG or lesson-aware context injection at MVP (D-AI-003 decision); AI Tutor quality depends entirely on system prompt guidance and model capability
 - AI conversation history is not persisted server-side (D-AI-004); users cannot continue a conversation across sessions in MVP
+
+**Provider verification requirement:** Model names, model IDs, pricing, and rate limits must be re-verified against official provider documentation before implementation begins and again before MVP beta release, because AI provider offerings and prices may change.
 
 **Cost monitoring guidance:**
 - Track AI usage by session via the Anthropic usage response fields (input_tokens, output_tokens)
