@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 2.7
-- Status: Draft — All Sections Complete / Ready for Product Owner Review
+- Version: 2.8
+- Status: Draft — Minor Cleanup Complete / Ready for Product Owner Approval
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -74,8 +74,8 @@ This section helps contributors understand whether the PRD is still being drafte
 | Product | IBMiHub AI |
 | Owner | Product |
 | Primary Decision Owner | Product Owner |
-| Current Version | 2.7 |
-| Current Status | Draft — All Sections Complete / Ready for Product Owner Review |
+| Current Version | 2.8 |
+| Current Status | Draft — Minor Cleanup Complete / Ready for Product Owner Approval |
 | Last Updated | 2026-07-01 |
 
 ---
@@ -91,7 +91,7 @@ This section helps contributors understand whether the PRD is still being drafte
 
 Current status:
 
-**Draft — All Sections Complete / Ready for Product Owner Review**
+**Draft — Minor Cleanup Complete / Ready for Product Owner Approval**
 
 This means the PRD content is complete for the current planning cycle, but it should still receive a full Product Owner review before being treated as formally approved for Sprint 1 planning.
 
@@ -143,7 +143,7 @@ IBMiHub AI is an AI-powered SaaS platform designed for IBM i professionals, lear
 
 The IBM i ecosystem continues to power important business systems across industries, but learning resources, developer tooling, and modernization support remain fragmented. Many professionals rely on static tutorials, legacy documentation, internal knowledge transfer, and manual debugging practices. This creates a significant opportunity for a modern, AI-first platform focused specifically on IBM i.
 
-IBMiHub AI is not intended to be just another tutorial website. It is being designed as a complete learning and productivity platform where users can learn IBM i concepts, practice through interactive labs, ask AI-powered questions, analyze RPGLE and CLLE code, understand job logs, generate documentation, and prepare for real-world development scenarios.
+IBMiHub AI is not intended to be just another tutorial website. It is being designed as a complete learning and productivity platform where users can start with structured IBM i learning and AI-powered questions in the MVP, then potentially expand in later phases into interactive labs, RPGLE and CLLE code understanding, job log learning, documentation assistance, and real-world development scenarios.
 
 The initial MVP will focus on a narrow but valuable experience: a structured learning foundation, an AI tutor, a user dashboard, and early progress tracking. More advanced capabilities such as a 5250 practice lab, RPG playground, job log analyzer, documentation generator, enterprise training, and certification features will be introduced in later phases.
 
@@ -6724,7 +6724,7 @@ Scope creep could delay MVP launch, increase complexity, reduce product focus, a
 
 ### Mitigation Direction
 
-- Keep MVP limited to approved Sections 11–18.
+- Keep MVP limited to the approved MVP scope defined in Sections 11–14.
 - Treat future modules as future, not current.
 - Do not add real IBM i connectivity, billing, enterprise features, or advanced tools to MVP.
 - Use Product Owner approval before adding any new feature.
@@ -9352,12 +9352,13 @@ This section should capture meaningful content, scope, structure, and status cha
 | 2026-07-01 | 2.5 | Added approved Glossary & Terminology content |
 | 2026-07-01 | 2.6 | Added approved Appendix content |
 | 2026-07-01 | 2.7 | Completed Document Control, Revision History, and final PRD cleanup |
+| 2026-07-01 | 2.8 | Applied final cleanup from PRD final review |
 
 ---
 
 ### Current Version Summary
 
-Version 2.7 completes the first full draft of the IBMiHub AI PRD.
+Version 2.8 completes the first full draft of the IBMiHub AI PRD.
 
 At this stage:
 
