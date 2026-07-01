@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Track and resolve all decisions that must be made before Sprint 1 implementation can begin
-- Version: 0.1
-- Status: Open — Decisions Pending
+- Version: 0.2
+- Status: Partially Decided — Product and Content decisions resolved; Engineering decisions pending
 - Last Updated: 2026-07-01
 - Owner: Both
 
@@ -49,13 +49,15 @@ Once a decision is made, it should be recorded here, reflected in the relevant S
 | Question | Should MVP beta be invite-only, public beta, or limited-access waitlist? |
 | Owner | Product / Founder |
 | Needed Before | MVP launch |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Invite-only or limited waitlist for the first beta.
 
 Rationale: Invite-only limits early exposure to users who can provide quality feedback. It reduces the risk of public trust damage from an immature product. A waitlist also creates demand signals and simplifies early AI cost management.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Use a limited-access waitlist first, followed by invite-only beta access.
+
+Rationale: This keeps early exposure controlled, helps collect better feedback, reduces public trust risk, and gives early demand signals without opening the product too broadly.
 
 **Notes:** —
 
@@ -71,15 +73,17 @@ Rationale: Invite-only limits early exposure to users who can provide quality fe
 | Question | What is the minimum number of lessons required for MVP release? |
 | Owner | Product |
 | Needed Before | Sprint 1 planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** A minimum of 8–12 lessons in the IBM i Fundamentals path before beta release.
 
 Rationale: Section 16 proposes a 12-lesson sequence. A minimum of 8 complete, reviewed lessons covers the most foundational topics (What is IBM i, libraries, objects, 5250 basics, files, RPGLE intro, CLLE intro, development workflow) and gives users enough content to justify returning. Fewer than 8 risks a product that feels empty; more than 12 may delay launch unnecessarily.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Target 12 lessons for the IBM i Fundamentals path, but allow MVP beta release with a minimum of 8 complete, reviewed lessons.
 
-**Notes:** Content creation timeline will affect this decision. Finalize alongside OQ-CONT-001 and OQ-CONT-002.
+Rationale: 12 lessons gives the full intended beginner path. 8 reviewed lessons is the minimum acceptable beta threshold so the product does not feel empty while avoiding unnecessary launch delay.
+
+**Notes:** Content creation timeline will affect this decision. Ties to D-CONT-001 (lesson list) and D-CONT-002 (lesson template).
 
 ---
 
@@ -93,13 +97,15 @@ Rationale: Section 16 proposes a 12-lesson sequence. A minimum of 8 complete, re
 | Question | Should MVP include quizzes or defer them to early post-MVP? |
 | Owner | Product |
 | Needed Before | Sprint 1 planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Defer quizzes to early post-MVP.
 
 Rationale: Quizzes add product and engineering complexity without changing the core MVP validation question (do users engage with learning and AI Tutor). A lightweight "mark as complete" per lesson is sufficient for MVP progress tracking. Quizzes can be added quickly in the first post-MVP iteration once lesson content is stable.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Defer quizzes to early post-MVP. MVP should use lesson completion only.
+
+Rationale: Quizzes add complexity and are not required to validate the core MVP value of structured learning plus AI Tutor.
 
 **Notes:** If deferred, the Lesson Experience Spec should still allow a quiz section to be added later without major rework.
 
@@ -115,13 +121,15 @@ Rationale: Quizzes add product and engineering complexity without changing the c
 | Question | Should MVP include a glossary or defer it to early post-MVP? |
 | Owner | Product |
 | Needed Before | Sprint 1 planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Defer a full glossary to early post-MVP; consider a lightweight inline tooltip or term explanation within lessons as optional.
 
 Rationale: A standalone glossary feature adds product and engineering scope. Inline term definitions within lesson content can partially satisfy beginner needs without a separate glossary module. A full glossary can be added as one of the first post-MVP improvements.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Defer a standalone glossary feature to early post-MVP. MVP lesson content may include inline term explanations where useful.
+
+Rationale: A full glossary adds separate product scope. Inline explanations support beginners without creating a new MVP module.
 
 **Notes:** —
 
@@ -137,15 +145,17 @@ Rationale: A standalone glossary feature adds product and engineering scope. Inl
 | Question | Should users be required to create an account before viewing lessons? |
 | Owner | Product |
 | Needed Before | MVP UX design |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Allow the first lesson or first portion of the landing experience to be accessible without login, but require account creation before tracking progress or using AI Tutor.
 
 Rationale: Friction-free first contact increases activation. Requiring an account before users see any content raises the barrier to entry and may increase bounce rate. However, progress tracking and AI Tutor require a user identity. A hybrid approach (some public content, account required for learning journey) is a common SaaS pattern and supports both early discovery and data collection.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Allow landing page and first lesson preview without login. Require account creation for progress tracking and AI Tutor usage.
 
-**Notes:** This decision affects authentication scope (OQ-TECH-004) and the landing experience spec.
+Rationale: This reduces first-time friction while still requiring identity for personalized features.
+
+**Notes:** This decision affects authentication scope (D-TECH-004) and the Landing Experience Spec and User Account Spec.
 
 ---
 
@@ -159,7 +169,7 @@ Rationale: Friction-free first contact increases activation. Requiring an accoun
 | Question | What onboarding questions should be used to separate beginners from working developers? |
 | Owner | Product |
 | Needed Before | MVP UX design |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** A single onboarding question with two or three clear options, such as:
 
@@ -169,9 +179,15 @@ Rationale: Friction-free first contact increases activation. Requiring an accoun
 
 Rationale: More questions increase friction and drop-off. One well-phrased question that clearly routes users to the right starting point is better than a multi-step onboarding survey. The answer should determine the recommended learning path but should not block access.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Use one simple onboarding question with three options:
 
-**Notes:** Exact wording should be refined in the Onboarding Spec.
+- I am new to IBM i and want to start learning.
+- I already work with IBM i and want to refresh or deepen my knowledge.
+- I am exploring what IBMiHub AI offers.
+
+Rationale: One question keeps onboarding lightweight and helps route users without creating a long survey.
+
+**Notes:** Exact wording should be refined in the User Account and Onboarding Spec.
 
 ---
 
@@ -209,15 +225,17 @@ Rationale: More questions increase friction and drop-off. One well-phrased quest
 | Question | Should the AI Tutor use only prompt guidance in MVP, or also include lesson-aware context? |
 | Owner | Product + Engineering |
 | Needed Before | AI implementation spec |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Prompt-guidance only for MVP. Lesson-aware context should be a post-MVP improvement.
 
 Rationale: Lesson-aware AI (where the AI knows which lesson the user is currently reading) adds complexity to the AI implementation and content-data pipeline. For MVP, a well-crafted system prompt that establishes IBM i domain context, appropriate caution, and beginner-friendly behavior is sufficient. Lesson awareness can be added once the basic AI Tutor is working and validated.
 
-**Approved Decision:** _To be filled in by Product Owner and Engineering._
+**Approved Decision:** Use prompt-guidance only for MVP. Lesson-aware AI should be deferred to post-MVP.
 
-**Notes:** This decision affects AI Tutor Spec complexity. If deferred to post-MVP, the Lesson Experience Spec should leave room for a "Ask AI about this lesson" button that can be enhanced later.
+Rationale: Prompt-guidance is enough for the first AI Tutor validation. Lesson-aware context adds complexity and should come after basic AI Tutor usage is validated.
+
+**Notes:** The Lesson Experience Spec should leave room for a future "Ask AI about this lesson" integration without requiring rework.
 
 ---
 
@@ -231,13 +249,15 @@ Rationale: Lesson-aware AI (where the AI knows which lesson the user is currentl
 | Question | Should AI conversation history be stored, and if yes, for how long? |
 | Owner | Product + Engineering |
 | Needed Before | Privacy review |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Store session-level conversation history only (not persisted across sessions) for MVP. Do not retain AI conversation data server-side beyond what is needed to render the current session.
 
 Rationale: Minimizing AI data retention reduces privacy risk, aligns with PRD Section 14.7 (minimal data collection), and avoids compliance complexity. Session-only history allows users to continue a conversation within one session while limiting long-term data exposure. Long-term conversation history storage should require a separate privacy and data retention review.
 
-**Approved Decision:** _To be filled in by Product Owner and Engineering._
+**Approved Decision:** Use session-level conversation history only for MVP. Do not persist AI conversation history server-side beyond what is needed for the current session.
+
+Rationale: This minimizes privacy risk and aligns with the MVP principle of minimal data retention.
 
 **Notes:** This decision should be documented in an ADR and reflected in the AI Tutor Spec and privacy messaging. OQ-SEC-006 (AI interaction storage) is related.
 
@@ -257,7 +277,7 @@ Rationale: Minimizing AI data retention reduces privacy risk, aligns with PRD Se
 | Question | What exact lessons should be included in the first IBM i Fundamentals learning path? |
 | Owner | Product |
 | Needed Before | Content planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** The 12-lesson sequence proposed in PRD Section 16.4:
 
@@ -276,9 +296,24 @@ Rationale: Minimizing AI data retention reduces privacy risk, aligns with PRD Se
 
 The Product Owner may adjust this list based on content readiness and teaching priorities. At minimum, Lessons 1, 4, 5, 7, 8, and 11 are strongly recommended for MVP.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Approve the 12-lesson IBM i Fundamentals sequence:
 
-**Notes:** The final approved lesson list should be documented in the Content Plan and Learning Center Spec. Ties to D-PROD-002 (minimum lesson count).
+1. What is IBM i?
+2. Why IBM i still matters
+3. IBM i platform overview
+4. Libraries and objects
+5. 5250 screen basics
+6. Physical files and logical files
+7. Introduction to RPGLE
+8. Introduction to CLLE
+9. Introduction to DB2 for i
+10. Job logs and spool files basics
+11. Basic IBM i development workflow
+12. Where to go next
+
+Minimum beta threshold: At least 8 complete and reviewed lessons before beta release.
+
+**Notes:** The approved lesson list should be documented in the Learning Center Spec and Content Plan. Ties to D-PROD-002 (minimum lesson count) and D-CONT-002 (lesson template).
 
 ---
 
@@ -292,7 +327,7 @@ The Product Owner may adjust this list based on content readiness and teaching p
 | Question | What is the approved standard lesson template for MVP content? |
 | Owner | Product |
 | Needed Before | Content planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** The lesson structure proposed in PRD Section 16.7:
 
@@ -309,7 +344,20 @@ The Product Owner may adjust this list based on content readiness and teaching p
 
 For shorter or simpler lessons, sections 6 and 7 may be combined or shortened. Section 8 (Try Asking AI Tutor) may be simplified to a single suggested question.
 
-**Approved Decision:** _To be filled in by Product Owner._
+**Approved Decision:** Approve the MVP lesson template:
+
+1. Lesson Title
+2. Learning Objective
+3. Simple Explanation
+4. Why It Matters
+5. Practical Example
+6. Common Confusions
+7. Quick Recap
+8. Try Asking AI Tutor
+9. Mark Complete
+10. Next Lesson
+
+Rationale: This gives all MVP lessons a consistent structure and supports both beginner learning and AI Tutor usage.
 
 **Notes:** The approved template should be documented in the Content Governance Spec and used for all MVP lessons from the start. Consistency is more important than the exact structure chosen.
 
@@ -409,7 +457,7 @@ For shorter or simpler lessons, sections 6 and 7 may be combined or shortened. S
 | Question | What SDD specs must be created before coding begins? |
 | Owner | Product + Engineering |
 | Needed Before | Sprint 1 planning |
-| Status | Open |
+| Status | Decided |
 
 **Recommended Default:** Based on the PRD Final Review recommendations (PRD_FINAL_REVIEW_v1.md), the following SDD specs are recommended before any coding begins, in priority order:
 
@@ -425,9 +473,21 @@ For shorter or simpler lessons, sections 6 and 7 may be combined or shortened. S
 
 All nine specs should be created and approved before engineering implements the corresponding features.
 
-**Approved Decision:** _To be confirmed by Product Owner and Engineering._
+**Approved Decision:** Approve the following required SDD specs before coding begins:
 
-**Notes:** The AI Tutor Spec, Learning Center Spec, and Lesson Experience Spec are the most critical path items. Content Governance Spec should be created immediately so lesson content creation can begin in parallel with engineering.
+1. AI Tutor Spec
+2. Learning Center Spec
+3. Lesson Experience Spec
+4. User Account and Onboarding Spec
+5. Dashboard Spec
+6. Progress Tracking Spec
+7. Feedback Collection Spec
+8. Public Landing Experience Spec
+9. Content Governance Spec
+
+Rationale: These specs cover the approved MVP scope and should be completed before implementation starts.
+
+**Notes:** The AI Tutor Spec, Learning Center Spec, and Lesson Experience Spec are critical path. Content Governance Spec should be created immediately so lesson content creation can begin in parallel with engineering.
 
 ---
 
@@ -435,22 +495,22 @@ All nine specs should be created and approved before engineering implements the 
 
 | Decision ID | Area | Question Summary | Status | Owner |
 |---|---|---|---|---|
-| D-PROD-001 | Product | Beta access model | Open | Product / Founder |
-| D-PROD-002 | Product | Minimum lesson count for MVP | Open | Product |
-| D-PROD-003 | Product | Quizzes in MVP or deferred? | Open | Product |
-| D-PROD-004 | Product | Glossary in MVP or deferred? | Open | Product |
-| D-PROD-005 | Product | Account required before lessons? | Open | Product |
-| D-PROD-006 | Product | Onboarding question design | Open | Product |
+| D-PROD-001 | Product | Beta access model | Decided | Product / Founder |
+| D-PROD-002 | Product | Minimum lesson count for MVP | Decided | Product |
+| D-PROD-003 | Product | Quizzes in MVP or deferred? | Decided | Product |
+| D-PROD-004 | Product | Glossary in MVP or deferred? | Decided | Product |
+| D-PROD-005 | Product | Account required before lessons? | Decided | Product |
+| D-PROD-006 | Product | Onboarding question design | Decided | Product |
 | D-AI-001 | AI | AI provider and model | Open | Engineering |
-| D-AI-003 | AI | Prompt-only or lesson-aware AI Tutor | Open | Product + Engineering |
-| D-AI-004 | AI | AI conversation history storage | Open | Product + Engineering |
-| D-CONT-001 | Content | Exact first learning path lessons | Open | Product |
-| D-CONT-002 | Content | Standard lesson template | Open | Product |
+| D-AI-003 | AI | Prompt-only or lesson-aware AI Tutor | Decided | Product + Engineering |
+| D-AI-004 | AI | AI conversation history storage | Decided | Product + Engineering |
+| D-CONT-001 | Content | Exact first learning path lessons | Decided | Product |
+| D-CONT-002 | Content | Standard lesson template | Decided | Product |
 | D-TECH-001 | Technical | MVP technology stack | Open | Engineering |
 | D-TECH-002 | Technical | Hosting and deployment | Open | Engineering |
 | D-TECH-003 | Technical | Database or storage approach | Open | Engineering |
 | D-TECH-004 | Technical | Authentication approach | Open | Engineering |
-| D-TECH-009 | Technical | Required SDD specs before coding | Open | Product + Engineering |
+| D-TECH-009 | Technical | Required SDD specs before coding | Decided | Product + Engineering |
 
 ---
 
@@ -471,3 +531,4 @@ All nine specs should be created and approved before engineering implements the 
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial Sprint 1 decision register created from PRD Section 20.14 open questions |
+| 2026-07-01 | 0.2 | Product Owner resolved 11 decisions: D-PROD-001 through D-PROD-006, D-AI-003, D-AI-004, D-CONT-001, D-CONT-002, D-TECH-009. Engineering decisions D-AI-001, D-TECH-001–004 remain open. |
