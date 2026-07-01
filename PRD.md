@@ -3,8 +3,8 @@
 ## Document Metadata
 - Project: IBMiHub AI
 - Document Purpose: Master Product Requirements Document — the single source of truth for all product decisions across the lifetime of the platform
-- Version: 0.8
-- Status: Draft — Sections 1–6 Complete
+- Version: 0.9
+- Status: Draft — Sections 1–7 Complete
 - Last Updated: 2026-07-01
 - Owner: Product
 
@@ -19,7 +19,7 @@ This document is **not**:
 - An implementation or engineering design document
 - An SDD feature specification (those live under `specs/` and derive from this PRD)
 
-Most sections below are currently placeholders. Sections 1–6 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
+Most sections below are currently placeholders. Sections 1–7 contain approved draft content, while remaining sections will be completed and reviewed section by section. Each entry defines the section's purpose, audience, and expected size so the document can be written and reviewed section-by-section, then approved by the Product Owner before downstream specs, plans, or architecture work reference it.
 
 Estimated total document length once complete: **45–65 pages**.
 
@@ -913,11 +913,265 @@ If the answer is unclear, the feature or decision should be reconsidered.
 
 ## 7. Market Analysis
 
-- **Purpose:** Size and characterize the market opportunity.
-- **Description:** TAM/SAM/SOM estimate, IBM i ecosystem trends (workforce demographics, modernization pressure), buyer landscape (individual vs. enterprise).
-- **Audience:** Product, Leadership, Investors.
-- **Approximate size:** 3–5 pages.
-- **Status:** Not started.
+### Purpose of This Section
+
+The purpose of this section is to describe the market opportunity for IBMiHub AI.
+
+This section should not overstate the market size or make unsupported claims. IBM i is a specialized ecosystem, not a mass-market developer platform. However, it remains important in many organizations, and the combination of skills pressure, modernization needs, AI adoption, and fragmented learning resources creates a focused opportunity for a niche SaaS product.
+
+### Market Framing
+
+IBMiHub AI is not targeting the general programming education market.
+
+It is targeting a specialized professional audience:
+
+- IBM i learners
+- RPGLE and CLLE developers
+- IBM i consultants
+- Team leads and architects
+- Companies onboarding new IBM i talent
+- Organizations trying to preserve legacy system knowledge
+- Professionals involved in IBM i modernization
+
+This makes the product a niche SaaS opportunity rather than a broad consumer education product.
+
+The opportunity is smaller than mainstream developer education, but potentially more valuable because the audience works on critical systems, has fewer modern learning options, and may have higher willingness to pay for practical productivity and training tools.
+
+### Market Signals
+
+Several market signals support the opportunity for IBMiHub AI.
+
+#### 1. IBM i Remains Relevant for Critical Business Workloads
+
+IBM i continues to be positioned as an integrated platform for mission-critical workloads. It combines operating system, database, middleware, runtime, security, and system management capabilities into one environment.
+
+This matters because IBMiHub AI is not being built for an obsolete platform. It is being built for a specialized ecosystem that continues to support important business applications.
+
+#### 2. IBM i Skills Are a Major Concern
+
+Public IBM i community research indicates that skills availability is a major concern for IBM i organizations.
+
+The 2026 IBM i Marketplace Survey from Fortra reported that IBM i skills became the top concern for respondents. The same survey also highlighted continued interest in modernization, AI, security, and newer development tooling.
+
+This directly supports IBMiHub AI's focus on learning, onboarding, AI assistance, and knowledge transfer.
+
+#### 3. Modernization Continues to Drive Demand
+
+Organizations running IBM i systems continue to face pressure to modernize applications, development practices, security, integrations, and user experiences.
+
+Modernization does not always mean replacing IBM i. In many cases, it means improving how teams develop, maintain, document, integrate, and extend existing IBM i applications.
+
+This creates demand for tools that help developers understand legacy systems, explain code, document behavior, and learn modern IBM i workflows.
+
+#### 4. IBM i Learning Resources Are Fragmented
+
+The IBM i ecosystem has valuable resources, including documentation, blogs, forums, training providers, books, and community experts.
+
+However, these resources are often distributed across many places and are not always structured as a modern learning journey.
+
+This creates an opportunity for a platform that combines structured learning, AI guidance, hands-on practice, and progress tracking.
+
+#### 5. AI Is Becoming Relevant to IBM i Development
+
+AI-assisted development is becoming increasingly relevant across software engineering, including IBM i modernization and code understanding.
+
+Generic AI tools can help, but they are not designed specifically around IBM i learning paths, RPGLE, CLLE, DDS, job logs, 5250 workflows, and enterprise onboarding.
+
+IBMiHub AI can differentiate by combining AI with IBM i-specific content, context, guardrails, and workflows.
+
+#### 6. Developer Tooling Is Modernizing
+
+The IBM i ecosystem is seeing increased use of modern developer tooling such as Visual Studio Code, Git-friendly workflows, and AI-assisted productivity tools.
+
+This shift is important because it shows that IBM i professionals are not limited to traditional tooling. There is room for modern web-based and AI-assisted experiences that complement the IBM i platform.
+
+### Target Market Segments
+
+#### Segment 1: Individual Learners
+
+These users are new to IBM i or trying to build foundational skills.
+
+They need:
+
+- Guided learning paths
+- Beginner-friendly explanations
+- Practice exercises
+- AI tutor support
+- Confidence-building content
+
+This segment may begin with free or low-cost plans.
+
+#### Segment 2: Working IBM i Developers
+
+These users already work with IBM i systems and want productivity support.
+
+They need:
+
+- RPGLE and CLLE explanation
+- SQL and DDS clarification
+- Job log understanding
+- Documentation support
+- Faster troubleshooting
+- Modernization guidance
+
+This segment is a strong candidate for paid individual plans.
+
+#### Segment 3: Team Leads and Architects
+
+These users are responsible for onboarding, knowledge transfer, code understanding, and modernization.
+
+They need:
+
+- Structured training material
+- Team learning paths
+- Documentation tools
+- Legacy code explanation
+- Productivity assistance
+- Knowledge preservation
+
+This segment may influence team or enterprise purchases.
+
+#### Segment 4: Companies and Enterprise Teams
+
+These buyers need to train employees, reduce dependency on senior experts, and improve IBM i knowledge transfer.
+
+They need:
+
+- Team accounts
+- Learning progress tracking
+- Corporate onboarding paths
+- Role-based learning
+- Internal training support
+- Enterprise-grade privacy and controls
+
+This segment is likely to be a future revenue driver after the product proves individual value.
+
+#### Segment 5: Interview Candidates and Career Switchers
+
+These users want to prepare for IBM i roles.
+
+They need:
+
+- Interview questions
+- Concept explanations
+- Practice scenarios
+- Mock assessments
+- Skill validation
+
+This segment may support future certification and interview-preparation offerings.
+
+### Market Opportunity
+
+The market opportunity is based on a focused but underserved audience.
+
+IBMiHub AI does not need to capture a massive developer market to become valuable. It needs to become trusted by a meaningful portion of the IBM i community.
+
+The opportunity exists because:
+
+- IBM i systems remain business-critical.
+- IBM i skills are difficult to find and transfer.
+- Existing learning resources are fragmented.
+- Modern AI-assisted learning experiences are still limited in this niche.
+- Companies need better onboarding and documentation support.
+- Developers need faster ways to understand legacy applications.
+
+The strongest opportunity is likely to begin with individual learning and AI assistance, then expand into productivity tools and enterprise training.
+
+### TAM / SAM / SOM Approach
+
+Precise TAM, SAM, and SOM numbers are not yet approved in this PRD.
+
+At this stage, the market sizing approach should remain conservative and evidence-driven.
+
+The proposed approach is:
+
+- TAM: Global IBM i professionals, learners, consultants, organizations, and training needs connected to IBM i systems
+- SAM: English-speaking IBM i learners, developers, consultants, and teams reachable through online channels
+- SOM: Early adopters from LinkedIn, IBM i communities, beta users, individual developers, small teams, and companies interested in AI-assisted onboarding
+
+The first priority is not to prove a large theoretical TAM.
+
+The first priority is to validate whether a focused audience finds the platform useful enough to return, recommend, and eventually pay.
+
+### Buyer Landscape
+
+IBMiHub AI may have two types of buyers.
+
+#### Individual Buyers
+
+These users may pay for:
+
+- Advanced AI tutor usage
+- Premium learning paths
+- Practice labs
+- RPGLE and job log tools
+- Interview preparation
+- Certifications
+
+#### Enterprise Buyers
+
+Companies may pay for:
+
+- Team learning access
+- Onboarding programs
+- Progress tracking
+- Enterprise privacy controls
+- Internal training paths
+- Documentation and productivity tools
+- Corporate support
+
+The product should begin with individual value but keep the long-term enterprise opportunity in mind.
+
+### Go-To-Market Assumptions
+
+Early go-to-market should be community-led and founder-led.
+
+Potential channels include:
+
+- LinkedIn posts targeting IBM i professionals
+- IBM i community groups
+- Developer forums
+- Personal network outreach
+- Content marketing
+- Demo videos
+- Early beta invitations
+- Partnerships with trainers or consultants in the future
+
+The early goal should be to attract beta users, validate demand, and identify the highest-value use cases.
+
+### Market Risks
+
+The market opportunity also has risks.
+
+Key risks include:
+
+- The IBM i audience is niche and may be smaller than expected.
+- Users may trust human experts more than AI explanations.
+- Companies may have concerns about uploading code or job logs.
+- Enterprise sales may require security, privacy, and compliance maturity.
+- Some users may expect free content because many learning resources are already available online.
+- Building credibility in the IBM i community may take time.
+- AI accuracy issues could damage trust if not handled carefully.
+
+These risks should be managed through focused MVP scope, original content, transparent AI boundaries, strong privacy practices, and gradual market validation.
+
+### Strategic Market Position
+
+IBMiHub AI should position itself as:
+
+**The AI-first learning and productivity platform for IBM i professionals.**
+
+This positioning is intentionally focused.
+
+The product should not compete directly with all IBM documentation, training providers, blogs, or generic AI coding assistants. Instead, it should combine the strengths of structured learning, AI assistance, hands-on practice, and IBM i-specific productivity workflows.
+
+### Summary
+
+The market for IBMiHub AI is specialized but meaningful.
+
+IBM i remains important, IBM i skills are a visible concern, modernization continues, and learning resources remain fragmented. These conditions create an opportunity for a focused AI-powered platform that helps professionals learn, practice, troubleshoot, document, and modernize IBM i systems.
+
+The early market strategy should be conservative, evidence-driven, and community-focused. The product should validate real demand before expanding into advanced tools or enterprise offerings.
 
 ---
 
@@ -1103,3 +1357,4 @@ If the answer is unclear, the feature or decision should be reconsidered.
 | 2026-07-01 | 0.6 | Added approved Goals & Objectives content |
 | 2026-07-01 | 0.7 | Added approved Success Metrics & KPIs content |
 | 2026-07-01 | 0.8 | Added approved Product Principles content |
+| 2026-07-01 | 0.9 | Added approved Market Analysis content |
