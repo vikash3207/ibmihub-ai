@@ -5,8 +5,8 @@
 | Field | Value |
 |---|---|
 | Title | Sprint 1 Implementation Decisions |
-| Status | Draft |
-| Version | 0.1 |
+| Status | Review Ready |
+| Version | 0.2 |
 | Last Updated | 2026-07-01 |
 | Owner | Product + Engineering |
 
@@ -45,7 +45,7 @@ The following principles govern all implementation decisions in this register.
 | Field | Value |
 |---|---|
 | Question | Which Markdown rendering library should be used for lesson content? |
-| Status | Open |
+| Status | Decided |
 | Owner | Engineering |
 | Needed Before | S1-LESSON-002 |
 | Impacted Tasks | S1-LESSON-002 |
@@ -72,7 +72,7 @@ This pipeline is the de facto standard for Markdown rendering in Next.js App Rou
 - Slightly more initial setup than `marked` or `react-markdown`
 - No client-side interactivity required in lesson content in MVP, so server rendering is both sufficient and preferred
 
-**Approved Decision:** _To be confirmed by Engineering before S1-LESSON-002 begins._
+**Approved Decision:** Use `remark` + `rehype` with `remark-gfm` for MVP Markdown rendering. This supports the approved Markdown elements (headings, lists, links, code blocks, inline code, bold, italic, tables) defined in Spec 003 Section 9. It avoids MDX and does not require client-side rendering for basic lesson content.
 
 ---
 
@@ -81,7 +81,7 @@ This pipeline is the de facto standard for Markdown rendering in Next.js App Rou
 | Field | Value |
 |---|---|
 | Question | Should lesson pages use static site generation (SSG), server-side rendering (SSR), or a hybrid approach? |
-| Status | Open |
+| Status | Decided |
 | Owner | Engineering |
 | Needed Before | S1-LESSON-003 |
 | Impacted Tasks | S1-LESSON-003 |
@@ -108,7 +108,7 @@ The Next.js App Router's server component model handles this pattern cleanly wit
 - Server renders on every request for lesson pages; acceptable for MVP beta scale
 - Lesson 1 does not benefit from CDN-level caching unless additional caching configuration is applied; this can be optimized post-MVP
 
-**Approved Decision:** _To be confirmed by Engineering before S1-LESSON-003 begins._
+**Approved Decision:** Use Next.js App Router server components for lesson pages with server-side auth checks on every request. Lesson 1 is public and requires no authentication check. Published lessons beyond Lesson 1 require a server-side authentication check before content is served. Auth-gated lesson content must not rely on client-side-only protection. Auth-gated lesson responses must not be cached in a way that could expose protected content to unauthenticated users. Lesson 1 may be optimized for caching if safe, but this is not required for MVP.
 
 ---
 
@@ -117,7 +117,7 @@ The Next.js App Router's server component model handles this pattern cleanly wit
 | Field | Value |
 |---|---|
 | Question | What exact lesson metadata record shape and seeding/sync approach should be used in Supabase PostgreSQL? |
-| Status | Open |
+| Status | Decided |
 | Owner | Engineering |
 | Needed Before | S1-CONTENT-001, S1-CONTENT-002 |
 | Impacted Tasks | S1-CONTENT-001, S1-CONTENT-002 |
@@ -145,7 +145,7 @@ This approach is repeatable, auditable through Git history, and avoids manual SQ
 - Requires a lightweight seed/sync script to maintain
 - Status changes (e.g., Draft → Published) need to be reflected in both the config file and triggered via the script or a direct database update
 
-**Approved Decision:** _To be confirmed by Engineering before S1-CONTENT-001 begins._
+**Approved Decision:** Use a version-controlled lesson metadata configuration file in the repository plus a seed/sync script that upserts lesson metadata into Supabase PostgreSQL. Lesson body content lives in repository Markdown files. Lesson metadata lives in Supabase PostgreSQL at runtime. The repository metadata config is the editable source for lesson metadata and publication status. Supabase is the runtime query source for Learning Center, Lesson Experience, Progress Tracking, and Dashboard. Status changes such as Draft → Review Ready → Approved → Published should be made through the repository metadata config and synced to Supabase. Ad-hoc direct database edits should be avoided except for emergency correction with Product Owner approval.
 
 ---
 
@@ -154,7 +154,7 @@ This approach is repeatable, auditable through Git history, and avoids manual SQ
 | Field | Value |
 |---|---|
 | Question | What is the exact mechanism and storage approach for the "Join the Waitlist" CTA on the landing page? |
-| Status | Open |
+| Status | Decided |
 | Owner | Product / Founder + Engineering |
 | Needed Before | S1-LAND-003 |
 | Impacted Tasks | S1-LAND-003 |
@@ -180,7 +180,7 @@ A custom form aligned with the product's existing Supabase setup keeps the data 
 - Requires a small amount of engineering; not literally zero effort
 - Form must be accessible without authentication (landing page is public)
 
-**Approved Decision:** _To be confirmed by Product / Founder and Engineering before S1-LAND-003 begins._
+**Approved Decision:** Use a custom public waitlist form that stores submissions in Supabase. The landing page CTA remains "Join the Waitlist". The form collects email only for MVP, plus optional source/referrer metadata if available. No account is required to join the waitlist. Duplicate email submissions must not create duplicate active records. Waitlist records must not be publicly readable. Public insert must be allowed only through the intended server-side action or protected route handler. No third-party form service is used for MVP.
 
 ---
 
@@ -189,7 +189,7 @@ A custom form aligned with the product's existing Supabase setup keeps the data 
 | Field | Value |
 |---|---|
 | Question | How should Supabase Row-Level Security (RLS) policies and server-side user filtering be designed for progress and feedback records? |
-| Status | Open |
+| Status | Decided |
 | Owner | Engineering |
 | Needed Before | S1-PROG-003, S1-FB-007 |
 | Impacted Tasks | S1-PROG-003, S1-FB-007 |
@@ -208,7 +208,7 @@ RLS provides a robust, server-enforced data isolation layer that cannot be bypas
 - RLS operates on the JWT from Supabase Auth; the service role key bypasses RLS (the service role key must never be used in client-facing code)
 - Some additional testing is needed to confirm RLS policies work as expected with the Next.js App Router Supabase client
 
-**Approved Decision:** _To be confirmed by Engineering before S1-PROG-003 and S1-FB-007 begin._
+**Approved Decision:** Use Supabase Row-Level Security plus server-side user ID filtering for progress and feedback records. Progress records must be scoped to the authenticated user. Feedback records must be scoped to the authenticated user. A user must not be able to read or write another user's progress or feedback. RLS policies must enforce `user_id = auth.uid()`. Server-side queries must also filter by authenticated user ID for defense in depth. The Supabase service role key must never be exposed to client-side code.
 
 ---
 
@@ -217,7 +217,7 @@ RLS provides a robust, server-enforced data isolation layer that cannot be bypas
 | Field | Value |
 |---|---|
 | Question | What is the token usage logging mechanism for AI Tutor requests? |
-| Status | Open |
+| Status | Decided |
 | Owner | Engineering |
 | Needed Before | S1-AI-009 |
 | Impacted Tasks | S1-AI-009 |
@@ -243,7 +243,7 @@ A Supabase table is already the product's primary data store; adding a usage log
 - Adds one table to the Supabase database
 - Requires care to ensure no conversation content is accidentally included in log records
 
-**Approved Decision:** _To be confirmed by Engineering before S1-AI-009 begins._
+**Approved Decision:** Use a Supabase `ai_usage_log` table for AI Tutor token usage logging. Store user ID, timestamp, provider, model ID, input token count, output token count, and request status. Do not store user prompt text. Do not store AI response text. Do not store full conversation history. The log exists only for usage monitoring and cost estimation.
 
 ---
 
@@ -252,7 +252,7 @@ A Supabase table is already the product's primary data store; adding a usage log
 | Field | Value |
 |---|---|
 | Question | What are the exact current Anthropic model IDs, pricing, rate limits, and fallback model settings to use? |
-| Status | Open |
+| Status | Verification Required |
 | Owner | Engineering |
 | Needed Before | S1-AI-001 |
 | Impacted Tasks | S1-AI-001 |
@@ -283,21 +283,21 @@ Model IDs, pricing, and API behavior change. Using incorrect model IDs will resu
 **Action Required:**
 Engineering must complete this verification checklist before S1-AI-001 begins. Verified values should be recorded in the Engineering team's implementation notes and reflected in the AI provider abstraction layer configuration.
 
-**Approved Decision:** _To be confirmed by Engineering with verified values before S1-AI-001 begins._
+**Approved Decision:** Not yet decided. This decision must not be marked Decided until Engineering has verified the exact current Anthropic model IDs, pricing, rate limits, fallback model, Anthropic SDK version, and streaming API support from official Anthropic documentation. The AI Tutor implementation must not begin using assumed or cached model IDs or pricing from any source other than official provider documentation.
 
 ---
 
 ## 3. Decisions Needed Before First Coding Batch
 
-The following decisions must be resolved before any coding begins (Stage 3 and earlier in the dependency order).
+Foundation and authentication tasks may begin while implementation decisions are being finalized. However, the dependent tasks listed below must not begin until their decisions are resolved.
 
-| Question | Decision | Status |
-|---|---|---|
-| IMP-Q-003 | Lesson metadata structure and seeding approach | Open |
-| IMP-Q-004 / IMP-Q-008 | Waitlist CTA mechanism and storage | Open |
-| IMP-Q-005 | Supabase RLS and server-side user filtering design | Open |
+| Question | Decision | Dependent Tasks | Status |
+|---|---|---|---|
+| IMP-Q-003 | Lesson metadata structure and seeding approach | S1-CONTENT-001, S1-CONTENT-002 | Decided |
+| IMP-Q-004 / IMP-Q-008 | Waitlist CTA mechanism and storage | S1-LAND-003 | Decided |
+| IMP-Q-005 | Supabase RLS and server-side user filtering design | S1-PROG-003, S1-FB-007 | Decided |
 
-These decisions affect the data foundation that all other features depend on. Resolving them first avoids rework.
+These decisions are now resolved. The dependent tasks may proceed.
 
 ---
 
@@ -307,10 +307,10 @@ The following decisions must be resolved before Lesson Experience implementation
 
 | Question | Decision | Status |
 |---|---|---|
-| IMP-Q-001 | Markdown rendering library | Open |
-| IMP-Q-002 | Lesson rendering strategy (SSG / SSR / hybrid) | Open |
+| IMP-Q-001 | Markdown rendering library | Decided |
+| IMP-Q-002 | Lesson rendering strategy (SSG / SSR / hybrid) | Decided |
 
-These decisions directly affect how S1-LESSON-002 and S1-LESSON-003 are implemented.
+These decisions are now resolved. S1-LESSON-002 and S1-LESSON-003 may proceed.
 
 ---
 
@@ -320,14 +320,38 @@ The following decisions must be resolved before AI Tutor implementation begins (
 
 | Question | Decision | Status |
 |---|---|---|
-| IMP-Q-006 | Token usage logging mechanism | Open |
-| IMP-Q-007 | Anthropic model ID, pricing, rate limits — verified against official documentation | Open |
+| IMP-Q-006 | Token usage logging mechanism | Decided |
+| IMP-Q-007 | Anthropic model ID, pricing, rate limits — verified against official documentation | Verification Required |
 
-IMP-Q-007 in particular must be completed by Engineering as a verification task before any AI provider code is written.
+IMP-Q-007 must be completed by Engineering as a verification task before any AI provider code is written. The AI Tutor implementation must not begin using assumed or cached model IDs or pricing from any source other than official provider documentation.
 
 ---
 
-## 6. Notes
+## 6. First Approved Coding Batch
+
+After this decision document is approved, the first safe coding batch can begin. The following tasks do not depend on unresolved implementation decisions and may proceed immediately.
+
+### May Begin Immediately
+
+- **Foundation (S1-FND-001 through S1-FND-006):** Project setup, Supabase project, Vercel deployment, environment variables, component library, directory structure.
+- **Authentication and Onboarding (S1-AUTH-001 through S1-AUTH-009):** Sign-up, login, logout, session persistence, forgot password, onboarding question, post-login redirect, user profile.
+- **Content Governance (S1-GOV-001):** Create lesson review checklist template at `docs/content/lesson-review-checklist.md`.
+
+### May Begin After IMP-Q-003 Is Confirmed
+
+- **Content Metadata and Markdown Loading (S1-CONTENT-001 through S1-CONTENT-006):** Lesson metadata structure, seeding, Markdown loading, published-only filter, draft protection, content directory structure.
+
+### May Begin Before Waitlist Storage Is Complete
+
+- **Public Landing Experience (S1-LAND-001 and S1-LAND-002):** Landing page shell and hero section with approved copy may be built before the waitlist mechanism is finalized.
+
+### May Begin Only After IMP-Q-004/008 Is Confirmed
+
+- **Waitlist CTA Implementation (S1-LAND-003):** The waitlist form and storage mechanism require the decision to be confirmed before implementation.
+
+---
+
+## 7. Notes
 
 Once the implementation decisions in this register are reviewed and approved by Product + Engineering, task ticket creation and coding can begin for the resolved decision areas.
 
@@ -347,3 +371,4 @@ Once the implementation decisions in this register are reviewed and approved by 
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial implementation decision register created from Sprint 1 Implementation Plan v1.0 and Task Breakdown v1.0 |
+| 2026-07-01 | 0.2 | Cleanup after review; resolved implementation decisions except Anthropic provider verification |
