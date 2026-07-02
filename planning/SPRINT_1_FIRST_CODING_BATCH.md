@@ -5,8 +5,8 @@
 | Field | Value |
 |---|---|
 | Title | Sprint 1 First Coding Batch |
-| Status | Draft |
-| Version | 0.1 |
+| Status | Approved |
+| Version | 1.0 |
 | Last Updated | 2026-07-01 |
 | Owner | Engineering |
 
@@ -34,7 +34,7 @@ This batch covers the foundation, authentication, early content governance, and 
 | S1-FND-002 | Add lightweight component library (shadcn/ui or equivalent) |
 | S1-FND-003 | Create Supabase project and configure PostgreSQL database |
 | S1-FND-004 | Configure Vercel deployment connected to GitHub with PR preview deployments |
-| S1-FND-005 | Configure environment variable management for development and Vercel |
+| S1-FND-005 | Configure environment variable management for development and Vercel. Document the AI provider API key variable name (e.g., `ANTHROPIC_API_KEY`) as a placeholder only — do not add a real Anthropic API key, Anthropic SDK, or any AI provider configuration in this batch because IMP-Q-007 is still Verification Required. |
 | S1-FND-006 | Define repository directory structure (`app/`, `components/`, `lib/`, `services/`, `content/lessons/`, `docs/content/`) |
 
 #### Authentication and Onboarding
@@ -65,7 +65,7 @@ This batch covers the foundation, authentication, early content governance, and 
 | S1-CONTENT-002 | Seed initial lesson metadata (12 lessons, status = Draft) |
 | S1-CONTENT-003 | Implement lesson Markdown file loading from the repository content directory |
 | S1-CONTENT-004 | Implement published-only lesson filter (server-side; status = Published only) |
-| S1-CONTENT-005 | Implement non-published lesson route protection (404 for non-Published slugs) |
+| S1-CONTENT-005 | Implement server-side published-only guard: non-Published lesson slugs must return a 404 response. This task covers the content protection guard only — it must not implement the full Lesson Experience UI, which belongs to a later batch. |
 | S1-CONTENT-006 | Create lesson content directory structure with placeholder Markdown files for each lesson |
 
 #### Public Landing Experience (Shell Only)
@@ -211,3 +211,4 @@ The following constraints apply to all work in this batch.
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial first coding batch document created from approved implementation decisions and task breakdown |
+| 2026-07-01 | 1.0 | Approved first coding batch for Sprint 1 implementation |
