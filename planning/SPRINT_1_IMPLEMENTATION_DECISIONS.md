@@ -5,8 +5,8 @@
 | Field | Value |
 |---|---|
 | Title | Sprint 1 Implementation Decisions |
-| Status | Review Ready |
-| Version | 0.2 |
+| Status | Approved |
+| Version | 1.0 |
 | Last Updated | 2026-07-01 |
 | Owner | Product + Engineering |
 
@@ -337,7 +337,7 @@ After this decision document is approved, the first safe coding batch can begin.
 - **Authentication and Onboarding (S1-AUTH-001 through S1-AUTH-009):** Sign-up, login, logout, session persistence, forgot password, onboarding question, post-login redirect, user profile.
 - **Content Governance (S1-GOV-001):** Create lesson review checklist template at `docs/content/lesson-review-checklist.md`.
 
-### May Begin After IMP-Q-003 Is Confirmed
+### May Begin Immediately Since IMP-Q-003 Is Decided
 
 - **Content Metadata and Markdown Loading (S1-CONTENT-001 through S1-CONTENT-006):** Lesson metadata structure, seeding, Markdown loading, published-only filter, draft protection, content directory structure.
 
@@ -372,3 +372,4 @@ Once the implementation decisions in this register are reviewed and approved by 
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial implementation decision register created from Sprint 1 Implementation Plan v1.0 and Task Breakdown v1.0 |
 | 2026-07-01 | 0.2 | Cleanup after review; resolved implementation decisions except Anthropic provider verification |
+| 2026-07-01 | 1.0 | Approved Sprint 1 implementation decisions for first coding batch |
