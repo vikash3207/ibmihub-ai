@@ -1,4 +1,4 @@
-﻿/**
+/**
  * IBM i Fundamentals -- Approved Lesson Sequence
  * Source: Spec 009 Section 5; D-CONT-001 resolved
  *

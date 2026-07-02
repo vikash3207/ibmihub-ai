@@ -1,4 +1,4 @@
-﻿import Link from 'next/link'
+import Link from 'next/link'
 import { WAITLIST_CTA_LABEL, SITE_NAME } from '@/lib/config'
 
 export default function LandingPage() {

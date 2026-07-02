@@ -1,11 +1,24 @@
+# Dependencies
 node_modules
+
+# Next.js build output
 .next
 out
-.DS_Store
 
 # Environment files -- never commit real secrets
 .env.local
 .env.*.local
+
+# TypeScript incremental build cache
+*.tsbuildinfo
+
+# Claude Code local settings (machine-specific, not shared)
+.claude/settings.local.json
+.claude/*.local.json
+
+# OS metadata
+.DS_Store
+Thumbs.db
 
 # Logs
 npm-debug.log*
@@ -15,5 +28,3 @@ yarn-error.log*
 # Unused lock files -- only package-lock.json (npm) is committed
 yarn.lock
 pnpm-lock.yaml
-*.tsbuildinfo 
-.claude/ 
