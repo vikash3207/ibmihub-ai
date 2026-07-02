@@ -1,5 +1,5 @@
-/**
- * IBM i Fundamentals — Approved Lesson Sequence
+﻿/**
+ * IBM i Fundamentals -- Approved Lesson Sequence
  * Source: Spec 009 Section 5; D-CONT-001 resolved
  *
  * This file is the editable source of truth for lesson metadata.

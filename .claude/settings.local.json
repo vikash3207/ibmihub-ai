@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"C:/Users/vikas\" -maxdepth 5 -iname \".git\" -type d 2>/dev/null | grep -v node_modules)"
+    ]
+  }
+}

@@ -1,10 +1,10 @@
-import Link from 'next/link'
+﻿import Link from 'next/link'
 import { WAITLIST_CTA_LABEL, SITE_NAME } from '@/lib/config'
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* -- Header ------------------------------------------------------- */}
       <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 flex h-14 items-center justify-between">
           <span className="font-semibold text-slate-900">{SITE_NAME}</span>
@@ -25,7 +25,7 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* ── Hero ───────────────────────────────────────────────────────── */}
+      {/* -- Hero --------------------------------------------------------- */}
       <main className="flex-1">
         <section className="mx-auto max-w-5xl px-4 sm:px-6 py-20 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold text-slate-900 leading-tight mb-6">
@@ -37,7 +37,7 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            {/* Primary CTA — label from config constant */}
+            {/* Primary CTA -- label from config constant */}
             <Link
               href="/auth/sign-up"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 transition-colors"
@@ -45,17 +45,17 @@ export default function LandingPage() {
               {WAITLIST_CTA_LABEL}
             </Link>
 
-            {/* Secondary CTA — first lesson preview */}
+            {/* Secondary CTA -- first lesson preview */}
             <Link
               href="/learn/ibm-i-fundamentals/what-is-ibm-i"
               className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-900 hover:border-slate-400 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 transition-colors"
             >
-              Preview the first lesson →
+              Preview the first lesson &rarr;
             </Link>
           </div>
         </section>
 
-        {/* ── Feature overview ────────────────────────────────────────── */}
+        {/* -- Feature overview ------------------------------------------ */}
         <section className="mx-auto max-w-5xl px-4 sm:px-6 pb-20">
           <div className="grid sm:grid-cols-3 gap-6">
             {[
@@ -83,7 +83,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Audience ────────────────────────────────────────────────── */}
+        {/* -- Audience -------------------------------------------------- */}
         <section className="bg-white border-t border-slate-100 py-16">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <h2 className="text-2xl font-bold text-slate-900 mb-8 text-center">Who is IBMiHub AI for?</h2>
@@ -110,7 +110,7 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* ── Trust / privacy ─────────────────────────────────────────── */}
+        {/* -- Trust / privacy ------------------------------------------- */}
         <section className="mx-auto max-w-5xl px-4 sm:px-6 py-12">
           <div className="rounded-2xl border border-amber-100 bg-amber-50 p-6">
             <p className="text-sm text-amber-900 leading-relaxed">
@@ -123,7 +123,7 @@ export default function LandingPage() {
         </section>
       </main>
 
-      {/* ── Footer ─────────────────────────────────────────────────────── */}
+      {/* -- Footer ------------------------------------------------------- */}
       <footer className="border-t border-slate-100 bg-white py-8">
         <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <span>{SITE_NAME}</span>

@@ -1,12 +1,12 @@
--- IBMiHub AI — Initial Schema (Sprint 1 First Coding Batch)
--- Run this against your Supabase project in the SQL Editor.
--- Tables in this migration: user_profiles, lessons
+-- IBMiHub AI -- Initial Schema (Sprint 1 First Coding Batch)
+-- Idempotent: safe to re-run. Triggers are dropped before creation.
+-- Tables: user_profiles, lessons
 -- NOT included (future migrations): progress, feedback, ai_usage_log, waitlist
 
--- ─── Extensions ─────────────────────────────────────────────────────────────
+-- Extensions
 create extension if not exists "uuid-ossp";
 
--- ─── user_profiles ──────────────────────────────────────────────────────────
+-- user_profiles
 create table if not exists public.user_profiles (
   id                  uuid        primary key references auth.users(id) on delete cascade,
   onboarding_response text        null,
@@ -15,7 +15,7 @@ create table if not exists public.user_profiles (
   updated_at          timestamptz not null default now()
 );
 
--- Auto-update updated_at
+-- Shared updated_at function (idempotent via create or replace)
 create or replace function public.handle_updated_at()
 returns trigger language plpgsql as $$
 begin
@@ -24,12 +24,19 @@ begin
 end;
 $$;
 
+-- user_profiles updated_at trigger (drop first for idempotency)
+drop trigger if exists user_profiles_updated_at on public.user_profiles;
 create trigger user_profiles_updated_at
   before update on public.user_profiles
   for each row execute procedure public.handle_updated_at();
 
 -- Row-Level Security on user_profiles
 alter table public.user_profiles enable row level security;
+
+-- Policies (drop first for idempotency)
+drop policy if exists "Users can read their own profile"   on public.user_profiles;
+drop policy if exists "Users can insert their own profile" on public.user_profiles;
+drop policy if exists "Users can update their own profile" on public.user_profiles;
 
 create policy "Users can read their own profile"
   on public.user_profiles for select
@@ -44,7 +51,7 @@ create policy "Users can update their own profile"
   using (auth.uid() = id)
   with check (auth.uid() = id);
 
--- Auto-create a profile row when a user signs up
+-- Auto-create profile row when a user signs up (idempotent via create or replace)
 create or replace function public.handle_new_user()
 returns trigger language plpgsql security definer set search_path = public as $$
 begin
@@ -55,11 +62,13 @@ begin
 end;
 $$;
 
+-- Trigger on auth.users (drop first for idempotency)
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
 
--- ─── lessons ────────────────────────────────────────────────────────────────
+-- lessons
 create table if not exists public.lessons (
   id                        uuid        primary key default uuid_generate_v4(),
   slug                      text        not null unique,
@@ -76,21 +85,24 @@ create table if not exists public.lessons (
   updated_at                timestamptz not null default now()
 );
 
-create index if not exists lessons_slug_idx       on public.lessons (slug);
-create index if not exists lessons_status_idx     on public.lessons (status);
-create index if not exists lessons_order_idx      on public.lessons (lesson_order);
+create index if not exists lessons_slug_idx   on public.lessons (slug);
+create index if not exists lessons_status_idx on public.lessons (status);
+create index if not exists lessons_order_idx  on public.lessons (lesson_order);
 
+-- lessons updated_at trigger (drop first for idempotency)
+drop trigger if exists lessons_updated_at on public.lessons;
 create trigger lessons_updated_at
   before update on public.lessons
   for each row execute procedure public.handle_updated_at();
 
 -- Row-Level Security on lessons
--- Lessons are publicly readable when Published; only the service role can write.
+-- Published lessons are publicly readable; only the service role can write.
 alter table public.lessons enable row level security;
 
+drop policy if exists "Anyone can read published lessons" on public.lessons;
 create policy "Anyone can read published lessons"
   on public.lessons for select
   using (status = 'Published');
 
--- Service role bypasses RLS; all writes go through the seed script using the
+-- Service role bypasses RLS. All writes go through the seed script using the
 -- service role key. No client-side writes to the lessons table.

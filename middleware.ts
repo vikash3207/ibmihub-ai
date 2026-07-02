@@ -21,14 +21,14 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith(route)
   )
 
-  // Unauthenticated user trying to reach a protected route → redirect to login
+  // Unauthenticated user trying to reach a protected route -> redirect to login
   if (isProtected && !user) {
     const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('next', pathname)
     return NextResponse.redirect(loginUrl)
   }
 
-  // Authenticated user hitting a sign-up/login page → redirect to dashboard
+  // Authenticated user hitting a sign-up/login page -> redirect to dashboard
   if (user && PUBLIC_AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/dashboard', request.url))
   }

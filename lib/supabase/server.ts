@@ -1,3 +1,12 @@
+/**
+ * Supabase server client (anon key).
+ * Uses the public anon key -- subject to Row-Level Security policies.
+ * Safe for Server Actions, Route Handlers, and Server Components.
+ *
+ * For service-role access see lib/supabase/admin.ts
+ */
+import 'server-only'
+
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 
@@ -18,19 +27,11 @@ export async function createClient() {
               cookieStore.set(name, value, options as Parameters<typeof cookieStore.set>[2])
             )
           } catch {
-            // setAll called from a Server Component — ignore
+            // setAll called from a Server Component -- the session update
+            // will be handled by the middleware on the next request.
           }
         },
       },
     }
-  )
-}
-
-/** Service-role client — server-side only; bypasses RLS; NEVER use in client code. */
-export function createServiceClient() {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
   )
 }

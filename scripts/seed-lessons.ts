@@ -1,5 +1,5 @@
 /**
- * Seed / sync lesson metadata from content/lessons/metadata.ts → Supabase.
+ * Seed / sync lesson metadata from content/lessons/metadata.ts -> Supabase.
  *
  * Usage:
  *   npm run seed
@@ -47,9 +47,9 @@ async function seed() {
       )
 
     if (error) {
-      console.error(`  ✗ Failed: ${lesson.slug}`, error.message)
+      console.error(`  FAILED: ${lesson.slug}`, error.message)
     } else {
-      console.log(`  ✓ ${lesson.slug} (${lesson.status})`)
+      console.log(`  OK: ${lesson.slug} (${lesson.status})`)
     }
   }
 

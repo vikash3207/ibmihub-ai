@@ -5,7 +5,7 @@ import { SITE_NAME } from '@/lib/config'
 
 export const metadata: Metadata = {
   title: {
-    default: `${SITE_NAME} — IBM i Learning and AI Assistance`,
+    default: `${SITE_NAME} - IBM i Learning and AI Assistance`,
     template: `%s | ${SITE_NAME}`,
   },
   description:

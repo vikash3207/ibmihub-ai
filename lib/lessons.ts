@@ -1,7 +1,7 @@
 /**
  * Lesson content loading and metadata queries.
  * All public queries return ONLY Published lessons.
- * Server-side only — do not import in client components.
+ * Server-side only - do not import in client components.
  */
 
 import { createClient } from '@/lib/supabase/server'
@@ -55,7 +55,7 @@ export async function getPublishedLessonBySlug(slug: string): Promise<Lesson> {
   }
 
   if (!data) {
-    // Lesson doesn't exist or is not Published → 404
+    // Lesson does not exist or is not Published -- returns 404
     notFound()
   }
 

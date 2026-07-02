@@ -1,10 +1,10 @@
 /**
- * IBMiHub AI — Application Configuration Constants
+ * IBMiHub AI - Application Configuration Constants
  * Store CTA labels and other config-level values here so they can be updated
  * in one place without touching component code.
  */
 
-/** Primary landing page CTA label — update here when transitioning to a new launch phase. */
+/** Primary landing page CTA label - update here when transitioning to a new launch phase. */
 export const WAITLIST_CTA_LABEL = 'Join the Waitlist'
 
 /** Site name used in metadata and UI */

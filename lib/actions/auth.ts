@@ -23,7 +23,7 @@ export async function signUp(formData: FormData) {
     return { error: error.message }
   }
 
-  // Email verification is disabled for MVP — user is logged in immediately.
+  // Email verification is disabled for MVP - user is logged in immediately.
   // Redirect to onboarding.
   revalidatePath('/', 'layout')
   redirect(`/onboarding?next=${encodeURIComponent(next)}`)
