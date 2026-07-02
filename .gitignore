@@ -12,6 +12,9 @@ out
 # TypeScript incremental build cache
 *.tsbuildinfo
 
+# ESLint cache
+.eslintcache
+
 # Claude Code local settings (machine-specific, not shared)
 .claude/settings.local.json
 .claude/*.local.json
