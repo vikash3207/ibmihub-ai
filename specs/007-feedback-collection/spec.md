@@ -8,8 +8,8 @@
 |---|---|
 | Spec ID | 007 |
 | Feature | Feedback Collection |
-| Status | Draft |
-| Version | 0.1 |
+| Status | Approved |
+| Version | 1.0 |
 | Owner | Product + Engineering |
 | Last Updated | 2026-07-01 |
 
@@ -32,7 +32,7 @@ Feedback collection is the mechanism through which IBMiHub AI learns whether the
 
 The primary feedback signal in the MVP is AI Tutor response quality: a simple helpful / not helpful rating on each AI response. This signal tells the product team which responses are landing well and which are not. Aggregate patterns across AI responses can identify topic areas where the AI Tutor performs poorly, prompts that should be revised, and IBM i topics that need stronger lesson content.
 
-Secondary to AI response feedback, the MVP may support a lightweight general beta feedback entry point, consistent with what the PRD describes as "simple contact or beta feedback form" (PRD 13.10 FR-FB-001). This allows beta users to submit general impressions, report issues, or request topics without requiring a formal support system.
+Secondary to AI response feedback, the MVP supports a lightweight general beta feedback entry point, consistent with PRD 13.10 FR-FB-001. This allows beta users to submit general impressions, report issues, or request topics without requiring a formal support system.
 
 Feedback collection exists in the MVP to:
 
@@ -46,20 +46,20 @@ Feedback collection exists in the MVP to:
 
 ## 3. MVP Scope
 
-The MVP Feedback Collection feature provides a helpful / not helpful rating mechanism for AI Tutor responses and an optional lightweight general beta feedback entry point.
+The MVP Feedback Collection feature provides a helpful / not helpful rating mechanism for AI Tutor responses and a lightweight general beta feedback entry point.
 
 ### In Scope for MVP
 
 | Capability | Description |
 |---|---|
-| Helpful / Not helpful AI response feedback | Each completed AI Tutor response includes a helpful / not helpful rating control (D-AI-007 resolved; Spec 001 AI-TUTOR-FR-012) |
+| Helpful / Not helpful AI response feedback | Each completed AI Tutor response includes a helpful / not helpful rating control (Spec 001 AI-TUTOR-FR-012) |
 | Authenticated feedback submission | Feedback can only be submitted by authenticated users (consistent with AI Tutor being authenticated-only) |
 | Feedback tied to the authenticated user | Feedback records include the user ID of the submitting user |
 | Feedback timestamp | Each feedback record includes a timestamp of when it was submitted |
 | Feedback context type | Feedback records identify the type of feedback (e.g., AI response, general beta) |
 | Feedback source surface | Feedback records identify which product surface the feedback came from (e.g., AI Tutor) |
-| Optional lightweight general beta feedback | A simple feedback link or form where beta users can submit general impressions or requests, consistent with PRD FR-FB-001 and FR-FB-005 |
-| No free-text reason/comment for AI response feedback | AI response feedback is helpful / not helpful only in MVP (D-AI-007 resolved; Spec 001) |
+| Lightweight general beta feedback | A simple authenticated feedback link or form where beta users can submit a short free-text message (impressions, requests). Separate from AI response feedback. Included in MVP (OQ-FB-002 resolved). |
+| No free-text reason/comment for AI response feedback | AI response feedback is helpful / not helpful only in MVP (Spec 001 AI-TUTOR-FR-012) |
 | No public reviews or ratings | Feedback is internal only; users cannot see each other's feedback |
 | No admin feedback dashboard in MVP | Feedback is stored for manual Product Owner review; no dashboard is built in MVP |
 | No automated AI retraining from feedback | Feedback does not trigger any automated model updates |
@@ -70,7 +70,7 @@ The MVP Feedback Collection feature provides a helpful / not helpful rating mech
 
 | Excluded Capability | Reason |
 |---|---|
-| Free-text reason or comment for AI response feedback | Deferred to post-MVP (D-AI-007 resolved; Spec 001 AI-TUTOR-FR-012) |
+| Free-text reason or comment for AI response feedback | Deferred to post-MVP (Spec 001 approved AI Tutor feedback scope; Spec 001 AI-TUTOR-FR-012) |
 | Star ratings | Not in MVP scope; helpful/not helpful is sufficient |
 | Public reviews or ratings | All feedback is internal in MVP |
 | Community comments on lessons or AI responses | Future feature |
@@ -139,7 +139,7 @@ Each completed AI Tutor response must display a helpful / not helpful feedback c
 - The control must be accessible to authenticated users; unauthenticated users cannot reach the AI Tutor and therefore cannot see this control
 
 **Priority:** Must Have
-**Source:** PRD 13.10 FR-FB-002; Spec 001 AI-TUTOR-FR-012; D-AI-007 resolved
+**Source:** PRD 13.10 FR-FB-002; Spec 001 AI-TUTOR-FR-012
 
 ---
 
@@ -149,10 +149,10 @@ AI response feedback must be limited to the helpful / not helpful binary rating 
 
 - The feedback control must not include a text input, dropdown reason, or any other free-text mechanism
 - No prompt asking the user to elaborate on their rating may appear after submission in MVP
-- The reason/comment capability is explicitly deferred to post-MVP (D-AI-007 resolved)
+- The free-text reason/comment capability for AI response feedback is explicitly deferred to post-MVP (Spec 001 approved AI Tutor feedback scope). Note: general beta feedback uses free-text separately — see FEEDBACK-FR-015.
 
 **Priority:** Must Have
-**Source:** Spec 001 AI-TUTOR-FR-012; D-AI-007 resolved
+**Source:** Spec 001 AI-TUTOR-FR-012
 
 ---
 
@@ -221,16 +221,18 @@ Each feedback record must identify what type of feedback it is and which surface
 
 ---
 
-### FEEDBACK-FR-008 — Response Reference Without Full Conversation Content
+### FEEDBACK-FR-008 — AI Response Reference Identifier
 
-AI response feedback must include a reference to the specific AI response without storing the full conversation content.
+AI response feedback must use a server-generated identifier (`ai_response_id`) to reference the specific AI response without storing full conversation content (OQ-FB-003 resolved).
 
-- Each feedback record must include a reference identifier that links the feedback to the AI response it relates to (e.g., a session-scoped interaction ID or response sequence number)
-- The full text of the AI Tutor question and response must not be stored as part of the feedback record in MVP
-- The reference identifier must be sufficient to allow the Product Owner to understand the context of the feedback without requiring full conversation retention
+- Each completed AI Tutor response must receive a server-generated `ai_response_id`
+- When a user submits feedback on a response, the feedback record must include this `ai_response_id`
+- The full text of the AI Tutor question and the AI response must not be stored in the feedback record
+- The `ai_response_id` provides a privacy-safe reference to the response event without retaining conversation content
+- The `ai_response_id` must be coordinated between the AI Tutor implementation and the Feedback Collection implementation (see SDD Handoff Notes)
 
 **Priority:** Must Have
-**Source:** Spec 001 Privacy and Data Handling section; D-AI-004; PRD 14.7 NFR-PRIV-001
+**Source:** Spec 001 Privacy and Data Handling section; D-AI-004; PRD 14.7 NFR-PRIV-001; OQ-FB-003 resolved
 
 ---
 
@@ -249,14 +251,16 @@ Feedback records must not contain private, sensitive, or personally identifiable
 
 ### FEEDBACK-FR-010 — Duplicate Feedback Handling
 
-Submitting feedback more than once on the same AI response must be handled predictably.
+A user may change their feedback on the same AI response. The latest selection replaces the previous value (OQ-FB-001 resolved).
 
-- If a user submits feedback on the same AI response a second time with a different value (e.g., changing from "helpful" to "not helpful"), the behavior is to be decided (see OQ-FB-001)
-- The implementation must not create an unbounded number of duplicate feedback records for the same user/response pair
-- The behavior when a duplicate submission occurs must not confuse the user
+- One active feedback value per user per AI response is maintained at all times
+- If a user clicks "Helpful" and then clicks "Not helpful" on the same response, the stored value becomes "Not helpful"
+- If a user clicks the same value again, no new record is created and the existing record is preserved unchanged
+- The implementation must not create more than one active feedback record per user per AI response
+- The UI must reflect the user's latest selected value after any change
 
 **Priority:** Must Have
-**Source:** US-FB-005; OQ-FB-001
+**Source:** US-FB-005; OQ-FB-001 resolved
 
 ---
 
@@ -313,18 +317,19 @@ Feedback must not trigger any automated changes to the AI provider or model.
 
 ---
 
-### FEEDBACK-FR-015 — Optional Lightweight General Beta Feedback
+### FEEDBACK-FR-015 — Lightweight General Beta Feedback
 
-The MVP may support a simple general beta feedback entry point for users to submit impressions or requests.
+The MVP must include a lightweight authenticated general beta feedback entry point for users to submit impressions or requests (OQ-FB-002 resolved).
 
-- If implemented, the general beta feedback mechanism should be lightweight: a simple form or link that captures a short open text submission
-- General beta feedback submissions should be stored with the same context attributes (user ID, timestamp, feedback type, source surface)
+- A simple link or button must appear in a non-intrusive location such as the navigation or footer
+- Clicking it opens a minimal form where the user can type a short free-text message. This free-text is for general beta feedback only and is separate from AI response feedback.
+- AI response feedback remains Helpful / Not helpful only and must not show a free-text comment box (FEEDBACK-FR-002 is unaffected by this requirement)
+- General beta feedback submissions must be stored with: user ID, timestamp, feedback type ("general_beta"), and source surface
+- General beta feedback is internal only and must not be publicly visible
 - General beta feedback must not replace or interrupt the AI Tutor experience
-- The general beta feedback entry point must be accessible from a visible but non-intrusive location (e.g., footer, navigation)
-- Whether to include general beta feedback in MVP or defer it is subject to OQ-FB-002
 
-**Priority:** Should Have
-**Source:** PRD 13.10 FR-FB-001, FR-FB-005
+**Priority:** Must Have
+**Source:** PRD 13.10 FR-FB-001, FR-FB-005; OQ-FB-002 resolved
 
 ---
 
@@ -404,7 +409,7 @@ This section defines the data attributes for the MVP feedback records at the spe
 | Feedback type | Identifies the category of feedback | Examples: "ai_response", "general_beta" |
 | Feedback value | The user's feedback choice | "helpful" or "not_helpful" for AI response feedback |
 | Source surface | Which product feature the feedback came from | Examples: "ai_tutor" |
-| Source item reference ID | A reference to the specific item the feedback relates to | An interaction ID or response identifier; does NOT store full conversation content |
+| AI response ID (`ai_response_id`) | A server-generated identifier linking the feedback to the specific AI response | Does NOT store full conversation content; one active feedback value per user per `ai_response_id` (OQ-FB-003 resolved) |
 | Submitted timestamp | When the feedback was submitted | Server-side timestamp |
 | Optional metadata | Additional context if needed | Must not include full AI conversation text, private source code, job logs, credentials, or customer data |
 
@@ -413,7 +418,8 @@ This section defines the data attributes for the MVP feedback records at the spe
 - **Full AI conversation content must not be stored in feedback records.** The source item reference ID provides a reference, not the content itself.
 - **Feedback records must not contain private IBM i source code, sensitive job logs, credentials, or customer data.** If any such content appears in an AI prompt, it must not flow into the feedback record.
 - **Feedback records must be scoped to authenticated users.** No anonymous feedback records are created in MVP.
-- No free-text reason or comment field is included in the MVP feedback record schema.
+- No free-text reason or comment field is stored for AI response feedback records in MVP. General beta feedback records include a short free-text message field (FEEDBACK-FR-015).
+- One active feedback value per user per `ai_response_id` is maintained; a user changing their rating replaces the previous value rather than creating a duplicate (OQ-FB-001 resolved).
 
 ---
 
@@ -429,8 +435,9 @@ The following UX requirements define the expected user experience for feedback c
 
 ### Submitted Feedback State
 
-- After the user clicks Helpful or Not helpful, the controls must visually indicate the submitted state (e.g., the selected option is highlighted or the controls transition to a static "Feedback received" message)
-- The submitted state must not disrupt the ongoing conversation; the user can continue asking questions immediately after submitting
+- After the user clicks Helpful or Not helpful, the controls must visually indicate which option is currently selected (e.g., the selected option is highlighted)
+- If the user clicks the other option, the UI must update to reflect the new selection (the previous selection is deselected and the new selection is highlighted)
+- The submitted/selected state must not disrupt the ongoing conversation; the user can continue asking questions immediately after submitting
 
 ### Error State
 
@@ -443,20 +450,22 @@ The following UX requirements define the expected user experience for feedback c
 - Each feedback button/icon must have a descriptive accessible label for screen reader users
 - Accessible labels must clearly communicate the purpose of each control
 
-### No Comment Box in MVP
+### No Comment Box for AI Response Feedback
 
 - No free-text comment field, dropdown reason selector, or elaboration prompt must appear for AI response feedback in MVP
-- The feedback interaction must be a single click only
+- AI response feedback is a single click only: Helpful or Not helpful
+- Note: general beta feedback (FEEDBACK-FR-015) uses a short free-text message — this is a separate feedback type on a separate form and does not appear within the AI Tutor response flow
 
 ### No Disruption to AI Tutor Conversation Flow
 
 - The feedback controls must be displayed in a way that does not interrupt or visually compete with the AI Tutor conversation
 - Feedback submission must not scroll the user away from the conversation or open a modal in the MVP
 
-### General Beta Feedback Entry Point (If Included)
+### General Beta Feedback Entry Point
 
-- If implemented, a lightweight feedback link or button may appear in the navigation or footer
-- Clicking it opens a minimal input area where the user can type a short free-text message and submit
+- A lightweight feedback link or button must appear in a non-intrusive location (navigation or footer) (OQ-FB-002 resolved; FEEDBACK-FR-015)
+- Clicking it opens a minimal form where the user can type a short free-text message and submit
+- The form is for general beta feedback only — it is a separate mechanism from AI response feedback and must not include Helpful / Not helpful controls
 - The form must be simple and fast; it must not feel like a full support ticket system
 
 ---
@@ -510,7 +519,8 @@ The Feedback Collection feature is considered implementation-complete and ready 
 
 ### Feedback Storage
 
-- [ ] Each feedback submission creates a record in the database with: user ID, feedback type, feedback value, source surface, source item reference ID, and timestamp
+- [ ] Each AI response feedback submission creates or updates a record in the database with: user ID, feedback type, feedback value, source surface, ai_response_id, and timestamp
+- [ ] Each general beta feedback submission creates a record with: user ID, feedback type ("general_beta"), source surface, free-text message, and timestamp
 - [ ] Full AI Tutor conversation content (question text and response text) is not stored in the feedback record
 - [ ] No private source code, job logs, credentials, or customer data appears in any feedback record
 
@@ -521,15 +531,17 @@ The Feedback Collection feature is considered implementation-complete and ready 
 
 ### Restrictions
 
-- [ ] No free-text reason or comment field is present in MVP
+- [ ] No free-text reason or comment field appears within AI response feedback controls in MVP (general beta feedback's free-text form is separate and does not appear in the AI Tutor conversation flow)
 - [ ] Feedback is not publicly visible or displayed to other users
 - [ ] Feedback does not trigger any automated AI model changes
 
-### General Beta Feedback (If Included)
+### General Beta Feedback
 
-- [ ] If implemented, an authenticated user can submit a general text feedback message
-- [ ] General feedback is stored with user ID, timestamp, and source context
-- [ ] The general feedback form is lightweight and does not disrupt the product experience
+- [ ] A feedback link or button is visible in a non-intrusive location (navigation or footer)
+- [ ] An authenticated user can submit a general text feedback message through the form
+- [ ] General beta feedback is stored with user ID, timestamp, feedback type ("general_beta"), and source surface
+- [ ] The general beta feedback form is separate from AI response feedback controls and does not show Helpful / Not helpful controls
+- [ ] The general beta feedback form is lightweight and does not disrupt the product experience
 
 ---
 
@@ -539,7 +551,7 @@ The Feedback Collection feature is considered implementation-complete and ready 
 |---|---|---|---|
 | Low feedback volume — users do not click helpful / not helpful | Medium | Medium | Design the controls to be visible and easy to interact with; ensure they do not require extra steps to use; monitor click rates from beta day one |
 | Users misunderstanding feedback purpose — users think the AI will immediately change based on their rating | Low | Low | Avoid overstating feedback impact in the UI; do not promise real-time improvement; keep the feedback control simple and label it clearly |
-| Duplicate feedback records — user clicks both Helpful and Not helpful in quick succession | Low | Medium | Implement FEEDBACK-FR-010 handling; decide on replace vs. ignore behavior (OQ-FB-001); test specifically for rapid click scenarios |
+| Duplicate or conflicting feedback records — user clicks both Helpful and Not helpful in quick succession | Low | Medium | Implement FEEDBACK-FR-010 replace-with-latest behavior (OQ-FB-001 resolved); enforce one active record per user per ai_response_id at the data layer; test rapid click scenarios |
 | Feedback storing too much sensitive context — sensitive data leaks into optional metadata or source item reference | Low | High | FEEDBACK-FR-009 explicitly prohibits storing full conversation content or sensitive data; test that no prompt text, response text, or user-pasted content flows into feedback records |
 | Scope creep into admin analytics dashboard — requests to build a feedback dashboard during implementation | Medium | Medium | This spec explicitly excludes an admin feedback dashboard; manual review of database records is sufficient for MVP; any dashboard requires Product Owner approval |
 | Feedback not actionable without comments — helpful / not helpful alone is too thin to guide specific improvements | Medium | Medium | Aggregate patterns (which response types or topics get "not helpful") are still meaningful; optional general beta feedback form adds a text channel; post-MVP can add comment fields |
@@ -548,11 +560,7 @@ The Feedback Collection feature is considered implementation-complete and ready 
 
 ## 15. Open Questions
 
-| ID | Question | Owner | Needed Before |
-|---|---|---|---|
-| OQ-FB-001 | Should submitting feedback on the same AI response a second time replace the existing record, or be ignored? For example, if a user clicks "Helpful" and then "Not helpful", does the record update to "Not helpful" or stay as "Helpful"? | Engineering | Implementation planning |
-| OQ-FB-002 | Should the MVP include a general beta feedback form/link in addition to AI response feedback, or should AI response feedback be the only feedback mechanism? The PRD supports it (FR-FB-001, FR-FB-005) but it adds implementation scope. | Product | Implementation planning |
-| OQ-FB-003 | What identifier should represent the AI response in the feedback record? Options include a session-scoped sequence number, a content hash, or a server-generated response ID — without storing the full conversation content. | Engineering | Implementation planning |
+No open questions remain for this spec at this stage. Any new questions discovered during implementation planning should be added here before coding begins.
 
 ---
 
@@ -564,9 +572,7 @@ This specification must be reviewed and approved by the Product Owner before any
 
 - [ ] Product Owner has reviewed this spec and confirmed the MVP scope and feedback data requirements
 - [ ] Engineering has reviewed this spec and confirmed no blocking technical ambiguities
-- [ ] OQ-FB-001 (duplicate feedback handling) is decided — this affects the feedback write logic
-- [ ] OQ-FB-002 (general beta feedback inclusion) is decided — this affects the MVP implementation scope
-- [ ] OQ-FB-003 (AI response reference identifier) is decided — this affects the feedback record design
+- [ ] AI Tutor implementation plan (Spec 001) is coordinated to confirm the server-generated `ai_response_id` is generated and returned per response, so feedback can reference it
 
 ### Before Coding Can Begin
 
@@ -580,7 +586,8 @@ This specification must be reviewed and approved by the Product Owner before any
 
 - The feedback write should be implemented as a non-blocking, asynchronous operation. The AI Tutor conversation must not wait for the feedback write to complete before displaying the next response.
 - The feedback control should be implemented as a client-side component that calls a server-side feedback submission endpoint. The endpoint must verify authentication and the absence of sensitive content before writing the record.
-- The decision on OQ-FB-003 (response reference ID) affects whether the AI Tutor needs to generate and return an identifier for each response, or whether the feedback system generates one independently. This should be coordinated between the AI Tutor and Feedback Collection implementation plans.
+- The `ai_response_id` (FEEDBACK-FR-008) must be coordinated between the AI Tutor and Feedback Collection implementation plans. The AI Tutor implementation must generate and return a server-side identifier per completed response so the feedback control can include it in the submission.
+- The replace-with-latest behavior for duplicate feedback (FEEDBACK-FR-010) should be enforced at the data layer (e.g., upsert on user ID + ai_response_id) to avoid race condition duplicates.
 
 ---
 
@@ -589,3 +596,5 @@ This specification must be reviewed and approved by the Product Owner before any
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial draft — MVP Feedback Collection spec based on PRD v2.9, Sprint 1 Decision Register v0.3, and Specs 001 and 004 |
+| 2026-07-01 | 0.2 | Cleanup after review; resolved duplicate feedback, general beta feedback, and AI response identifier decisions |
+| 2026-07-01 | 1.0 | Approved Feedback Collection SDD spec for implementation planning |
