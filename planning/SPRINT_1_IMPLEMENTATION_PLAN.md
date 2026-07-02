@@ -5,8 +5,8 @@
 | Field | Value |
 |---|---|
 | Title | Sprint 1 Implementation Plan |
-| Status | Draft |
-| Version | 0.1 |
+| Status | Review Ready |
+| Version | 0.2 |
 | Last Updated | 2026-07-01 |
 | Owner | Product + Engineering |
 
@@ -23,6 +23,12 @@
 | Spec 007 | Feedback Collection | v1.0 |
 | Spec 008 | Public Landing Experience | v1.0 |
 | Spec 009 | Content Governance | v1.0 |
+
+### Supporting ADRs (All Accepted)
+
+| Document | Version | Role |
+|---|---|---|
+| docs/adr/ADR-005-ai-provider-and-model.md | v0.1 Accepted | AI provider, model, fallback, provider abstraction, and re-verification requirements |
 
 ---
 
@@ -134,23 +140,29 @@ This workstream covers lesson content loading, metadata, the Learning Center, an
 - Create lesson review checklist template at `docs/content/lesson-review-checklist.md` based on Spec 009 Section 12
 
 **High-Level Tasks — Learning Center (Spec 002):**
+
+> **Staged note:** The Learning Center lesson list (published lesson display) can be implemented before Progress Tracking is complete. Completion status indicators per lesson depend on Spec 006 Progress Tracking and should be added after Progress Tracking is available.
+
 - Implement Learning Center page at `/learn`
 - Implement IBM i Fundamentals path page at `/learn/ibm-i-fundamentals`
 - Display ordered list of published lessons with titles, descriptions, and order
-- Display completion status per lesson for authenticated users (reads from Progress Tracking)
+- Display completion status per lesson for authenticated users (reads from Progress Tracking — implement this after Workstream D is available)
 - Show "More lessons are being added" note if fewer than 12 lessons are published
 - Implement unauthenticated lesson list view (lesson titles visible, no completion status)
 
 **High-Level Tasks — Lesson Experience (Spec 003):**
+
+> **Staged note:** Lesson content rendering and access rules can be implemented before Progress Tracking is complete. Mark Complete and completed-state display depend on Spec 006 Progress Tracking and should be added after Progress Tracking is available.
+
 - Implement lesson page route at `/learn/ibm-i-fundamentals/[slug]`
-- Implement Markdown rendering for lesson body content (select Markdown library; confirm OQ-LE-001)
-- Implement static or server-side rendering for lesson pages (resolve OQ-LE-002 before implementation)
+- Implement Markdown rendering for lesson body content (select Markdown library; confirm OQ-LE-001 / IMP-Q-001)
+- Implement static or server-side rendering for lesson pages (resolve OQ-LE-002 / IMP-Q-002 before implementation)
 - Implement lesson access control: Lesson 1 (slug: `what-is-ibm-i`) is public; all other published lessons require authentication
 - Implement login/sign-up prompt for unauthenticated users attempting protected lessons
 - Implement lesson metadata display: title, estimated reading time if provided, lesson position
 - Implement next and previous lesson navigation
-- Implement Mark Complete button for authenticated users (calls Progress Tracking)
-- Implement read-only completed state display for already-completed lessons
+- Implement Mark Complete button for authenticated users (calls Progress Tracking — implement after Workstream D is available)
+- Implement read-only completed state display for already-completed lessons (depends on Progress Tracking)
 - Implement AI Tutor link on each lesson page
 - Implement optional AI Tutor starter question display near the link
 - Implement Lesson 1 sign-up CTA at the end of the first lesson
@@ -198,9 +210,9 @@ This workstream covers the AI Tutor feature. It depends on Workstream B for auth
 - Implement system prompt establishing IBM i domain context, safety boundaries, beginner-friendly behavior, production-use caution, and sensitive data guidance
 - Implement streaming response delivery to the client
 - Implement session-level conversation history: pass prior messages in the current session as context; do not persist server-side
-- Implement AI Tutor privacy notice near the input area (approved wording: Spec 004 OQ-SEC-003 referenced in Spec 001 FR-009)
+- Implement the AI Tutor privacy/trust notice using the approved wording from Spec 001. If the final wording is not confirmed in Spec 001, resolve it before AI Tutor implementation begins.
 - Implement helpful / not helpful feedback controls on each completed AI response (coordinates with Workstream F for ai_response_id)
-- Implement token usage logging (input and output token counts per request — Spec 001 LESSON-FR-014 / AI-TUTOR-FR-014)
+- Implement token usage logging (input and output token counts per request — Spec 001 AI-TUTOR-FR-014)
 - Implement error handling for AI provider failures, rate limits
 - Implement starter prompt display when conversation is empty (Spec 001 UX — Empty State)
 
@@ -392,10 +404,12 @@ The following questions are genuine implementation-level questions that remain o
 |---|---|---|---|
 | IMP-Q-001 | Which Markdown rendering library should be used for lesson content? The choice affects bundle size, rendering quality, and maintenance. Options include `remark` / `rehype`, `next-mdx-remote`, or a similar library. (Spec 003 OQ-LE-001) | Engineering | Lesson Experience implementation |
 | IMP-Q-002 | Should lesson pages use static generation (SSG) or server-side rendering (SSR)? SSG provides better performance but requires careful handling of the Lesson 1 public / rest authenticated split. SSR is simpler for auth-gated content but may add latency. (Spec 003 OQ-LE-002) | Engineering | Lesson Experience implementation |
-| IMP-Q-003 | How should the lesson metadata store be structured? Options include a JSON metadata file in the repository, a TypeScript module, or database records. This affects how lesson status (published/draft) is read at runtime. | Engineering | Content loading foundation |
+| IMP-Q-003 | What exact lesson metadata record shape and seeding/sync approach should be used in Supabase PostgreSQL? The approved decision is that lesson body content lives in repository Markdown files and lesson metadata lives in Supabase PostgreSQL. Implementation planning still needs to decide the exact metadata record shape and how metadata is seeded or updated from the repository workflow. | Engineering | Content loading foundation |
 | IMP-Q-004 | What is the exact waitlist or access-request mechanism for the "Join the Waitlist" CTA on the landing page? Does it route to a third-party form service, a custom form, or an email? | Product / Founder | Landing page implementation |
-| IMP-Q-005 | Should Supabase row-level security (RLS) policies be used for progress record isolation, or should all user ID filtering be enforced at the application query level? RLS is more robust but requires additional Supabase configuration. | Engineering | Progress Tracking implementation |
+| IMP-Q-005 | How should Supabase Row-Level Security policies and server-side user filtering be designed for progress and feedback records? The implementation should prefer RLS plus server-side user ID filtering to prevent cross-user data access. Pure client-side or app-only filtering is not sufficient. | Engineering | Progress Tracking and Feedback Collection implementation |
 | IMP-Q-006 | What is the token usage logging mechanism? Options include a Supabase table, a server log, or a lightweight analytics store. Full conversation content must not be logged. | Engineering | AI Tutor implementation |
+| IMP-Q-007 | What are the exact current Anthropic model IDs, pricing, rate limits, and fallback model settings to use before implementation begins? These must be verified against official provider documentation before coding and again before beta release, per ADR-005. | Engineering | AI Tutor implementation |
+| IMP-Q-008 | Where should waitlist/access-request submissions be stored for the first launch phase — Supabase table, third-party form, email workflow, or another lightweight mechanism? The landing page CTA is approved as "Join the Waitlist", but the implementation mechanism must be decided before Public Landing implementation. | Product + Engineering | Public Landing implementation |
 
 ---
 
@@ -404,3 +418,4 @@ The following questions are genuine implementation-level questions that remain o
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial Sprint 1 implementation plan created from all 9 approved SDD specs |
+| 2026-07-01 | 0.2 | Cleanup after review; added ADR-005 reference, clarified implementation questions, and tightened dependency/security notes |
