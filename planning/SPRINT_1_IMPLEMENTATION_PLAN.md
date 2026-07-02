@@ -5,8 +5,8 @@
 | Field | Value |
 |---|---|
 | Title | Sprint 1 Implementation Plan |
-| Status | Review Ready |
-| Version | 0.2 |
+| Status | Approved |
+| Version | 1.0 |
 | Last Updated | 2026-07-01 |
 | Owner | Product + Engineering |
 
@@ -28,6 +28,10 @@
 
 | Document | Version | Role |
 |---|---|---|
+| docs/adr/ADR-001-mvp-technology-stack.md | v0.1 Accepted | Next.js, TypeScript, Tailwind, component library, technical stack |
+| docs/adr/ADR-002-hosting-and-deployment.md | v0.1 Accepted | Vercel hosting, GitHub-connected deployments, preview deployments |
+| docs/adr/ADR-003-database-and-storage.md | v0.1 Accepted | Supabase PostgreSQL and content storage decisions |
+| docs/adr/ADR-004-authentication-approach.md | v0.1 Accepted | Supabase Auth and access control approach |
 | docs/adr/ADR-005-ai-provider-and-model.md | v0.1 Accepted | AI provider, model, fallback, provider abstraction, and re-verification requirements |
 
 ---
@@ -77,15 +81,15 @@ The following recommended build sequence reflects the dependency relationships b
 |---|---|---|
 | 1 | Project foundation and environment | Next.js project initialized; Supabase project created; Vercel deployment configured; environment variable management in place |
 | 2 | Authentication | Supabase Auth email/password flow working; sign-up, login, logout, session persistence, forgot password; middleware for route protection |
-| 3 | Content metadata and Markdown loading | Lesson metadata store designed; lesson Markdown content loading from files; published-only filter working |
+| 3 | Content metadata and Markdown loading (engineering) + Content governance setup (parallel content track) | Engineering: lesson metadata store designed; lesson Markdown content loading from files; published-only filter working. Content: lesson review checklist template created; lesson content directory structure set up; authoring of Lessons 1–2 begins in parallel |
 | 4 | Public Landing Experience | Landing page with hero, CTAs, trust message, links to lesson preview and Learning Center; statically generated |
-| 5 | Learning Center | Lesson list page; published-only lesson display; lesson status indicators for authenticated users |
-| 6 | Lesson Experience | Lesson page route; Markdown rendering; access rules; Mark Complete button; next/previous navigation |
+| 5 | Learning Center | Lesson list page; published-only lesson display; lesson status indicators for authenticated users (completion indicators added after Stage 7) |
+| 6 | Lesson Experience | Lesson page route; Markdown rendering; access rules; next/previous navigation (Mark Complete and completed-state added after Stage 7) |
 | 7 | Progress Tracking | Progress records; Mark Complete write; idempotent behavior; progress count and next lesson calculation |
 | 8 | Dashboard | Authenticated home page; continue-learning card using progress data; progress summary; quick links |
 | 9 | AI Tutor | Provider abstraction layer; AI Tutor page; streaming IBM i Q&A; session-level conversation history; trust messaging; privacy notice |
 | 10 | Feedback Collection | Helpful / Not helpful controls on AI responses; ai_response_id generation; feedback storage; general beta feedback form |
-| 11 | Content Governance support | Lesson review checklist template (`docs/content/lesson-review-checklist.md`); lesson content authoring workflow validated; minimum 8 lessons reviewed and published |
+| 11 | Content readiness validation | Lessons 1–8 authored, reviewed, approved, and published; lesson rendering verified end-to-end; no draft lesson exposure confirmed |
 | 12 | End-to-end QA and beta readiness | Full user flow testing; access control verification; no draft lesson exposure; beta readiness checklist completion |
 
 ---
@@ -419,3 +423,4 @@ The following questions are genuine implementation-level questions that remain o
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial Sprint 1 implementation plan created from all 9 approved SDD specs |
 | 2026-07-01 | 0.2 | Cleanup after review; added ADR-005 reference, clarified implementation questions, and tightened dependency/security notes |
+| 2026-07-01 | 1.0 | Approved Sprint 1 implementation plan for task breakdown |
