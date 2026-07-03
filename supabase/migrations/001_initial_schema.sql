@@ -106,3 +106,16 @@ create policy "Anyone can read published lessons"
 
 -- Service role bypasses RLS. All writes go through the seed script using the
 -- service role key. No client-side writes to the lessons table.
+
+-- Grants
+-- RLS policies above restrict row visibility; these grants give the anon,
+-- authenticated, and service_role Postgres roles the underlying table-level
+-- privileges they need on a fresh project (some Supabase projects do not
+-- apply default privileges to tables created via the SQL Editor).
+grant usage on schema public to anon, authenticated, service_role;
+
+grant select on public.lessons to anon, authenticated, service_role;
+grant insert, update, delete on public.lessons to service_role;
+
+grant select, insert, update on public.user_profiles to authenticated, service_role;
+grant delete on public.user_profiles to service_role;

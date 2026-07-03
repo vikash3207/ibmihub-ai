@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default async function OnboardingPage({ searchParams }: Props) {
-  const { next = '/dashboard' } = await searchParams
+  const { next = '/' } = await searchParams
 
   const supabase = await createClient()
   const {

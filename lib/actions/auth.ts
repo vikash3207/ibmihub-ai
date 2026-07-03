@@ -9,7 +9,7 @@ export async function signUp(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const next = (formData.get('next') as string) || '/dashboard'
+  const next = (formData.get('next') as string) || '/'
 
   const { error } = await supabase.auth.signUp({
     email,
@@ -34,7 +34,7 @@ export async function login(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const next = (formData.get('next') as string) || '/dashboard'
+  const next = (formData.get('next') as string) || '/'
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
@@ -98,7 +98,22 @@ export async function resetPassword(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  redirect('/dashboard')
+
+  // If onboarding not yet answered, send to onboarding first
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('onboarding_response, onboarding_skipped')
+    .eq('id', user?.id ?? '')
+    .maybeSingle()
+
+  const needsOnboarding =
+    !profile?.onboarding_response && !profile?.onboarding_skipped
+
+  redirect(needsOnboarding ? '/onboarding' : '/')
 }
 
 export async function saveOnboardingResponse(
@@ -125,5 +140,5 @@ export async function saveOnboardingResponse(
     .eq('id', user.id)
 
   revalidatePath('/', 'layout')
-  redirect(next || '/dashboard')
+  redirect(next || '/')
 }

@@ -6,7 +6,7 @@ interface Props {
 }
 
 export default async function LoginPage({ searchParams }: Props) {
-  const { next = '/dashboard', error } = await searchParams
+  const { next = '/', error } = await searchParams
 
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">

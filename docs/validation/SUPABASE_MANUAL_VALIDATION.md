@@ -10,6 +10,8 @@
 
 This guide validates **Batch 1 only**. It does not test AI Tutor, Progress Tracking, Dashboard content, Feedback, Learning Center UI, Lesson Experience UI, or Waitlist backend -- those belong to future batches.
 
+**`/dashboard` is not implemented in Batch 1.** It is listed as a protected route for future-proofing, but no page exists yet. Visiting it while authenticated is expected to return 404; visiting it while unauthenticated redirects to login. No Batch 1 auth or onboarding flow (sign-up, login, password reset, onboarding save) redirects a user to `/dashboard` -- successful flows redirect to `/onboarding` (if not yet answered) or `/` (if already onboarded or skipped).
+
 Batch 1 validation confirms:
 
 - Supabase project is configured correctly
@@ -275,14 +277,14 @@ Fill in **Actual Result** and **Pass/Fail** after running each test.
 | VAL-003 | Create test user | On sign-up page, enter a test email and password (min 8 chars). Submit. | User is created. Redirect to `/onboarding` (or email confirmation message if email confirmation is enabled). | | | |
 | VAL-004 | User appears in Supabase Auth | Supabase Dashboard -> Authentication -> Users | Test user email is listed. | | | |
 | VAL-005 | user_profiles row created | Run: `select * from public.user_profiles order by created_at desc limit 5;` | A row exists with the test user's UUID. `onboarding_response` is `null`, `onboarding_skipped` is `false`. | | | |
-| VAL-006 | Login works | Log out if needed. Open `/auth/login`. Enter test credentials. Submit. | Authenticated session is created. Redirect to `/onboarding` (if not yet answered) or `/dashboard` (if already answered). `/dashboard` will return 404 since the Dashboard page is not built in Batch 1 -- the session exists even if the page is not yet implemented. | | | |
+| VAL-006 | Login works | Log out if needed. Open `/auth/login`. Enter test credentials. Submit. | Authenticated session is created. Redirect to `/onboarding` (if not yet answered) or `/` (if already answered or skipped). Dashboard is not implemented in Batch 1, so no auth/onboarding flow redirects there. | | | |
 | VAL-007 | Logout works | While logged in, POST to `/auth/logout` via the sign-up page form or directly. | Session clears. User returns to public state. | | | |
 | VAL-008 | Forgot password page loads | Open `/auth/forgot-password` | Page renders with email field. No crash. | | | |
 | VAL-009 | Reset password route handles no token | Open `/auth/reset-password` directly (no valid token in URL) | Page renders (form appears). No crash. Submitting without a valid session/token produces an appropriate error. | | | |
 | VAL-010 | Onboarding page requires auth | While logged out, open `/onboarding` | Redirect to `/auth/login?next=%2Fonboarding`. Onboarding content is not exposed to unauthenticated users. | | | |
-| VAL-011 | Onboarding saves selected option | Log in. Open `/onboarding`. Select one approved option. Submit. | Onboarding response is saved. Redirect to `/dashboard` (or original destination). Run SQL to verify: `select onboarding_response, onboarding_skipped from public.user_profiles where id = '<your-user-id>';` | | | Approved options are listed below this table |
+| VAL-011 | Onboarding saves selected option | Log in. Open `/onboarding`. Select one approved option. Submit. | Onboarding response is saved. Redirect to `/` (or original destination) -- never to `/dashboard`. Run SQL to verify: `select onboarding_response, onboarding_skipped from public.user_profiles where id = '<your-user-id>';` | | | Approved options are listed below this table |
 | VAL-012 | Returning user skips onboarding | After completing onboarding, refresh or revisit the app. | User is NOT redirected back to `/onboarding`. No onboarding loop. | | | |
-| VAL-013 | Protected `/dashboard` redirects | While logged out, open `/dashboard` | Redirect to `/auth/login?next=%2Fdashboard`. No dashboard content exposed. Note: Dashboard page is not implemented in Batch 1. The redirect behavior is what is being validated here. | | | |
+| VAL-013 | Protected `/dashboard` behavior | While logged out, open `/dashboard`. Then, while logged in, open `/dashboard`. | Logged out: redirect to `/auth/login?next=%2Fdashboard`, no protected content exposed. Logged in: `/dashboard` returns 404 (page not implemented in Batch 1) -- this is expected and acceptable. No auth or onboarding flow should ever redirect a user to `/dashboard`. | | | Dashboard is intentionally not implemented in Batch 1 |
 | VAL-014 | Protected `/ai-tutor` redirects | While logged out, open `/ai-tutor` | Redirect to `/auth/login?next=%2Fai-tutor`. No AI Tutor content exposed. Note: AI Tutor page is not implemented in Batch 1. Anthropic SDK is NOT installed. The redirect behavior is what is being validated here. | | | |
 | VAL-015 | Draft lesson content not exposed | Visit `/learn/ibm-i-fundamentals/what-is-ibm-i` or any lesson slug | Returns 404 or a Next.js not-found page. No draft lesson content is served. Note: The full Lesson Experience UI is not implemented in Batch 1. The server-side `getPublishedLessonBySlug()` guard in `lib/lessons.ts` returns `notFound()` for any non-Published lesson. Since all lessons are `Draft`, all lesson routes return 404. | | | |
 | VAL-016 | Seed idempotency | Run `npm run seed` a second time | Output is identical to first run. No duplicate rows. `select count(*) from public.lessons;` still returns 12. | | | |
@@ -488,7 +490,7 @@ Before marking PR #25 as ready to merge, confirm each item below:
 
 ### Protected Routes (Batch 1 scope)
 
-- [ ] `/dashboard` redirects unauthenticated users to login (VAL-013)
+- [ ] `/dashboard` redirects unauthenticated users to login, and returns 404 (not protected content) for authenticated users, since the page is not implemented in Batch 1 (VAL-013)
 - [ ] `/ai-tutor` redirects unauthenticated users to login (VAL-014)
 - [ ] Draft lesson routes return 404 / not-found (VAL-015)
 

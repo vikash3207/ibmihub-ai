@@ -28,6 +28,9 @@ const supabase = createClient(supabaseUrl, serviceRoleKey)
 async function seed() {
   console.log(`Seeding ${IBM_I_FUNDAMENTALS_LESSONS.length} lessons...`)
 
+  let successCount = 0
+  let failureCount = 0
+
   for (const lesson of IBM_I_FUNDAMENTALS_LESSONS) {
     const { error } = await supabase
       .from('lessons')
@@ -47,13 +50,22 @@ async function seed() {
       )
 
     if (error) {
-      console.error(`  FAILED: ${lesson.slug}`, error.message)
+      failureCount += 1
+      console.error(`  FAILED: ${lesson.slug} - ${error.message}`)
     } else {
+      successCount += 1
       console.log(`  OK: ${lesson.slug} (${lesson.status})`)
     }
   }
 
-  console.log('\nSeed complete.')
+  console.log(`\nSeed summary: ${successCount} succeeded, ${failureCount} failed.`)
+
+  if (failureCount > 0) {
+    console.error('Seed did not complete successfully.')
+    process.exit(1)
+  }
+
+  console.log('Seed complete.')
 }
 
 seed().catch((err) => {
