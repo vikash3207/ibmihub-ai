@@ -8,6 +8,15 @@ const nextConfig = {
   // --webpack is passed explicitly, or during legacy CI/tool chains).
   turbopack: {},
 
+  // The lesson detail route reads Markdown files from content/lessons at
+  // request time (lib/lessons.ts). The file path isn't a static import, so
+  // the bundler can't discover it through static analysis; this tells the
+  // file tracer explicitly which files that route needs, instead of it
+  // falling back to tracing the whole project.
+  outputFileTracingIncludes: {
+    '/learn/ibm-i-fundamentals/[slug]': ['./content/lessons/*.md'],
+  },
+
   webpack(config) {
     // Suppress the false-positive Edge Runtime warning from @supabase/supabase-js.
     // The import chain lib/supabase/middleware.ts -> @supabase/ssr ->

@@ -1,29 +1,11 @@
 import Link from 'next/link'
 import { WAITLIST_CTA_LABEL, SITE_NAME } from '@/lib/config'
+import { SiteHeader } from '@/components/site-header'
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* -- Header ------------------------------------------------------- */}
-      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex h-14 items-center justify-between">
-          <span className="font-semibold text-slate-900">{SITE_NAME}</span>
-          <nav className="flex items-center gap-4">
-            <Link
-              href="/learn/ibm-i-fundamentals"
-              className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
-            >
-              Learning Center
-            </Link>
-            <Link
-              href="/auth/login"
-              className="text-sm font-medium text-slate-900 hover:underline"
-            >
-              Log in
-            </Link>
-          </nav>
-        </div>
-      </header>
+      <SiteHeader />
 
       {/* -- Hero --------------------------------------------------------- */}
       <main className="flex-1">
@@ -128,11 +110,8 @@ export default function LandingPage() {
         <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
           <span>{SITE_NAME}</span>
           <nav className="flex gap-6">
-            <Link href="/learn/ibm-i-fundamentals" className="hover:text-slate-600 transition-colors">
+            <Link href="/learn" className="hover:text-slate-600 transition-colors">
               Learning Center
-            </Link>
-            <Link href="/auth/login" className="hover:text-slate-600 transition-colors">
-              Log in
             </Link>
           </nav>
         </div>

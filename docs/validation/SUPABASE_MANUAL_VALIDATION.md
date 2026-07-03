@@ -519,4 +519,49 @@ Before marking PR #25 as ready to merge, confirm each item below:
 
 ---
 
-*Guide version: Batch 1 | Branch: Feature_24 | Last updated: 2026-07-03*
+## L. Batch 2 -- Learning Center and Lesson Experience Validation
+
+**Branch:** Feature_25
+
+This section validates the Learning Center and Lesson Experience **shell** only. It does not cover Mark Complete, lesson completion status, progress tracking, the Dashboard, the AI Tutor, or the Waitlist backend -- those are later batches.
+
+### Current content state
+
+As of this batch, **all 12 lessons in `content/lessons/metadata.ts` are `Draft`** (placeholder content). Publishing a lesson is a content governance decision (task S1-GOV-004), owned by the Product Owner/Founder, not part of this batch. This means:
+
+- `/learn` and `/learn/ibm-i-fundamentals` will show their **empty/beta state** by default.
+- Every lesson URL (including `/learn/ibm-i-fundamentals/what-is-ibm-i`) will return **404** by default, because no lesson is Published yet.
+
+Both of these are expected, not bugs.
+
+### Optional: temporarily publishing a lesson to see the full flow
+
+If you want to see the populated list, lesson rendering, and the login-gating behavior locally:
+
+1. In `content/lessons/metadata.ts`, change one or two lessons' `status` from `'Draft'` to `'Published'` (e.g. `what-is-ibm-i` and `why-ibm-i-still-matters`).
+2. Run `npm run seed`.
+3. Test using the steps below.
+4. **Before committing anything**, revert `content/lessons/metadata.ts` (`git checkout -- content/lessons/metadata.ts`) and run `npm run seed` again to push the reverted Draft statuses back to Supabase.
+
+**Do not commit a temporary status change.** `content/lessons/metadata.ts` must stay all-`Draft` in this batch's commit.
+
+### Manual Test Checklist
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B2-001 | `/learn` loads (empty state) | With all lessons Draft, open `/learn` | Page loads (200). Shows the IBM i Fundamentals path card, "0 of 12 lessons published", and a "content is being finalized" note instead of a Start Learning button. No crash. | | |
+| VAL-B2-002 | `/learn/ibm-i-fundamentals` loads (empty state) | With all lessons Draft, open `/learn/ibm-i-fundamentals` | Page loads (200). Shows a "lessons are still being written and reviewed" message. No crash, no lesson list. | | |
+| VAL-B2-003 | Draft lesson returns 404 | Open `/learn/ibm-i-fundamentals/what-is-ibm-i` while it is Draft | Returns 404. No lesson title, description, or body is exposed anywhere in the response. | | |
+| VAL-B2-004 | Nonexistent slug returns 404 | Open `/learn/ibm-i-fundamentals/no-such-lesson` | Returns 404. | | |
+| VAL-B2-005 | Published Lesson 1 preview (unauthenticated) | Temporarily publish `what-is-ibm-i` (see above), reseed. Log out. Open `/learn/ibm-i-fundamentals/what-is-ibm-i` | Returns 200. Full lesson body renders (headings, lists, code block, links, bold all readable). A "Create a free account" CTA appears. No login prompt is shown. | | |
+| VAL-B2-006 | Published protected lesson (unauthenticated) | With Lesson 2 also temporarily Published, log out. Open `/learn/ibm-i-fundamentals/why-ibm-i-still-matters` | Returns **200, not a redirect**. Title, short description, and position ("Lesson 2 of 2") are visible. Body content is NOT rendered anywhere in the page source. An inline "Log in to continue" prompt appears with Log in / Create account buttons linking to `/auth/login?next=...` and `/auth/sign-up?next=...`. | | |
+| VAL-B2-007 | Published protected lesson (authenticated) | Log in as a test user. Open the same lesson from VAL-B2-006 | Full lesson body renders. No login prompt. | | |
+| VAL-B2-008 | Lesson list shows correct badges | Open `/learn/ibm-i-fundamentals` with Lessons 1-2 Published | Lesson 1 shows a "Free preview" badge. Lesson 2 shows a lock indicator + "Log in to access" when logged out (no lock when logged in). A "More lessons are being added" note appears below the list (2 of 12 published). | | |
+| VAL-B2-009 | Lesson navigation | On the Lesson 1 page, use the "next lesson" link; on Lesson 2, use "previous lesson" | Next/previous links navigate to the correct adjacent *Published* lesson. Lesson 1 has no previous link. The last Published lesson's "next" link falls back to "IBM i Fundamentals". | | |
+| VAL-B2-010 | AI Tutor CTA is a link only | On any Published lesson page, check the "Ask the AI Tutor" area | A link to `/ai-tutor` is present (and the optional starter question if set in metadata). Clicking it follows existing Batch 1 `/ai-tutor` behavior (login redirect if logged out, 404 if logged in) -- no AI Tutor functionality, no Anthropic SDK involved. | | |
+| VAL-B2-011 | Header reflects auth state | Compare header while logged out vs. logged in, on `/`, `/learn`, and any lesson page | Logged out: header shows "Log in". Logged in: header shows "Log out" (linking to `/auth/logout`, which works via direct GET per the earlier fix). No account menu, no user email/details shown in the header. | | |
+| VAL-B2-012 | Revert temporary publish | After finishing VAL-B2-005 through VAL-B2-010, revert `content/lessons/metadata.ts` and reseed | `git status` shows no changes to `content/lessons/metadata.ts`. `select status, count(*) from public.lessons group by status;` shows all 12 as `Draft` again. | | |
+
+---
+
+*Guide version: Batch 2 | Branch: Feature_25 | Last updated: 2026-07-03*
