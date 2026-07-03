@@ -36,11 +36,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'why-ibm-i-still-matters',
     title: 'Why IBM i Still Matters',
-    shortDescription: 'Understanding why IBM i remains important for business-critical applications.',
+    shortDescription: 'Why organizations continue to rely on IBM i for critical systems, and what makes replacing it a slow, deliberate decision.',
     lessonOrder: 2,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/why-ibm-i-still-matters.md',
+    estimatedReadingTime: 5,
+    aiTutorStarterQuestion: "Why don't companies just migrate off IBM i if it's an older platform?",
   },
   {
     slug: 'ibm-i-platform-overview',

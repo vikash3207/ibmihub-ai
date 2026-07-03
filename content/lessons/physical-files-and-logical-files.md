@@ -1,6 +1,5 @@
-﻿# Physical Files and Logical Files
+# Physical Files and Logical Files
 
-> **Status:** Draft — content coming soon.
+> **Status:** Draft -- content coming soon.
 
 This lesson is being authored and reviewed. Check back after the content passes the lesson review checklist.
-
