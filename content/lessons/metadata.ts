@@ -47,11 +47,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'ibm-i-platform-overview',
     title: 'IBM i Platform Overview',
-    shortDescription: 'A high-level look at the IBM i architecture and its integrated components.',
+    shortDescription: 'A high-level map of the major parts of the IBM i platform and how they work together.',
     lessonOrder: 3,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-platform-overview.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: 'How do libraries, objects, and Db2 for i files all fit together on IBM i?',
   },
   {
     slug: 'libraries-and-objects',
