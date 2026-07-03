@@ -24,9 +24,9 @@ If you have only used general-purpose operating systems before, this "everything
 
 IBM i is not a legacy curiosity. It runs core, business-critical systems for organizations around the world today: order processing, inventory management, financial systems, manufacturing, distribution, healthcare records, and government services, among others.
 
-Many of these organizations have relied on IBM i for decades because it has a strong track record for reliability and long-term stability. That same reliability is exactly why IBM i can feel "invisible" -- it quietly keeps running in the background, so newer developers sometimes never hear about it until they encounter it directly on the job.
+Many of these organizations have relied on IBM i for decades because it has a strong track record for reliability and long-term stability. That same reliability is exactly why IBM i can feel "invisible" - it quietly keeps running in the background, so newer developers sometimes never hear about it until they encounter it directly on the job.
 
-For you, that means two things. First, if you are new to IT, IBM i skills are genuinely useful in the job market, particularly in industries where these systems are deeply embedded. Second, if you already work with IBM i, understanding it as a coherent platform -- rather than a collection of unrelated tools -- will make everything else you learn about it click into place faster.
+For you, that means two things. First, if you are new to IT, IBM i skills are genuinely useful in the job market, particularly in industries where these systems are deeply embedded. Second, if you already work with IBM i, understanding it as a coherent platform - rather than a collection of unrelated tools - will make everything else you learn about it click into place faster.
 
 ## Practical Example
 
