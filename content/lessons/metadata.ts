@@ -25,11 +25,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'what-is-ibm-i',
     title: 'What is IBM i?',
-    shortDescription: 'An introduction to the IBM i platform and what makes it unique.',
+    shortDescription: 'A beginner-friendly introduction to IBM i, the integrated platform that runs on IBM Power Systems.',
     lessonOrder: 1,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/what-is-ibm-i.md',
+    estimatedReadingTime: 5,
+    aiTutorStarterQuestion: "What's the difference between IBM i and IBM Power Systems?",
   },
   {
     slug: 'why-ibm-i-still-matters',
