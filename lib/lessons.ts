@@ -61,7 +61,7 @@ export async function getPublishedLessonBySlug(slug: string): Promise<Lesson> {
   }
 
   if (!data) {
-    // Lesson does not exist or is not Published -- returns 404
+    // Lesson does not exist or is not Published - returns 404
     notFound()
   }
 
@@ -93,8 +93,8 @@ export async function getPublishedLessonCount(): Promise<number> {
  * resolved by slug against the repository-committed metadata file
  * (content/lessons/metadata.ts), then constrained to LESSON_CONTENT_DIR and
  * re-validated after resolution. This means a compromised or misconfigured
- * `lessons.content_source_path` database value can never cause a file read
- * outside content/lessons -- the database is not a trusted source for
+ * "lessons.content_source_path" database value can never cause a file read
+ * outside content/lessons - the database is not a trusted source for
  * filesystem paths.
  */
 export async function loadLessonMarkdown(lesson: Lesson): Promise<string> {
@@ -108,8 +108,9 @@ export async function loadLessonMarkdown(lesson: Lesson): Promise<string> {
   // basename() strips any directory components, so fileName can never
   // contain "../" or an absolute path segment.
   const fileName = basename(knownLesson.contentSourcePath)
+
   // turbopackIgnore: this path is built from a fixed base directory plus a
-  // sanitized basename, not inferred from an arbitrary runtime string --
+  // sanitized basename, not inferred from an arbitrary runtime string -
   // next.config.mjs outputFileTracingIncludes tells the bundler which files
   // this route actually needs.
   const absolutePath = /* turbopackIgnore: true */ resolve(LESSON_CONTENT_DIR, fileName)
