@@ -10,7 +10,11 @@
 
 This guide validates **Batch 1 only**. It does not test AI Tutor, Progress Tracking, Dashboard content, Feedback, Learning Center UI, Lesson Experience UI, or Waitlist backend -- those belong to future batches.
 
-**`/dashboard` is not implemented in Batch 1.** It is listed as a protected route for future-proofing, but no page exists yet. Visiting it while authenticated is expected to return 404; visiting it while unauthenticated redirects to login. No Batch 1 auth or onboarding flow (sign-up, login, password reset, onboarding save) redirects a user to `/dashboard` -- successful flows redirect to `/onboarding` (if not yet answered) or `/` (if already onboarded or skipped).
+**`/dashboard` is not implemented in Batch 1.** It is listed as a protected route for future-proofing, but no page exists yet. Visiting it while authenticated is expected to return 404; visiting it while unauthenticated redirects to login. No Batch 1 auth or onboarding flow (sign-up, login, password reset, onboarding save) redirects a user to `/dashboard` -- successful flows redirect to `/onboarding` (if not yet answered) or `/` (if already onboarded or skipped). `/dashboard` must never be used as the expected target of a successful login or onboarding test.
+
+**`/auth/logout` supports direct GET requests.** Opening `http://localhost:3000/auth/logout` directly in the browser signs the current user out and redirects to `/` (or a safe, path-relative `next` if supplied). It no longer returns a 405.
+
+**Authenticated users are redirected away from `/auth/login` and `/auth/sign-up`.** This is enforced by `proxy.ts`. If you are already logged in and try to open those pages, you will be bounced to `/` -- this is expected, not a bug. Log out (or use an incognito/private window) before testing sign-up or login flows.
 
 Batch 1 validation confirms:
 
@@ -270,6 +274,8 @@ Leave the dev server running for all manual tests below.
 
 Fill in **Actual Result** and **Pass/Fail** after running each test.
 
+> **Before VAL-006:** If you are already logged in from a previous test, open `/auth/logout` (or use an incognito/private window) before testing sign-up or login. Because `proxy.ts` redirects authenticated users away from `/auth/login` and `/auth/sign-up`, staying logged in will make those pages appear to "not load" when really you were just bounced to `/`.
+
 | Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail | Notes |
 |---|---|---|---|---|---|---|
 | VAL-001 | Landing page loads | Open `http://localhost:3000` | Landing page renders. Hero headline reads "Learn IBM i with structured lessons and AI guidance." Trust/privacy notice is visible. Page does not crash. | | | |
@@ -277,8 +283,9 @@ Fill in **Actual Result** and **Pass/Fail** after running each test.
 | VAL-003 | Create test user | On sign-up page, enter a test email and password (min 8 chars). Submit. | User is created. Redirect to `/onboarding` (or email confirmation message if email confirmation is enabled). | | | |
 | VAL-004 | User appears in Supabase Auth | Supabase Dashboard -> Authentication -> Users | Test user email is listed. | | | |
 | VAL-005 | user_profiles row created | Run: `select * from public.user_profiles order by created_at desc limit 5;` | A row exists with the test user's UUID. `onboarding_response` is `null`, `onboarding_skipped` is `false`. | | | |
-| VAL-006 | Login works | Log out if needed. Open `/auth/login`. Enter test credentials. Submit. | Authenticated session is created. Redirect to `/onboarding` (if not yet answered) or `/` (if already answered or skipped). Dashboard is not implemented in Batch 1, so no auth/onboarding flow redirects there. | | | |
-| VAL-007 | Logout works | While logged in, POST to `/auth/logout` via the sign-up page form or directly. | Session clears. User returns to public state. | | | |
+| VAL-006 | Login works | Log out first (see note above). Open `/auth/login`. Enter test credentials. Submit. | Authenticated session is created. Redirect to `/onboarding` (if not yet answered) or `/` (if already answered or skipped). `/dashboard` is not implemented in Batch 1 and must never be the redirect target. | | | |
+| VAL-006A | Login with wrong password | Log out first. Open `/auth/login`. Enter a valid email with an incorrect password. Submit. | User stays on / returns to `/auth/login`. A generic error message is displayed: "Incorrect email or password. Please try again." No specific reason (e.g. "user not found" vs "wrong password") is revealed. | | | |
+| VAL-007 | Logout works | While logged in, open `/auth/logout` directly in the browser (GET), or POST to `/auth/logout` via a form. | Session clears. User is redirected to `/`. Returns 200/redirect, not 405. | | | |
 | VAL-008 | Forgot password page loads | Open `/auth/forgot-password` | Page renders with email field. No crash. | | | |
 | VAL-009 | Reset password route handles no token | Open `/auth/reset-password` directly (no valid token in URL) | Page renders (form appears). No crash. Submitting without a valid session/token produces an appropriate error. | | | |
 | VAL-010 | Onboarding page requires auth | While logged out, open `/onboarding` | Redirect to `/auth/login?next=%2Fonboarding`. Onboarding content is not exposed to unauthenticated users. | | | |
@@ -482,8 +489,9 @@ Before marking PR #25 as ready to merge, confirm each item below:
 - [ ] Sign-up flow works (VAL-003)
 - [ ] User appears in Supabase Auth dashboard (VAL-004)
 - [ ] `user_profiles` row auto-created on sign-up (VAL-005)
-- [ ] Login with correct credentials works (VAL-006)
-- [ ] Logout clears session (VAL-007)
+- [ ] Login with correct credentials works and never redirects to `/dashboard` (VAL-006)
+- [ ] Login with wrong password shows a generic error and returns to `/auth/login` (VAL-006A)
+- [ ] Logout clears session via direct GET (`/auth/logout`) without a 405, and redirects to `/` (VAL-007)
 - [ ] Onboarding page is protected (VAL-010)
 - [ ] Onboarding answer saves to `user_profiles` (VAL-011)
 - [ ] Returning user does not loop back to onboarding (VAL-012)

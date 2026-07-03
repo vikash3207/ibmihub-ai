@@ -4,6 +4,25 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 
+/** Map a raw Supabase sign-up error to a safe, generic message for display. */
+function safeSignUpErrorMessage(message: string): string {
+  const lower = message.toLowerCase()
+
+  if (lower.includes('already registered') || lower.includes('already exists')) {
+    return 'An account with this email already exists. Try logging in instead.'
+  }
+
+  if (lower.includes('password')) {
+    return 'Password does not meet the minimum requirements (at least 8 characters).'
+  }
+
+  if (lower.includes('email')) {
+    return 'Please enter a valid email address.'
+  }
+
+  return 'Unable to create your account. Please check your details and try again.'
+}
+
 export async function signUp(formData: FormData) {
   const supabase = await createClient()
 
@@ -20,7 +39,11 @@ export async function signUp(formData: FormData) {
   })
 
   if (error) {
-    return { error: error.message }
+    redirect(
+      `/auth/sign-up?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+        safeSignUpErrorMessage(error.message)
+      )}`
+    )
   }
 
   // Email verification is disabled for MVP - user is logged in immediately.
@@ -39,15 +62,24 @@ export async function login(formData: FormData) {
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
   if (error) {
-    return { error: 'Incorrect email or password. Please try again.' }
+    redirect(
+      `/auth/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
+        'Incorrect email or password. Please try again.'
+      )}`
+    )
   }
 
   revalidatePath('/', 'layout')
 
   // If onboarding not yet answered, send to onboarding first
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   const { data: profile } = await supabase
     .from('user_profiles')
     .select('onboarding_response, onboarding_skipped')
+    .eq('id', user?.id ?? '')
     .maybeSingle()
 
   const needsOnboarding =
