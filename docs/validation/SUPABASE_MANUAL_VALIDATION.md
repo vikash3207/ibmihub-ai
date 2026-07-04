@@ -529,18 +529,18 @@ This section validates the Learning Center and Lesson Experience **shell** only.
 
 As of **Batch 2**, all 12 lessons in `content/lessons/metadata.ts` were `Draft` (placeholder content), so `/learn` and every lesson URL showed empty/404 states by default. This section is kept for historical reference and for testing the *Draft* lesson behavior in general.
 
-**As of Batch 3, Lesson 1 (`what-is-ibm-i`) is permanently `Published`** as the public preview lesson, **as of Batch 4, Lesson 2 (`why-ibm-i-still-matters`) is also permanently `Published`**, and **as of Batch 5, Lesson 3 (`ibm-i-platform-overview`) is also permanently `Published`** -- see Section M, Section N, and Section O below for their current validation steps. None of the three is something to temporarily publish and revert anymore. The examples below now use Lesson 4 (`libraries-and-objects`), which remains `Draft`, to demonstrate the same Draft-lesson and protected-lesson behaviors without touching Lessons 1-3's real published status.
+**As of Batch 3, Lesson 1 (`what-is-ibm-i`) is permanently `Published`** as the public preview lesson, **as of Batch 4, Lesson 2 (`why-ibm-i-still-matters`) is also permanently `Published`**, **as of Batch 5, Lesson 3 (`ibm-i-platform-overview`) is also permanently `Published`**, and **as of Batch 6, Lesson 4 (`libraries-and-objects`) is also permanently `Published`** -- see Section M, Section N, Section O, and Section P below for their current validation steps. None of the four is something to temporarily publish and revert anymore. The examples below now use Lesson 5 (`5250-screen-basics`), which remains `Draft`, to demonstrate the same Draft-lesson and protected-lesson behaviors without touching Lessons 1-4's real published status.
 
 ### Optional: temporarily publishing a Draft lesson to see the protected-lesson flow
 
 If you want to see the protected-lesson login-gating behavior locally, using a lesson that is still Draft:
 
-1. In `content/lessons/metadata.ts`, change Lesson 4's (`libraries-and-objects`) `status` from `'Draft'` to `'Published'`. **Do not change Lessons 1-3 -- they are already intentionally Published; you do not need to touch any of them to test protected-lesson behavior.**
+1. In `content/lessons/metadata.ts`, change Lesson 5's (`5250-screen-basics`) `status` from `'Draft'` to `'Published'`. **Do not change Lessons 1-4 -- they are already intentionally Published; you do not need to touch any of them to test protected-lesson behavior.**
 2. Run `npm run seed`.
 3. Test using the steps below.
-4. **Before committing anything**, revert `content/lessons/metadata.ts` (`git checkout -- content/lessons/metadata.ts`) and run `npm run seed` again to push Lesson 4's status back to Draft in Supabase. This will not affect Lessons 1-3, which stay Published in the repository source.
+4. **Before committing anything**, revert `content/lessons/metadata.ts` (`git checkout -- content/lessons/metadata.ts`) and run `npm run seed` again to push Lesson 5's status back to Draft in Supabase. This will not affect Lessons 1-4, which stay Published in the repository source.
 
-**Do not commit a temporary status change for Lessons 4-12.** They must stay `Draft` unless a real content governance review (like Section M/N/O below) publishes them.
+**Do not commit a temporary status change for Lessons 5-12.** They must stay `Draft` unless a real content governance review (like Section M/N/O/P below) publishes them.
 
 ### Manual Test Checklist
 
@@ -551,13 +551,13 @@ If you want to see the protected-lesson login-gating behavior locally, using a l
 | VAL-B2-003 | Draft lesson returns 404 | Open `/learn/ibm-i-fundamentals/what-is-ibm-i` while it is Draft | Returns 404. No lesson title, description, or body is exposed anywhere in the response. | | |
 | VAL-B2-004 | Nonexistent slug returns 404 | Open `/learn/ibm-i-fundamentals/no-such-lesson` | Returns 404. | | |
 | VAL-B2-005 | Published Lesson 1 preview (unauthenticated) | **Superseded by Section M** -- Lesson 1 is now permanently Published; see VAL-B3-004. | | | |
-| VAL-B2-006 | Published protected lesson (unauthenticated) | **Superseded by Section N/O** -- Lessons 2 and 3 are now permanently Published as protected lessons; see VAL-B4-004 and VAL-B5-004. With Lesson 4 temporarily Published (see above), log out. Open `/learn/ibm-i-fundamentals/libraries-and-objects` | Returns **200, not a redirect**. Title, short description, and position are visible. Body content is NOT rendered anywhere in the page source. An inline "Log in to continue" prompt appears with Log in / Create account buttons linking to `/auth/login?next=...` and `/auth/sign-up?next=...`. | | |
+| VAL-B2-006 | Published protected lesson (unauthenticated) | **Superseded by Section N/O/P** -- Lessons 2, 3, and 4 are now permanently Published as protected lessons; see VAL-B4-004, VAL-B5-004, and VAL-B6-004. With Lesson 5 temporarily Published (see above), log out. Open `/learn/ibm-i-fundamentals/5250-screen-basics` | Returns **200, not a redirect**. Title, short description, and position are visible. Body content is NOT rendered anywhere in the page source. An inline "Log in to continue" prompt appears with Log in / Create account buttons linking to `/auth/login?next=...` and `/auth/sign-up?next=...`. | | |
 | VAL-B2-007 | Published protected lesson (authenticated) | Log in as a test user. Open the same lesson from VAL-B2-006 | Full lesson body renders. No login prompt. | | |
-| VAL-B2-008 | Lesson list shows correct badges | Open `/learn/ibm-i-fundamentals` with Lesson 4 temporarily Published (Lessons 1-3 are already permanently Published) | Lesson 1 shows a "Free preview" badge. Lesson 4 shows a lock indicator + "Log in to access" when logged out (no lock when logged in). A "More lessons are being added" note appears below the list (4 of 12 published). | | |
-| VAL-B2-009 | Lesson navigation | On the Lesson 1 page, use the "next lesson" link; on Lesson 4, use "previous lesson" | Next/previous links navigate to the correct adjacent *Published* lesson. Lesson 1 has no previous link. The last Published lesson's "next" link falls back to "IBM i Fundamentals". | | |
+| VAL-B2-008 | Lesson list shows correct badges | Open `/learn/ibm-i-fundamentals` with Lesson 5 temporarily Published (Lessons 1-4 are already permanently Published) | Lesson 1 shows a "Free preview" badge. Lesson 5 shows a lock indicator + "Log in to access" when logged out (no lock when logged in). A "More lessons are being added" note appears below the list (5 of 12 published). | | |
+| VAL-B2-009 | Lesson navigation | On the Lesson 1 page, use the "next lesson" link; on Lesson 5, use "previous lesson" | Next/previous links navigate to the correct adjacent *Published* lesson. Lesson 1 has no previous link. The last Published lesson's "next" link falls back to "IBM i Fundamentals". | | |
 | VAL-B2-010 | AI Tutor CTA is a link only | On any Published lesson page, check the "Ask the AI Tutor" area | A link to `/ai-tutor` is present (and the optional starter question if set in metadata). Clicking it follows existing Batch 1 `/ai-tutor` behavior (login redirect if logged out, 404 if logged in) -- no AI Tutor functionality, no Anthropic SDK involved. | | |
 | VAL-B2-011 | Header reflects auth state | Compare header while logged out vs. logged in, on `/`, `/learn`, and any lesson page | Logged out: header shows "Log in". Logged in: header shows "Log out" (linking to `/auth/logout`, which works via direct GET per the earlier fix). No account menu, no user email/details shown in the header. | | |
-| VAL-B2-012 | Revert temporary publish | After finishing VAL-B2-006 through VAL-B2-009, revert `content/lessons/metadata.ts` and reseed | `git status` shows no changes to `content/lessons/metadata.ts`. `select status, count(*) from public.lessons group by status;` shows Lessons 1-3 `Published` and all others `Draft` again. | | |
+| VAL-B2-012 | Revert temporary publish | After finishing VAL-B2-006 through VAL-B2-009, revert `content/lessons/metadata.ts` and reseed | `git status` shows no changes to `content/lessons/metadata.ts`. `select status, count(*) from public.lessons group by status;` shows Lessons 1-4 `Published` and all others `Draft` again. | | |
 
 ---
 
@@ -655,4 +655,35 @@ This section validates the third published lesson: Lesson 3 (`ibm-i-platform-ove
 
 ---
 
-*Guide version: Batch 5 | Branch: Feature_28 | Last updated: 2026-07-04*
+## P. Batch 6 -- Lesson 4 Protected-Publish Validation
+
+**Branch:** Feature_29
+
+This section validates the fourth published lesson: Lesson 4 (`libraries-and-objects`) is Published but is not the free-preview lesson, so logged-out users must see a login prompt instead of the lesson body, same as Lessons 2 and 3. It does not cover Mark Complete, Progress Tracking, the Dashboard, the AI Tutor, or Lessons 5-12 content.
+
+### Content state as of Batch 6
+
+- Lessons 1-3 remain `Published` (unchanged from prior batches).
+- Lesson 4 (`libraries-and-objects`) status is now `Published` in `content/lessons/metadata.ts`, with real beginner-friendly content, an estimated reading time, and an AI Tutor starter question.
+- Lessons 5-12 remain `Draft`.
+- The review record for Lesson 4 is at `docs/content/reviews/lesson-004-libraries-and-objects-review.md`.
+
+**After pulling this change, you must run `npm run seed`** to sync Lesson 4's new status and metadata into Supabase.
+
+### Manual Test Checklist
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B6-001 | `/learn` shows 4 of 12 published | Open `/learn` | Shows "4 of 12 lessons published" and a "Start Learning" button. | | |
+| VAL-B6-002 | `/learn/ibm-i-fundamentals` lists Lessons 1-4 only | Open `/learn/ibm-i-fundamentals` | Shows exactly four rows: "What is IBM i?" with a "Free preview" badge, and "Why IBM i Still Matters", "IBM i Platform Overview", and "Libraries and Objects" each with a lock indicator + "Log in to access" when logged out (no lock when logged in). Lessons 5-12 do not appear. A "More lessons are being added" note appears below the list. | | |
+| VAL-B6-003 | Lessons 1-3 unaffected | Log out. Open `/learn/ibm-i-fundamentals/what-is-ibm-i`, `/learn/ibm-i-fundamentals/why-ibm-i-still-matters`, and `/learn/ibm-i-fundamentals/ibm-i-platform-overview` | All three behave exactly as in Sections M, N, and O, unaffected by Lesson 4's publication. | | |
+| VAL-B6-004 | Lesson 4 protected behavior (logged out) | Log out. Open `/learn/ibm-i-fundamentals/libraries-and-objects` | Returns **200, not a redirect**. Title, "~6 min read", and short description are visible. The lesson body is **not present anywhere in the page's HTML response** (verify via view-source or curl, not just visually). An inline "Log in to continue" prompt appears with Log in / Create account buttons linking to `/auth/login?next=...` and `/auth/sign-up?next=...`. No Mark Complete button. | | |
+| VAL-B6-005 | Lesson 4 full content (logged in) | Log in as a test user. Open the same URL | Full lesson body renders: all sections present and readable. No login prompt. Still no Mark Complete button (not implemented yet). | | |
+| VAL-B6-006 | Lesson 5 still returns 404 | Open `/learn/ibm-i-fundamentals/5250-screen-basics` | Returns 404. Lesson 5 remains Draft and is not exposed by title, description, or body. | | |
+| VAL-B6-007 | AI Tutor CTA is static only | On the Lesson 4 page, check the "Ask the AI Tutor" area | A link to `/ai-tutor` is shown along with the suggested question "What's the difference between an IBM i library and a folder on my computer?". Clicking it follows existing `/ai-tutor` behavior (login redirect if logged out, 404 if logged in). No AI provider is called; no Anthropic SDK is present. | | |
+| VAL-B6-008 | Lesson navigation between Lesson 3 and 4 | On Lesson 3, use "next lesson"; on Lesson 4, use "previous lesson" | Lesson 3's next control leads to Lesson 4. Lesson 4's previous control leads to Lesson 3. Lesson 4's next control falls back to "IBM i Fundamentals" (no other Published lesson yet). | | |
+| VAL-B6-009 | Draft lessons unaffected | `select status, count(*) from public.lessons group by status;` | Shows exactly 1 row with status `Published` and count `4`, and 1 row with status `Draft` and count `8`. | | |
+
+---
+
+*Guide version: Batch 6 | Branch: Feature_29 | Last updated: 2026-07-04*
