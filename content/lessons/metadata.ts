@@ -91,11 +91,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'introduction-to-rpgle',
     title: 'Introduction to RPGLE',
-    shortDescription: 'A first look at RPGLE, the primary programming language for IBM i development.',
+    shortDescription: "What RPGLE is, how it's used to build IBM i business applications, and how it connects to what you've learned so far.",
     lessonOrder: 7,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/introduction-to-rpgle.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: 'What is the difference between fixed-format and free-format RPGLE?',
   },
   {
     slug: 'introduction-to-clle',
