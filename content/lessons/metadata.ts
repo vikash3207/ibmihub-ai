@@ -58,11 +58,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'libraries-and-objects',
     title: 'Libraries and Objects',
-    shortDescription: 'How IBM i organizes resources using libraries and objects.',
+    shortDescription: 'How IBM i organizes programs, files, and other objects using libraries, and why the library list matters.',
     lessonOrder: 4,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/libraries-and-objects.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: "What's the difference between an IBM i library and a folder on my computer?",
   },
   {
     slug: '5250-screen-basics',
