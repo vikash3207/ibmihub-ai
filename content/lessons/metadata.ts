@@ -135,11 +135,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'basic-ibm-i-development-workflow',
     title: 'Basic IBM i Development Workflow',
-    shortDescription: 'How a typical IBM i development and deployment workflow is structured.',
+    shortDescription: 'A general mental model for how IBM i developers move from source code to a tested, released program.',
     lessonOrder: 11,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-ibm-i-development-workflow.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: "What's the difference between compiling a program and deploying it?",
   },
   {
     slug: 'where-to-go-next',
