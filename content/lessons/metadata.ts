@@ -102,11 +102,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'introduction-to-clle',
     title: 'Introduction to CLLE',
-    shortDescription: 'Understanding Control Language and its role in IBM i system workflows.',
+    shortDescription: "What CLLE is, how it's used to control and coordinate IBM i processes, and how it differs from RPGLE.",
     lessonOrder: 8,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/introduction-to-clle.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: "What's the difference between CLLE and RPGLE?",
   },
   {
     slug: 'introduction-to-db2-for-i',
