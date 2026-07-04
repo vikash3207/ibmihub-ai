@@ -69,11 +69,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: '5250-screen-basics',
     title: '5250 Screen Basics',
-    shortDescription: 'Understanding the 5250 terminal interface used to interact with IBM i.',
+    shortDescription: 'What a 5250 screen is, how people navigate it, and why many IBM i applications still use it.',
     lessonOrder: 5,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/5250-screen-basics.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: 'What do function keys like F3 typically do on a 5250 screen?',
   },
   {
     slug: 'physical-files-and-logical-files',
