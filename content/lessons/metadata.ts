@@ -80,11 +80,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'physical-files-and-logical-files',
     title: 'Physical Files and Logical Files',
-    shortDescription: 'How IBM i stores data using physical and logical file structures.',
+    shortDescription: 'How IBM i stores data in physical files and provides different views of that data through logical files.',
     lessonOrder: 6,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/physical-files-and-logical-files.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: "What's the difference between a physical file and a logical file on IBM i?",
   },
   {
     slug: 'introduction-to-rpgle',
