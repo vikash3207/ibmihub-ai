@@ -112,12 +112,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   {
     slug: 'introduction-to-db2-for-i',
-    title: 'Introduction to DB2 for i',
-    shortDescription: 'An introduction to the integrated relational database built into IBM i.',
+    title: 'Introduction to Db2 for i',
+    shortDescription: 'What Db2 for i is, how it relates to physical and logical files, and how applications access the data it stores.',
     lessonOrder: 9,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/introduction-to-db2-for-i.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: 'How does Db2 for i relate to physical and logical files?',
   },
   {
     slug: 'job-logs-and-spool-files-basics',
