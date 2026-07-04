@@ -124,11 +124,13 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'job-logs-and-spool-files-basics',
     title: 'Job Logs and Spool Files Basics',
-    shortDescription: 'Understanding how IBM i records job activity and manages output.',
+    shortDescription: 'What job logs and spool files are, how they help with troubleshooting, and how they differ from physical and logical files.',
     lessonOrder: 10,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/job-logs-and-spool-files-basics.md',
+    estimatedReadingTime: 6,
+    aiTutorStarterQuestion: "What's the difference between a job log and a spool file?",
   },
   {
     slug: 'basic-ibm-i-development-workflow',
