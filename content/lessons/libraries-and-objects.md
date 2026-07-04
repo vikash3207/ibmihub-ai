@@ -11,11 +11,11 @@ On IBM i, almost everything the system manages is treated as an object: programs
 files, commands, job descriptions, and many other kinds of system resources are all
 objects. Each object has a name and a type, and IBM i keeps track of it accordingly.
 
-A library is a container used to organize objects. Every object lives inside exactly
-one library at a time. You can think of a library as a named collection that groups
-related objects together, similar in spirit to how you might group related items in
-real life, though it does not work exactly like a folder on a personal computer (more
-on that below).
+A library is a container used to organize objects. For the library-based objects you
+will use in these lessons, each object lives in one library at a time. You can think
+of a library as a named collection that groups related objects together, similar in
+spirit to how you might group related items in real life, though it does not work
+exactly like a folder on a personal computer (more on that below).
 
 When you refer to an object without saying which library it is in, IBM i searches a
 list of libraries, called the library list, in a defined order until it finds a
