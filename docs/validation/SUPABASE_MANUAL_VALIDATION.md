@@ -1186,4 +1186,42 @@ This section validates the first working version of the AI Tutor (Spec 001 MVP; 
 
 ---
 
-*Guide version: Batch 19 | Branch: Feature_42 | Last updated: 2026-07-05*
+## AD. Batch 20 -- AI Tutor Response UX Polish Validation
+
+**Branch:** Feature_43
+
+This section validates a UI/UX-only polish pass over the AI Tutor's response display and formatting. It does not change the provider wrapper, model ID, API route architecture, auth logic, Supabase schema, RLS policies, streaming transport, progress tracking, dashboard logic, lesson content, or Mark Complete -- all of that is exactly as validated in Section AC.
+
+### Code state as of Batch 20
+
+- `components/ai-tutor-chat.tsx`: added a small, dependency-free, local plain-text structural formatter (`formatAssistantContent` + `AssistantContentBlocks`) that recognizes paragraphs (blank-line separated), `-`/`*` bullet lines, `1.`/`2.` numbered lines, and triple-backtick fenced code blocks. Renders exclusively through JSX text children -- **no `dangerouslySetInnerHTML` anywhere, no new dependency, no markdown parser.** Also added: role labels ("You" / "AI Tutor"), a wider assistant bubble, a three-dot animated "thinking" indicator before the first token arrives, a blinking cursor while a response is still streaming, and `lucide-react` `ThumbsUp`/`ThumbsDown` icons on the feedback buttons (`lucide-react` was already a project dependency). Message state, the 20-turn limit, the 4,000-character limit, and feedback submission logic are byte-for-byte unchanged.
+- `lib/ai/system-prompt.ts`: the "Response style" paragraph was replaced with a "Formatting" paragraph instructing the model to use exactly the four patterns the new renderer supports, and explicitly avoid markdown bold/italic/headings/tables (which the renderer does not interpret specially and would show as literal symbols). All safety/behavior rules (IBM i focus, educational-only framing, no connectivity/execution/production-code-analysis claims, no customer/confidential data handling, uncertainty language, beginner-default depth) are unchanged from Batch 19.
+- `app/ai-tutor/page.tsx`: added a small icon next to the privacy notice and a minor spacing adjustment (`space-y-6` -> `space-y-8`). No copy, structural, or functional changes.
+- `app/api/ai-tutor/route.ts`, `lib/ai/anthropic.ts`, `lib/actions/ai-tutor-feedback.ts`, and the Batch 19 migration are untouched.
+
+### Manual Test Checklist
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B20-001 | AI Tutor still loads | Log in. Open `/ai-tutor` | Page loads with the privacy notice (now with an icon), starter prompts, and chat input, same as Section AC. | | |
+| VAL-B20-002 | Streaming still works | Ask a question | Response streams progressively; a blinking cursor appears at the end of the growing text while streaming, and disappears once complete. | | |
+| VAL-B20-003 | Loading state improved | Submit a question and watch the moment before the first token arrives | A three-dot animated "thinking" indicator appears in place of the old plain "..." text. | | |
+| VAL-B20-004 | Response formatting is more readable | Ask a multi-part question (e.g. "What is IBM i?") | The answer renders as distinct, properly spaced paragraphs rather than one dense block of text. | | |
+| VAL-B20-005 | Bullet lists display cleanly | Ask a question likely to produce a list (e.g. "What are the main parts of the IBM i platform?") | Bulleted content renders as an actual bulleted list (round markers, indentation), not raw "- " text. | | |
+| VAL-B20-006 | Numbered steps display cleanly | Ask a "how do I..." style procedural question | Sequential steps render as an actual numbered list, not raw "1. " text. | | |
+| VAL-B20-007 | Code blocks display cleanly | Ask for a short sample command (e.g. a CL command) | Any fenced sample command renders in a monospace, dark code block, distinct from surrounding prose text. | | |
+| VAL-B20-008 | Long answer remains readable | Ask a broader conceptual question likely to produce a long response | The full response is scannable -- clear paragraph breaks, no single giant wall of text, assistant bubble uses the wider max width. | | |
+| VAL-B20-009 | Role labels visible | Look at any exchange | Each bubble is labeled "You" or "AI Tutor" above its content. | | |
+| VAL-B20-010 | Safety refusal still works | Ask the AI Tutor to review pasted "production code" or a "customer job log" | Still declines and redirects to a conceptual alternative, exactly as in Section AC -- unaffected by the formatting-only prompt change. | | |
+| VAL-B20-011 | No false connectivity/execution claims | Ask "Can you connect to my IBM i system?" | Still clearly states it cannot, exactly as in Section AC. | | |
+| VAL-B20-012 | Feedback still works | Click "Helpful" on one response and "Not helpful" on another | Buttons now show thumbs-up/thumbs-down icons; behavior (one submission per response, "Thanks for your feedback" acknowledgement) is unchanged from Section AC. `ai_tutor_feedback` rows are created exactly as before. | | |
+| VAL-B20-013 | Usage logging still works | After a successful exchange | `ai_usage_log` gets a `success` row with token counts, exactly as in Section AC. | | |
+| VAL-B20-014 | No chat history persists after refresh | Have a conversation, then refresh `/ai-tutor` | Conversation is gone; starter prompts reappear, exactly as in Section AC. | | |
+| VAL-B20-015 | No file upload exists | Inspect the `/ai-tutor` page and chat input | Still no file input, drag-and-drop area, or attachment control anywhere. | | |
+| VAL-B20-016 | Existing Dashboard still works | Open `/dashboard` | Unaffected -- progress summary, Continue Learning card, and the AI Tutor quick-action card all behave as in Section AA/AC. | | |
+| VAL-B20-017 | Existing Lessons still work | Open Lesson 1 (logged out) and Lessons 2-12 (logged in and logged out) | Unaffected -- identical to Section AC/Z behavior. | | |
+| VAL-B20-018 | Mark Complete still works | Mark a lesson complete | Unaffected -- identical to Section Z behavior. | | |
+
+---
+
+*Guide version: Batch 20 | Branch: Feature_43 | Last updated: 2026-07-05*
