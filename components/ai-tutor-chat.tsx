@@ -99,7 +99,40 @@ function formatAssistantContent(content: string): Block[] {
     }
   })
 
-  return blocks
+  return mergeAdjacentLists(blocks)
+}
+
+/**
+ * Merge adjacent list blocks of the same type into one.
+ *
+ * The model sometimes separates list items with blank lines, which makes
+ * each item its own chunk (and therefore its own block) before this merge
+ * runs. Without merging, each item would render as its own single-item
+ * <ol>/<ul>, and every standalone <ol> restarts its numbering at 1 -- which
+ * is what caused every numbered item to display as "1.". Merging adjacent
+ * same-type list blocks into one keeps a single <ol>/<ul> per logical list,
+ * so numbering increases correctly.
+ */
+function mergeAdjacentLists(blocks: Block[]): Block[] {
+  const merged: Block[] = []
+
+  for (const block of blocks) {
+    const previous = merged[merged.length - 1]
+
+    if (previous?.type === 'numbered-list' && block.type === 'numbered-list') {
+      merged[merged.length - 1] = { ...previous, items: [...previous.items, ...block.items] }
+      continue
+    }
+
+    if (previous?.type === 'bullet-list' && block.type === 'bullet-list') {
+      merged[merged.length - 1] = { ...previous, items: [...previous.items, ...block.items] }
+      continue
+    }
+
+    merged.push(block)
+  }
+
+  return merged
 }
 
 function AssistantContentBlocks({ blocks }: { blocks: Block[] }) {
