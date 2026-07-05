@@ -146,10 +146,12 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   {
     slug: 'where-to-go-next',
     title: 'Where to Go Next',
-    shortDescription: 'Guidance on continuing your IBM i learning journey after completing the fundamentals.',
+    shortDescription: "A closing look at what you've learned across the IBM i Fundamentals path, and practical directions for continuing to learn.",
     lessonOrder: 12,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Draft',
+    status: 'Published',
     contentSourcePath: 'content/lessons/where-to-go-next.md',
+    estimatedReadingTime: 5,
+    aiTutorStarterQuestion: 'What should I focus on learning next after finishing IBM i Fundamentals?',
   },
 ]
