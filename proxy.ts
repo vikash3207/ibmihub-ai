@@ -33,8 +33,6 @@ export async function proxy(request: NextRequest) {
   }
 
   // Authenticated user hitting a sign-up/login page -> redirect home
-  // (Dashboard is not implemented in Batch 1; do not send authenticated
-  // users to a route that does not exist.)
   if (user && PUBLIC_AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     return NextResponse.redirect(new URL('/', request.url))
   }

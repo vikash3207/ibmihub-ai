@@ -5,7 +5,7 @@
  */
 
 /** Primary landing page CTA label - update here when transitioning to a new launch phase. */
-export const WAITLIST_CTA_LABEL = 'Join the Waitlist'
+export const PRIMARY_CTA_LABEL = 'Create Free Account'
 
 /** Site name used in metadata and UI */
 export const SITE_NAME = 'IBMiHub AI'

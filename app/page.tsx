@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { WAITLIST_CTA_LABEL, SITE_NAME } from '@/lib/config'
+import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
 import { SiteHeader } from '@/components/site-header'
 
 export default function LandingPage() {
@@ -24,7 +24,7 @@ export default function LandingPage() {
               href="/auth/sign-up"
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 focus:ring-offset-2 transition-colors"
             >
-              {WAITLIST_CTA_LABEL}
+              {PRIMARY_CTA_LABEL}
             </Link>
 
             {/* Secondary CTA -- first lesson preview */}
@@ -98,8 +98,8 @@ export default function LandingPage() {
             <p className="text-sm text-amber-900 leading-relaxed">
               <strong>A note on AI guidance:</strong> AI Tutor responses may be incorrect and should be
               validated before production use. Do not paste private source code, sensitive job logs,
-              credentials, or customer data. IBMiHub AI does not connect to real IBM&nbsp;i systems in
-              the MVP.
+              credentials, or customer data. IBMiHub AI does not connect to real IBM&nbsp;i systems
+              at this time.
             </p>
           </div>
         </section>
