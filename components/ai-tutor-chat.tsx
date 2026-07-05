@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { ThumbsUp, ThumbsDown } from 'lucide-react'
 import { submitAiTutorFeedback } from '@/lib/actions/ai-tutor-feedback'
 
 /** Must match app/api/ai-tutor/route.ts -- client-side mirror for UX only. */
@@ -19,6 +20,140 @@ interface Props {
   starterPrompts: string[]
 }
 
+/**
+ * Plain-text structural formatting for assistant responses.
+ *
+ * This is deliberately NOT a markdown parser -- it recognizes exactly four
+ * patterns (paragraphs, "-"/"*" bullets, "1."/"2)" numbered steps, and
+ * ```-fenced code blocks) via string splitting/regex, and renders everything
+ * through plain JSX text children. No HTML string is ever constructed and
+ * dangerouslySetInnerHTML is never used, so this is safe by construction
+ * regardless of what the model outputs -- React escapes all text content.
+ *
+ * The system prompt (lib/ai/system-prompt.ts) is written to match exactly
+ * what this formatter understands; it deliberately avoids asking the model
+ * for markdown constructs (bold, headings, tables) this formatter does not
+ * render specially, since those would otherwise show up as literal symbol
+ * clutter (e.g. stray asterisks).
+ */
+type Block =
+  | { type: 'paragraph'; key: string; text: string }
+  | { type: 'bullet-list'; key: string; items: string[] }
+  | { type: 'numbered-list'; key: string; items: string[] }
+  | { type: 'code'; key: string; text: string }
+
+function classifyChunk(chunk: string, key: string): Block {
+  const lines = chunk
+    .split('\n')
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0)
+
+  if (lines.length > 0 && lines.every((line) => /^[-*]\s+/.test(line))) {
+    return { type: 'bullet-list', key, items: lines.map((line) => line.replace(/^[-*]\s+/, '')) }
+  }
+
+  if (lines.length > 0 && lines.every((line) => /^\d+[.)]\s+/.test(line))) {
+    return { type: 'numbered-list', key, items: lines.map((line) => line.replace(/^\d+[.)]\s+/, '')) }
+  }
+
+  return { type: 'paragraph', key, text: chunk }
+}
+
+/** Strip a leading language-tag line (e.g. "rpgle") from a fenced code block, if present. */
+function stripLanguageTag(codeText: string): string {
+  const trimmed = codeText.replace(/^\n/, '').replace(/\n$/, '')
+  const firstNewline = trimmed.indexOf('\n')
+  if (firstNewline === -1) {
+    return trimmed
+  }
+  const firstLine = trimmed.slice(0, firstNewline)
+  if (/^[a-zA-Z0-9_-]{1,20}$/.test(firstLine)) {
+    return trimmed.slice(firstNewline + 1)
+  }
+  return trimmed
+}
+
+function formatAssistantContent(content: string): Block[] {
+  const segments = content.split('```')
+  const blocks: Block[] = []
+  let key = 0
+
+  segments.forEach((segment, index) => {
+    const isCode = index % 2 === 1
+
+    if (isCode) {
+      const codeText = stripLanguageTag(segment)
+      if (codeText.trim().length > 0) {
+        blocks.push({ type: 'code', key: `b${key++}`, text: codeText })
+      }
+      return
+    }
+
+    const chunks = segment
+      .split(/\n\s*\n/)
+      .map((chunk) => chunk.trim())
+      .filter((chunk) => chunk.length > 0)
+
+    for (const chunk of chunks) {
+      blocks.push(classifyChunk(chunk, `b${key++}`))
+    }
+  })
+
+  return blocks
+}
+
+function AssistantContentBlocks({ blocks }: { blocks: Block[] }) {
+  return (
+    <div className="space-y-3">
+      {blocks.map((block) => {
+        switch (block.type) {
+          case 'paragraph':
+            return (
+              <p key={block.key} className="whitespace-pre-wrap">
+                {block.text}
+              </p>
+            )
+          case 'bullet-list':
+            return (
+              <ul key={block.key} className="list-disc space-y-1 pl-5">
+                {block.items.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ul>
+            )
+          case 'numbered-list':
+            return (
+              <ol key={block.key} className="list-decimal space-y-1 pl-5">
+                {block.items.map((item, i) => (
+                  <li key={i}>{item}</li>
+                ))}
+              </ol>
+            )
+          case 'code':
+            return (
+              <pre
+                key={block.key}
+                className="overflow-x-auto rounded-lg bg-slate-900 p-3 text-xs text-slate-100"
+              >
+                <code>{block.text}</code>
+              </pre>
+            )
+        }
+      })}
+    </div>
+  )
+}
+
+function ThinkingIndicator() {
+  return (
+    <span className="inline-flex items-center gap-1 py-1" aria-label="AI Tutor is thinking">
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.3s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400 [animation-delay:-0.15s]" />
+      <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-slate-400" />
+    </span>
+  )
+}
+
 export function AiTutorChat({ starterPrompts }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -28,6 +163,7 @@ export function AiTutorChat({ starterPrompts }: Props) {
 
   const userTurnCount = messages.filter((m) => m.role === 'user').length
   const limitReached = userTurnCount >= MAX_USER_TURNS
+  const lastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -129,41 +265,64 @@ export function AiTutorChat({ starterPrompts }: Props) {
 
       {messages.length > 0 && (
         <div className="space-y-4">
-          {messages.map((message) => (
-            <div
-              key={message.id}
-              className={
-                message.role === 'user'
-                  ? 'rounded-2xl bg-slate-900 text-white px-4 py-3 ml-auto max-w-lg whitespace-pre-wrap'
-                  : 'rounded-2xl border border-slate-100 bg-white px-4 py-3 max-w-lg whitespace-pre-wrap text-slate-800'
-              }
-            >
-              <p className="text-sm">{message.content || (isStreaming ? '...' : '')}</p>
+          {messages.map((message) => {
+            const isUser = message.role === 'user'
+            const isCurrentlyStreaming = isStreaming && message.id === lastMessageId
 
-              {message.role === 'assistant' && message.content && !isStreaming && (
-                <div className="mt-3 flex items-center gap-3 text-xs">
-                  <button
-                    type="button"
-                    onClick={() => handleFeedback(message.id, true)}
-                    disabled={feedback[message.id] !== undefined && feedback[message.id] !== 'none'}
-                    className="text-slate-500 hover:text-slate-900 disabled:text-emerald-600 disabled:cursor-default"
-                  >
-                    {feedback[message.id] === 'helpful' ? 'Thanks for your feedback' : 'Helpful'}
-                  </button>
-                  {feedback[message.id] !== 'helpful' && (
-                    <button
-                      type="button"
-                      onClick={() => handleFeedback(message.id, false)}
-                      disabled={feedback[message.id] !== undefined && feedback[message.id] !== 'none'}
-                      className="text-slate-500 hover:text-slate-900 disabled:text-slate-400 disabled:cursor-default"
-                    >
-                      {feedback[message.id] === 'not_helpful' ? 'Thanks for your feedback' : 'Not helpful'}
-                    </button>
+            return (
+              <div key={message.id} className={isUser ? 'flex justify-end' : 'flex justify-start'}>
+                <div
+                  className={
+                    isUser
+                      ? 'max-w-[85%] rounded-2xl bg-slate-900 px-4 py-3 text-white sm:max-w-lg'
+                      : 'max-w-[85%] rounded-2xl border border-slate-100 bg-white px-4 py-3 text-slate-800 sm:max-w-2xl'
+                  }
+                >
+                  <p className={isUser ? 'mb-1 text-xs text-slate-300' : 'mb-1 text-xs text-slate-400'}>
+                    {isUser ? 'You' : 'AI Tutor'}
+                  </p>
+
+                  {isUser ? (
+                    <p className="whitespace-pre-wrap text-sm leading-relaxed">{message.content}</p>
+                  ) : message.content ? (
+                    <div className="text-sm leading-relaxed">
+                      <AssistantContentBlocks blocks={formatAssistantContent(message.content)} />
+                      {isCurrentlyStreaming && (
+                        <span className="ml-0.5 inline-block h-4 w-1.5 animate-pulse bg-slate-400 align-middle" />
+                      )}
+                    </div>
+                  ) : isCurrentlyStreaming ? (
+                    <ThinkingIndicator />
+                  ) : null}
+
+                  {message.role === 'assistant' && message.content && !isCurrentlyStreaming && (
+                    <div className="mt-3 flex items-center gap-4 border-t border-slate-100 pt-2 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => handleFeedback(message.id, true)}
+                        disabled={feedback[message.id] === 'helpful' || feedback[message.id] === 'not_helpful'}
+                        className="inline-flex items-center gap-1 text-slate-500 hover:text-emerald-700 disabled:cursor-default disabled:text-emerald-600 disabled:hover:text-emerald-600"
+                      >
+                        <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
+                        {feedback[message.id] === 'helpful' ? 'Thanks for your feedback' : 'Helpful'}
+                      </button>
+                      {feedback[message.id] !== 'helpful' && (
+                        <button
+                          type="button"
+                          onClick={() => handleFeedback(message.id, false)}
+                          disabled={feedback[message.id] === 'not_helpful'}
+                          className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 disabled:cursor-default disabled:text-slate-400 disabled:hover:text-slate-400"
+                        >
+                          <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
+                          {feedback[message.id] === 'not_helpful' ? 'Thanks for your feedback' : 'Not helpful'}
+                        </button>
+                      )}
+                    </div>
                   )}
                 </div>
-              )}
-            </div>
-          ))}
+              </div>
+            )
+          })}
         </div>
       )}
 

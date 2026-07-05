@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
+import { ShieldAlert } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { AiTutorChat } from '@/components/ai-tutor-chat'
 
@@ -33,7 +34,7 @@ export default async function AiTutorPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">AI Tutor</h1>
         <p className="text-slate-600 leading-relaxed">
@@ -41,7 +42,8 @@ export default async function AiTutorPage() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-amber-100 bg-amber-50 p-4">
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+        <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
         <p className="text-sm text-amber-900 leading-relaxed">{PRIVACY_NOTICE}</p>
       </div>
 
