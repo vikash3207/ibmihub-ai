@@ -128,14 +128,16 @@ export default async function DashboardPage() {
           </span>
         </Link>
 
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
-          <span className="block text-sm font-medium text-slate-500">
-            AI Tutor -- coming later, not available yet
+        <Link
+          href="/ai-tutor"
+          className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
+        >
+          <span className="block font-semibold text-slate-900">AI Tutor</span>
+          <span className="block text-sm text-slate-600 mt-1">
+            Ask IBM i questions for educational guidance. It cannot connect to a real IBM i
+            system, execute code, or analyze production code.
           </span>
-          <span className="block text-sm text-slate-500 mt-1">
-            Soon you will be able to ask IBM i questions directly.
-          </span>
-        </div>
+        </Link>
       </div>
     </div>
   )
