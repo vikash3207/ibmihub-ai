@@ -152,17 +152,23 @@ export default async function LessonPage({ params }: Props) {
       )}
 
       <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6">
-        <p className="text-sm font-medium text-slate-500">
-          AI Tutor -- coming later, not available yet
-        </p>
-        <p className="text-sm text-slate-500 mt-1">
-          Have a question about this lesson? Soon you will be able to ask the AI Tutor directly.
+        <p className="text-sm font-medium text-slate-700">Have a question?</p>
+        <p className="text-sm text-slate-600 mt-1">
+          The AI Tutor is for educational guidance only. It cannot connect to a real IBM i
+          system, execute code, or analyze production code -- it does not know which lesson
+          you are reading.
         </p>
         {lesson.ai_tutor_starter_question && (
           <p className="text-sm text-slate-500 italic mt-2">
-            Example question you&apos;ll be able to ask: &ldquo;{lesson.ai_tutor_starter_question}&rdquo;
+            Try asking: &ldquo;{lesson.ai_tutor_starter_question}&rdquo;
           </p>
         )}
+        <Link
+          href="/ai-tutor"
+          className="mt-3 inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+        >
+          Ask the AI Tutor
+        </Link>
       </div>
 
       <nav className="flex items-center justify-between border-t border-slate-100 pt-6">

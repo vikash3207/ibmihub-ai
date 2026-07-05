@@ -36,6 +36,12 @@ export async function SiteHeader() {
                 Dashboard
               </Link>
               <Link
+                href="/ai-tutor"
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                AI Tutor
+              </Link>
+              <Link
                 href="/auth/logout"
                 className="text-sm font-medium text-slate-900 hover:underline"
               >
