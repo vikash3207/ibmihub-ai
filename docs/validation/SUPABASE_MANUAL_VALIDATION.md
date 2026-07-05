@@ -970,6 +970,69 @@ This section validates the IBM i Fundamentals path now that all 12 lessons are p
 | VAL-B15-009 | Logged-in full content spot-check | Log in as a test user. Open Lessons 2, 8, and 12 | Full lesson body renders for all three. No login prompt. Still no Mark Complete button on any of them. | | |
 | VAL-B15-010 | All lessons Published, none Draft | `select status, count(*) from public.lessons group by status;` | Shows exactly 1 row with status `Published` and count `12`. No row with status `Draft` exists. | | |
 
+**Note (Batch 16):** VAL-B15-004 and VAL-B15-009 above state that no Mark Complete button appears. As of Batch 16, a Mark Complete button (or a read-only Completed indicator) is shown to **logged-in** users on lesson pages -- see Section Z below. The "no Mark Complete button" expectation still holds for logged-out users on Lessons 2-12.
+
 ---
 
-*Guide version: Batch 15 | Branch: Feature_38 | Last updated: 2026-07-05*
+## Z. Batch 16 -- Progress Tracking and Mark Complete Validation
+
+**Branch:** Feature_39
+
+This section validates the first version of Progress Tracking (Spec 006 MVP): authenticated users can mark a published lesson complete, see a read-only completed state, and see a simple completion count on the learning path page. It does not cover the Dashboard, AI Tutor, unmark/toggle, quiz scores, streaks, or any analytics -- those remain out of scope.
+
+### Content and schema state as of Batch 16
+
+- All 12 lessons in `content/lessons/metadata.ts` remain `status: 'Published'`. No lesson metadata changed in this batch.
+- New table `public.lesson_completions` stores one row per completed lesson per user: `id`, `user_id` (references `auth.users(id)`), `lesson_id` (references `public.lessons(id)`), `learning_path_id`, `completed_at`, `created_at`, with a `unique(user_id, lesson_id)` constraint.
+- New Server Action `markLessonComplete` in `lib/actions/progress.ts` writes to this table using an idempotent upsert (`onConflict: 'user_id,lesson_id', ignoreDuplicates: true`).
+- New helper `getCompletedLessonIdsForUser` in `lib/progress.ts` is the single query used by both the lesson page (`app/learn/ibm-i-fundamentals/[slug]/page.tsx`) and the learning path page (`app/learn/ibm-i-fundamentals/page.tsx`) to read completion state -- neither page computes its own progress model.
+- No unmark, toggle, or delete capability exists anywhere in the UI, the Server Action, or the database (no update/delete RLS policy or grant on `lesson_completions`).
+
+### Migration
+
+**Migration file:** `supabase/migrations/002_lesson_completions.sql`. Like `001_initial_schema.sql`, it is idempotent (`create table if not exists`, `drop policy if exists` before `create policy`) and safe to re-run.
+
+**Before running any Batch 16 validation, apply this migration manually:**
+
+1. Open the Supabase project's **SQL Editor** (same as the Batch 1 migration procedure -- there is no Supabase CLI project in this repo).
+2. Copy the full contents of `supabase/migrations/002_lesson_completions.sql` and paste it into the SQL Editor. Click **Run**.
+3. Confirm no errors are returned.
+
+### RLS / security expectations
+
+- `lesson_completions` has Row-Level Security enabled.
+- **Select policy:** a user can only read rows where `auth.uid() = user_id`.
+- **Insert policy:** a user can only insert a row where `auth.uid() = user_id`, **and** the referenced `lesson_id` currently exists in `public.lessons` with `status = 'Published'`, **and** the row's `learning_path_id` matches that lesson's `learning_path_id`. This is enforced at the database level via the policy's `with check`, not only in application code.
+- **No update policy and no delete policy exist.** Combined with grants that omit `update`/`delete` for every role, completion rows cannot be modified or removed through the `authenticated` Postgres role once written -- this is the database-level backing for "no unmark/toggle in MVP."
+- The Server Action (`markLessonComplete`) independently re-fetches the lesson by ID filtered to `status = 'Published'` immediately before writing, so an unpublished/draft lesson is rejected at the application layer as well as the database layer (defense in depth).
+
+### Published-only completion rule -- how this is validated
+
+Since all 12 lessons are currently `Published`, there is no live Draft lesson to attempt completing against. This rule is validated two ways:
+
+1. **By design/reasoning from the RLS policy:** the insert policy's `exists (...)` clause requires `l.status = 'Published'` at write time. If a lesson's status were changed to `Draft` (temporarily, per the ad hoc procedure in Section L), any attempt to insert a `lesson_completions` row referencing that lesson's ID would be rejected by Postgres with a row-level security policy violation, regardless of what the Server Action does.
+2. **By ad hoc manual test (optional, not required for every validation pass):** temporarily set one lesson's `status` back to `Draft` in `content/lessons/metadata.ts`, run `npm run seed`, attempt to mark that lesson complete as a logged-in user, confirm the action fails silently (no completion row created, no crash), then revert the status and reseed per the Section L procedure. **Do not commit a temporary status change.**
+
+### Manual Test Checklist
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B16-001 | Migration applied cleanly | Run `002_lesson_completions.sql` in the SQL Editor | No errors. `select * from public.lesson_completions limit 1;` returns an empty result set (table exists, no rows yet). | | |
+| VAL-B16-002 | RLS enabled and policies present | `select * from pg_policies where tablename = 'lesson_completions';` | Exactly two policies exist: one `SELECT` policy and one `INSERT` policy. No `UPDATE` or `DELETE` policy exists. | | |
+| VAL-B16-003 | No Mark Complete UI when logged out | Log out. Open `/learn`, `/learn/ibm-i-fundamentals`, Lesson 1, Lesson 2, Lesson 12 | All pages render as in Section Y. No Mark Complete button or Completed indicator appears anywhere, including on Lesson 1's full free-preview body. | | |
+| VAL-B16-004 | Lesson 1 preview and Lessons 2-12 protection unchanged | Log out. Open Lesson 1 (full body visible) and Lesson 2 / Lesson 12 (login prompt, no body) | Behavior matches Section Y exactly -- Batch 16 changes nothing about read access. | | |
+| VAL-B16-005 | Mark Complete appears for logged-in, not-yet-completed lesson | Log in as a test user. Open Lesson 1 (or any lesson not yet completed) | Lesson body is visible. A "Mark Complete" button appears below the body. | | |
+| VAL-B16-006 | Marking a lesson complete | Click "Mark Complete" on Lesson 1 | The page re-renders showing a static "Completed" indicator in place of the button. No modal, no celebratory animation. | | |
+| VAL-B16-007 | Completed state persists after refresh | Refresh the Lesson 1 page | The "Completed" indicator is still shown (not the Mark Complete button). | | |
+| VAL-B16-008 | Second lesson completion | Open Lesson 2, click "Mark Complete", refresh | Same behavior as Lesson 1: button becomes a persistent "Completed" indicator after refresh. | | |
+| VAL-B16-009 | Duplicate click / idempotency | On an already-completed lesson, attempt to resubmit the Mark Complete form (e.g. via browser back button + resubmit, or by calling the action again) | No error is shown. No duplicate row is created: `select count(*) from public.lesson_completions where user_id = '<test-user-id>' and lesson_id = '<lesson-id>';` returns exactly `1`. | | |
+| VAL-B16-010 | Learning path page shows completed indicators | Log in as the same test user. Open `/learn/ibm-i-fundamentals` | Lessons 1 and 2 each show a "Completed" badge in the lesson list. Other lessons show no such badge. | | |
+| VAL-B16-011 | Completion count updates | On `/learn/ibm-i-fundamentals`, check the summary line near the top | Reads "2 of 12 completed" after completing Lessons 1 and 2. The denominator is the live published lesson count, not a hardcoded value. | | |
+| VAL-B16-012 | AI Tutor remains static | On any lesson page, check the AI Tutor area | Still reads "AI Tutor -- coming later, not available yet" as static text, unchanged from Batch 15. Not a link or button. | | |
+| VAL-B16-013 | No Dashboard added | Attempt to navigate to `/dashboard` while logged in | Returns 404 (no page exists), exactly as documented in Section A for Batch 1. Batch 16 does not add a Dashboard. | | |
+| VAL-B16-014 | User isolation (two accounts) | Log in as Test User A, mark Lesson 3 complete. Log out. Log in as Test User B (a different account). Open Lesson 3 and `/learn/ibm-i-fundamentals` | Lesson 3 shows the Mark Complete button (not Completed) for Test User B. The completion count for Test User B does not include Lesson 3. `select * from public.lesson_completions where user_id = '<user-b-id>';` does not return Test User A's row. | | |
+| VAL-B16-015 | Published-only completion rule | See "Published-only completion rule -- how this is validated" above | RLS policy reasoning confirmed (or ad hoc test performed and reverted, with no committed status change). | | |
+
+---
+
+*Guide version: Batch 16 | Branch: Feature_39 | Last updated: 2026-07-05*
