@@ -17,6 +17,8 @@ The MVP AI Tutor uses prompt-guidance only (D-AI-003 approved) — no lesson-awa
 - GPT-4o-mini (OpenAI): approximately $0.15/$0.60 per MTok (reference only)
 - GPT-4o (OpenAI): approximately $2.50/$10 per MTok (reference only)
 
+**Update (Batch 18, 2026-07-05):** The pricing above reflects the original ADR review date and is kept for historical context. Claude Sonnet 4.6 is now a legacy model per official Anthropic documentation. The MVP AI Tutor model has been updated to Claude Sonnet 5. See "Update — Batch 18 Model Verification (IMP-Q-007)" below for the full re-verification and updated decision.
+
 This ADR resolves Decision Register item: **D-AI-001** (AI provider and model).
 
 ---
@@ -132,6 +134,8 @@ Implement a multi-provider routing layer that calls different AI providers based
 
 ## Recommended Decision
 
+**Superseded by Batch 18 (2026-07-05) — see "Update — Batch 18 Model Verification (IMP-Q-007)" below for the current model decision (Claude Sonnet 5).** The text below is kept as the original historical recommendation.
+
 **Use Anthropic as the AI provider, with Claude Sonnet 4.6 as the initial MVP model.**
 
 Begin monitoring AI usage costs from the first beta user session. If observed costs during beta indicate that Sonnet 4.6 is unsustainable at the usage levels seen, evaluate Claude Haiku 4.5 as a downgrade with a brief quality assessment against representative IBM i questions.
@@ -179,6 +183,40 @@ Claude Sonnet 4.6 is the most appropriate starting model for the IBM i AI Tutor 
 
 ---
 
+## Update — Batch 18 Model Verification (IMP-Q-007)
+
+**Date:** 2026-07-05
+**Branch:** Feature_41
+**Trigger:** This ADR's own "Provider verification requirement" (below) and Decision Register item IMP-Q-007 both require model names, model IDs, and pricing to be re-verified against official Anthropic documentation before AI provider implementation begins. Batch 18 performed this verification via live lookup against `platform.claude.com/docs` (not training knowledge, per IMP-Q-007's explicit instruction).
+
+**Finding:** Claude Sonnet 4.6 (this ADR's original pick) is now listed under "Legacy models" in Anthropic's official model overview. Its direct successor at the same tier, **Claude Sonnet 5**, launched June 30, 2026, and is described by Anthropic as "the best combination of speed and intelligence" — the same positioning Sonnet 4.6 held when this ADR was originally written.
+
+**Updated Decision: Use Claude Sonnet 5 as the MVP AI Tutor model.**
+
+| Item | Verified Value |
+|---|---|
+| Primary model | Claude Sonnet 5 |
+| Primary model ID | `claude-sonnet-5` |
+| Primary model pricing | $2 / $10 per MTok (input/output) introductory, through August 31, 2026; then $3 / $15 per MTok standard (identical to Sonnet 4.6's rate) |
+| Fallback model | Claude Haiku 4.5 (unchanged from the original decision) |
+| Fallback model ID | `claude-haiku-4-5-20251001` (exact dated/pinned ID; the `claude-haiku-4-5` alias is a convenience pointer that resolves to this same snapshot) |
+| Fallback model pricing | $1 / $5 per MTok (input/output) — unchanged from the original ADR |
+| Rate limits (default "Start" tier) | 1,000 requests/min, 2,000,000 input tokens/min, 400,000 output tokens/min for both Sonnet 5 and Haiku 4.5 — well within MVP beta volume |
+| SDK | `@anthropic-ai/sdk` (npm) — unchanged from the original decision |
+
+**Sonnet 4.6 status:** No longer the recommended choice for new implementation. It remains available and documented by Anthropic, but is positioned as a previous-generation model; Sonnet 5 is its current equivalent-tier replacement at the same standard price point (and a lower introductory price through August 31, 2026).
+
+**What did not change:**
+- Provider remains Anthropic (Option A in this ADR is otherwise unaffected).
+- The provider abstraction layer requirement is unchanged — the AI Tutor implementation must isolate all Anthropic SDK calls behind a single service module.
+- The Haiku 4.5 downgrade path is unchanged: switching from Sonnet 5 to Haiku 4.5 remains a one-line model ID change.
+- Cost monitoring guidance (log `input_tokens`/`output_tokens` per request) is unchanged.
+- All other Options (B, C, D) and their rejections are unaffected by this update.
+
+This update does not itself authorize any AI Tutor implementation code. Per the Decision Register, IMP-Q-007 verification (model IDs, pricing, rate limits, SDK, streaming support) is now complete; empirical testing of safety/refusal behavior on IBM i topics remains an open, implementation-time item that can only be performed once a working service layer exists.
+
+---
+
 ## PRD Alignment
 
 - **PRD 15.12** (AI Provider Neutrality): Provider abstraction layer maintains replaceability; this ADR selects a starting point, not a permanent lock-in
@@ -200,3 +238,4 @@ Resolves **D-AI-001** (AI provider and model) in `planning/SPRINT_1_DECISION_REG
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-01 | 0.1 | Initial draft; recommended Claude Sonnet 4.6 with Haiku 4.5 fallback path |
+| 2026-07-05 | 0.2 | Batch 18 (IMP-Q-007 verification): updated model decision to Claude Sonnet 5 (`claude-sonnet-5`) as primary; Claude Sonnet 4.6 is now treated as legacy. Haiku 4.5 fallback confirmed unchanged (`claude-haiku-4-5-20251001`). Provider, abstraction layer requirement, and cost monitoring guidance unchanged. |
