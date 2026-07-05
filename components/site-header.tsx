@@ -28,12 +28,20 @@ export async function SiteHeader() {
             Learning Center
           </Link>
           {user ? (
-            <Link
-              href="/auth/logout"
-              className="text-sm font-medium text-slate-900 hover:underline"
-            >
-              Log out
-            </Link>
+            <>
+              <Link
+                href="/dashboard"
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Dashboard
+              </Link>
+              <Link
+                href="/auth/logout"
+                className="text-sm font-medium text-slate-900 hover:underline"
+              >
+                Log out
+              </Link>
+            </>
           ) : (
             <Link
               href="/auth/login"
