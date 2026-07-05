@@ -18,11 +18,11 @@ const START_LEARNING_COPY: Record<string, string> = {
   'I already work with IBM i and want to refresh or deepen my knowledge.':
     'Use the IBM i Fundamentals path as a refresher, or jump directly to the topic you want to revisit.',
   'I am exploring what IBMiHub AI offers.':
-    'Explore the IBM i Fundamentals path and try the AI Tutor when you have questions.',
+    'Explore the IBM i Fundamentals path to understand the core concepts before moving into deeper topics.',
 }
 
 const DEFAULT_START_LEARNING_COPY =
-  'Start with the IBM i Fundamentals path or open the AI Tutor to ask an IBM i question.'
+  'Start with the IBM i Fundamentals path to build a clear foundation in IBM i.'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
