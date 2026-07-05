@@ -1068,4 +1068,72 @@ This section validates the first version of the authenticated Dashboard (Spec 00
 
 ---
 
-*Guide version: Batch 17 | Branch: Feature_40 | Last updated: 2026-07-05*
+## AB. Batch 18 -- AI Tutor Provider Verification and MVP Planning
+
+**Branch:** Feature_41
+
+This section documents a **planning-only** batch: resolving Decision Register item IMP-Q-007 (Anthropic model/provider verification) and recording the future AI Tutor implementation architecture. **No AI Tutor code, route, page, SDK install, or provider call exists as of this section.** This section is a record of decisions and verified facts, not a description of a working feature.
+
+### Files and specs inspected
+
+`specs/001-ai-tutor/spec.md` (Approved, v1.0), `docs/adr/ADR-005-ai-provider-and-model.md`, `planning/SPRINT_1_DECISION_REGISTER.md`, `planning/SPRINT_1_IMPLEMENTATION_DECISIONS.md` (IMP-Q-007's verification checklist), `planning/SPRINT_1_TASK_BREAKDOWN.md`, `planning/SPRINT_1_FIRST_CODING_BATCH.md`, `scripts/validate-env.ts`, `.env.local.example`, `package.json` (confirmed `@anthropic-ai/sdk` not installed), `next.config.mjs`, `proxy.ts` (confirms `/ai-tutor` is already a protected route with no page behind it), `app/learn/ibm-i-fundamentals/[slug]/page.tsx` and `app/dashboard/page.tsx` (both have static, non-clickable "AI Tutor -- coming later" placeholders from Batches 15-17).
+
+### Provider verification summary (IMP-Q-007)
+
+Verified live against official Anthropic documentation (`platform.claude.com/docs`), not training knowledge, per IMP-Q-007's explicit requirement:
+
+| Verification Item | Result |
+|---|---|
+| Model ID -- Sonnet 4.6 (ADR-005's original pick) | `claude-sonnet-4-6` -- confirmed to exist, but now listed as a legacy model |
+| Model ID -- Sonnet 5 (current successor) | `claude-sonnet-5` |
+| Model ID -- Haiku 4.5 (fallback) | `claude-haiku-4-5-20251001` (exact pinned ID; `claude-haiku-4-5` is a convenience alias resolving to it) |
+| Sonnet 5 pricing | $2/$10 per MTok introductory through August 31, 2026; $3/$15 per MTok standard thereafter |
+| Haiku 4.5 pricing | $1/$5 per MTok (unchanged from ADR-005) |
+| Rate limits (default Start tier) | 1,000 requests/min, 2,000,000 input tokens/min, 400,000 output tokens/min for both models -- well within MVP beta volume |
+| SDK package | `@anthropic-ai/sdk` (npm), native TypeScript types, streaming supported, Next.js/Vercel Edge compatible |
+| Streaming support | Confirmed native (`stream: true` + async iteration, or `client.messages.stream()`) |
+| Safety/refusal behavior on IBM i topics | **Cannot be verified from documentation.** Requires empirical testing against representative prompts once a working service layer exists -- remains open until the implementation batch. |
+
+### Model decision
+
+- **Primary model: Claude Sonnet 5 (`claude-sonnet-5`)** -- selected over ADR-005's original Sonnet 4.6 pick because Sonnet 4.6 is now a legacy model per Anthropic's own documentation, while Sonnet 5 occupies the same tier at an equal-or-better price. Recorded in `docs/adr/ADR-005-ai-provider-and-model.md` under "Update -- Batch 18 Model Verification (IMP-Q-007)".
+- **Fallback model: Claude Haiku 4.5 (`claude-haiku-4-5-20251001`)** -- unchanged from ADR-005.
+- **SDK to use later:** `@anthropic-ai/sdk` (not installed in this batch).
+- **Required environment variable (for a future batch):** `ANTHROPIC_API_KEY`. Already reserved as an empty placeholder in `.env.local.example` and checked (must-be-empty) in `scripts/validate-env.ts` since Batch 1; neither file was changed in this batch.
+
+### Future implementation architecture (documented for planning only -- not built)
+
+- **`/ai-tutor` page** -- dedicated full-page authenticated route, already listed in `proxy.ts`'s `PROTECTED_ROUTES` since Batch 1 with no page behind it yet.
+- **Streaming Route Handler** (e.g. `app/api/ai-tutor/route.ts`) -- approved for the streaming response, in place of a Server Action. Server Actions remain the right tool for this codebase's form-style mutations (Mark Complete, login, sign-up, onboarding), but a Route Handler returning a `ReadableStream` is the correct fit for progressive token streaming to a `fetch`-based client.
+- **Provider wrapper module** (e.g. `lib/ai/anthropic.ts`) -- the only file that will import `@anthropic-ai/sdk`, per Spec 001 AI-TUTOR-FR-013's provider abstraction requirement.
+- **System prompt module** (e.g. `lib/ai/system-prompt.ts`) -- system prompt stored as a named constant, not inline in a route.
+- **Client chat component** (e.g. `components/ai-tutor-chat.tsx`) -- the one place client-side JavaScript is required, for streaming display, starter prompts, and feedback buttons.
+- **Feedback/usage logging migration** (e.g. `supabase/migrations/003_ai_tutor_feedback_and_usage.sql`) -- two small tables (response feedback, token usage log) per Spec 001 Section 11 and the Decision Register's approved `ai_usage_log` design. Neither table stores conversation content.
+
+### Conversation and session behavior
+
+- **No persistent server-side chat history.** Conversation state lives in client-side React state only, per D-AI-004.
+- **Session-only conversation context.** A new browser session starts with no prior history.
+- **20-turn MVP session cap.** Resolves Decision Register item OQ-AITUTOR-003: conversation context is capped at 20 turns per session to bound token cost predictably.
+
+### Privacy notice wording (approved for future implementation)
+
+> "AI Tutor is for educational guidance only. Do not enter customer data, credentials, production code, job logs, or confidential information. The tutor cannot connect to a real IBM i system, execute code, or verify production behavior. For production or operational changes, validate with official documentation and an experienced IBM i professional."
+
+This resolves Decision Register item OQ-AI-005.
+
+### Safety boundaries (for future implementation)
+
+Directly from Spec 001 Section 9's AI Behavior Rules: IBM i focus only (no generic programming assistance), no overconfidence or guaranteed-correctness claims, explicit uncertainty language when appropriate, always recommend validating production-relevant guidance against official IBM documentation, refuse/redirect requests involving private code/job logs/credentials/customer data, never claim real IBM i connectivity or code execution ability, adapt explanation depth to beginner vs. working-developer signal.
+
+### Open implementation-time validation item
+
+**Empirical safety/refusal testing** -- the system prompt's actual behavior against representative IBM i questions (beginner and working-developer) can only be tested once a working service layer exists. This is explicitly not resolvable during a documentation-only planning batch and remains a required step before beta launch, per Spec 001 Section 10's Prompt Review Requirement.
+
+### Confirmation
+
+**No AI Tutor code was implemented in Batch 18.** No SDK was installed, no route or page was created, no provider call was made, and no environment, schema, progress-tracking, or dashboard changes occurred. This batch is documentation-only: `docs/adr/ADR-005-ai-provider-and-model.md` and this section of `docs/validation/SUPABASE_MANUAL_VALIDATION.md` are the only files changed.
+
+---
+
+*Guide version: Batch 18 | Branch: Feature_41 | Last updated: 2026-07-05*
