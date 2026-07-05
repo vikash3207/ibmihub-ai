@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Lock } from 'lucide-react'
+import { Lock, Check } from 'lucide-react'
 import { getPublishedLessons } from '@/lib/lessons'
 import { createClient } from '@/lib/supabase/server'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
+import { getCompletedLessonIdsForUser } from '@/lib/progress'
 
 export const metadata: Metadata = {
   title: IBM_I_FUNDAMENTALS_PATH_NAME,
@@ -19,6 +20,8 @@ export default async function IbmIFundamentalsPage() {
   } = await supabase.auth.getUser()
 
   const totalLessons = IBM_I_FUNDAMENTALS_LESSONS.length
+  const completedLessonIds = user ? await getCompletedLessonIdsForUser(user.id) : new Set<string>()
+  const completedCount = lessons.filter((lesson) => completedLessonIds.has(lesson.id)).length
 
   return (
     <div className="space-y-6">
@@ -31,6 +34,11 @@ export default async function IbmIFundamentalsPage() {
           An ordered path through the foundational IBM i concepts every beginner and working
           developer benefits from knowing.
         </p>
+        {user && lessons.length > 0 && (
+          <p className="text-sm text-slate-500 mt-2">
+            {completedCount} of {lessons.length} completed
+          </p>
+        )}
       </div>
 
       {lessons.length === 0 ? (
@@ -42,6 +50,7 @@ export default async function IbmIFundamentalsPage() {
           {lessons.map((lesson) => {
             const isPreview = lesson.lesson_order === 1
             const isLocked = !isPreview && !user
+            const isCompleted = user && completedLessonIds.has(lesson.id)
 
             return (
               <li key={lesson.id}>
@@ -64,6 +73,12 @@ export default async function IbmIFundamentalsPage() {
                         <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500">
                           <Lock className="h-3 w-3" aria-hidden="true" />
                           Log in to access
+                        </span>
+                      )}
+                      {isCompleted && (
+                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800">
+                          <Check className="h-3 w-3" aria-hidden="true" />
+                          Completed
                         </span>
                       )}
                     </span>

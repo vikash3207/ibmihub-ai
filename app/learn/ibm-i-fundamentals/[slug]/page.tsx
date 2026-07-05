@@ -6,6 +6,8 @@ import { renderLessonMarkdown } from '@/lib/markdown'
 import { createClient } from '@/lib/supabase/server'
 import { LessonContent } from '@/components/lesson-content'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
+import { getCompletedLessonIdsForUser } from '@/lib/progress'
+import { markLessonComplete } from '@/lib/actions/progress'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -56,6 +58,10 @@ export default async function LessonPage({ params }: Props) {
       loadError = true
     }
   }
+
+  const isCompleted = user
+    ? (await getCompletedLessonIdsForUser(user.id)).has(lesson.id)
+    : false
 
   return (
     <article className="space-y-8">
@@ -109,6 +115,24 @@ export default async function LessonPage({ params }: Props) {
               Create account
             </Link>
           </div>
+        </div>
+      )}
+
+      {user && canRead && !loadError && (
+        <div className="rounded-2xl border border-slate-100 bg-white p-6">
+          {isCompleted ? (
+            <p className="text-sm font-medium text-emerald-700">Completed &#10003;</p>
+          ) : (
+            <form>
+              <input type="hidden" name="lessonId" value={lesson.id} />
+              <button
+                formAction={markLessonComplete}
+                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+              >
+                Mark Complete
+              </button>
+            </form>
+          )}
         </div>
       )}
 
