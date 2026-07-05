@@ -936,6 +936,40 @@ This section validates the twelfth and final published lesson: Lesson 12 (`where
 | VAL-B14-008 | Final-lesson navigation | On Lesson 11, use "next lesson". On Lesson 12, check for a "previous lesson" and "next lesson" control. | Lesson 11's next control leads to Lesson 12. Lesson 12's previous control leads to Lesson 11. Lesson 12's next control falls back to "IBM i Fundamentals" (the path page), since there is no 13th lesson -- matching the same existing fallback behavior already used for every other lesson that was previously last-published in Batches 3-13. | | |
 | VAL-B14-009 | All lessons Published, none Draft | `select status, count(*) from public.lessons group by status;` | Shows exactly 1 row with status `Published` and count `12`. No row with status `Draft` exists. | | |
 
+**Note (Batch 15):** VAL-B2-010, VAL-B3-007, and VAL-B14-007 above describe the "Ask the AI Tutor" area as a clickable link to `/ai-tutor`. As of Batch 15, that CTA was changed to static, non-clickable text -- see Section Y below for the current expected behavior.
+
 ---
 
-*Guide version: Batch 14 | Branch: Feature_37 | Last updated: 2026-07-05*
+## Y. Batch 15 -- Content-Complete Beta Validation
+
+**Branch:** Feature_38
+
+This section validates the IBM i Fundamentals path now that all 12 lessons are permanently Published, and records a small copy/UI polish pass. It does not add or change any application feature -- no AI Tutor, Anthropic SDK, Progress Tracking, Mark Complete, Dashboard, Feedback, Waitlist backend, Quizzes, Certification, Community, Billing, Enterprise features, RPG Playground, 5250 lab, real IBM i connectivity, production code upload, new lessons, or new learning paths were implemented in this batch.
+
+### Content and metadata state as of Batch 15
+
+- All 12 lessons in `content/lessons/metadata.ts` remain `status: 'Published'`. No lesson is `Draft`.
+- Metadata consistency was checked across all 12 entries: `lessonOrder` is sequential 1-12 with no gaps or duplicates, all slugs are correct and unique, `estimatedReadingTime` is present on all 12, `shortDescription` is present on all 12, and `aiTutorStarterQuestion` is present on all 12. No metadata changes were needed.
+- `app/learn/page.tsx`: the hardcoded path description was corrected from "DB2 for i" to "Db2 for i" to match the branding casing already used in Lesson 9's title and content (Batch 11). This is a copy-only change; no lesson markdown was modified.
+- `app/learn/ibm-i-fundamentals/[slug]/page.tsx`: the "Ask the AI Tutor" CTA was changed from a clickable `Link` to `/ai-tutor` (a route that does not exist) to static, non-interactive text reading "AI Tutor -- coming later, not available yet". The AI Tutor starter question display is preserved. This removes a broken link for authenticated users (the route 404s; logged-out users were previously redirected to login for a page that still does not exist) without implementing any AI Tutor functionality.
+
+**After pulling this change, run `npm run seed`** (no metadata changes in this batch, but this keeps the standard batch workflow consistent).
+
+### Manual Test Checklist
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B15-001 | `/learn` shows 12 of 12, no stale copy | Open `/learn` | Shows "12 of 12 lessons published", a "Start Learning" button, and the path description reads "Db2 for i" (not "DB2 for i"). | | |
+| VAL-B15-002 | `/learn/ibm-i-fundamentals` lists all 12 lessons, no "more lessons" note | Open `/learn/ibm-i-fundamentals` | Shows all 12 lesson rows in order, Lesson 1 marked "Free preview", Lessons 2-12 show a lock indicator when logged out. No "More lessons are being added" text appears anywhere on the page. | | |
+| VAL-B15-003 | Lesson 1 remains free preview (logged out) | Log out. Open `/learn/ibm-i-fundamentals/what-is-ibm-i` | Returns 200. Full lesson body is visible. No login prompt. | | |
+| VAL-B15-004 | Lessons 2-12 remain protected (logged out) | Log out. Open each of the eleven URLs for Lessons 2-12 | Each returns 200. Title, short description, and reading time are visible. The lesson body is **not present anywhere in the HTML response** (verify via curl/view-source). An inline "Log in to continue" prompt with Log in / Create account buttons is shown instead. No Mark Complete button appears. | | |
+| VAL-B15-005 | Lesson 11 -> Lesson 12 navigation | On Lesson 11, use the "next lesson" control | Leads to Lesson 12 ("Where to Go Next"). | | |
+| VAL-B15-006 | Lesson 12 -> Lesson 11 navigation | On Lesson 12, check the "previous lesson" control | Leads to Lesson 11 ("Basic IBM i Development Workflow"). | | |
+| VAL-B15-007 | Lesson 12 end-of-path navigation | On Lesson 12, check the "next lesson" control | Falls back to a link back to "IBM i Fundamentals" (the path page), since there is no 13th lesson. No broken link. | | |
+| VAL-B15-008 | AI Tutor CTA is non-clickable | On any lesson page, check the area below the lesson body | Text reads "AI Tutor -- coming later, not available yet" and is **not** a link or button of any kind. The lesson's AI Tutor starter question, when present in metadata, is still shown as example text. No navigation occurs when clicking/tapping the text. | | |
+| VAL-B15-009 | Logged-in full content spot-check | Log in as a test user. Open Lessons 2, 8, and 12 | Full lesson body renders for all three. No login prompt. Still no Mark Complete button on any of them. | | |
+| VAL-B15-010 | All lessons Published, none Draft | `select status, count(*) from public.lessons group by status;` | Shows exactly 1 row with status `Published` and count `12`. No row with status `Draft` exists. | | |
+
+---
+
+*Guide version: Batch 15 | Branch: Feature_38 | Last updated: 2026-07-05*

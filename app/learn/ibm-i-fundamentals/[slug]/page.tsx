@@ -127,16 +127,16 @@ export default async function LessonPage({ params }: Props) {
         </div>
       )}
 
-      <div className="rounded-2xl border border-slate-100 bg-white p-6">
-        <p className="text-sm text-slate-700 mb-2">
-          Have a question about this lesson?{' '}
-          <Link href="/ai-tutor" className="font-medium text-slate-900 underline">
-            Ask the AI Tutor
-          </Link>
+      <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6">
+        <p className="text-sm font-medium text-slate-500">
+          AI Tutor -- coming later, not available yet
+        </p>
+        <p className="text-sm text-slate-500 mt-1">
+          Have a question about this lesson? Soon you will be able to ask the AI Tutor directly.
         </p>
         {lesson.ai_tutor_starter_question && (
-          <p className="text-sm text-slate-500 italic">
-            Try asking: &ldquo;{lesson.ai_tutor_starter_question}&rdquo;
+          <p className="text-sm text-slate-500 italic mt-2">
+            Example question you&apos;ll be able to ask: &ldquo;{lesson.ai_tutor_starter_question}&rdquo;
           </p>
         )}
       </div>
