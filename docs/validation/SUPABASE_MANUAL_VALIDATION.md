@@ -1033,6 +1033,39 @@ Since all 12 lessons are currently `Published`, there is no live Draft lesson to
 | VAL-B16-014 | User isolation (two accounts) | Log in as Test User A, mark Lesson 3 complete. Log out. Log in as Test User B (a different account). Open Lesson 3 and `/learn/ibm-i-fundamentals` | Lesson 3 shows the Mark Complete button (not Completed) for Test User B. The completion count for Test User B does not include Lesson 3. `select * from public.lesson_completions where user_id = '<user-b-id>';` does not return Test User A's row. | | |
 | VAL-B16-015 | Published-only completion rule | See "Published-only completion rule -- how this is validated" above | RLS policy reasoning confirmed (or ad hoc test performed and reverted, with no committed status change). | | |
 
+**Note (Batch 17):** VAL-B16-013 above states that `/dashboard` returns 404 while logged in. As of Batch 17, a real Dashboard page exists -- see Section AA below.
+
 ---
 
-*Guide version: Batch 16 | Branch: Feature_39 | Last updated: 2026-07-05*
+## AA. Batch 17 -- Dashboard MVP Validation
+
+**Branch:** Feature_40
+
+This section validates the first version of the authenticated Dashboard (Spec 005 MVP): a welcome message, an IBM i Fundamentals progress summary, a Continue Learning / Start Learning / Path Complete card, and quick links to the Learning Center and (static, non-clickable) AI Tutor. It does not cover admin dashboards, analytics, charts, gamification, certificates, or AI Tutor functionality -- those remain out of scope.
+
+### Content and data state as of Batch 17
+
+- New route: `app/dashboard/page.tsx`. No new database tables or migrations -- the dashboard reads through the same `getPublishedLessons()` (`lib/lessons.ts`) and `getCompletedLessonIdsForUser()` (`lib/progress.ts`) functions the learning path page already uses, plus a `user_profiles.onboarding_response` read using the same query shape already used in `lib/actions/auth.ts`.
+- Progress display is count-only ("X of Y lessons completed"), per Spec 006 PROGRESS-FR: no percentage is shown, consistent with the approved spec.
+- The AI Tutor quick-access area on the dashboard uses the same static, non-clickable treatment as the lesson pages (Batch 15) -- not a link to `/ai-tutor`, since that route does not exist.
+- `components/site-header.tsx` gained a "Dashboard" link, shown only when a session exists, alongside the existing "Learning Center" and "Log out" links.
+
+### Manual Test Checklist
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B17-001 | Logged-out `/dashboard` redirects | Log out. Open `/dashboard` | Redirected to `/auth/login?next=%2Fdashboard` (existing `proxy.ts` behavior, unchanged). No dashboard content is ever sent to the browser. | | |
+| VAL-B17-002 | Logged-out pages unaffected | Log out. Open `/learn`, `/learn/ibm-i-fundamentals`, Lesson 1, Lesson 2 | All behave exactly as in Section Z -- no "Dashboard" link appears in the header when logged out. | | |
+| VAL-B17-003 | Logged-in `/dashboard` loads | Log in as a test user. Open `/dashboard` | Page returns 200. Welcome message, progress summary, a Continue Learning / Start Learning / Path Complete card, and the Learning Center + AI Tutor quick-action cards are all visible. "Dashboard" link now appears in the header. | | |
+| VAL-B17-004 | Progress count matches completed lessons | Compare the dashboard's "X of Y lessons completed" line against `/learn/ibm-i-fundamentals`'s equivalent line for the same user | Both pages show the identical count and denominator, since both read through the same two functions. | | |
+| VAL-B17-005 | New user sees Start Learning state | Log in as a user with zero completed lessons | Card heading reads "Start Learning", body copy reflects the user's onboarding response (or the default copy if skipped), and the button links to Lesson 1 (`what-is-ibm-i`). | | |
+| VAL-B17-006 | Continue Learning points to first incomplete lesson | As a user with some (but not all) lessons completed, open `/dashboard` | Card heading reads "Continue Learning" and links to the lowest-`lesson_order` Published lesson not yet in the user's completion set -- not simply "last completed + 1" if lessons were completed out of order. | | |
+| VAL-B17-007 | All-lessons-complete state | Mark all 12 lessons complete for a test user (or reuse an account that already has), then open `/dashboard` | Card heading reads "Path complete", body confirms all available lessons are done, and the button links to `/learn/ibm-i-fundamentals`. No "Continue Learning" or "Start Learning" copy appears. | | |
+| VAL-B17-008 | Link back to IBM i Fundamentals path | Click the "Learning Center" quick-action card on the dashboard | Navigates to `/learn/ibm-i-fundamentals` and shows the full 12-lesson list with completed badges matching the dashboard's count. | | |
+| VAL-B17-009 | User isolation | Log in as Test User A (some completions). Log out. Log in as Test User B (different completions) | Test User B's dashboard shows only Test User B's own count and next lesson -- never Test User A's data. Backed by the same RLS-scoped `getCompletedLessonIdsForUser` helper validated in Section Z. | | |
+| VAL-B17-010 | AI Tutor remains static | On `/dashboard`, check the AI Tutor quick-action card | Reads "AI Tutor -- coming later, not available yet" as plain text. Not a link, not a button, no navigation on click. | | |
+| VAL-B17-011 | No admin dashboard added | Review `/dashboard` content | No charts, analytics, admin controls, other users' data, billing, or team features appear anywhere on the page. | | |
+
+---
+
+*Guide version: Batch 17 | Branch: Feature_40 | Last updated: 2026-07-05*
