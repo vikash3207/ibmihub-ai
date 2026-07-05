@@ -43,7 +43,7 @@ export default function LandingPage() {
             {[
               {
                 title: 'IBM i Fundamentals',
-                body: 'A structured, beginner-friendly learning path covering IBM i concepts, RPGLE, CLLE, DB2 for i, job logs, and more.',
+                body: 'A structured, beginner-friendly learning path covering IBM i concepts, RPGLE, CLLE, Db2 for i, job logs, and more.',
               },
               {
                 title: 'AI Tutor',

@@ -27,7 +27,7 @@ export default async function LearnPage() {
         <h2 className="text-xl font-semibold text-slate-900 mb-2">{IBM_I_FUNDAMENTALS_PATH_NAME}</h2>
         <p className="text-sm text-slate-600 leading-relaxed mb-4">
           Foundational IBM i concepts, from what the platform is to basic development workflow --
-          covering libraries and objects, the 5250 interface, RPGLE, CLLE, DB2 for i, and more.
+          covering libraries and objects, the 5250 interface, RPGLE, CLLE, Db2 for i, and more.
         </p>
         <p className="text-sm text-slate-500 mb-4">
           {publishedCount} of {totalLessons} lessons published
