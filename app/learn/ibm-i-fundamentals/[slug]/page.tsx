@@ -37,6 +37,10 @@ export default async function LessonPage({ params }: Props) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
+  // auth-session investigation is closed out).
+  console.log(`[auth-diag] lesson page (${slug}): user=${user ? 'present' : 'null'}`)
+
   const isPreview = lesson.lesson_order === 1
   const canRead = isPreview || Boolean(user)
 

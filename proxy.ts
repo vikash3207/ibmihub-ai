@@ -5,9 +5,6 @@
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-/** Routes that require authentication */
-const PROTECTED_ROUTES = ['/dashboard', '/ai-tutor', '/onboarding']
-
 /** Routes that are always public (no redirect even if logged in) */
 const PUBLIC_AUTH_ROUTES = [
   '/auth/login',
@@ -36,20 +33,29 @@ function redirectPreservingSession(url: URL, supabaseResponse: NextResponse): Ne
   return redirectResponse
 }
 
+/**
+ * This middleware intentionally does NOT redirect unauthenticated users away
+ * from protected routes (/dashboard, /ai-tutor, /onboarding). It previously
+ * did, but that duplicated a check every one of those pages already performs
+ * server-side (`if (!user) redirect('/auth/login')`), and the duplication
+ * was the root of a P0 regression: middleware-level auth redirects built
+ * from scratch (NextResponse.redirect) are easy to get subtly wrong around
+ * cookie propagation, and a divergence between the middleware's auth check
+ * and the page's own auth check made logged-in users bounce back to login.
+ * Per the investigation, middleware now does exactly one auth job: refresh
+ * the session cookie on every request (updateSession) so each page's own
+ * getUser() call sees a fresh session. Each protected page remains the
+ * single source of truth for whether access is allowed.
+ */
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { supabaseResponse, user } = await updateSession(request)
 
-  const isProtected = PROTECTED_ROUTES.some((route) =>
-    pathname.startsWith(route)
+  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
+  // auth-session investigation is closed out).
+  console.log(
+    `[auth-diag] proxy: path=${pathname} user=${user ? 'present' : 'null'} requestCookies=${request.cookies.getAll().length}`
   )
-
-  // Unauthenticated user trying to reach a protected route -> redirect to login
-  if (isProtected && !user) {
-    const loginUrl = new URL('/auth/login', request.url)
-    loginUrl.searchParams.set('next', pathname)
-    return redirectPreservingSession(loginUrl, supabaseResponse)
-  }
 
   // Authenticated user hitting a sign-up/login page -> redirect home
   if (user && PUBLIC_AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
