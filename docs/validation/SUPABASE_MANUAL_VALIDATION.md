@@ -1224,4 +1224,113 @@ This section validates a UI/UX-only polish pass over the AI Tutor's response dis
 
 ---
 
-*Guide version: Batch 20 | Branch: Feature_43 | Last updated: 2026-07-05*
+## AE. Batch 21 -- Beta Launch Readiness Validation
+
+**Branch:** Feature_44
+
+This section validates a small, launch-readiness copy/polish pass ahead of beta. **No new features were added.** It does not change the AI Tutor provider, model ID, API route behavior, auth architecture, Supabase schema, RLS policies, feedback storage, usage logging, progress tracking, dashboard logic, lesson content, Mark Complete behavior, or environment validation -- all of that is exactly as validated in Sections A through AD.
+
+### Code state as of Batch 21
+
+- `lib/config.ts`: `WAITLIST_CTA_LABEL` ("Join the Waitlist") renamed to `PRIMARY_CTA_LABEL` ("Create Free Account"). The button's link target is unchanged -- it still points to `/auth/sign-up`, which was already the real, working sign-up flow. Only the misleading label and the constant's name changed.
+- `app/page.tsx`: the trust-note sentence "IBMiHub AI does not connect to real IBM i systems in the MVP" now reads "...at this time" -- removes internal product jargon from public-facing copy. No other wording on this page changed.
+- `components/site-header.tsx`: the header row changed from a fixed `h-14` height with `gap-4` to `flex-wrap` with vertical padding (`py-3`) and a responsive gap (`gap-3 sm:gap-4`), so a wrapped nav row on narrow screens grows the header instead of clipping. The logged-in/logged-out conditional rendering (Dashboard/AI Tutor/Log out vs. Log in) is byte-for-byte unchanged.
+- `proxy.ts`: removed the stale "(Dashboard is not implemented in Batch 1...)" comment. No behavioral change -- the redirect logic itself is untouched.
+
+### Manual Test Checklist
+
+**Production URL checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-001 | Production site loads | Open `https://ibmihub-ai.vercel.app` | Landing page loads with the new "Create Free Account" primary CTA. | | |
+| VAL-B21-002 | Production build reflects this batch | Inspect the landing page trust note | Reads "...at this time", not "...in the MVP". | | |
+
+**Auth checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-003 | Sign-up via new CTA | Click "Create Free Account" on the landing page | Navigates to `/auth/sign-up` and creates a real account, exactly as before -- only the label changed. | | |
+| VAL-B21-004 | Login works | Log in with a test account | Succeeds, redirects per existing `next`-param behavior. | | |
+| VAL-B21-005 | Logout works | Click "Log out" | Session ends, header reverts to logged-out state. | | |
+| VAL-B21-006 | Protected route redirect | Log out. Open `/dashboard` and `/ai-tutor` | Both redirect to `/auth/login?next=...`, unchanged from Section AA/AC. | | |
+
+**Learning path checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-007 | Lesson 1 public preview | Log out. Open Lesson 1 | Full body visible, no login prompt -- unchanged. | | |
+| VAL-B21-008 | Protected lessons | Log out. Open Lessons 2-12 | Login prompt shown, body hidden from HTML -- unchanged. | | |
+
+**Progress checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-009 | Mark Complete still works | Mark a lesson complete | Behaves exactly as in Section Z. | | |
+| VAL-B21-010 | Completed badges | Open `/learn/ibm-i-fundamentals` | Completed badges and count match Section AA behavior. | | |
+
+**Dashboard checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-011 | Dashboard loads and is accurate | Open `/dashboard` | Welcome message, progress count, Continue Learning card, and quick-action cards all behave exactly as in Section AA. | | |
+
+**AI Tutor checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-012 | AI Tutor loads and responds | Open `/ai-tutor`, ask a question | Loads, streams a response, formatting unchanged from Section AD. | | |
+| VAL-B21-013 | Safety boundaries intact | Ask about production code / customer data / real connectivity | Declines/redirects and disclaims connectivity exactly as in Section AC/AD. | | |
+
+**Feedback/usage logging checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-014 | Feedback still works | Submit helpful/not-helpful on a response | `ai_tutor_feedback` row created, no prompt/response content, unchanged from Section AC. | | |
+| VAL-B21-015 | Usage logging still works | After any exchange | `ai_usage_log` row created with token counts, no prompt/response content, unchanged from Section AC. | | |
+
+**Environment variable checklist** (confirm in Vercel project settings)
+
+| Item | Expected | Confirmed |
+|---|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Set, matches the production Supabase project | |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Set | |
+| `SUPABASE_SERVICE_ROLE_KEY` | Set, server-side only | |
+| `NEXT_PUBLIC_SITE_URL` | Set to `https://ibmihub-ai.vercel.app`, not `localhost` | |
+| `ANTHROPIC_API_KEY` | Set, valid, has available credit | |
+
+**Supabase URL configuration checklist** (confirm in Supabase Auth settings)
+
+| Item | Expected | Confirmed |
+|---|---|---|
+| Site URL | `https://ibmihub-ai.vercel.app` | |
+| Redirect URL (dev) | `http://localhost:3000/auth/callback` present | |
+| Redirect URL (production) | `https://ibmihub-ai.vercel.app/auth/callback` present | |
+| Migration 001 applied to production | Confirmed via SQL Editor | |
+| Migration 002 applied to production | Confirmed via SQL Editor | |
+| Migration 003 applied to production | Confirmed via SQL Editor | |
+| `npm run seed` run against production | 12/12 lessons Published | |
+| RLS enabled on all 5 tables | `user_profiles`, `lessons`, `lesson_completions`, `ai_tutor_feedback`, `ai_usage_log` | |
+
+**Mobile smoke checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-016 | Header on narrow viewport | Open the site at a narrow mobile width (e.g. ~375px), logged in and logged out | Header wraps gracefully if needed and does not clip any nav item; no hamburger menu was added (none was in scope). | | |
+| VAL-B21-017 | AI Tutor chat on mobile | Open `/ai-tutor` on a narrow viewport | Chat bubbles and input remain usable and readable. | | |
+| VAL-B21-018 | Dashboard cards on mobile | Open `/dashboard` on a narrow viewport | Quick-action cards stack to a single column. | | |
+
+**Regression checklist**
+
+| Test ID | Scenario | Steps | Expected Result | Actual Result | Pass/Fail |
+|---|---|---|---|---|---|
+| VAL-B21-019 | No broken links | Click through header, landing page, learn page, lesson page, dashboard, and AI Tutor CTAs | All resolve to real, working destinations; no 404s, no stale "coming later" copy. | | |
+| VAL-B21-020 | No misleading CTAs | Review all primary CTAs | Landing CTA now reads "Create Free Account" and matches its real behavior. | | |
+
+### Confirmation
+
+**No new major features were added in Batch 21.** This batch is a copy/polish/documentation pass only: a CTA label and constant rename, one wording fix, a header layout/spacing tweak, and a stale-comment removal. The AI Tutor provider, model ID, API route architecture, auth architecture, Supabase schema, RLS policies, feedback storage, usage logging, progress tracking, dashboard logic, lesson content, Mark Complete behavior, and environment validation are all unchanged.
+
+---
+
+*Guide version: Batch 21 | Branch: Feature_44 | Last updated: 2026-07-06*

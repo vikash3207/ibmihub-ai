@@ -16,11 +16,11 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 flex h-14 items-center justify-between">
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
         <Link href="/" className="font-semibold text-slate-900">
           {SITE_NAME}
         </Link>
-        <nav className="flex items-center gap-4">
+        <nav className="flex items-center gap-3 sm:gap-4">
           <Link
             href="/learn"
             className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
