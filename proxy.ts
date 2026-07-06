@@ -17,6 +17,25 @@ const PUBLIC_AUTH_ROUTES = [
   '/auth/callback',
 ]
 
+/**
+ * Any redirect issued by this middleware must carry over the cookies
+ * updateSession() may have just refreshed onto supabaseResponse. Supabase
+ * rotates the refresh token on every refresh; a redirect built from scratch
+ * (NextResponse.redirect(...)) does not inherit supabaseResponse's Set-Cookie
+ * headers, so the browser would be left holding an already-invalidated
+ * refresh token. The user is then silently logged out server-side on the
+ * next request that needs a refresh -- visible as protected pages and
+ * Server Actions treating a logged-in user as logged out (P0 regression
+ * found during Batch 21 validation).
+ */
+function redirectPreservingSession(url: URL, supabaseResponse: NextResponse): NextResponse {
+  const redirectResponse = NextResponse.redirect(url)
+  supabaseResponse.cookies.getAll().forEach((cookie) => {
+    redirectResponse.cookies.set(cookie)
+  })
+  return redirectResponse
+}
+
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { supabaseResponse, user } = await updateSession(request)
@@ -29,12 +48,12 @@ export async function proxy(request: NextRequest) {
   if (isProtected && !user) {
     const loginUrl = new URL('/auth/login', request.url)
     loginUrl.searchParams.set('next', pathname)
-    return NextResponse.redirect(loginUrl)
+    return redirectPreservingSession(loginUrl, supabaseResponse)
   }
 
   // Authenticated user hitting a sign-up/login page -> redirect home
   if (user && PUBLIC_AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
-    return NextResponse.redirect(new URL('/', request.url))
+    return redirectPreservingSession(new URL('/', request.url), supabaseResponse)
   }
 
   return supabaseResponse
