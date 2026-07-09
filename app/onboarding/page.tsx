@@ -8,6 +8,9 @@ const OPTIONS = [
   'I am exploring what IBMiHub AI offers.',
 ] as const
 
+// Auth-gated page -- never statically cache; always compute fresh per request.
+export const dynamic = 'force-dynamic'
+
 interface Props {
   searchParams: Promise<{ next?: string }>
 }

@@ -36,6 +36,7 @@ export default async function LearnPage() {
         {publishedCount > 0 ? (
           <Link
             href="/learn/ibm-i-fundamentals"
+            prefetch={false}
             className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
           >
             Start Learning

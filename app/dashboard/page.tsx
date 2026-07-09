@@ -6,6 +6,11 @@ import { getPublishedLessons } from '@/lib/lessons'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 
+// Auth-gated page -- never statically cache; always compute fresh per request
+// so a production visitor's real session (not a build-time snapshot) decides
+// what renders here.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your IBM i Fundamentals progress and next lesson.',
@@ -85,6 +90,7 @@ export default async function DashboardPage() {
             </p>
             <Link
               href="/learn/ibm-i-fundamentals"
+              prefetch={false}
               className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
             >
               View All Lessons
@@ -97,6 +103,7 @@ export default async function DashboardPage() {
             {nextLesson && (
               <Link
                 href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
+                prefetch={false}
                 className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
               >
                 Start {nextLesson.title}
@@ -111,6 +118,7 @@ export default async function DashboardPage() {
                 <p className="text-sm text-slate-600 mb-4">Next up: {nextLesson.title}</p>
                 <Link
                   href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
+                  prefetch={false}
                   className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
                 >
                   Continue
@@ -124,6 +132,7 @@ export default async function DashboardPage() {
       <div className="grid sm:grid-cols-2 gap-4">
         <Link
           href="/learn/ibm-i-fundamentals"
+          prefetch={false}
           className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
         >
           <span className="block font-semibold text-slate-900">Learning Center</span>
@@ -134,6 +143,7 @@ export default async function DashboardPage() {
 
         <Link
           href="/ai-tutor"
+          prefetch={false}
           className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
         >
           <span className="block font-semibold text-slate-900">AI Tutor</span>
