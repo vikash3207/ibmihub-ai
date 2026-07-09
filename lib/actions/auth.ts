@@ -61,6 +61,10 @@ export async function login(formData: FormData) {
 
   const { error } = await supabase.auth.signInWithPassword({ email, password })
 
+  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie/email/password values,
+  // remove after the P0 auth-session investigation is closed out).
+  console.log(`[auth-diag] login action: signInWithPassword error=${error ? 'yes' : 'no'}`)
+
   if (error) {
     redirect(
       `/auth/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(
@@ -75,6 +79,8 @@ export async function login(formData: FormData) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  console.log(`[auth-diag] login action: getUser after sign-in user=${user ? 'present' : 'null'}`)
 
   const { data: profile } = await supabase
     .from('user_profiles')

@@ -20,7 +20,13 @@ export default async function OnboardingPage({ searchParams }: Props) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
+  // auth-session investigation is closed out).
+  console.log(`[auth-diag] onboarding page: user=${user ? 'present' : 'null'}`)
+
   if (!user) {
+    // No next param needed here: login()'s own post-login logic
+    // independently re-checks onboarding status and routes accordingly.
     redirect('/auth/login')
   }
 
