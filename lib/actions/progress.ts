@@ -27,10 +27,6 @@ export async function markLessonComplete(formData: FormData) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
-  // auth-session investigation is closed out).
-  console.log(`[auth-diag] markLessonComplete: user=${user ? 'present' : 'null'}`)
-
   if (!user) {
     // No session -- the UI never renders this form for logged-out users,
     // but the action itself must not trust that.

@@ -15,10 +15,6 @@ export async function SiteHeader() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
-  // auth-session investigation is closed out).
-  console.log(`[auth-diag] site-header: user=${user ? 'present' : 'null'}`)
-
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
