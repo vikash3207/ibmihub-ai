@@ -9,6 +9,11 @@ import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
 
+// Reads the auth session to decide protected-lesson access, Mark Complete,
+// and completed state -- never statically cache; always compute fresh per
+// request so production visitors see their real session, not a cached one.
+export const dynamic = 'force-dynamic'
+
 interface Props {
   params: Promise<{ slug: string }>
 }
@@ -72,6 +77,7 @@ export default async function LessonPage({ params }: Props) {
       <div>
         <Link
           href="/learn/ibm-i-fundamentals"
+          prefetch={false}
           className="text-sm text-slate-500 hover:text-slate-900"
         >
           &larr; {IBM_I_FUNDAMENTALS_PATH_NAME}
@@ -90,7 +96,7 @@ export default async function LessonPage({ params }: Props) {
         loadError ? (
           <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-800">
             This lesson could not be loaded right now. Please try again later, or{' '}
-            <Link href="/learn/ibm-i-fundamentals" className="underline">
+            <Link href="/learn/ibm-i-fundamentals" prefetch={false} className="underline">
               return to {IBM_I_FUNDAMENTALS_PATH_NAME}
             </Link>
             .
@@ -169,6 +175,7 @@ export default async function LessonPage({ params }: Props) {
         )}
         <Link
           href="/ai-tutor"
+          prefetch={false}
           className="mt-3 inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
         >
           Ask the AI Tutor
@@ -179,6 +186,7 @@ export default async function LessonPage({ params }: Props) {
         {previousLesson ? (
           <Link
             href={`/learn/ibm-i-fundamentals/${previousLesson.slug}`}
+            prefetch={false}
             className="text-sm font-medium text-slate-600 hover:text-slate-900"
           >
             &larr; {previousLesson.title}
@@ -190,6 +198,7 @@ export default async function LessonPage({ params }: Props) {
         {nextLesson ? (
           <Link
             href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
+            prefetch={false}
             className="text-sm font-medium text-slate-600 hover:text-slate-900"
           >
             {nextLesson.title} &rarr;
@@ -197,6 +206,7 @@ export default async function LessonPage({ params }: Props) {
         ) : (
           <Link
             href="/learn/ibm-i-fundamentals"
+            prefetch={false}
             className="text-sm font-medium text-slate-600 hover:text-slate-900"
           >
             {IBM_I_FUNDAMENTALS_PATH_NAME} &rarr;

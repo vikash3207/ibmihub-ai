@@ -2,6 +2,10 @@ import Link from 'next/link'
 import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
 import { SiteHeader } from '@/components/site-header'
 
+// Renders SiteHeader, which reads the auth session -- never statically cache
+// this page or its header could serve a stale/incorrect logged-in state.
+export const dynamic = 'force-dynamic'
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen flex flex-col">

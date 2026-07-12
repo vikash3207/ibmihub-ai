@@ -4,6 +4,11 @@ import { ShieldAlert } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { AiTutorChat } from '@/components/ai-tutor-chat'
 
+// Auth-gated page -- never statically cache; always compute fresh per request
+// so a production visitor's real session (not a build-time snapshot) decides
+// what renders here.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: 'AI Tutor',
   description: 'Ask IBM i learning questions and get educational guidance.',

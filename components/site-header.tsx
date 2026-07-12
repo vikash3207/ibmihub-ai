@@ -35,12 +35,14 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/dashboard"
+                prefetch={false}
                 className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
               >
                 Dashboard
               </Link>
               <Link
                 href="/ai-tutor"
+                prefetch={false}
                 className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
               >
                 AI Tutor

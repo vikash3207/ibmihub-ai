@@ -7,6 +7,10 @@ import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 
+// Reads the auth session to decide lock icons/completed badges per lesson --
+// never statically cache; always compute fresh per request.
+export const dynamic = 'force-dynamic'
+
 export const metadata: Metadata = {
   title: IBM_I_FUNDAMENTALS_PATH_NAME,
   description:
@@ -56,6 +60,7 @@ export default async function IbmIFundamentalsPage() {
               <li key={lesson.id}>
                 <Link
                   href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
+                  prefetch={false}
                   className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
                 >
                   <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-semibold text-slate-700">
