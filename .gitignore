@@ -31,3 +31,5 @@ yarn-error.log*
 # Unused lock files -- only package-lock.json (npm) is committed
 yarn.lock
 pnpm-lock.yaml
+.vercel
+.env*

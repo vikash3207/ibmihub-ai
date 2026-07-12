@@ -20,9 +20,6 @@ export async function updateSession(request: NextRequest) {
           cookiesToSet.forEach(({ name, value, options }) =>
             supabaseResponse.cookies.set(name, value, options as Parameters<typeof supabaseResponse.cookies.set>[2])
           )
-          // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after
-          // the P0 auth-session investigation is closed out).
-          console.log(`[auth-diag] middleware setAll: refreshed ${cookiesToSet.length} cookie(s) for path=${request.nextUrl.pathname}`)
         },
       },
     }
@@ -32,12 +29,6 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser()
-
-  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
-  // auth-session investigation is closed out).
-  console.log(
-    `[auth-diag] updateSession: path=${request.nextUrl.pathname} user=${user ? 'present' : 'null'} incomingCookies=${request.cookies.getAll().length}`
-  )
 
   return { supabaseResponse, user }
 }

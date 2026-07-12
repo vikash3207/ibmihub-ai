@@ -51,12 +51,6 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { supabaseResponse, user } = await updateSession(request)
 
-  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
-  // auth-session investigation is closed out).
-  console.log(
-    `[auth-diag] proxy: path=${pathname} user=${user ? 'present' : 'null'} requestCookies=${request.cookies.getAll().length}`
-  )
-
   // Authenticated user hitting a sign-up/login page -> redirect home
   if (user && PUBLIC_AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
     return redirectPreservingSession(new URL('/', request.url), supabaseResponse)

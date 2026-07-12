@@ -35,10 +35,6 @@ export default async function DashboardPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  // TEMP AUTH DIAGNOSTIC (safe: no token/cookie values, remove after the P0
-  // auth-session investigation is closed out).
-  console.log(`[auth-diag] dashboard page: user=${user ? 'present' : 'null'}`)
-
   if (!user) {
     redirect('/auth/login?next=%2Fdashboard')
   }
