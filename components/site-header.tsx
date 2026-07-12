@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
+import { logout } from '@/lib/actions/auth'
 import { SITE_NAME } from '@/lib/config'
 
 /**
@@ -47,12 +48,14 @@ export async function SiteHeader() {
               >
                 AI Tutor
               </Link>
-              <Link
-                href="/auth/logout"
-                className="text-sm font-medium text-slate-900 hover:underline"
-              >
-                Log out
-              </Link>
+              <form>
+                <button
+                  formAction={logout}
+                  className="text-sm font-medium text-slate-900 hover:underline"
+                >
+                  Log out
+                </button>
+              </form>
             </>
           ) : (
             <Link
