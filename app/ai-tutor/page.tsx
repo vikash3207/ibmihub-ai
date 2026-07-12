@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ShieldAlert } from 'lucide-react'
+import { ShieldAlert, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { AiTutorChat } from '@/components/ai-tutor-chat'
 
@@ -41,7 +41,12 @@ export default async function AiTutorPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">AI Tutor</h1>
+        <div className="mb-2 flex items-center gap-2">
+          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h1 className="text-3xl font-bold text-slate-900">AI Tutor</h1>
+        </div>
         <p className="text-slate-600 leading-relaxed">
           Ask questions about IBM i concepts and get educational, plain-language guidance.
         </p>

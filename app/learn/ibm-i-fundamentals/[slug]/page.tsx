@@ -1,6 +1,7 @@
 import { cache } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { Check, Sparkles } from 'lucide-react'
 import { getPublishedLessonBySlug, getPublishedLessons, loadLessonMarkdown } from '@/lib/lessons'
 import { renderLessonMarkdown } from '@/lib/markdown'
 import { createClient } from '@/lib/supabase/server'
@@ -8,6 +9,9 @@ import { LessonContent } from '@/components/lesson-content'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
+import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
+import { Button, buttonVariants } from '@/components/ui/button'
 
 // Reads the auth session to decide protected-lesson access, Mark Complete,
 // and completed state -- never statically cache; always compute fresh per
@@ -82,10 +86,13 @@ export default async function LessonPage({ params }: Props) {
           Lesson {lesson.lesson_order} of {lessons.length}
         </p>
         <h1 className="text-3xl font-bold text-slate-900 mt-1 mb-2">{lesson.title}</h1>
-        <p className="text-slate-600">{lesson.short_description}</p>
-        {lesson.estimated_reading_time !== null && (
-          <p className="text-sm text-slate-400 mt-1">~{lesson.estimated_reading_time} min read</p>
-        )}
+        <p className="text-slate-600 leading-relaxed">{lesson.short_description}</p>
+        <div className="mt-2 flex items-center gap-2">
+          {lesson.estimated_reading_time !== null && (
+            <span className="text-sm text-slate-400">~{lesson.estimated_reading_time} min read</span>
+          )}
+          {isCompleted && <Badge variant="success"><Check className="h-3 w-3" aria-hidden="true" />Completed</Badge>}
+        </div>
       </div>
 
       {canRead ? (
@@ -101,65 +108,64 @@ export default async function LessonPage({ params }: Props) {
           <LessonContent html={bodyHtml ?? ''} />
         )
       ) : (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center space-y-4">
+        <Card className="text-center space-y-4 py-10">
           <h2 className="text-lg font-semibold text-slate-900">Log in to continue</h2>
-          <p className="text-sm text-slate-600 max-w-sm mx-auto">
+          <p className="text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
             Create a free account to read this lesson and save your progress through the IBM i
             Fundamentals path.
           </p>
           <div className="flex justify-center gap-3">
-            <Link
-              href={loginHref}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
-            >
+            <Link href={loginHref} className={buttonVariants({ variant: 'primary' })}>
               Log in
             </Link>
             <Link
               href={`/auth/sign-up?next=${encodeURIComponent(`/learn/ibm-i-fundamentals/${lesson.slug}`)}`}
-              className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 hover:border-slate-400 transition-colors"
+              className={buttonVariants({ variant: 'secondary' })}
             >
               Create account
             </Link>
           </div>
-        </div>
+        </Card>
       )}
 
       {user && canRead && !loadError && (
-        <div className="rounded-2xl border border-slate-100 bg-white p-6">
+        <Card className="border-l-4 border-l-emerald-500">
           {isCompleted ? (
-            <p className="text-sm font-medium text-emerald-700">Completed &#10003;</p>
+            <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+              <Check className="h-4 w-4" aria-hidden="true" /> Completed
+            </p>
           ) : (
             <form>
               <input type="hidden" name="lessonId" value={lesson.id} />
-              <button
-                formAction={markLessonComplete}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
-              >
+              <Button type="submit" formAction={markLessonComplete} variant="primary">
                 Mark Complete
-              </button>
+              </Button>
             </form>
           )}
-        </div>
+        </Card>
       )}
 
       {isPreview && !user && canRead && (
-        <div className="rounded-2xl border border-slate-200 bg-slate-50 p-6 text-center space-y-3">
-          <p className="text-sm text-slate-700">
+        <Card variant="muted" className="text-center space-y-3">
+          <p className="text-sm text-slate-700 leading-relaxed">
             Like what you&apos;re reading? Create a free account to save your progress and unlock
             the rest of {IBM_I_FUNDAMENTALS_PATH_NAME}.
           </p>
           <Link
             href={`/auth/sign-up?next=${encodeURIComponent('/learn/ibm-i-fundamentals')}`}
-            className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+            className={buttonVariants({ variant: 'primary' })}
           >
             Create a free account
           </Link>
-        </div>
+        </Card>
       )}
 
-      <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6">
-        <p className="text-sm font-medium text-slate-700">Have a question?</p>
-        <p className="text-sm text-slate-600 mt-1">
+      <Card variant="ai">
+        <p className="flex items-center gap-1.5 text-sm font-medium text-cyan-900">
+          <Sparkles className="h-4 w-4" aria-hidden="true" />
+          Have a question?
+        </p>
+        <p className="text-sm text-slate-600 mt-1 leading-relaxed">
           The AI Tutor is for educational guidance only. It cannot connect to a real IBM i
           system, execute code, or analyze production code -- it does not know which lesson
           you are reading.
@@ -172,18 +178,18 @@ export default async function LessonPage({ params }: Props) {
         <Link
           href="/ai-tutor"
           prefetch={false}
-          className="mt-3 inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+          className={buttonVariants({ variant: 'ai', className: 'mt-3' })}
         >
           Ask the AI Tutor
         </Link>
-      </div>
+      </Card>
 
       <nav className="flex items-center justify-between border-t border-slate-100 pt-6">
         {previousLesson ? (
           <Link
             href={`/learn/ibm-i-fundamentals/${previousLesson.slug}`}
             prefetch={false}
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
           >
             &larr; {previousLesson.title}
           </Link>
@@ -195,7 +201,7 @@ export default async function LessonPage({ params }: Props) {
           <Link
             href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
             prefetch={false}
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
           >
             {nextLesson.title} &rarr;
           </Link>
@@ -203,7 +209,7 @@ export default async function LessonPage({ params }: Props) {
           <Link
             href="/learn/ibm-i-fundamentals"
             prefetch={false}
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
+            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
           >
             {IBM_I_FUNDAMENTALS_PATH_NAME} &rarr;
           </Link>
