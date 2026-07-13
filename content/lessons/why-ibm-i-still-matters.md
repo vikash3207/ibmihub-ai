@@ -83,7 +83,7 @@ government. Niche does not mean unimportant.
 
 ## Try Asking the AI Tutor
 
-Once the AI Tutor is available, you will be able to ask follow-up questions about
-anything in this lesson. One thing you might ask:
+Use the AI Tutor to ask follow-up questions about this lesson. For example, try
+asking:
 
 - "Why don't companies just migrate off IBM i if it's an older platform?"
