@@ -8,10 +8,10 @@
 |---|---|
 | Spec ID | 006 |
 | Feature | Progress Tracking |
-| Status | Approved |
-| Version | 1.0 |
+| Status | v1.0 Approved (current production baseline) — **v2.1 Amendment Draft; open questions resolved (Section 16), full amendment approval still pending** |
+| Version | 1.0 (Approved) → 2.1 (Draft, this revision) |
 | Owner | Product + Engineering |
-| Last Updated | 2026-07-01 |
+| Last Updated | 2026-07-14 |
 
 ### Source Documents
 
@@ -19,10 +19,12 @@
 |---|---|---|
 | PRD.md | v2.9 | Primary product requirements source |
 | planning/SPRINT_1_DECISION_REGISTER.md | v0.3 | Resolved Sprint 1 blocking decisions |
-| specs/002-learning-center/spec.md | v1.0 Approved | Learning Center lesson status display reference |
+| planning/CURRICULUM_EXPANSION_BLUEPRINT.md | v0.1 Draft | Source of the multi-track curriculum model this v2.0 amendment supports |
+| specs/002-learning-center/spec.md | v1.0 Approved → v2.0 Draft (companion amendment) | Learning Center lesson status display reference |
 | specs/003-lesson-experience/spec.md | v1.0 Approved | Mark Complete behavior and completed state reference |
 | specs/004-user-account-and-onboarding/spec.md | v1.0 Approved | Authentication identity reference |
 | specs/005-dashboard/spec.md | v1.0 Approved | Dashboard progress summary requirements |
+| specs/009-content-governance/spec.md | v1.0 Approved → v2.0 Draft (companion amendment) | Lesson metadata model this spec reads from, including `trackId`/`moduleId` |
 | docs/adr/ADR-003-database-and-storage.md | v0.1 Accepted | Supabase PostgreSQL storage decision |
 | docs/adr/ADR-004-authentication-approach.md | v0.1 Accepted | Supabase Auth authentication decision |
 
@@ -41,6 +43,14 @@ Progress tracking is a foundational capability that other features depend on:
 - The **Dashboard** (Spec 005) uses progress data to display a progress summary and the next recommended lesson
 
 This spec defines the MVP scope, progress data requirements, calculation rules, access control, UX requirements, and acceptance criteria for the Progress Tracking feature.
+
+### 2.1 Amendment Notice — v2.0 (Multi-Track Progress)
+
+This revision amends the v1.0 Approved spec to support progress calculation across the multi-track curriculum defined in `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` and formalized by the companion Spec 009 v2.0 amendment. Every v1.0 requirement, rule, and calculation is preserved and labeled; new v2.0 material is added alongside it and also labeled.
+
+**Nothing changes in the live product as a result of this document.** Progress continues to be calculated exactly as it is today — a single completed count over a single published-lesson denominator — until this amendment, the companion Spec 009 v2.0 amendment, and the companion Spec 002 v2.0 amendment are all approved and implemented together. This spec does not authorize any code change by itself.
+
+**Important mathematical note:** while only today's single "IBM i Fundamentals" track-equivalent content exists, the v2.0 per-track calculation (Section 10, v2.0) produces the exact same numeric result as the current v1.0 calculation, because the track's denominator equals the full published-lesson count, exactly as today. Approving this amendment does not change any user's currently displayed progress number on day one — it only changes the calculation's generality so it continues to work correctly once a second track's lessons are published.
 
 ---
 
@@ -65,6 +75,18 @@ The MVP Progress Tracking feature provides authenticated lesson completion recor
 | User-specific progress data | Progress records are scoped to the authenticated user; no cross-user data access |
 | Published lessons only | Only published lessons can have completion records; draft lessons are excluded from progress |
 | No progress for unauthenticated users | Unauthenticated users cannot create or read progress records |
+
+### v2.0 Proposed Scope Additions (Pending Approval — Not Yet Implemented)
+
+| Capability | Description |
+|---|---|
+| Module-level progress | Completed count and denominator scoped to a single module within a track |
+| Track-level progress | Completed count and denominator scoped to a single track, rolled up from its modules |
+| Recommended-path progress | A roll-up across the specific tracks that make up the curated recommended beginner path (Spec 002 v2.0 Section 6) |
+| Dynamic per-scope denominators | The existing "dynamic, never hardcoded" denominator principle (v1.0 PROGRESS-FR-008) generalizes to any track or module scope, not only the whole curriculum |
+| Future multi-track aggregate progress | An optional overall completion figure across every track a user has touched — explicitly lower priority, not required for Phase 1 or Phase 2 of the curriculum blueprint |
+
+**Everything currently out of scope for v1.0 (Section 4) remains out of scope under v2.0** unless explicitly listed above. In particular: unmarking/toggling completion, quiz scores, streaks, badges, and admin/team progress views are not introduced by this amendment.
 
 ---
 
@@ -124,6 +146,15 @@ A working developer uses the Learning Center less linearly. They may jump around
 | US-PROG-007 | Unauthenticated visitor | See a login prompt rather than a Mark Complete button | I understand I need an account to save progress |
 | US-PROG-008 | Authenticated user | Find that clicking Mark Complete again on a lesson I already completed does nothing harmful | No duplicate records are created if I mark a lesson complete twice |
 | US-PROG-009 | Authenticated user | Find that my completed lessons cannot be unmarked in MVP | My progress state remains stable once saved |
+
+### v2.0 Proposed User Stories (Pending Approval)
+
+| ID | As a... | I want to... | So that... |
+|---|---|---|---|
+| US-PROG-010 | Authenticated user | See my progress broken down by track and by module | I understand exactly how far along I am in the specific skill I'm building |
+| US-PROG-011 | Authenticated user | See my recommended-beginner-path progress as one number even though it spans multiple tracks internally | The transition from today's single-path experience to the multi-track model feels seamless, not more confusing |
+| US-PROG-012 | Working IBM i Developer | Complete lessons out of order across several tracks and still see correct per-track progress | My non-linear learning style is respected exactly as it is in the current single-path MVP |
+| US-PROG-013 | Product Owner | Confirm that adding a new track does not change any existing user's already-displayed progress numbers for tracks they've already been using | Users don't lose confidence in the product when the curriculum grows |
 
 ---
 
@@ -330,6 +361,77 @@ Draft and unpublished lessons must be excluded from all progress operations.
 
 ---
 
+### v2.0 Proposed Functional Requirements (Pending Approval — Not Yet Implemented)
+
+The following requirements apply once this amendment, the companion Spec 009 v2.0 amendment, and the companion Spec 002 v2.0 amendment are all approved and implemented. They do not apply to the current production system today.
+
+### PROGRESS-FR-016 — Module-Level Progress Calculation
+
+The completed count and denominator must be computable scoped to a single module.
+
+- Module completed count = number of completion records for the current user where the lesson's `moduleId` matches the target module and the lesson's `status` is Published
+- Module denominator = number of currently Published lessons with that `moduleId`
+- **Resolved (OQ-PROG-005):** "the lesson's `moduleId`" means joining the completion record's `lessonId` against current lesson metadata at read time — progress records themselves do not store `moduleId` directly (Section 9, v2.0)
+- This calculation must use the same live, uncached computation principle as the existing v1.0 PROGRESS-FR-007
+
+**Priority:** Must Have
+**Source:** Spec 009 v2.0 CONTENT-FR-015; US-PROG-010
+
+---
+
+### PROGRESS-FR-017 — Track-Level Progress Calculation
+
+The completed count and denominator must be computable scoped to a single track.
+
+- Track completed count = number of completion records for the current user where the lesson's `trackId` matches the target track and the lesson's `status` is Published
+- Track denominator = number of currently Published lessons with that `trackId`
+- A track's progress is not simply the sum of its modules' progress values recomputed independently — it must be calculated directly from the same underlying completion records and lesson metadata, to guarantee module-level and track-level numbers are always consistent with each other (no independent recalculation that could drift)
+
+**Priority:** Must Have
+**Source:** Spec 009 v2.0 CONTENT-FR-015; US-PROG-010, US-PROG-012
+
+---
+
+### PROGRESS-FR-018 — Recommended-Path Progress Calculation
+
+The recommended beginner path's progress (Spec 002 v2.0 Section 6) must be computable as a roll-up across its constituent tracks.
+
+- Recommended-path completed count = sum of completed counts across the specific tracks that make up the recommended path (at the time of this amendment: Tracks 1 through 5, per `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Phase 1)
+- Recommended-path denominator = sum of Published lesson counts across those same tracks
+- The set of tracks that make up the recommended path is itself a piece of configuration, not hardcoded lesson IDs — if the Product Owner changes which tracks constitute the recommended path, this calculation must reflect that without a code change to the calculation logic itself
+- This calculation must produce the same numeric result as today's v1.0 single-path calculation for as long as only Track-1-equivalent content exists, satisfying the backward-compatibility principle in Section 2.1
+
+**Priority:** Must Have
+**Source:** Spec 002 v2.0 Section 6; US-PROG-011
+
+---
+
+### PROGRESS-FR-019 — Dynamic Per-Scope Denominators
+
+This generalizes v1.0 PROGRESS-FR-008 (Published Lesson Denominator) from a single curriculum-wide count to any track or module scope.
+
+- Every denominator described in PROGRESS-FR-016 through PROGRESS-FR-018 must be computed live from current lesson metadata on each request; none may be hardcoded or cached
+- Adding a new Published lesson to any track or module must be immediately reflected in that track's and module's denominator on the next page load, with no code change required
+- This requirement does not change v1.0 PROGRESS-FR-008 itself; it extends the same principle to the new scopes introduced by this amendment
+
+**Priority:** Must Have
+**Source:** v1.0 PROGRESS-FR-008; US-PROG-013
+
+---
+
+### PROGRESS-FR-020 — Multi-Track Aggregate Progress (Resolved — Not To Be Built At This Time)
+
+**Resolved (OQ-PROG-004):** no cross-track aggregate "overall academy progress" figure is shown to users. Progress is displayed only at track level (PROGRESS-FR-017), module level (PROGRESS-FR-016), and recommended-path level (PROGRESS-FR-018).
+
+- This is a deliberate product decision, not a temporary scoping limitation: one giant aggregate number is explicitly avoided until the curriculum is mature enough for it to mean something (`planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1 #3)
+- This requirement must not be implemented in Phase 1, Phase 2, or any phase currently planned; it remains documented here only so the reasoning is not lost, and so a future revision of this spec has a clear starting point if the Product Owner revisits the decision
+- If a future revision of this spec reverses this decision, it must follow the same live-calculation, no-caching principle as every other progress value in this spec
+
+**Priority:** Will Not Build (at this time)
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 0.1 #3; OQ-PROG-004 resolved
+
+---
+
 ## 8. Non-Functional Requirements
 
 ### NFR: Security
@@ -419,6 +521,12 @@ This section defines the data attributes needed for the MVP progress tracking im
 - Lesson rating or feedback (feedback is a separate feature)
 - Any lesson content or user-generated notes
 
+### v2.0 Proposed Progress Data Requirements (Pending Approval)
+
+- The "Learning path ID" attribute above generalizes to referencing a lesson's `trackId` and `moduleId` (Spec 009 v2.0 Section 11.3), rather than a single implicit path
+- **Resolved (OQ-PROG-005):** progress records remain **lesson-based only**. `trackId` and `moduleId` are **not** denormalized onto the progress record. Track/module scoping is always computed by joining the completion record's `lessonId` against current lesson metadata at read time.
+- No new data is stored beyond what v1.0 already stores (user ID, lesson ID, completion timestamp, created timestamp); this amendment changes how existing data is *interpreted and scoped* for calculation purposes, not what is captured or how it is written
+
 ---
 
 ## 10. Progress Calculation Rules
@@ -458,6 +566,40 @@ If new lessons are published later, the path complete state may revert to false 
 > Progress display = "[completed count] of [published lesson count] lessons completed"
 
 MVP uses count-based display only (OQ-PROG-003 resolved). Progress percentage is not shown in MVP. A visual progress bar may be added in a later phase if separately approved, but MVP acceptance criteria rely on the count-based display.
+
+### v2.0 Proposed Calculation Rules (Pending Approval)
+
+These generalize the v1.0 rules above from "the one path" to any track or module scope. The v1.0 rules remain correct as the special case where the scope is "the whole curriculum."
+
+**Module Completed Count**
+
+> Module completed count = count of completion records for the current authenticated user where the lesson's `moduleId` matches the target module and the lesson's `status` is Published
+
+**Module Denominator**
+
+> Module denominator = count of Published lessons with the target `moduleId` at the time of the request
+
+**Track Completed Count**
+
+> Track completed count = count of completion records for the current authenticated user where the lesson's `trackId` matches the target track and the lesson's `status` is Published
+
+**Track Denominator**
+
+> Track denominator = count of Published lessons with the target `trackId` at the time of the request
+
+**Recommended-Path Completed Count**
+
+> Recommended-path completed count = sum of track completed counts across the tracks configured as the recommended path (Spec 002 v2.0 Section 6)
+
+**Recommended-Path Denominator**
+
+> Recommended-path denominator = sum of track denominators across those same tracks
+
+**Backward-compatibility check:** as long as the recommended path's configured tracks are exactly the tracks seeded from today's 12 lessons (Spec 009 v2.0 Section 5B), the Recommended-Path Completed Count and Denominator above evaluate to the exact same numbers as the v1.0 Completed Count and Denominator formulas. No user-visible progress number changes on the day this amendment is approved.
+
+**Display format:** all v2.0 scopes use the same count-based format already approved in v1.0 (Section 10 "Progress Display Format" above) — no percentage, no new display format introduced by this amendment.
+
+**Multi-track aggregate (resolved — not to be built, PROGRESS-FR-020):** deliberately not defined here (OQ-PROG-004 resolved). No cross-track aggregate figure is calculated or shown.
 
 ---
 
@@ -513,6 +655,13 @@ The following UX requirements define how progress tracking data surfaces in the 
 - Lesson list completion indicators: not shown for unauthenticated users
 - Dashboard progress summary: not applicable; the dashboard requires authentication
 
+### v2.0 Proposed UX Requirements (Pending Approval)
+
+- **Track and module progress indicators** appear on the Learning Center's track catalog and module listing pages (Spec 002 v2.0), using the same count-based format as v1.0 (e.g., "3 of 7 lessons completed")
+- **Recommended-path progress** appears as one number on the recommended-path entry point (Spec 002 v2.0 Section 6), computed per PROGRESS-FR-018, so a new user's experience looks identical in form to today's v1.0 dashboard progress summary
+- **No new visual pattern is introduced** — track/module/path progress reuses the existing count-based, non-percentage display approved in v1.0 (OQ-PROG-003 resolved); this amendment does not reopen that decision
+- **Loading and error states** for track/module/path progress follow the same patterns already approved in v1.0 (loading indicator, non-disruptive error message)
+
 ---
 
 ## 12. Access Rules
@@ -526,6 +675,8 @@ The following UX requirements define how progress tracking data surfaces in the 
 | Mark a draft/unpublished lesson complete | Blocked | Blocked |
 
 All access rules must be enforced server-side. Client-side enforcement is not sufficient.
+
+**v2.0 note:** these access rules are unchanged by the multi-track model. Track/module scoping affects how progress is *calculated and displayed*, not who is allowed to read or write it.
 
 ---
 
@@ -548,6 +699,19 @@ The Progress Tracking feature depends on the following approved decisions and re
 | Spec 002: Learning Center | Reads progress data to display completion status per lesson in the lesson list |
 | Spec 005: Dashboard | Reads progress data to display the progress summary and next lesson in the continue-learning card |
 | Spec 004: User Account and Onboarding | Provides the authenticated user identity that scopes all progress operations |
+
+### v2.0 Companion Amendments (Pending Approval)
+
+| Spec | Role |
+|---|---|
+| Spec 009: Content Governance (v2.0) | Source of `trackId`/`moduleId` on lesson metadata that this spec's v2.0 calculations key off of |
+| Spec 002: Learning Center (v2.0) | Displays the track/module/recommended-path progress values this spec computes; defines which tracks make up the recommended path (PROGRESS-FR-018) |
+
+### v2.0 Planning Dependency (Not a Spec)
+
+| Document | Role |
+|---|---|
+| planning/CURRICULUM_EXPANSION_BLUEPRINT.md | Defines the track structure and Phase 1 recommended-path track set this spec's calculations reference |
 
 ---
 
@@ -591,6 +755,17 @@ The Progress Tracking feature is considered implementation-complete and ready fo
 - [ ] No quiz scores, streaks, badges, or detailed analytics are present
 - [ ] No admin or team progress views are present
 
+### v2.0 Acceptance Criteria (Pending Approval — Not Yet Implemented)
+
+- [ ] This amendment, the companion Spec 009 v2.0 amendment, and the companion Spec 002 v2.0 amendment are all approved
+- [ ] Module-level completed count and denominator are correctly computed and match Section 10's v2.0 formulas
+- [ ] Track-level completed count and denominator are correctly computed and are always consistent with the sum of their modules' values
+- [ ] Recommended-path progress is correctly computed as a roll-up across its configured tracks
+- [ ] On the day this amendment is deployed, existing users see no change to their currently displayed progress numbers (backward-compatibility check, Section 10 v2.0)
+- [ ] All new denominators are computed live and are never hardcoded, matching the existing v1.0 principle
+- [ ] No cross-track aggregate progress figure is implemented or displayed (PROGRESS-FR-020 resolved)
+- [ ] Progress records remain lesson-based; no `trackId`/`moduleId` denormalization onto progress records (OQ-PROG-005 resolved)
+
 ---
 
 ## 15. Risks and Mitigations
@@ -604,11 +779,27 @@ The Progress Tracking feature is considered implementation-complete and ready fo
 | Dashboard and Learning Center calculating progress differently — each feature implements its own progress model | Medium | High | PROGRESS-FR-004 and PROGRESS-FR-011 require a single shared implementation; the implementation plan must enforce a single data source |
 | Scope creep into analytics, streaks, or badges during implementation | Medium | Medium | This spec explicitly excludes these; any addition requires Product Owner approval and a PRD update |
 
+### v2.0 Risks and Mitigations (Pending Approval)
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Track-level and module-level progress drift out of sync (e.g., a bug makes them disagree) | Low | High | PROGRESS-FR-017 requires track progress to be computed from the same underlying records as module progress, not independently re-derived; test with multi-module tracks explicitly |
+| Existing users see their progress number change unexpectedly when this amendment ships | Low | High | Section 10 v2.0's backward-compatibility formula guarantees identical output while only Track-1-equivalent content exists; this must be verified with a regression test comparing pre- and post-migration progress values for existing test accounts |
+| Recommended-path track configuration drifts from what Spec 002 actually displays as "the recommended path" | Low | Medium | PROGRESS-FR-018 and Spec 002 v2.0 Section 6 must reference the same configured track set; the implementation plan should define this set in one shared location, not duplicate it in both features |
+| Pressure to build multi-track aggregate progress (PROGRESS-FR-020) despite the resolved decision not to | Medium | Low | PROGRESS-FR-020 is now resolved as "will not build at this time," not merely deprioritized; building it is a scope violation against a settled product decision, not just premature work |
+
 ---
 
 ## 16. Open Questions
 
-No open questions remain for this spec at this stage. Any new questions discovered during implementation planning should be added here before coding begins.
+**v1.0 questions:** No open questions remain for the v1.0 scope.
+
+**v2.0 open questions — both resolved by the Product Owner (`planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1):**
+
+- **OQ-PROG-004 (RESOLVED):** No cross-track aggregate progress is surfaced to users. Progress is always shown scoped to track, module, or recommended-path (PROGRESS-FR-020). (Mirrors Spec 009 v2.0 OQ-CONTENT-006 — the same decision, tracked in both specs.)
+- **OQ-PROG-005 (RESOLVED):** Progress records do not denormalize `trackId`/`moduleId`. Track/module scoping is always computed by joining against current lesson metadata at read time.
+
+No new open questions remain for this v2.0 amendment at this stage. Any new questions discovered during implementation planning should be added here before coding begins.
 
 ---
 
@@ -636,6 +827,21 @@ This specification must be reviewed and approved by the Product Owner before any
 - Idempotency (PROGRESS-FR-003) must be enforced via the approved uniqueness rule on user ID + lesson ID at the data layer, not only in application logic, to prevent race condition duplicates.
 - The dynamic denominator (PROGRESS-FR-008) must be computed from a live count of published lessons; the implementation must not hardcode the value 12.
 
+### v2.0 SDD Handoff Notes (Pending Approval — Not Yet Implemented)
+
+**Before this amendment authorizes any implementation:**
+
+- [x] OQ-PROG-004 and OQ-PROG-005 are resolved — see Section 16 and `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1
+- [ ] The Product Owner has reviewed and approved this v2.0 amendment in full (resolution of the open questions is not the same as approval of the amendment as a whole)
+- [ ] The companion Spec 009 v2.0 amendment and Spec 002 v2.0 amendment are also approved — these three specs must move together
+- [ ] The set of tracks that make up the recommended beginner path (PROGRESS-FR-018) is confirmed and matches what Spec 002 v2.0 displays
+
+**Notes for implementation planning:**
+
+- The single-source-of-truth principle (PROGRESS-FR-004, unchanged) applies with equal force to the new track/module/recommended-path scopes: Spec 002's v2.0 UI must read these values from this spec's implementation, not recompute them independently.
+- Before writing any migration code, implementation planning should design and test the backward-compatibility check from Section 10 v2.0 against real existing test-account data, to catch any discrepancy before it reaches production users.
+- This amendment intentionally does not touch Spec 003 (Lesson Experience) or Spec 005 (Dashboard). Spec 003's per-lesson Mark Complete behavior is unaffected by track/module scoping. If Spec 005's dashboard needs to display per-track progress summaries (beyond the existing single progress summary), that should be scoped as its own amendment once this one is approved, not folded in here.
+
 ---
 
 ## Revision History
@@ -645,3 +851,5 @@ This specification must be reviewed and approved by the Product Owner before any
 | 2026-07-01 | 0.1 | Initial draft — full MVP Progress Tracking spec based on PRD v2.9, Sprint 1 Decision Register v0.3, and Specs 002–005 |
 | 2026-07-01 | 0.2 | Cleanup after review; resolved idempotency, live calculation, and progress display decisions |
 | 2026-07-01 | 1.0 | Approved Progress Tracking SDD spec for implementation planning |
+| 2026-07-14 | 2.0-draft | Amendment draft generalizing progress calculation to module-level, track-level, and recommended-path scopes, with dynamic per-scope denominators. Companion to Spec 009 v2.0 and Spec 002 v2.0. Includes an explicit backward-compatibility guarantee: no user's displayed progress number changes while only today's single-path-equivalent content exists. All v1.0 content preserved and labeled; nothing in production changes until all three amendments are approved and implemented together. Pending Product Owner review. |
+| 2026-07-14 | 2.1-draft | Resolved both open questions assigned to this spec (OQ-PROG-004: no cross-track aggregate progress figure, ever, at this time — PROGRESS-FR-020 now "will not build"; OQ-PROG-005: progress records stay lesson-based, no `trackId`/`moduleId` denormalization). Still pending: full Product Owner approval of the amendment as a whole. |

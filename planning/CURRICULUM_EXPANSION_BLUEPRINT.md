@@ -5,11 +5,11 @@
 | Field | Value |
 |---|---|
 | Title | IBM i / AS400 Curriculum Expansion Blueprint |
-| Status | **Draft — Pending Product Owner Review** (not an approved spec; no lesson content or code should be produced from this document until reviewed) |
-| Version | 0.1 |
+| Status | **Draft — Product Decisions Resolved (Section 0.1); Governance Amendments (Spec 009/002/006 v2.0) In Progress.** Not an approved spec; no lesson content or code should be produced from this document until the companion spec amendments are approved. |
+| Version | 0.2 |
 | Owner | Product + Content |
-| Depends on / Interacts with | Spec 009 (Content Governance — Approved, single-path model), Spec 002 (Learning Center), Spec 003 (Lesson Experience), Spec 006 (Progress Tracking) |
-| Scope of this document | Planning only. No lesson Markdown files, no metadata schema migration, no spec edits are performed as part of this document. |
+| Depends on / Interacts with | Spec 009 (Content Governance — v1.0 Approved, v2.0 Draft), Spec 002 (Learning Center — v1.0 Approved, v2.0 Draft), Spec 003 (Lesson Experience), Spec 006 (Progress Tracking — v1.0 Approved, v2.0 Draft) |
+| Scope of this document | Planning only. No lesson Markdown files, no metadata schema migration, no application code changes are performed as part of this document. Spec amendments live in the specs themselves (specs/009, specs/002, specs/006), not here. |
 
 ---
 
@@ -19,19 +19,36 @@ IBMiHub AI shipped with a single, approved 12-lesson "IBM i Fundamentals" path (
 
 This document proposes what a comprehensive IBM i / AS400 curriculum should look like — tracks, modules, lesson templates, a richer metadata model, a quality bar, and a phased rollout. **It does not implement any of it.**
 
-**Important governance callout:** Spec 009 in its current Approved form assumes exactly one learning path and a single status field with no track/module/difficulty dimensions. Spec 002 (Learning Center) and Spec 006 (Progress Tracking) were written against that same single-path assumption (e.g., Spec 006's progress denominator is "published lesson count," singular). **Acting on this blueprint will require a revision to Spec 009 (and likely amendments to Specs 002 and 006) before any multi-track lesson content is produced or coded against.** That revision is intentionally not done here — it should happen only after this blueprint itself is reviewed and the track/phase structure is agreed, so the spec revision reflects a settled plan rather than a moving target. Treat "revise Spec 009" as the first concrete next step after this document is approved, not a side effect of it.
+**Important governance callout:** Spec 009 in its current Approved form assumes exactly one learning path and a single status field with no track/module/difficulty dimensions. Spec 002 (Learning Center) and Spec 006 (Progress Tracking) were written against that same single-path assumption (e.g., Spec 006's progress denominator is "published lesson count," singular). **Acting on this blueprint requires a revision to Spec 009 (and amendments to Specs 002 and 006) before any multi-track lesson content is produced or coded against.** Those revisions exist as draft v2.0 amendments in the specs themselves; this blueprint is their supporting rationale, not a substitute for them.
+
+### 0.1 Resolved Product Decisions
+
+The following were open questions in the initial draft of this blueprint and the companion spec amendments. They are now resolved by the Product Owner. Each resolution is also recorded in the relevant spec (cross-referenced below) so the specs remain the authoritative, implementation-facing source; this section exists so the reasoning is visible in one place.
+
+| # | Decision | Resolution | Recorded In |
+|---|---|---|---|
+| 1 | Existing lesson URLs | **Remain permanent.** `/learn/ibm-i-fundamentals/[slug]` keeps working indefinitely. A future track-aware pattern (`/learn/[trackSlug]/[moduleSlug]/[lessonSlug]`) may be introduced for *new* tracks/lessons, but must never break the existing URLs. | Spec 009 OQ-CONTENT-004 (resolved); Spec 002 OQ-LC-007 (resolved) |
+| 2 | Recommended beginner path name | **"IBM i Fundamentals"** continues as the name, even though it now internally spans Tracks 1–5. | Spec 009 OQ-CONTENT-005 (resolved); Spec 002 OQ-LC-006 (resolved) |
+| 3 | Cross-track aggregate progress | **Not shown.** Progress is displayed at track level, module level, and recommended-path level only. No single "overall academy progress" figure until the curriculum is mature enough for that number to mean something. | Spec 009 OQ-CONTENT-006 (resolved); Spec 006 OQ-PROG-004 (resolved) |
+| 4 | Difficulty model | **One primary `difficulty` value per lesson** (`beginner` / `intermediate` / `advanced`). No difficulty ranges at the lesson level — only tracks (which contain many lessons) may span a range. | Spec 009 OQ-CONTENT-007 (resolved) |
+| 5 | Persona tags | **Metadata-only through at least Phase 2.** No personalized UI or recommendation engine. | Spec 009 OQ-CONTENT-008 (resolved) |
+| 6 | Public track catalog | **Publicly browsable while logged out** — tracks, modules, lesson titles, descriptions, and difficulty are all visible without an account, matching today's lesson-list visibility rule. Protected lesson *content* beyond the existing preview allowance still requires login. | Spec 002 OQ-LC-008 (resolved) |
+| 7 | Progress record structure | **Stay lesson-based.** Track/module progress is computed by joining completion records against current lesson metadata at read time — `trackId`/`moduleId` are not denormalized onto progress records. | Spec 006 OQ-PROG-005 (resolved) |
 
 ---
 
 ## 1. Executive Summary
 
 - Propose **16 top-level learning tracks** (Section 2), expanding from the user's example list of 14 by splitting RPGLE into three explicit difficulty tiers and giving SQL for IBM i its own dedicated track (both changes explained in Section 2.0).
-- Propose **4 release phases** growing from 50–60 lessons to a 400–500+ lesson academy (Section 3).
+- Propose **4 release phases** growing from 50–60 lessons to a 400–500+ lesson academy (Section 3), now paired with named **release positioning levels** (Section 3.2) so the product is never described as "unreleasable" — each level has its own honest, defensible claim.
 - Propose an **expanded lesson template** (Section 4) that keeps everything Spec 009's current template already requires and adds the new sections this task calls for (beginner example, real-world example, advanced notes, debugging/support angle, interview/scenario question, multiple AI Tutor prompts, related lessons).
-- Propose an **expanded metadata model** (Section 5) that adds track/module/difficulty/tags/prerequisites to the existing Spec 009 metadata fields, without breaking anything currently published.
-- Propose a **quality bar** (Section 6) that extends Spec 009 Section 12's checklist with checks specific to multi-track, multi-level content.
+- Propose an **expanded metadata model** (Section 5) that adds track/module/difficulty/**depth**/tags/prerequisites/persona tags to the existing Spec 009 metadata fields, without breaking anything currently published. **Depth** (`foundation` / `professional`, Section 2.3) is a new axis, orthogonal to difficulty, formalizing the principle that a topic can eventually have both a beginner-friendly foundation lesson and an advanced professional counterpart without needing a separate top-level track for each.
+- Propose a **quality bar** (Section 6) that extends Spec 009 Section 12's checklist with checks specific to multi-track, multi-level content, including an explicit prohibition on unverified certification claims.
+- Adds a **public-facing A–K coverage taxonomy** (Section 2.4) — a simplified 11-item list for explaining curriculum coverage to prospective users, mapped onto the richer internal 16-track model rather than replacing it.
 - Recommend the **first 50 lessons** to build (Section 7), chosen to make IBMiHub AI genuinely useful to a beginner on day one, not just a proof of concept.
 - Section 8 explicitly maps the **existing 12 lessons** onto the new structure — nothing already written is wasted or thrown away.
+- Section 0.1 records **7 resolved product decisions** (URL structure, recommended-path naming, progress display scope, difficulty model, persona tag scope, public catalog visibility, progress record structure) that were open questions in the prior draft.
+- Section 9 names the **concrete next document**: `planning/PHASE_1_CURRICULUM_CATALOG.md`, a lesson-level skeleton for the first 50–60 lessons — still no full lesson content.
 
 ---
 
@@ -405,6 +422,45 @@ Estimated lesson count: ~3 (Phase 1 intro) → ~10 (Phase 2) → ~25 (Phase 3) �
 
 ---
 
+### 2.3 Depth: Foundations vs. Professional (New Metadata Axis)
+
+A recurring idea worth formalizing: **every major topic should eventually have both a beginner-friendly foundation lesson and an advanced/professional counterpart with real-world examples** — but this does **not** mean creating two separate top-level tracks for every topic. Difficulty (Section 2.1) already spans a track internally where needed (e.g., CLLE runs Beginner → Advanced within one track). Depth is a distinct, additional dimension:
+
+- **`depth: foundation`** — a lesson whose job is to build correct understanding from zero. Leans on the lesson template's Beginner Example section; Advanced Notes is typically omitted.
+- **`depth: professional`** — a lesson (often on the *same subtopic* as a foundation lesson, sometimes added to a module much later) whose job is real-world, production-grade treatment. Leans on the Real-World Example and Advanced Notes sections; assumes the corresponding foundation lesson as a prerequisite.
+
+**How this differs from `difficulty`:** `difficulty` describes how conceptually advanced a lesson's content is (does it assume more prior knowledge). `depth` describes the *orientation* of the lesson (is it teaching the concept for the first time, or treating it at a professional/production level). A lesson can be `difficulty: intermediate, depth: foundation` (an intermediate concept explained for the first time) just as easily as `difficulty: intermediate, depth: professional` (a revisit of that same concept with production-grade nuance).
+
+**Practical application:** this blueprint does not restructure the existing 16-track module lists to explicitly enumerate foundation/professional pairs for every topic today — doing so now would mean designing lesson-level content, which is out of scope for a blueprint. Instead, this is an **authoring principle for the Phase 1 Curriculum Catalog Skeleton and beyond** (Section 9): as modules mature past their first (foundation-depth) lesson on a subtopic, a professional-depth counterpart is a natural, expected addition — not a new track, not a new module, just another lesson in the same module with `depth: professional` and a `prerequisites` link back to its foundation counterpart.
+
+`depth` is added as a proposed metadata field in Section 5 and as a Spec 009 v2.0 field (`depth`, alongside `difficulty`).
+
+---
+
+### 2.4 Public-Facing Taxonomy (A–K Coverage Map)
+
+The 16-track model (Section 2.1) is the *internal* structure that drives navigation, prerequisites, and progress. For explaining curriculum coverage to a prospective user — on a landing page, in marketing copy, or in a simple "what does this cover" checklist — a shorter, more recognizable taxonomy is more useful than listing all 16 tracks. This taxonomy is **additive, not a replacement**: it exists for external communication only. Internally, content is still authored, filed, and governed under the 16-track/module model.
+
+| Public Category | Maps to Internal Track(s) |
+|---|---|
+| A. IBM i Platform Fundamentals | Track 1 (IBM i Foundations) |
+| B. CL / CLLE | Track 8 (CLLE) |
+| C. RPG / RPGLE | Tracks 5, 6, 7 (RPGLE Beginner / Intermediate / Advanced) |
+| D. Db2 for i and DDS | Track 4 (Db2 for i, DDS, Physical Files, Logical Files), Track 11 (SQL for IBM i) |
+| E. IFS and Data Movement | Track 3 (Libraries, Objects, and the IFS — IFS portion), Track 14 (Integration and Modernization — data movement portion) |
+| F. Screens and 5250 UI | Track 2 (5250 Terminal and Core Commands), Track 9 (Display Files and Subfiles) |
+| G. Security and Administration | Track 13 (IBM i Operations for Developers — security/ops modules) |
+| H. Debugging and Tooling | Track 12 (Debugging, Job Logs, and Problem Diagnosis) |
+| I. Modern IBM i Development | Track 14 (Integration and Modernization) |
+| J. Performance and Architecture | Track 7 (RPGLE Advanced — performance module), Track 11 (SQL for IBM i — performance module), Track 12 (performance diagnosis module) |
+| K. Career and Interview Readiness | Track 16 (Interview and Professional Readiness) |
+
+**Not directly mapped:** Track 10 (Printer Files and Reports) is closest in spirit to category D/F (a DDS-defined output artifact, conceptually adjacent to screens); Track 15 (Real-World Projects) is intentionally cross-cutting by design and does not belong to a single category — it draws from whichever tracks a given project needs. Both remain fully governed internal tracks; they simply don't have a clean 1:1 public-taxonomy slot, and this blueprint doesn't force one.
+
+**Certification wording guardrail:** category K is deliberately named "Career and Interview Readiness," not "Certification." IBMiHub AI must not claim that completing this category (or any content) earns a recognized IBM i certification unless that is actually implemented and verified against a real certification body's requirements. Where safer wording is needed in public-facing copy, use "Career and Interview Readiness," "Certification-Aligned Foundations," or "Professional Readiness" — never an unqualified claim of certification. This is now a formal quality-bar check (Section 6, check 23) and a Spec 009 v2.0 functional requirement (CONTENT-FR-025).
+
+---
+
 ## 3. Recommended Release Phases
 
 A note on granularity: Phase 1 and Phase 2 content above is described down to individual lesson titles because that's the actionable near-term work. Phase 3 and Phase 4 are described at the module/topic level rather than fully titled lesson-by-lesson — inventing 300–500 exact lesson titles today would be premature (better decided once Phase 1–2 are live and real learner behavior/AI Tutor question logs inform what Phase 3+ actually needs) and would make this document far less usable as a working reference. This blueprint should be revisited and the Phase 3/4 module lists expanded into full lesson lists once Phase 2 ships.
@@ -423,6 +479,22 @@ A note on granularity: Phase 1 and Phase 2 content above is described down to in
 - **IBM i for Technical Leads/Architects** (design-tradeoff-level content, distinct audience from working developers)
 
 These are explicitly out of scope to design now; flagged only so Phase 4 planning doesn't start from zero.
+
+### 3.2 Release Positioning (Resolved — Product Decision #10)
+
+Phases (Section 3's main table) describe *content production* milestones for planning purposes. **Release levels** are a separate, resolved concept describing what claim is honest to make publicly at each milestone — this replaces any notion that the product is "unreleasable" until every advanced topic exists.
+
+| Release Level | Lesson Count | Honest Public Claim |
+|---|---|---|
+| **Private Content Beta** | Phase 1 catalog "useful enough" (see note below) | Invite-only; framed as an expanding beta, not a finished course |
+| **Serious Beginner Release** | ~50–60 (Phase 1 complete) | "A serious beginner course for IBM i" — safe to claim once Phase 1 ships |
+| **Job-Ready Developer Release** | ~120–150 (Phase 2 complete) | "Job-ready IBM i developer skills" — safe to claim once Phase 2 ships |
+| **Professional/Advanced Release** | ~250–300 (Phase 3 complete) | "Professional-level IBM i training" — safe to claim once Phase 3 ships |
+| **Long-Term Academy** | 400–500+ (Phase 4 complete) | "Comprehensive IBM i academy" — safe to claim once Phase 4 ships |
+
+**Note on "Private Content Beta":** this is distinct from — and later than — the original MVP private beta that the current 12-lesson product already cleared (Spec 009 CONTENT-FR-007, 8-lesson minimum threshold, already met). "Private Content Beta" here marks the *next* milestone: once Phase 1's full ~50–60 lesson, multi-track catalog is live, not the already-passed original gate.
+
+**Explicit statement (Product Decision #10):** the current 12 lessons are a foundation, not a complete public offering. Public-facing copy must not claim "professional," "comprehensive," or "job-ready" coverage until the curriculum has actually reached the corresponding release level above. This is consistent with — and extends — the existing no-fake-claims discipline already applied to the landing page.
 
 ---
 
@@ -469,7 +541,8 @@ This extends Spec 009 Section 11. Fields already required today are marked **(ex
 | Lesson order **(existing, reinterpreted)** | Position within its module | Previously "position in the one path"; now scoped to module, not the whole curriculum |
 | Learning path ID **(existing, generalized)** | Reference to a learning path | Generalizes from "the IBM i Fundamentals path" (singular) to "one of N tracks" |
 | Status **(existing)** | Draft → Review Ready → Approved → Published → Unpublished/Archived | Unchanged lifecycle; still the single authoritative visibility field per Spec 009 OQ-CONTENT-003 |
-| **Difficulty (new)** | Beginner / Intermediate / Advanced | Drives filtering, badges, and prerequisite gating display |
+| **Difficulty (new)** | Beginner / Intermediate / Advanced — **resolved:** one primary value per lesson, no ranges (Section 0.1 #4) | Drives filtering, badges, and prerequisite gating display |
+| **Depth (new)** | `foundation` / `professional` (Section 2.3) | Orthogonal to Difficulty; distinguishes a first-time explanation of a topic from its production-grade counterpart |
 | Content source path **(existing)** | File path to the lesson Markdown file | Unchanged |
 | Created date / Updated date **(existing)** | Record-keeping | Unchanged |
 
@@ -482,18 +555,21 @@ This extends Spec 009 Section 11. Fields already required today are marked **(ex
 | **Related Lesson IDs** | Cross-track "see also" links | Powers Section 13 of the lesson template |
 | **Estimated reading time (existing)** | Approximate completion time | Unchanged, still optional |
 | **AI Tutor prompt suggestions (existing, expanded)** | Was a single optional starter question; now a small list (2–3) | Still reviewed per CONTENT-FR-010; list instead of single value |
-| **Persona tags** | Which target audience persona(s) this lesson most serves (absolute beginner / junior developer / working developer / support-production / interview-prep / legacy-to-modern) | Optional but recommended — supports future personalized recommendations without building a recommendation engine in MVP |
+| **Persona tags** | **Resolved (Section 0.1 #5):** `beginner`, `working-developer`, `support-developer`, `interview-prep`. Metadata-only through at least Phase 2 — no personalized UI or recommendation engine. | Supersedes the earlier, broader six-value list proposed in the initial draft of this blueprint |
 
-### Progress tracking implications (for a future Spec 006 revision — not designed here)
+### Progress tracking implications (Resolved — Section 0.1 #3, #7)
 
-- The single "published lesson count" denominator becomes, at minimum, a **per-track denominator** (progress within a track), and likely also a **per-module** sub-denominator for tracks with many lessons.
-- A learner's overall "curriculum progress" becomes a roll-up across tracks rather than one flat percentage — this is a materially different progress model than Spec 006 v1.0 and should be scoped as its own revision, sequenced after this blueprint is approved and before Phase 1 of this expansion ships multiple tracks.
+- **Resolved:** progress is computed and displayed at track level, module level, and recommended-path level. No cross-track aggregate "overall academy progress" figure is shown until the curriculum is mature enough for that number to be meaningful (Section 0.1 #3).
+- **Resolved:** progress records remain lesson-based (user ID + lesson ID + timestamp, exactly as today). Track and module progress are computed by joining completion records against current lesson metadata (`trackId`/`moduleId`) at read time — these fields are **not** denormalized onto the progress record itself (Section 0.1 #7).
+- Full calculation rules live in Spec 006 v2.0 (PROGRESS-FR-016 through PROGRESS-FR-019); this blueprint does not restate them to avoid drift between the two documents.
 
 ---
 
 ## 6. Quality Bar — What Makes a Lesson Publishable
 
 This extends Spec 009 Section 12. All of Spec 009's existing 13 checklist items still apply unchanged. The additions below are specific to a multi-track, multi-level curriculum.
+
+**Content creation approach (Resolved — Product Decision #14):** content is **AI-assisted but SME-reviewed**. AI assistance (drafting, structuring, suggesting examples) is permitted at authoring time, but every lesson must still be reviewed and approved by the Product Owner / Founder (or a designated subject-matter-expert reviewer) before publication, exactly as Spec 009 CONTENT-FR-006/CONTENT-FR-014 already require. This blueprint does not weaken that human-review requirement — it clarifies that AI assistance during drafting is expected and fine, provided the review gate is never skipped.
 
 ### Additional required checks
 
@@ -508,18 +584,22 @@ This extends Spec 009 Section 12. All of Spec 009's existing 13 checklist items 
 | 20 | Debugging/support angle is concrete when present | Where Section 4.9 is included, it names an actual failure mode and diagnostic step, not a generic "check the job log" non-answer. |
 | 21 | AI Tutor prompts are genuinely varied | The 2–3 suggested prompts differ meaningfully in depth/angle, not just reworded versions of the same question. |
 | 22 | Related Lessons are bidirectional where appropriate | If Lesson A lists Lesson B as related, and the relationship is genuinely mutual, Lesson B should generally list Lesson A back (checked at review time, not enforced automatically). |
+| 23 | No unverified certification claims | The lesson does not claim or imply that completing it earns a recognized IBM i certification unless that has been separately verified and implemented. Safer framing: "Career and Interview Readiness," "Certification-Aligned Foundations," or "Professional Readiness" (Section 2.4). |
+| 24 | Depth matches its declared value | If `depth: foundation`, the lesson genuinely teaches the concept from zero; if `depth: professional`, it genuinely delivers production-grade treatment and correctly declares its foundation-lesson prerequisite (Section 2.3). |
 
 ### Unchanged from Spec 009 (still fully in force)
 
-- Correct IBM i terminology, beginner-friendly baseline explanation, no unsupported technical claims, no production-safe guarantee, no private/customer data, no credentials, template compliance, Markdown renders correctly, **original content only — nothing copied from IBM documentation, Go4AS400, Redbooks, RPGPGM, or any other external source**, sensible next-lesson flow, appropriate AI Tutor prompts, correct code blocks.
+- Correct IBM i terminology, beginner-friendly baseline explanation, no unsupported technical claims, no production-safe guarantee, no private/customer data, no credentials, template compliance, Markdown renders correctly, **original content only — nothing copied from IBM documentation, Go4AS400, Redbooks, RPGPGM, community blogs, or any other external source**, sensible next-lesson flow, appropriate AI Tutor prompts, correct code blocks.
 
-The existing rule bears repeating given this blueprint explicitly names external references: **IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, and similar resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them.** This should be called out explicitly in the review checklist once it's updated for the expanded curriculum.
+The existing rule bears repeating given this blueprint explicitly names external references: **IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, community blogs, and similar resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them.** This is formalized as Spec 009 v2.0 CONTENT-FR-022 and should be called out explicitly in the review checklist (already done — see `docs/content/lesson-review-checklist.md`).
 
 ---
 
 ## 7. First Implementation Recommendation — The First 50 Lessons
 
 Chosen so that Phase 1, on its own, is genuinely useful: a true beginner can go from zero to a working understanding of the platform, comfortable 5250 navigation, a real data-layer foundation, a complete simple RPGLE program, a first taste of CLLE and interactive screens, basic troubleshooting instinct, and a sense of what a real IBM i job involves.
+
+**Depth note (Section 2.3):** all 50 lessons below are `depth: foundation` — Phase 1 is, by definition, the foundation layer. `depth: professional` counterparts on these same subtopics are expected to appear starting in Phase 2/3 as specific modules mature, not as part of this first-50 list.
 
 ### Track 1 — IBM i Foundations (8)
 1. What is IBM i? *(existing — retained as-is, seeds this track)*
@@ -618,11 +698,19 @@ All 12 lessons keep their existing Markdown files, slugs, and (per CONTENT-FR-00
 
 ## 9. Recommended Immediate Next Steps
 
-1. **Review and approve this blueprint** (Product Owner).
-2. **Revise Spec 009 (Content Governance)** to support multiple tracks, the expanded metadata model (Section 5), and the expanded template (Section 4) — this is required before any new lesson beyond the current 12 is authored under this plan.
-3. **Scope a Spec 006 (Progress Tracking) amendment** for per-track/per-module progress, sequenced after Spec 009's revision.
-4. **Confirm the "first 50" list in Section 7** with the Product Owner, adjusting persona emphasis if needed before content production begins.
-5. Only after 1–4 are done: begin Phase 1 lesson production, starting with the 39 new lessons in Section 7 (the 11 existing lessons need no new writing, just re-tagging once the metadata model exists).
+1. ~~Review and approve this blueprint (Product Owner).~~ **Done for the 7 decisions in Section 0.1.** Full blueprint approval is still pending alongside the companion Spec 009/002/006 v2.0 amendments.
+2. **Approve the Spec 009 (Content Governance) v2.0 amendment** — already drafted, now updated with the resolutions in Section 0.1 plus the `depth` field and certification-claims policy from this revision.
+3. **Approve the companion Spec 002 and Spec 006 v2.0 amendments** — already drafted, updated with the same resolutions (permanent legacy URLs, "IBM i Fundamentals" naming, track/module/path-scoped progress only, public track catalog).
+4. **Next concrete deliverable: `planning/PHASE_1_CURRICULUM_CATALOG.md`** — a Phase 1 Curriculum Catalog Skeleton defining the first 50–60 lessons at the following level of detail, **still no full lesson content**:
+   - Track and Module
+   - Lesson title
+   - One-line summary
+   - Difficulty (`beginner` / `intermediate` / `advanced`)
+   - Depth (`foundation` / `professional` — expected to be `foundation` for nearly all Phase 1 entries, per Section 7)
+   - Persona tags (`beginner`, `working-developer`, `support-developer`, `interview-prep`)
+   - Priority
+   - Mapping to the existing 12 lessons where applicable (Section 8)
+5. Only after 2–4 are done: begin Phase 1 lesson production, starting with the 39 new lessons in Section 7 (the 11 existing lessons need no new writing, just re-tagging once the metadata model exists).
 
 ---
 
@@ -631,3 +719,4 @@ All 12 lessons keep their existing Markdown files, slugs, and (per CONTENT-FR-00
 | Date | Version | Summary |
 |---|---|---|
 | 2026-07-14 | 0.1 | Initial draft curriculum blueprint for Product Owner review. No specs revised, no lesson content produced. |
+| 2026-07-14 | 0.2 | Incorporated 7 resolved product decisions (Section 0.1: URL structure, recommended-path naming, progress display scope, difficulty model, persona tag scope, public catalog visibility, progress record structure) and 4 new curriculum strategy concepts from an independent recommendation review: Depth as a new metadata axis (Section 2.3), a public-facing A–K coverage taxonomy (Section 2.4), named release positioning levels (Section 3.2), and an explicit certification-claims policy (Sections 2.4, 6). Named the next concrete deliverable: `planning/PHASE_1_CURRICULUM_CATALOG.md` (Section 9). No application code, lesson content, or auth/session/progress/AI Tutor logic touched. |
