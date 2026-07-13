@@ -87,7 +87,7 @@ something you are missing today.
 
 ## Try Asking the AI Tutor
 
-Once the AI Tutor is available, you will be able to ask follow-up questions
-about anything in this path. One thing you might ask:
+Use the AI Tutor to ask follow-up questions about this path. For example, try
+asking:
 
 - "What should I focus on learning next after finishing IBM i Fundamentals?"

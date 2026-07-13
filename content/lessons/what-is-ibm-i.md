@@ -106,8 +106,8 @@ a database" misses the fact that it is a complete, integrated platform.
 
 ## Try Asking the AI Tutor
 
-Once the AI Tutor is available, you will be able to ask follow-up questions about
-anything in this lesson. Two things you might ask:
+Use the AI Tutor to ask follow-up questions about this lesson. For example, try
+asking:
 
 - "What is the difference between IBM i and IBM Power Systems?"
 - "Why do people still call IBM i the AS/400?"

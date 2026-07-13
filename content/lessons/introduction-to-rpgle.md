@@ -81,7 +81,7 @@ beyond the scope of this introductory lesson.
 
 ## Try Asking the AI Tutor
 
-Once the AI Tutor is available, you will be able to ask follow-up questions about
-anything in this lesson. One thing you might ask:
+Use the AI Tutor to ask follow-up questions about this lesson. For example, try
+asking:
 
 - "What's the difference between fixed-format and free-format RPGLE?"
