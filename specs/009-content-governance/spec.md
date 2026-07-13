@@ -8,8 +8,8 @@
 |---|---|
 | Spec ID | 009 |
 | Feature | Content Governance |
-| Status | v1.0 Approved (current production baseline) — **v2.0 Amendment Draft, Pending Product Owner Review** |
-| Version | 1.0 (Approved) → 2.0 (Draft, this revision) |
+| Status | v1.0 Approved (current production baseline) — **v2.1 Amendment Draft; open questions resolved (Section 17), full amendment approval still pending** |
+| Version | 1.0 (Approved) → 2.1 (Draft, this revision) |
 | Owner | Product + Content + Engineering |
 | Last Updated | 2026-07-14 |
 
@@ -181,6 +181,10 @@ Full track, module, and lesson detail lives in `planning/CURRICULUM_EXPANSION_BL
 - Under v2.0, lesson ordering (CONTENT-FR-008) is scoped **within a module**, not across the whole curriculum. A lesson's position in the Learning Center is determined by its track, then its module, then its in-module order.
 - New tracks, modules, and lessons may be added without a further revision to this spec, **provided** they conform to the approved track list above. Adding, removing, or renaming a top-level track requires Product Owner approval and a revision to this spec, matching the existing rule for lesson-path reordering.
 - The Section 5 table above (the current 12-lesson sequence) remains the authoritative v1.0 production state until the migration in Section 5B is executed.
+
+**Resolved (OQ-CONTENT-004 and OQ-CONTENT-005):**
+- **URL structure:** existing lesson URLs (`/learn/ibm-i-fundamentals/[slug]`) remain permanent. A future track-aware URL pattern (`/learn/[trackSlug]/[moduleSlug]/[lessonSlug]`) may be introduced for new tracks and lessons going forward, but must never break the 11 retained lesson URLs. See Spec 002 v2.0 Section 6 for the full routing resolution.
+- **Recommended path name:** the curated beginner path (Section 6, v2.0 of Spec 002) continues to be called "IBM i Fundamentals," even though it now spans Tracks 1–5 internally.
 
 ### 5B. Migration Mapping — Existing 12 Lessons → New Track/Module Structure
 
@@ -523,14 +527,15 @@ Every lesson must be assigned to exactly one track and exactly one module within
 
 ### CONTENT-FR-016 — Difficulty Classification
 
-Every lesson must declare exactly one difficulty level: Beginner, Intermediate, or Advanced.
+Every lesson must declare exactly one `difficulty` value: `beginner`, `intermediate`, or `advanced` (stored value lowercase; UI display labels may be capitalized, e.g. "Beginner").
 
-- Difficulty is a single-value field per lesson, even though a track as a whole may span multiple difficulty levels
-- The reviewer must verify the declared difficulty matches the lesson's actual depth (Section 12, v2.0 check 14) before Approval
+- **Resolved (OQ-CONTENT-007):** difficulty is a single value per lesson, with no ranges at the lesson level — even though a track as a whole may span multiple difficulty levels (e.g., CLLE runs Beginner → Advanced across its module set). Only tracks express a range; individual lessons never do.
+- Difficulty is distinct from `depth` (`foundation`/`professional`, CONTENT-FR-024) — difficulty is about conceptual complexity; depth is about whether the lesson is a first explanation or a production-grade treatment. See `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 2.3 for the full distinction.
+- The reviewer must verify the declared difficulty matches the lesson's actual content (Section 12, v2.0 check 14) before Approval
 - Difficulty drives Learning Center filtering and badge display (Spec 002 v2.0) but has no effect on the Draft → Review Ready → Approved → Published lifecycle
 
 **Priority:** Must Have
-**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 5; US-CONT-008, US-CONT-009
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 0.1 #4, Section 5; US-CONT-008, US-CONT-009; OQ-CONTENT-007 resolved
 
 ---
 
@@ -577,12 +582,12 @@ A lesson may declare a structured list of related lesson IDs, powering the "Rela
 
 A lesson may optionally declare which target audience persona(s) it most serves.
 
-- Approved persona values: absolute beginner, junior developer, working developer, support/production developer, interview-prep, legacy-to-modern
-- Persona tags are metadata only in this amendment; no personalized recommendation engine or persona-specific UI is authorized by this spec
+- **Resolved approved persona values (OQ-CONTENT-008 resolved):** `beginner`, `working-developer`, `support-developer`, `interview-prep`. This supersedes the broader six-value list in this FR's initial draft.
+- Persona tags are metadata only through at least Phase 2 of the curriculum blueprint; no personalized recommendation engine or persona-specific UI is authorized by this spec
 - Persona tags must not be used to hide or gate content from any user; they are descriptive, not access-controlling
 
 **Priority:** Could Have
-**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 5; PRD 12 MVP Explicit Exclusions (no recommendation engine)
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 0.1 #5, Section 5; PRD 12 MVP Explicit Exclusions (no recommendation engine); OQ-CONTENT-008 resolved
 
 ---
 
@@ -602,15 +607,16 @@ Lessons authored under v2.0 must follow the expanded lesson template (Section 6,
 
 ### CONTENT-FR-022 — External Reference Policy
 
-IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, and similar external IBM i resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them or from any other external source.
+IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, community blogs, and similar external IBM i resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them or from any other external source.
 
 - This formalizes, as a functional requirement, the "original content" principle already present in v1.0 (Section 12 check 10) and makes the specific named sources explicit
 - A reviewer who suspects content was copied or too closely paraphrased from an external source must not approve the lesson; the content must be rewritten in the author's own words and structure
+- **Content creation approach (resolved):** content is AI-assisted but SME-reviewed. AI assistance during drafting is expected and permitted; it does not relax CONTENT-FR-006/CONTENT-FR-014's human review requirement, which applies regardless of how a draft was produced.
 - This policy applies to all content regardless of track, difficulty, or whether AI assistance was used to draft it
 - This policy does not prohibit linking to external resources from the AI Tutor's own responses (governed separately by Spec 001); it governs lesson Markdown content only
 
 **Priority:** Must Have
-**Source:** PRD 16.9 Original Content Policy; Section 12 check 10; US-CONT-011
+**Source:** PRD 16.9 Original Content Policy; Section 12 check 10; US-CONT-011; planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 6 (Product Decision #14)
 
 ---
 
@@ -624,6 +630,34 @@ Lesson ordering under the v2.0 multi-track model is scoped to a lesson's module,
 
 **Priority:** Must Have
 **Source:** Section 5 v2.0 Proposed Multi-Track Structure; planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 5
+
+---
+
+### CONTENT-FR-024 — Depth Classification
+
+Every lesson must declare exactly one depth value: `foundation` or `professional`.
+
+- Depth is orthogonal to difficulty (CONTENT-FR-016): difficulty describes how conceptually advanced the content is; depth describes whether the lesson is a first-time explanation of a topic (`foundation`) or a production-grade treatment of a topic already introduced elsewhere (`professional`)
+- A `professional`-depth lesson should declare its corresponding `foundation`-depth lesson as a prerequisite (CONTENT-FR-018) where one exists
+- This spec does not require every topic to have both a foundation and a professional lesson immediately; per `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 2.3, professional-depth counterparts are expected to accumulate over time within existing modules, not by creating new top-level tracks
+- The reviewer must verify the declared depth matches the lesson's actual treatment (Section 12, v2.0 check 24) before Approval
+
+**Priority:** Must Have
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 2.3 (Product Decision #8)
+
+---
+
+### CONTENT-FR-025 — Certification Claims Policy
+
+No lesson, track description, or related product copy may claim or imply that completing IBMiHub AI content earns a recognized IBM i certification unless that has been separately verified against a real certification body's requirements and explicitly implemented.
+
+- Approved safer framing where certification-adjacent language is wanted: "Career and Interview Readiness," "Certification-Aligned Foundations," or "Professional Readiness" (`planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 2.4)
+- This applies to Track 16 (Interview and Professional Readiness) in particular, since it is the track most likely to be described in certification-adjacent terms
+- This requirement extends the existing no-fake-claims discipline already applied to public-facing product copy to the curriculum's own content and track descriptions
+- The reviewer must check for unverified certification claims as part of the standard review process (Section 12, v2.0 check 23)
+
+**Priority:** Must Have
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 2.4, Section 6 (Product Decision #11)
 
 ---
 
@@ -729,7 +763,7 @@ This section defines the metadata attributes required for each lesson at the spe
 
 ### 11.3 v2.0 Proposed Metadata Schema (Pending Approval)
 
-This is the canonical field-level metadata model for the multi-track curriculum. It supersedes the v1.0 tables above field-by-field where a field is renamed or reinterpreted, and adds the new fields required by CONTENT-FR-015 through CONTENT-FR-020. As with the rest of this amendment, this is not a database schema — it is the spec-level contract that Specs 002, 003, and 006 read from. Field names below are given in camelCase since that is how they are expected to be referenced across specs and, eventually, code.
+This is the canonical field-level metadata model for the multi-track curriculum. It supersedes the v1.0 tables above field-by-field where a field is renamed or reinterpreted, and adds the new fields required by CONTENT-FR-015 through CONTENT-FR-020 and CONTENT-FR-024. As with the rest of this amendment, this is not a database schema — it is the spec-level contract that Specs 002, 003, and 006 read from. Field names below are given in camelCase since that is how they are expected to be referenced across specs and, eventually, code.
 
 | Field | Type | Required? | Purpose | Relationship to v1.0 |
 |---|---|---|---|---|
@@ -740,18 +774,19 @@ This is the canonical field-level metadata model for the multi-track curriculum.
 | `trackId` | string | Required (v2.0) | Which of the approved tracks (Section 5, v2.0) this lesson belongs to | **New.** Replaces the implicit single-path assumption |
 | `moduleId` | string | Required (v2.0) | Which module within the track this lesson belongs to | **New** |
 | `lessonOrder` | integer | Required | Position within the lesson's module (CONTENT-FR-023) | Reinterpreted from v1.0's "Lesson order" (was: position in the one path) |
-| `difficulty` | enum: `Beginner` \| `Intermediate` \| `Advanced` | Required (v2.0) | Single declared difficulty level (CONTENT-FR-016) | **New** |
+| `difficulty` | enum: `beginner` \| `intermediate` \| `advanced` | Required (v2.0) | Single declared difficulty level, resolved to one value per lesson with no ranges (CONTENT-FR-016; Section 0.1 #4 of the blueprint) | **New** |
+| `depth` | enum: `foundation` \| `professional` | Required (v2.0) | Whether the lesson is a first-time explanation or a production-grade counterpart (CONTENT-FR-024) | **New** |
 | `tags` | string[] | Optional | Free-form topical tags (CONTENT-FR-017) | **New** |
 | `prerequisites` | lessonId[] | Optional | Structured list of prerequisite lessons (CONTENT-FR-018) | **New** |
 | `relatedLessons` | lessonId[] | Optional | Cross-track "see also" links (CONTENT-FR-019) | **New** |
-| `personaTags` | string[] | Optional | Target audience persona(s) served (CONTENT-FR-020) | **New** |
+| `personaTags` | string[] (values: `beginner`, `working-developer`, `support-developer`, `interview-prep`) | Optional | Target audience persona(s) served (CONTENT-FR-020) | **New**; resolved value list per OQ-CONTENT-008 |
 | `status` | enum: `Draft` \| `Review Ready` \| `Approved` \| `Published` \| `Unpublished/Archived` | Required | Current content status; sole visibility gate | Same as v1.0 "Status" (OQ-CONTENT-003 resolved — unchanged, single field) |
 | `estimatedReadingTime` | integer (minutes) | Optional | Approximate completion time | Same as v1.0 "Estimated reading time" |
 | `aiTutorPrompts` | string[] (2–3 items) | Optional but recommended | Suggested AI Tutor prompts of varying depth | Expands v1.0's single "AI Tutor starter question" from one value to a small list |
 
 **Fields intentionally not changed:** Content source path, Created date, Updated date, and the Learning path ID concept (now expressed via `trackId`) all continue to function as in v1.0 with no structural change beyond the rename/generalization noted above.
 
-**Backward compatibility note:** every field marked "Same as v1.0" is a rename or direct carryover, not a breaking change — a straightforward migration script could map v1.0 records to this schema mechanically for those fields. The genuinely new fields (`trackId`, `moduleId`, `difficulty`, `tags`, `prerequisites`, `relatedLessons`, `personaTags`) are additive; existing records would need these populated during the Section 5B migration.
+**Backward compatibility note:** every field marked "Same as v1.0" is a rename or direct carryover, not a breaking change — a straightforward migration script could map v1.0 records to this schema mechanically for those fields. The genuinely new fields (`trackId`, `moduleId`, `difficulty`, `depth`, `tags`, `prerequisites`, `relatedLessons`, `personaTags`) are additive; existing records would need these populated during the Section 5B migration. All 11 retained lessons are `depth: foundation` (they are the seeds of Phase 1's beginner spine); `depth: professional` counterparts do not yet exist for any current lesson.
 
 ---
 
@@ -798,7 +833,9 @@ These apply to lessons authored under the v2.0 expanded template and multi-track
 | 19 | Interview/scenario question has a real model answer approach | The Interview/Scenario Question template section walks through how a strong candidate would reason about it, not only the final answer |
 | 20 | Debugging/support angle is concrete when present | Where included, the Debugging/Support Angle section names an actual failure mode and diagnostic step, not a generic non-answer |
 | 21 | AI Tutor prompts are genuinely varied | The `aiTutorPrompts` list differs meaningfully in depth/angle, not just reworded versions of the same question |
-| 22 | External references used only for discovery/fact-checking | If IBM documentation, Go4AS400, IBM Redbooks, RPGPGM, or similar sources informed the lesson, the reviewer confirms nothing was copied or too closely paraphrased from them (CONTENT-FR-022) |
+| 22 | External references used only for discovery/fact-checking | If IBM documentation, Go4AS400, IBM Redbooks, RPGPGM, community blogs, or similar sources informed the lesson, the reviewer confirms nothing was copied or too closely paraphrased from them (CONTENT-FR-022) |
+| 23 | No unverified certification claims | The lesson, track, or module description does not claim or imply a recognized IBM i certification is earned unless verified and implemented (CONTENT-FR-025) |
+| 24 | Depth matches its declared value | If `depth: foundation`, the lesson genuinely teaches the concept from zero; if `depth: professional`, it delivers production-grade treatment and correctly declares its foundation-lesson prerequisite where one exists (CONTENT-FR-024) |
 
 ---
 
@@ -941,15 +978,15 @@ The v2.0 amendment is considered ready for implementation planning when all of t
 
 No open questions remain for the v1.0 scope at this stage.
 
-**v2.0 open questions (new — must be resolved before implementation):**
+**v2.0 open questions — all resolved by the Product Owner (`planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1):**
 
-- **OQ-CONTENT-004:** Should the existing lesson URLs (`/learn/ibm-i-fundamentals/[slug]`) remain permanently under that path even after their content conceptually moves into other tracks (e.g., "Introduction to RPGLE" moving into Track 5), or should new track-based URLs be introduced (e.g., `/learn/tracks/rpgle-beginner/[slug]`) with the legacy path kept only as a redirect for the 11 retained lessons? This affects Spec 002's route structure and is not resolved by this amendment.
-- **OQ-CONTENT-005:** What should the curated "first recommended beginner path" (Spec 002 v2.0) be called in the product UI — does "IBM i Fundamentals" continue as its name, or does it need a new name now that it is one recommended sequence across multiple tracks rather than the only content that exists?
-- **OQ-CONTENT-006:** Should overall multi-track curriculum progress (an aggregate percentage across all tracks) be surfaced to users at all in early phases, or only per-track and per-module progress? (See Spec 006 v2.0 PROGRESS-FR-020, proposed as lower priority pending this decision.)
-- **OQ-CONTENT-007:** Is a single `difficulty` value per lesson sufficient, or will some lessons genuinely need to express a difficulty range the way tracks do at the track level? This amendment assumes single-value-per-lesson is sufficient (CONTENT-FR-016); this should be explicitly confirmed rather than assumed.
-- **OQ-CONTENT-008:** Are persona tags (CONTENT-FR-020) confirmed to remain metadata-only with no personalized UI or recommendation behavior through at least Phase 2 of the curriculum blueprint, or is there an intent to build persona-aware experiences sooner than that?
+- **OQ-CONTENT-004 (RESOLVED):** Existing lesson URLs (`/learn/ibm-i-fundamentals/[slug]`) remain permanent. A future track-aware pattern (`/learn/[trackSlug]/[moduleSlug]/[lessonSlug]`) may be introduced for new tracks/lessons, but must never break the 11 retained lesson URLs. See Section 5, v2.0 subsection and Spec 002 v2.0 Section 6.
+- **OQ-CONTENT-005 (RESOLVED):** The curated recommended beginner path continues to be called "IBM i Fundamentals," even though it now spans Tracks 1–5 internally.
+- **OQ-CONTENT-006 (RESOLVED):** No cross-track aggregate progress is shown. Progress is displayed at track level, module level, and recommended-path level only (see Spec 006 v2.0 PROGRESS-FR-016 through PROGRESS-FR-019; PROGRESS-FR-020's aggregate figure remains explicitly deferred/not-to-be-built at this time).
+- **OQ-CONTENT-007 (RESOLVED):** One primary `difficulty` value per lesson, no ranges. Only tracks (which contain many lessons) may span a difficulty range.
+- **OQ-CONTENT-008 (RESOLVED):** Persona tags remain metadata-only through at least Phase 2, with the confirmed value list `beginner`, `working-developer`, `support-developer`, `interview-prep`. No personalized UI or recommendation engine.
 
-Any new questions discovered during implementation planning should be added here before coding begins.
+No new open questions remain for this v2.0 amendment at this stage. Any new questions discovered during implementation planning should be added here before coding begins.
 
 ---
 
@@ -981,21 +1018,21 @@ This specification must be reviewed and approved by the Product Owner before les
 
 **Before this amendment authorizes any implementation:**
 
-- [ ] The Product Owner has reviewed and approved this v2.0 amendment in full, including the open questions in Section 17
-- [ ] OQ-CONTENT-004 through OQ-CONTENT-008 are resolved (or explicitly deferred with a documented interim decision)
+- [x] OQ-CONTENT-004 through OQ-CONTENT-008 are resolved — see Section 17 and `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1
+- [ ] The Product Owner has reviewed and approved this v2.0 amendment in full (resolution of the open questions is not the same as approval of the amendment as a whole)
 - [ ] The companion Spec 002 v2.0 amendment and Spec 006 v2.0 amendment are also approved — this spec, Spec 002, and Spec 006 must move together; approving this spec alone does not authorize Learning Center or Progress Tracking implementation changes
-- [ ] `docs/content/lesson-review-checklist.md` is updated to reflect Section 12's v2.0 checks and the external reference policy (CONTENT-FR-022)
+- [x] `docs/content/lesson-review-checklist.md` is updated to reflect Section 12's v2.0 checks (including checks 23–24) and the external reference policy (CONTENT-FR-022)
 
 **Before the migration (Section 5B) is executed:**
 
-- [ ] An implementation plan exists for the underlying metadata schema change (adding `trackId`, `moduleId`, `difficulty`, `tags`, `prerequisites`, `relatedLessons`, `personaTags`, and converting `aiTutorPrompts` to a list)
+- [ ] An implementation plan exists for the underlying metadata schema change (adding `trackId`, `moduleId`, `difficulty`, `depth`, `tags`, `prerequisites`, `relatedLessons`, `personaTags`, and converting `aiTutorPrompts` to a list)
 - [ ] The migration is executed as a single reviewed change, not incremental ad hoc edits, per Section 5B
 
 **Before Phase 1 lesson production (per the curriculum blueprint) begins:**
 
 - [ ] This spec, Spec 002 v2.0, and Spec 006 v2.0 are all approved
 - [ ] The migration (Section 5B) is complete
-- [ ] `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 7's "first 50 lessons" list has been confirmed by the Product Owner (per that document's own Section 9 recommended next steps)
+- [ ] `planning/PHASE_1_CURRICULUM_CATALOG.md` exists and has been confirmed by the Product Owner (the next planning deliverable per `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 9) — this supersedes the earlier plan to confirm Section 7's list directly; the catalog document is the more detailed, actionable artifact
 
 ### Notes on This Amendment's Scope
 
@@ -1011,3 +1048,4 @@ This specification must be reviewed and approved by the Product Owner before les
 | 2026-07-01 | 0.2 | Cleanup after review; resolved approver, checklist format, and status model decisions |
 | 2026-07-01 | 1.0 | Approved Content Governance SDD spec for implementation planning |
 | 2026-07-14 | 2.0-draft | Amendment draft adopting the multi-track curriculum model from planning/CURRICULUM_EXPANSION_BLUEPRINT.md: multiple tracks/modules, difficulty classification, tags, prerequisites, related lessons, persona tags, expanded lesson template, expanded quality checklist, explicit external reference policy, and the migration mapping for the existing 12 lessons. All v1.0 content preserved and labeled; nothing in production changes until this amendment is approved and implemented. Pending Product Owner review. |
+| 2026-07-14 | 2.1-draft | Resolved all 5 open questions assigned to this spec (OQ-CONTENT-004 through -008: URL permanence, recommended-path naming, no cross-track aggregate progress, single difficulty value with no ranges, resolved persona tag list). Added `depth` (foundation/professional) as a new metadata field and CONTENT-FR-024; added CONTENT-FR-025 (certification claims policy) and checklist checks 23–24. Updated `docs/content/lesson-review-checklist.md` to match. Still pending: full Product Owner approval of the amendment as a whole. |

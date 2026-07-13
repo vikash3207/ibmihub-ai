@@ -1,11 +1,11 @@
 # IBM i Fundamentals — Lesson Review Checklist
 
-**Source:** Spec 009 Section 12 Content Quality Checklist (v1.0 checks 1–13; v2.0 checks 14–22 pending amendment approval — see note below)  
+**Source:** Spec 009 Section 12 Content Quality Checklist (v1.0 checks 1–13; v2.0 checks 14–24 pending amendment approval — see note below)  
 **Approver:** Product Owner / Founder  
 **Process:** Complete this checklist before moving a lesson from Review Ready → Approved.  
 Record completion in the pull request description or review record.
 
-**Status note:** Spec 009 has a v2.0 amendment draft (pending Product Owner review) that adds checks 14–22 below, a Track/Module/Difficulty section, and an explicit external reference policy. Until that amendment is approved, only checks 1–13 are mandatory. The v2.0 sections in this checklist are marked accordingly and should not be enforced before the amendment is approved.
+**Status note:** Spec 009 has a v2.0 amendment draft (open questions resolved; full amendment approval still pending Product Owner review) that adds checks 14–24 below, a Track/Module/Difficulty/Depth section, and an explicit external reference and certification-claims policy. Until the amendment as a whole is approved, only checks 1–13 are mandatory. The v2.0 sections in this checklist are marked accordingly and should not be enforced before the amendment is approved.
 
 ---
 
@@ -16,7 +16,9 @@ Record completion in the pull request description or review record.
 | Lesson title | |
 | Lesson slug | |
 | Lesson number (v1.0) / Track, Module, Lesson (v2.0, once approved) | |
-| Difficulty (v2.0, once approved) | |
+| Difficulty (v2.0, once approved) — `beginner` / `intermediate` / `advanced` (one value only, no ranges) | |
+| Depth (v2.0, once approved) — `foundation` / `professional` | |
+| Persona tags (v2.0, once approved) — `beginner`, `working-developer`, `support-developer`, `interview-prep` | |
 | Reviewed by | |
 | Review date | |
 | PR / commit reference | |
@@ -60,9 +62,13 @@ Do not enforce these until the Spec 009 v2.0 amendment is approved. Once approve
 - [ ] **19. Interview/scenario question has a real model answer approach** — The question walks through how a strong candidate would reason about it, not only the final answer.
 - [ ] **20. Debugging/support angle is concrete when present** — Names an actual failure mode and diagnostic step, not a generic non-answer.
 - [ ] **21. AI Tutor prompts are genuinely varied** — The suggested prompts differ meaningfully in depth/angle, not just reworded versions of the same question.
-- [ ] **22. External references used only for discovery/fact-checking** — If IBM documentation, Go4AS400, IBM Redbooks, RPGPGM, or similar sources informed the lesson, confirm nothing was copied or too closely paraphrased from them.
+- [ ] **22. External references used only for discovery/fact-checking** — If IBM documentation, Go4AS400, IBM Redbooks, RPGPGM, community blogs, or similar sources informed the lesson, confirm nothing was copied or too closely paraphrased from them.
+- [ ] **23. No unverified certification claims** — The lesson, track, or module description does not claim or imply that completing it earns a recognized IBM i certification unless verified and implemented. Safer framing: "Career and Interview Readiness," "Certification-Aligned Foundations," or "Professional Readiness."
+- [ ] **24. Depth matches its declared value** — If `depth: foundation`, the lesson genuinely teaches the concept from zero; if `depth: professional`, it delivers production-grade treatment and correctly declares its foundation-lesson prerequisite where one exists.
 
-**External reference policy (reminder, applies regardless of v2.0 approval status):** IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, and similar external IBM i resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them. This is already required by check 10 above; check 22 makes the named sources explicit once v2.0 is approved.
+**External reference policy (reminder, applies regardless of v2.0 approval status):** IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, community blogs, and similar external IBM i resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them. This is already required by check 10 above; check 22 makes the named sources explicit once v2.0 is approved.
+
+**Content creation approach (reminder):** content is AI-assisted but SME-reviewed. AI assistance during drafting is expected and permitted; it never replaces the human review this checklist represents.
 
 ---
 

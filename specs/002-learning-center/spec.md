@@ -8,8 +8,8 @@
 |---|---|
 | Spec ID | 002 |
 | Feature | Learning Center |
-| Status | v1.0 Approved (current production baseline) — **v2.0 Amendment Draft, Pending Product Owner Review** |
-| Version | 1.0 (Approved) → 2.0 (Draft, this revision) |
+| Status | v1.0 Approved (current production baseline) — **v2.1 Amendment Draft; open questions resolved (Section 15), full amendment approval still pending** |
+| Version | 1.0 (Approved) → 2.1 (Draft, this revision) |
 | Owner | Product + Engineering |
 | Last Updated | 2026-07-14 |
 
@@ -167,12 +167,14 @@ The IBM i Fundamentals learning path is the only approved learning path for the 
 
 The authoritative track list is defined in Spec 009 v2.0 Section 5; this spec does not duplicate it. This subsection defines how the Learning Center presents that structure.
 
-**Track listing.** The Learning Center's top level becomes a list of all approved tracks (16 at the time of this amendment — see Spec 009 v2.0 Section 5), each showing: track name, a one-to-two sentence description, difficulty span, and (for authenticated users) a completion count scoped to that track.
+**Track listing (RESOLVED — publicly browsable, OQ-LC-008).** The Learning Center's top level becomes a list of all approved tracks (16 at the time of this amendment — see Spec 009 v2.0 Section 5), each showing: track name, a one-to-two sentence description, difficulty span, and (for authenticated users) a completion count scoped to that track. **This track catalog is publicly browsable while logged out** — track names, descriptions, module names, lesson titles, lesson short descriptions, and difficulty indicators are all visible without an account, matching today's v1.0 principle that the lesson list itself is public even though lesson *content* beyond the existing preview allowance is not. Logged-out users see the same catalog structure as authenticated users; they simply don't see completion/progress indicators (consistent with existing v1.0 behavior) and are prompted to log in when opening a protected lesson.
 
-**First recommended beginner path.** New and undecided users should not have to choose from 16 tracks on their first visit. The Learning Center must present one curated, linear recommended sequence as the default starting point — functionally, the direct successor to today's single "IBM i Fundamentals" path. This recommended path is the beginner spine defined in `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Phase 1: Tracks 1 (IBM i Foundations) → 2 (5250 Terminal and Core Commands) → 3 (Libraries, Objects, and the IFS) → 4 (Db2 for i, DDS, Physical Files, and Logical Files) → 5 (RPGLE Beginner), presented as one continuous sequence even though it spans five tracks internally. The full track catalog remains browsable alongside it for users who want to jump directly to a specific track (e.g., a working developer going straight to Track 11: SQL for IBM i).
+**First recommended beginner path (RESOLVED — named "IBM i Fundamentals," OQ-LC-006).** New and undecided users should not have to choose from 16 tracks on their first visit. The Learning Center must present one curated, linear recommended sequence as the default starting point — functionally, the direct successor to today's single "IBM i Fundamentals" path. This recommended path is the beginner spine defined in `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Phase 1: Tracks 1 (IBM i Foundations) → 2 (5250 Terminal and Core Commands) → 3 (Libraries, Objects, and the IFS) → 4 (Db2 for i, DDS, Physical Files, and Logical Files) → 5 (RPGLE Beginner), presented as one continuous sequence even though it spans five tracks internally. The full track catalog remains browsable alongside it for users who want to jump directly to a specific track (e.g., a working developer going straight to Track 11: SQL for IBM i).
 
-- **What this recommended path should be called in the product UI is an open question (OQ-LC-006, Section 15) — this spec does not resolve it.** It may continue to be called "IBM i Fundamentals," or it may need a new name now that it spans multiple tracks internally. Implementation should not proceed on a specific name until this is resolved.
+- **Resolved (OQ-LC-006):** this recommended path is named **"IBM i Fundamentals"** in the product UI, continuing today's name even though it now spans five tracks internally. Implementation may proceed using this name directly.
 - The recommended path's progress is a roll-up across its five constituent tracks (Spec 006 v2.0 PROGRESS-FR-018), not a separate, independently-tracked entity.
+
+**Route structure (RESOLVED — permanent legacy URLs, OQ-LC-007 / OQ-CONTENT-004).** Existing routes (`/learn`, `/learn/ibm-i-fundamentals`, `/learn/ibm-i-fundamentals/[slug]`) remain permanent and unchanged in meaning: `/learn/ibm-i-fundamentals` continues to serve the "IBM i Fundamentals" recommended path (now internally backed by Tracks 1–5), and its lesson pages keep their existing URLs. `/learn` itself is enhanced to also surface the full track catalog (LEARNING-FR-014) alongside the recommended-path entry point, rather than introducing a separate new top-level route for the catalog. Tracks beyond the recommended path's five (i.e., Tracks 6–16) — and any future new tracks — use a new URL pattern going forward: `/learn/[trackSlug]/[moduleSlug]/[lessonSlug]`. This is additive only; no existing URL is removed, renamed, or redirected as part of this resolution.
 
 **Migration display continuity.** The 11 retained lessons (Spec 009 v2.0 Section 5B) must continue to resolve at their existing URLs and display with all their existing content unchanged. Only their track/module placement in the Learning Center's navigation changes. The one rewritten lesson ("Where to go next") should, once rewritten, route learners from the end of the recommended path into the broader track catalog, matching its new role as a track-catalog gateway rather than a dead end.
 
@@ -404,10 +406,10 @@ The product must provide a track catalog page listing every approved track.
 - Each track entry must show: track name, short description, difficulty span, and lesson count
 - For authenticated users, each track entry must show a completion count scoped to that track (Spec 006 v2.0 PROGRESS-FR-017)
 - Tracks must be listed in the order approved in Spec 009 v2.0 Section 5
-- The track catalog page must be publicly accessible, consistent with LEARNING-FR-001's public-access principle
+- **Resolved (OQ-LC-008):** the track catalog page — including tracks, modules, lesson titles, lesson short descriptions, and difficulty indicators — must be publicly accessible without authentication, consistent with LEARNING-FR-001's public-access principle. This is the same visibility rule the v1.0 lesson list already uses (public list, gated content). Logged-out users do not see completion/progress indicators.
 
 **Priority:** Must Have
-**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 2; Spec 009 v2.0 Section 5; US-LC-013
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 2; Spec 009 v2.0 Section 5; US-LC-013; OQ-LC-008 resolved
 
 ---
 
@@ -468,10 +470,10 @@ The Learning Center must present the curated recommended beginner path (Section 
 
 - The recommended path must be visually prioritized over the full track catalog for new/undecided users (e.g., as the primary call-to-action), while the full catalog remains one click away
 - The recommended path's progress is the roll-up defined in Spec 006 v2.0 PROGRESS-FR-018
-- The specific name shown for this path in the UI is not resolved by this spec (OQ-LC-006)
+- **Resolved (OQ-LC-006):** the path is named "IBM i Fundamentals" in the UI
 
 **Priority:** Must Have
-**Source:** Section 6 v2.0 subsection; planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 3; US-LC-012
+**Source:** Section 6 v2.0 subsection; planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 3; US-LC-012; OQ-LC-006 resolved
 
 ---
 
@@ -479,12 +481,13 @@ The Learning Center must present the curated recommended beginner path (Section 
 
 Existing published lesson URLs must continue to resolve correctly after the Section 5B (Spec 009) migration.
 
-- The 11 retained lessons must remain accessible at their existing `/learn/ibm-i-fundamentals/[slug]` URLs unless and until OQ-CONTENT-004 (Spec 009 v2.0) is resolved in favor of a URL change with redirects
+- **Resolved (OQ-CONTENT-004 / OQ-LC-007):** the 11 retained lessons remain accessible at their existing `/learn/ibm-i-fundamentals/[slug]` URLs permanently. This is not a temporary state pending a future URL change — it is the confirmed, permanent behavior for this content.
+- New tracks and lessons introduced after this migration use the new `/learn/[trackSlug]/[moduleSlug]/[lessonSlug]` pattern (Section 6, v2.0 "Route structure" subsection); the legacy pattern is not retrofitted onto them, and the new pattern is never retrofitted onto the 11 retained lessons
 - No existing bookmark, external link, or search-indexed URL for a retained lesson may break as a result of this migration
 - This requirement takes precedence over any convenience gained from a fully consistent new URL scheme; correctness of existing links comes first
 
 **Priority:** Must Have
-**Source:** Spec 009 v2.0 Section 5B; Spec 009 CONTENT-FR-009 Slug Stability
+**Source:** Spec 009 v2.0 Section 5B; Spec 009 CONTENT-FR-009 Slug Stability; OQ-CONTENT-004 resolved, OQ-LC-007 resolved
 
 ---
 
@@ -692,8 +695,9 @@ The following UX requirements define the expected user experience of the Learnin
 ### v2.0 Proposed UX Requirements (Pending Approval)
 
 **Track Catalog Page**
-- A new page (route to be defined in implementation planning, pending OQ-LC-006) lists all approved tracks as cards or rows
+- Surfaced from the `/learn` route (resolved — Section 6, v2.0 "Route structure"), listing all approved tracks as cards or rows
 - Each track entry shows: name, description, difficulty span, lesson count, and (authenticated) completion count
+- Publicly visible while logged out (resolved, OQ-LC-008)
 - The recommended beginner path (below) is visually distinguished from — and prioritized over — the general track catalog for new/undecided users
 
 **Recommended Beginner Path Entry Point**
@@ -807,7 +811,6 @@ The Learning Center feature is considered implementation-complete and ready for 
 - [ ] Lesson and track entries show a non-color-only difficulty indicator
 - [ ] Authenticated users see progress scoped to a track and to a module, in addition to the recommended path's roll-up progress
 - [ ] All 11 retained lessons resolve at their existing URLs with no broken links after the Spec 009 v2.0 Section 5B migration
-- [ ] OQ-LC-006 (naming of the recommended path) is resolved before this UI ships to users
 
 ---
 
@@ -831,7 +834,7 @@ The Learning Center feature is considered implementation-complete and ready for 
 | Track catalog overwhelms new users despite the recommended-path design intent | Medium | Medium | The recommended path must be visually prioritized (LEARNING-FR-019); usability-test the default landing experience with a true beginner before shipping |
 | Existing lesson URLs break during migration | Low | High | LEARNING-FR-020 and Spec 009 v2.0 Section 5B require URL continuity; test all 11 retained lesson URLs explicitly after migration |
 | Per-track/per-module progress display is inconsistent with the recommended path's roll-up progress, confusing users | Medium | Medium | Both must read from the same Spec 006 v2.0 calculations (single source of truth, per the existing PROGRESS-FR-004 principle); do not let the Learning Center compute either independently |
-| Naming the recommended path incorrectly before OQ-LC-006 is resolved | Medium | Low | Implementation should not hardcode a specific name in code or copy until the Product Owner resolves OQ-LC-006 |
+| Naming the recommended path incorrectly | Resolved — no longer a risk | N/A | OQ-LC-006 is resolved; the path is named "IBM i Fundamentals" |
 
 ---
 
@@ -841,13 +844,13 @@ The following questions remain genuinely unresolved and must be answered before 
 
 **v1.0 questions:** No open questions remain for the v1.0 scope.
 
-**v2.0 open questions (new — must be resolved before implementation):**
+**v2.0 open questions — all resolved by the Product Owner (`planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1):**
 
-- **OQ-LC-006:** What should the recommended beginner path (Section 6, v2.0) be called in the product UI? Does "IBM i Fundamentals" continue as its name, or does it need a new name now that it spans five tracks internally? (Mirrors Spec 009 v2.0 OQ-CONTENT-005 — the same open question, tracked in both specs since it affects both content governance and Learning Center UI copy.)
-- **OQ-LC-007:** Should the track catalog page live at a new top-level route (e.g., `/learn/tracks`), or should `/learn` itself become the track catalog with the recommended path as a prominent featured entry? This is an information-architecture decision not resolved by this amendment. (Related to Spec 009 v2.0 OQ-CONTENT-004 on URL structure.)
-- **OQ-LC-008:** Should unauthenticated users be able to browse the full track catalog (titles/descriptions only, no lesson content beyond the existing first-lesson-preview rule), or should track browsing itself require authentication? This amendment assumes the track catalog is publicly browsable, consistent with the existing v1.0 principle that the lesson list (though not lesson content beyond Lesson 1) is publicly visible — this should be explicitly confirmed.
+- **OQ-LC-006 (RESOLVED):** The recommended beginner path is named **"IBM i Fundamentals"** in the product UI, continuing today's name even though it now spans five tracks internally. (Mirrors Spec 009 v2.0 OQ-CONTENT-005 — the same decision, tracked in both specs.)
+- **OQ-LC-007 (RESOLVED):** The track catalog is surfaced from the existing `/learn` route, alongside the recommended-path entry point — no new top-level route is introduced for it. New tracks/lessons beyond the recommended path use the new `/learn/[trackSlug]/[moduleSlug]/[lessonSlug]` pattern going forward. (Related to Spec 009 v2.0 OQ-CONTENT-004.)
+- **OQ-LC-008 (RESOLVED):** The full track catalog — tracks, modules, lesson titles, descriptions, and difficulty — is publicly browsable while logged out, matching the existing v1.0 principle that the lesson list is public even though lesson content beyond Lesson 1 is not.
 
-Any new questions discovered during implementation planning should be added here before coding begins.
+No new open questions remain for this v2.0 amendment at this stage. Any new questions discovered during implementation planning should be added here before coding begins.
 
 ---
 
@@ -882,14 +885,14 @@ This specification must be reviewed and approved by the Product Owner before any
 
 **Before this amendment authorizes any implementation:**
 
-- [ ] The Product Owner has reviewed and approved this v2.0 amendment in full, including OQ-LC-006, OQ-LC-007, and OQ-LC-008
+- [x] OQ-LC-006, OQ-LC-007, and OQ-LC-008 are resolved — see Section 15 and `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Section 0.1
+- [ ] The Product Owner has reviewed and approved this v2.0 amendment in full (resolution of the open questions is not the same as approval of the amendment as a whole)
 - [ ] The companion Spec 009 v2.0 amendment and Spec 006 v2.0 amendment are also approved — these three specs must move together
-- [ ] OQ-CONTENT-004 and OQ-CONTENT-005 (Spec 009 v2.0) are resolved, since they directly determine this spec's route structure and recommended-path naming
 
 **Notes for implementation planning:**
 
-- Do not build the track catalog or recommended-path UI until the URL/routing open questions (OQ-LC-006, OQ-LC-007) are resolved — building against an assumed route structure risks a rework if the Product Owner decides differently
-- The v1.0 route structure (`/learn`, `/learn/ibm-i-fundamentals`, `/learn/ibm-i-fundamentals/[slug]`) remains the only approved, implementable route structure until v2.0 routing is resolved and approved
+- The route structure is now resolved (Section 6, v2.0 "Route structure"): `/learn`, `/learn/ibm-i-fundamentals`, and `/learn/ibm-i-fundamentals/[slug]` remain permanent; `/learn` is enhanced to also show the track catalog; new tracks/lessons use `/learn/[trackSlug]/[moduleSlug]/[lessonSlug]` going forward. Implementation may proceed against this structure once the amendment as a whole is approved.
+- The v1.0 route structure (`/learn`, `/learn/ibm-i-fundamentals`, `/learn/ibm-i-fundamentals/[slug]`) remains fully valid under v2.0 — nothing about it needs to change; v2.0 only adds to it.
 - This amendment intentionally does not touch Spec 003 (Lesson Experience) or Spec 005 (Dashboard). Spec 003's per-lesson rendering is unaffected by track/module grouping. If Spec 005's dashboard needs its own v2.0 amendment to display per-track progress summaries, that should be scoped separately once Spec 006 v2.0 is approved.
 
 ---
@@ -902,3 +905,4 @@ This specification must be reviewed and approved by the Product Owner before any
 | 2026-07-01 | 0.2 | Cleanup after review; resolved Learning Center content format, preview, route, reading time, and unpublished lesson questions |
 | 2026-07-01 | 1.0 | Approved Learning Center SDD spec for implementation planning |
 | 2026-07-14 | 2.0-draft | Amendment draft adding multi-track support: track catalog, module listing, difficulty indicators, per-track/per-module progress display, and a curated recommended beginner path. Companion to Spec 009 v2.0 and Spec 006 v2.0. All v1.0 content preserved and labeled; nothing in production changes until all three amendments are approved and implemented together. Pending Product Owner review. |
+| 2026-07-14 | 2.1-draft | Resolved all 3 open questions assigned to this spec (OQ-LC-006: recommended path named "IBM i Fundamentals"; OQ-LC-007: `/learn` route enhanced for the catalog, new tracks use `/learn/[trackSlug]/[moduleSlug]/[lessonSlug]`, no existing URLs change; OQ-LC-008: track catalog publicly browsable while logged out). Still pending: full Product Owner approval of the amendment as a whole. |
