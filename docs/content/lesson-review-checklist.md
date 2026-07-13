@@ -1,9 +1,11 @@
 # IBM i Fundamentals — Lesson Review Checklist
 
-**Source:** Spec 009 Section 12 Content Quality Checklist  
+**Source:** Spec 009 Section 12 Content Quality Checklist (v1.0 checks 1–13; v2.0 checks 14–22 pending amendment approval — see note below)  
 **Approver:** Product Owner / Founder  
 **Process:** Complete this checklist before moving a lesson from Review Ready → Approved.  
 Record completion in the pull request description or review record.
+
+**Status note:** Spec 009 has a v2.0 amendment draft (pending Product Owner review) that adds checks 14–22 below, a Track/Module/Difficulty section, and an explicit external reference policy. Until that amendment is approved, only checks 1–13 are mandatory. The v2.0 sections in this checklist are marked accordingly and should not be enforced before the amendment is approved.
 
 ---
 
@@ -13,7 +15,8 @@ Record completion in the pull request description or review record.
 |---|---|
 | Lesson title | |
 | Lesson slug | |
-| Lesson number | |
+| Lesson number (v1.0) / Track, Module, Lesson (v2.0, once approved) | |
+| Difficulty (v2.0, once approved) | |
 | Reviewed by | |
 | Review date | |
 | PR / commit reference | |
@@ -45,6 +48,24 @@ Complete these checks only if the relevant element exists in the lesson.
 
 ---
 
+## v2.0 Additional Checks (Not Yet Mandatory — Pending Spec 009 v2.0 Amendment Approval)
+
+Do not enforce these until the Spec 009 v2.0 amendment is approved. Once approved, these apply to newly authored lessons under the expanded template; they do not retroactively apply to the 11 retained lessons unless one is substantively rewritten.
+
+- [ ] **14. Difficulty-appropriate depth** — The lesson's actual content matches its declared difficulty; a Beginner lesson doesn't assume Advanced-track prerequisite knowledge, and an Advanced lesson isn't padded with beginner-level restatement.
+- [ ] **15. Correct track/module placement** — The lesson is filed under the track and module a learner would actually look for it in.
+- [ ] **16. Prerequisite accuracy** — Declared prerequisites are genuinely required to understand the lesson, not over- or under-listed.
+- [ ] **17. No unjustified cross-track duplication** — A concept that needs restating in a second track cross-references rather than re-teaches it in full.
+- [ ] **18. Real-world example is plausible, not generic** — The Real-World Example section reads like a believable production scenario, not a restatement of the Beginner Example with bigger numbers.
+- [ ] **19. Interview/scenario question has a real model answer approach** — The question walks through how a strong candidate would reason about it, not only the final answer.
+- [ ] **20. Debugging/support angle is concrete when present** — Names an actual failure mode and diagnostic step, not a generic non-answer.
+- [ ] **21. AI Tutor prompts are genuinely varied** — The suggested prompts differ meaningfully in depth/angle, not just reworded versions of the same question.
+- [ ] **22. External references used only for discovery/fact-checking** — If IBM documentation, Go4AS400, IBM Redbooks, RPGPGM, or similar sources informed the lesson, confirm nothing was copied or too closely paraphrased from them.
+
+**External reference policy (reminder, applies regardless of v2.0 approval status):** IBM official documentation, Go4AS400, IBM Redbooks, RPGPGM, and similar external IBM i resources may be used only for topic discovery and fact-checking. No text, code example, or structural pattern may be copied from them. This is already required by check 10 above; check 22 makes the named sources explicit once v2.0 is approved.
+
+---
+
 ## Reviewer Decision
 
 - [ ] **Approved** — All required checks pass. Lesson may be moved to Approved status.
@@ -58,7 +79,7 @@ _Add any required revision notes here._
 
 ## Approved Lesson Template (Reference)
 
-For reference, the approved lesson Markdown body must include:
+For reference, the approved (v1.0) lesson Markdown body must include:
 
 1. Lesson Title (H1)
 2. Learning Objective
@@ -70,3 +91,23 @@ For reference, the approved lesson Markdown body must include:
 8. Try Asking AI Tutor _(may be a short prompt area or rendered from metadata)_
 
 Sections 9 (Mark Complete) and 10 (Next Lesson) are UI/navigation elements handled by the Lesson Experience; they are not authored in the Markdown body.
+
+### v2.0 Expanded Template (Reference Only — Pending Spec 009 v2.0 Amendment Approval)
+
+Once approved, newly authored lessons follow this expanded template instead (Spec 009 v2.0 Section 6):
+
+1. Lesson Title (H1)
+2. Learning Objective
+3. Simple Explanation
+4. Why It Matters
+5. Beginner Example
+6. Real-World Example
+7. Advanced Notes _(Intermediate/Advanced lessons)_
+8. Common Mistakes
+9. Debugging / Support Angle _(required for Track 12 lessons; optional elsewhere)_
+10. Interview / Scenario Question
+11. Quick Recap
+12. AI Tutor Prompt Suggestions _(2–3 prompts)_
+13. Related Lessons
+
+Sections 14 (Mark Complete) and 15 (Next Lesson) remain UI/navigation elements, unchanged from v1.0. The 11 retained lessons from the multi-track migration are not required to be retrofitted to this template.

@@ -8,10 +8,10 @@
 |---|---|
 | Spec ID | 002 |
 | Feature | Learning Center |
-| Status | Approved |
-| Version | 1.0 |
+| Status | v1.0 Approved (current production baseline) — **v2.0 Amendment Draft, Pending Product Owner Review** |
+| Version | 1.0 (Approved) → 2.0 (Draft, this revision) |
 | Owner | Product + Engineering |
-| Last Updated | 2026-07-01 |
+| Last Updated | 2026-07-14 |
 
 ### Source Documents
 
@@ -19,10 +19,12 @@
 |---|---|---|
 | PRD.md | v2.9 | Primary product requirements source |
 | planning/SPRINT_1_DECISION_REGISTER.md | v0.3 | Resolved Sprint 1 blocking decisions |
+| planning/CURRICULUM_EXPANSION_BLUEPRINT.md | v0.1 Draft | Source of the multi-track curriculum model this v2.0 amendment adopts |
 | docs/adr/ADR-001-mvp-technology-stack.md | v0.1 Accepted | Next.js + TypeScript stack decision |
 | docs/adr/ADR-003-database-and-storage.md | v0.1 Accepted | Supabase PostgreSQL and content storage decisions |
 | docs/adr/ADR-004-authentication-approach.md | v0.1 Accepted | Supabase Auth authentication decision |
 | specs/001-ai-tutor/spec.md | v1.0 Approved | AI Tutor integration reference |
+| specs/009-content-governance/spec.md | v1.0 Approved → v2.0 Draft (companion amendment) | Lesson metadata model this spec reads from, including the v2.0 `trackId`/`moduleId`/`difficulty` fields |
 
 ---
 
@@ -41,6 +43,12 @@ The Learning Center exists in the MVP to:
 - Validate the core product assumption that users prefer guided structured learning over disconnected article discovery
 
 This spec defines the MVP scope, requirements, content model, UX requirements, acceptance criteria, and implementation boundaries for the Learning Center feature.
+
+### 2.1 Amendment Notice — v2.0 (Multi-Track Curriculum)
+
+This revision amends the v1.0 Approved spec to support the multi-track curriculum defined in `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` and formalized into content governance by the companion Spec 009 v2.0 amendment. Every v1.0 requirement is preserved and labeled; new v2.0 material is added alongside it and also labeled.
+
+**Nothing changes in the live product as a result of this document.** The current single "IBM i Fundamentals" path, its route structure, and every currently-approved rule in this spec remain exactly as they are today until this amendment, the companion Spec 009 v2.0 amendment, and the companion Spec 006 v2.0 amendment are all approved and implemented together. This spec does not authorize any code change by itself.
 
 ---
 
@@ -64,6 +72,20 @@ The MVP Learning Center provides a single guided learning path — IBM i Fundame
 | Link to AI Tutor | Each lesson provides access to the AI Tutor so users can ask questions during or after reading a lesson |
 | Version-controlled content | Lesson content is stored as plain Markdown (.md) files in the repository, not in a database (ADR-003) |
 | Lesson metadata management | Lesson metadata (title, slug, order, description, status, estimated reading time) is managed separately from lesson body content |
+
+### v2.0 Proposed Scope Additions (Pending Approval — Not Yet Implemented)
+
+| Capability | Description |
+|---|---|
+| Track listing | A browsable list of all approved tracks (Spec 009 v2.0 Section 5), each showing its name, a short description, and lesson/completion counts |
+| Module listing within a track | Opening a track shows its modules in order, each with its lessons |
+| Lesson listing within a module | Generalizes today's flat lesson list (Section 6) to a module-scoped list, ordered by `lessonOrder` within the module |
+| Difficulty indicators | Each lesson and each track displays a Beginner/Intermediate/Advanced indicator (or a span, for tracks) |
+| Per-track and per-module progress indicators | Authenticated users see completion progress scoped to a track and to a module, not only one flat curriculum-wide count (companion Spec 006 v2.0 amendment) |
+| First recommended beginner path | A curated, linear entry sequence for new users who don't yet want to browse the full track catalog (Section 6, v2.0 subsection) |
+| Migration display continuity | The existing 11 retained lessons and their URLs continue to work exactly as today, now displayed under their migrated track/module (Spec 009 v2.0 Section 5B) |
+
+**Everything currently out of scope for v1.0 (Section 4) remains out of scope under v2.0** unless explicitly listed above. In particular: no CMS, no quizzes, no certifications, no interactive lab, and no admin dashboard are introduced by this amendment.
 
 ---
 
@@ -141,6 +163,19 @@ The IBM i Fundamentals learning path is the only approved learning path for the 
 
 **Beta launch threshold:** At least 8 complete, reviewed, and approved lessons must be available before the MVP beta releases. Lessons 1 through 8 are the recommended minimum set, as they cover the most foundational topics and provide a coherent beginner learning path.
 
+### v2.0 Proposed Multi-Track Structure (Pending Approval)
+
+The authoritative track list is defined in Spec 009 v2.0 Section 5; this spec does not duplicate it. This subsection defines how the Learning Center presents that structure.
+
+**Track listing.** The Learning Center's top level becomes a list of all approved tracks (16 at the time of this amendment — see Spec 009 v2.0 Section 5), each showing: track name, a one-to-two sentence description, difficulty span, and (for authenticated users) a completion count scoped to that track.
+
+**First recommended beginner path.** New and undecided users should not have to choose from 16 tracks on their first visit. The Learning Center must present one curated, linear recommended sequence as the default starting point — functionally, the direct successor to today's single "IBM i Fundamentals" path. This recommended path is the beginner spine defined in `planning/CURRICULUM_EXPANSION_BLUEPRINT.md` Phase 1: Tracks 1 (IBM i Foundations) → 2 (5250 Terminal and Core Commands) → 3 (Libraries, Objects, and the IFS) → 4 (Db2 for i, DDS, Physical Files, and Logical Files) → 5 (RPGLE Beginner), presented as one continuous sequence even though it spans five tracks internally. The full track catalog remains browsable alongside it for users who want to jump directly to a specific track (e.g., a working developer going straight to Track 11: SQL for IBM i).
+
+- **What this recommended path should be called in the product UI is an open question (OQ-LC-006, Section 15) — this spec does not resolve it.** It may continue to be called "IBM i Fundamentals," or it may need a new name now that it spans multiple tracks internally. Implementation should not proceed on a specific name until this is resolved.
+- The recommended path's progress is a roll-up across its five constituent tracks (Spec 006 v2.0 PROGRESS-FR-018), not a separate, independently-tracked entity.
+
+**Migration display continuity.** The 11 retained lessons (Spec 009 v2.0 Section 5B) must continue to resolve at their existing URLs and display with all their existing content unchanged. Only their track/module placement in the Learning Center's navigation changes. The one rewritten lesson ("Where to go next") should, once rewritten, route learners from the end of the recommended path into the broader track catalog, matching its new role as a track-catalog gateway rather than a dead end.
+
 ---
 
 ## 7. User Stories
@@ -158,6 +193,16 @@ The IBM i Fundamentals learning path is the only approved learning path for the 
 | US-LC-009 | Any user | Navigate to the previous lesson | I can revisit earlier content without searching |
 | US-LC-010 | Any user | Access the AI Tutor from a lesson page | I can ask a question about what I just read without leaving the learning flow |
 | US-LC-011 | Working IBM i Developer | Open a specific lesson directly from the lesson list | I can quickly access the specific content I want to refresh |
+
+### v2.0 Proposed User Stories (Pending Approval)
+
+| ID | As a... | I want to... | So that... |
+|---|---|---|---|
+| US-LC-012 | Absolute beginner | See one recommended path when I first arrive, not a list of 16 tracks | I'm not overwhelmed by choice before I've learned anything |
+| US-LC-013 | Working IBM i Developer | Browse the full track catalog and jump directly into a specific track (e.g., SQL for IBM i) | I can refresh exactly the skill I need without walking through beginner content |
+| US-LC-014 | Any authenticated user | See my progress broken down by track and by module | I understand exactly how far along I am in the specific skill I'm building, not just one flat number |
+| US-LC-015 | Any user | See a difficulty indicator on a track or lesson before opening it | I can judge whether content matches my current skill level |
+| US-LC-016 | Developer preparing for interviews | Find the Interview and Professional Readiness track easily from the track catalog | I can focus my remaining study time on interview-specific content |
 
 ---
 
@@ -348,6 +393,101 @@ Only reviewed and approved lesson content may appear in the public Learning Cent
 
 ---
 
+### v2.0 Proposed Functional Requirements (Pending Approval — Not Yet Implemented)
+
+The following requirements apply once this amendment, the companion Spec 009 v2.0 amendment, and the companion Spec 006 v2.0 amendment are all approved and implemented. They do not apply to the current production system today.
+
+### LEARNING-FR-014 — Track Listing Page
+
+The product must provide a track catalog page listing every approved track.
+
+- Each track entry must show: track name, short description, difficulty span, and lesson count
+- For authenticated users, each track entry must show a completion count scoped to that track (Spec 006 v2.0 PROGRESS-FR-017)
+- Tracks must be listed in the order approved in Spec 009 v2.0 Section 5
+- The track catalog page must be publicly accessible, consistent with LEARNING-FR-001's public-access principle
+
+**Priority:** Must Have
+**Source:** planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 2; Spec 009 v2.0 Section 5; US-LC-013
+
+---
+
+### LEARNING-FR-015 — Module Listing Within a Track
+
+Opening a track must display its modules in approved order, each showing its lessons.
+
+- Modules must be displayed in the order defined in the track's approved module list (Spec 009 v2.0)
+- Each module must show its title and its ordered lesson list (LEARNING-FR-016)
+- Only Published lessons appear, per the unchanged LEARNING-FR-013 enforcement
+
+**Priority:** Must Have
+**Source:** Spec 009 v2.0 CONTENT-FR-015, CONTENT-FR-023
+
+---
+
+### LEARNING-FR-016 — Lesson Listing Within a Module
+
+This generalizes LEARNING-FR-003 (Lesson List Display) from a single flat path to a module-scoped list.
+
+- Lessons within a module must be displayed in `lessonOrder` sequence (Spec 009 v2.0 Section 11.3)
+- Each lesson entry must show: lesson title, short description, difficulty indicator, and (for authenticated users) completion status
+- This requirement does not change how the 11 retained lessons display today; it changes the grouping context they display within
+
+**Priority:** Must Have
+**Source:** LEARNING-FR-003 (v1.0); Spec 009 v2.0 Section 5B
+
+---
+
+### LEARNING-FR-017 — Difficulty Indicator Display
+
+Lessons and tracks must visibly display their difficulty classification.
+
+- A lesson shows its single declared `difficulty` value (Beginner, Intermediate, or Advanced)
+- A track shows its difficulty span (e.g., "Beginner → Advanced") as defined in Spec 009 v2.0 Section 5
+- The indicator must not rely on color alone to convey meaning, consistent with the existing NFR Accessibility requirements
+
+**Priority:** Must Have
+**Source:** Spec 009 v2.0 CONTENT-FR-016; US-LC-015
+
+---
+
+### LEARNING-FR-018 — Per-Track and Per-Module Progress Display
+
+Authenticated users must see progress scoped to a track and to a module, in addition to (not instead of) the recommended-path progress.
+
+- Progress values must be read from Spec 006 v2.0's per-track and per-module calculations (PROGRESS-FR-016, PROGRESS-FR-017); the Learning Center must not compute its own progress values independently, matching the existing single-source-of-truth principle from Spec 006 PROGRESS-FR-004
+- Display format follows the same count-based pattern already approved in v1.0 (e.g., "3 of 7 lessons completed"), scoped to the relevant track or module
+
+**Priority:** Must Have
+**Source:** Spec 006 v2.0 PROGRESS-FR-016, PROGRESS-FR-017; US-LC-014
+
+---
+
+### LEARNING-FR-019 — Recommended Beginner Path Entry Point
+
+The Learning Center must present the curated recommended beginner path (Section 6, v2.0) as the default starting point for users who have not yet engaged with the track catalog.
+
+- The recommended path must be visually prioritized over the full track catalog for new/undecided users (e.g., as the primary call-to-action), while the full catalog remains one click away
+- The recommended path's progress is the roll-up defined in Spec 006 v2.0 PROGRESS-FR-018
+- The specific name shown for this path in the UI is not resolved by this spec (OQ-LC-006)
+
+**Priority:** Must Have
+**Source:** Section 6 v2.0 subsection; planning/CURRICULUM_EXPANSION_BLUEPRINT.md Section 3; US-LC-012
+
+---
+
+### LEARNING-FR-020 — Migration Display Continuity
+
+Existing published lesson URLs must continue to resolve correctly after the Section 5B (Spec 009) migration.
+
+- The 11 retained lessons must remain accessible at their existing `/learn/ibm-i-fundamentals/[slug]` URLs unless and until OQ-CONTENT-004 (Spec 009 v2.0) is resolved in favor of a URL change with redirects
+- No existing bookmark, external link, or search-indexed URL for a retained lesson may break as a result of this migration
+- This requirement takes precedence over any convenience gained from a fully consistent new URL scheme; correctness of existing links comes first
+
+**Priority:** Must Have
+**Source:** Spec 009 v2.0 Section 5B; Spec 009 CONTENT-FR-009 Slug Stability
+
+---
+
 ## 9. Non-Functional Requirements
 
 ### NFR: Performance
@@ -454,6 +594,8 @@ This section defines the data attributes each lesson must have at the spec level
 | Content source path | File path to the lesson markdown file | Used by the content loading implementation |
 | AI Tutor starter question | Optional suggested question to display near the AI Tutor link | Helps users know what to ask after reading the lesson |
 
+**Pre-existing note (not part of this amendment):** the "Published status" row above describes a boolean flag, which predates and is superseded in practice by Spec 009's already-Approved v1.0 resolution of OQ-CONTENT-003 (a single `status` field with values Draft/Review Ready/Approved/Published/Unpublished-Archived, not a separate boolean). This row is left as originally written to avoid retroactively editing v1.0 approved text outside this amendment's scope, but Spec 009 Section 7 is the authoritative source and this row should not be relied on. The v2.0 fields below use Spec 009's actual single-status-field model.
+
 ### Lesson Body Content
 
 - Lesson body content is stored as a separate plain Markdown file (.md) in the repository (OQ-LC-001 resolved).
@@ -461,6 +603,20 @@ This section defines the data attributes each lesson must have at the spec level
 - Content files must be version-controlled in the repository (ADR-003).
 - Content files are not stored in the database.
 - Plain Markdown was chosen for its simplicity, Git reviewability, and alignment with the MVP lesson structure. MDX or structured content formats may be introduced in a later phase if component-level lesson features are needed.
+
+### v2.0 Proposed Content Model (Pending Approval)
+
+The Learning Center's content model is owned by Spec 009 (Content Governance) — see Spec 009 v2.0 Section 11.3 for the full field-level metadata schema (`trackId`, `moduleId`, `difficulty`, `tags`, `prerequisites`, `relatedLessons`, `personaTags`, `aiTutorPrompts`, and the carried-over fields). This spec does not redefine that schema; it specifies which fields the Learning Center reads and how it uses them:
+
+| Field (from Spec 009 v2.0) | How the Learning Center uses it |
+|---|---|
+| `trackId` | Groups lessons under their track for the track listing (LEARNING-FR-014) |
+| `moduleId` | Groups lessons under their module for the module listing (LEARNING-FR-015) |
+| `lessonOrder` | Orders lessons within their module (LEARNING-FR-016) |
+| `difficulty` | Drives the difficulty indicator (LEARNING-FR-017) |
+| `status` | Unchanged — sole visibility gate, exactly as in v1.0 |
+| `tags`, `personaTags` | Not required for Phase 1 Learning Center UI; reserved for future discovery/filtering features, not designed in this amendment |
+| `prerequisites`, `relatedLessons` | Not required for Phase 1 Learning Center UI; reserved for future cross-track navigation features, not designed in this amendment |
 
 ---
 
@@ -533,6 +689,29 @@ The following UX requirements define the expected user experience of the Learnin
 - The link should be presented contextually: "Have a question about this lesson? Ask the AI Tutor."
 - The optional AI Tutor starter question from the lesson metadata may be displayed as a suggested prompt near the link
 
+### v2.0 Proposed UX Requirements (Pending Approval)
+
+**Track Catalog Page**
+- A new page (route to be defined in implementation planning, pending OQ-LC-006) lists all approved tracks as cards or rows
+- Each track entry shows: name, description, difficulty span, lesson count, and (authenticated) completion count
+- The recommended beginner path (below) is visually distinguished from — and prioritized over — the general track catalog for new/undecided users
+
+**Recommended Beginner Path Entry Point**
+- The `/learn` landing experience defaults to the recommended beginner path (Section 6, v2.0), not the full track catalog, consistent with today's v1.0 experience of landing directly on "IBM i Fundamentals"
+- A clearly visible way to reach the full track catalog is always present alongside it
+- The recommended path's own progress indicator rolls up across its constituent tracks (Spec 006 v2.0 PROGRESS-FR-018)
+
+**Module Listing Within a Track**
+- Opening a track shows its modules as a sub-list, each expandable or navigable to its own lesson list
+- Module names and their lesson counts are visible before opening a module
+
+**Difficulty Indicator**
+- A small, non-color-only badge or label shows Beginner/Intermediate/Advanced on lesson entries, and a range (e.g., "Beginner → Advanced") on track entries
+- The badge style should be visually consistent with existing status indicators (e.g., completion checkmarks) already used in the v1.0 lesson list
+
+**Per-Track / Per-Module Progress**
+- Track and module entries show a count-based progress indicator for authenticated users, following the same format already approved in v1.0 (no percentage, per Spec 006's existing display-format decision)
+
 ---
 
 ## 12. Dependencies
@@ -557,7 +736,13 @@ The Learning Center feature depends on the following approved decisions and rela
 | Spec 004: User Account and Onboarding | Authentication must be in place for progress tracking and gated lesson access |
 | Spec 005: Dashboard | The dashboard displays continue-learning state derived from Learning Center progress |
 | Spec 006: Progress Tracking | Lesson completion state and progress records are managed by the Progress Tracking implementation; the Learning Center reads from this data |
-| Spec 009: Content Governance | The content review and publication workflow governs which lessons are eligible to appear in the public lesson list (LEARNING-FR-013) |
+| Spec 009: Content Governance | The content review and publication workflow governs which lessons are eligible to appear in the public lesson list (LEARNING-FR-013). v2.0: also the sole owner of the `trackId`/`moduleId`/`difficulty`/etc. metadata schema this spec's v2.0 UI reads from (companion amendment). |
+
+### v2.0 Planning Dependency (Not a Spec)
+
+| Document | Role |
+|---|---|
+| planning/CURRICULUM_EXPANSION_BLUEPRINT.md | Source of the track/module structure and the recommended beginner path definition adopted in Section 6 v2.0 |
 
 ---
 
@@ -613,6 +798,17 @@ The Learning Center feature is considered implementation-complete and ready for 
 - [ ] No content authoring or CMS UI is accessible to users
 - [ ] No lesson-aware AI integration is present (AI Tutor link only)
 
+### v2.0 Acceptance Criteria (Pending Approval — Not Yet Implemented)
+
+- [ ] This amendment, the companion Spec 009 v2.0 amendment, and the companion Spec 006 v2.0 amendment are all approved
+- [ ] A user can browse the full track catalog and see all 16 approved tracks with name, description, difficulty span, and lesson count
+- [ ] A user can open a track and see its modules, and open a module to see its lessons, in approved order
+- [ ] New/undecided users land on the recommended beginner path by default, with the full track catalog reachable alongside it
+- [ ] Lesson and track entries show a non-color-only difficulty indicator
+- [ ] Authenticated users see progress scoped to a track and to a module, in addition to the recommended path's roll-up progress
+- [ ] All 11 retained lessons resolve at their existing URLs with no broken links after the Spec 009 v2.0 Section 5B migration
+- [ ] OQ-LC-006 (naming of the recommended path) is resolved before this UI ships to users
+
 ---
 
 ## 14. Risks and Mitigations
@@ -628,13 +824,30 @@ The Learning Center feature is considered implementation-complete and ready for 
 | Scope creep — pressure to add quizzes, glossary, or embedded AI during implementation | Medium | Medium | This spec explicitly excludes quizzes (D-PROD-003), glossary (D-PROD-004), and lesson-aware AI (D-AI-003); any addition requires Product Owner approval and a PRD update |
 | Lesson content quality insufficient — lessons do not build beginner confidence | Medium | High | Content must go through the review process defined in Spec 009 (Content Governance) before publication; early lessons should be tested with a beginner reviewer before beta |
 
+### v2.0 Risks and Mitigations (Pending Approval)
+
+| Risk | Likelihood | Impact | Mitigation |
+|---|---|---|---|
+| Track catalog overwhelms new users despite the recommended-path design intent | Medium | Medium | The recommended path must be visually prioritized (LEARNING-FR-019); usability-test the default landing experience with a true beginner before shipping |
+| Existing lesson URLs break during migration | Low | High | LEARNING-FR-020 and Spec 009 v2.0 Section 5B require URL continuity; test all 11 retained lesson URLs explicitly after migration |
+| Per-track/per-module progress display is inconsistent with the recommended path's roll-up progress, confusing users | Medium | Medium | Both must read from the same Spec 006 v2.0 calculations (single source of truth, per the existing PROGRESS-FR-004 principle); do not let the Learning Center compute either independently |
+| Naming the recommended path incorrectly before OQ-LC-006 is resolved | Medium | Low | Implementation should not hardcode a specific name in code or copy until the Product Owner resolves OQ-LC-006 |
+
 ---
 
 ## 15. Open Questions
 
 The following questions remain genuinely unresolved and must be answered before or during implementation planning.
 
-No open questions remain for this spec at this stage. Any new questions discovered during implementation planning should be added here before coding begins.
+**v1.0 questions:** No open questions remain for the v1.0 scope.
+
+**v2.0 open questions (new — must be resolved before implementation):**
+
+- **OQ-LC-006:** What should the recommended beginner path (Section 6, v2.0) be called in the product UI? Does "IBM i Fundamentals" continue as its name, or does it need a new name now that it spans five tracks internally? (Mirrors Spec 009 v2.0 OQ-CONTENT-005 — the same open question, tracked in both specs since it affects both content governance and Learning Center UI copy.)
+- **OQ-LC-007:** Should the track catalog page live at a new top-level route (e.g., `/learn/tracks`), or should `/learn` itself become the track catalog with the recommended path as a prominent featured entry? This is an information-architecture decision not resolved by this amendment. (Related to Spec 009 v2.0 OQ-CONTENT-004 on URL structure.)
+- **OQ-LC-008:** Should unauthenticated users be able to browse the full track catalog (titles/descriptions only, no lesson content beyond the existing first-lesson-preview rule), or should track browsing itself require authentication? This amendment assumes the track catalog is publicly browsable, consistent with the existing v1.0 principle that the lesson list (though not lesson content beyond Lesson 1) is publicly visible — this should be explicitly confirmed.
+
+Any new questions discovered during implementation planning should be added here before coding begins.
 
 ---
 
@@ -665,6 +878,20 @@ This specification must be reviewed and approved by the Product Owner before any
 - The progress tracking database interaction (reading and writing lesson completion state) must be designed in coordination with Spec 006 to avoid duplicated or conflicting implementations.
 - The route structure (`/learn`, `/learn/ibm-i-fundamentals`, `/learn/ibm-i-fundamentals/[slug]`) is approved and must be used in the implementation plan and implementation.
 
+### v2.0 SDD Handoff Notes (Pending Approval — Not Yet Implemented)
+
+**Before this amendment authorizes any implementation:**
+
+- [ ] The Product Owner has reviewed and approved this v2.0 amendment in full, including OQ-LC-006, OQ-LC-007, and OQ-LC-008
+- [ ] The companion Spec 009 v2.0 amendment and Spec 006 v2.0 amendment are also approved — these three specs must move together
+- [ ] OQ-CONTENT-004 and OQ-CONTENT-005 (Spec 009 v2.0) are resolved, since they directly determine this spec's route structure and recommended-path naming
+
+**Notes for implementation planning:**
+
+- Do not build the track catalog or recommended-path UI until the URL/routing open questions (OQ-LC-006, OQ-LC-007) are resolved — building against an assumed route structure risks a rework if the Product Owner decides differently
+- The v1.0 route structure (`/learn`, `/learn/ibm-i-fundamentals`, `/learn/ibm-i-fundamentals/[slug]`) remains the only approved, implementable route structure until v2.0 routing is resolved and approved
+- This amendment intentionally does not touch Spec 003 (Lesson Experience) or Spec 005 (Dashboard). Spec 003's per-lesson rendering is unaffected by track/module grouping. If Spec 005's dashboard needs its own v2.0 amendment to display per-track progress summaries, that should be scoped separately once Spec 006 v2.0 is approved.
+
 ---
 
 ## Revision History
@@ -674,3 +901,4 @@ This specification must be reviewed and approved by the Product Owner before any
 | 2026-07-01 | 0.1 | Initial draft — full MVP Learning Center spec based on PRD v2.9, Sprint 1 Decision Register v0.3, and Spec 001 |
 | 2026-07-01 | 0.2 | Cleanup after review; resolved Learning Center content format, preview, route, reading time, and unpublished lesson questions |
 | 2026-07-01 | 1.0 | Approved Learning Center SDD spec for implementation planning |
+| 2026-07-14 | 2.0-draft | Amendment draft adding multi-track support: track catalog, module listing, difficulty indicators, per-track/per-module progress display, and a curated recommended beginner path. Companion to Spec 009 v2.0 and Spec 006 v2.0. All v1.0 content preserved and labeled; nothing in production changes until all three amendments are approved and implemented together. Pending Product Owner review. |
