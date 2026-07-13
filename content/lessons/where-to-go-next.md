@@ -23,6 +23,12 @@ comfort with IBM i comes from continued, gradual exposure: reading existing
 programs, asking questions, and connecting new details back to the concepts
 you have already built here.
 
+IBM i Fundamentals is the foundation of a larger IBM i curriculum IBMiHub AI
+is building out over time -- deeper coverage of RPGLE and CLLE, Db2 for i and
+SQL, interactive screens and subfiles, and troubleshooting in production
+settings, among other topics. None of that deeper content exists yet; this
+path is where it starts.
+
 ## Why It Matters
 
 Setting realistic expectations matters. If you expected to be an expert after
@@ -57,14 +63,16 @@ No. Several directions are reasonable depending on your goals, such as
 practicing 5250 navigation, learning more RPGLE or CLLE basics, gradually
 understanding Db2 for i and SQL, getting comfortable reading job logs and
 spool files during troubleshooting, or learning from existing programs and
-business processes.
+business processes. As IBMiHub AI adds more structured content over time,
+you will be able to pick a specific direction -- such as RPGLE, CLLE, or
+troubleshooting -- rather than guessing where to look next.
 
 **"Are deeper topics like advanced RPGLE, troubleshooting, or
 integrations already available right now?"**
-Not necessarily. Topics like these represent natural directions for future
-learning rather than features that are already built or promised on a
-specific timeline. Treat them as areas worth exploring over time, not as
-something you are missing today.
+No, not yet. Topics like these are planned as part of a larger curriculum
+IBMiHub AI is actively building, not features that are already built or
+promised on a specific timeline. Treat them as areas worth exploring once
+they are published, not something you are missing today.
 
 ## Quick Recap
 
@@ -84,6 +92,8 @@ something you are missing today.
 - Deeper topics such as advanced RPGLE, CLLE, Db2 for i, troubleshooting,
   modernization, and integrations are natural future learning directions, not
   promises of features available today.
+- IBM i Fundamentals is the foundation of a larger IBM i curriculum IBMiHub AI
+  is building out over time; deeper tracks are planned but not yet available.
 
 ## Try Asking the AI Tutor
 

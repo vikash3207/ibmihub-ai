@@ -45,6 +45,18 @@ async function seed() {
           content_source_path: lesson.contentSourcePath,
           estimated_reading_time: lesson.estimatedReadingTime ?? null,
           ai_tutor_starter_question: lesson.aiTutorStarterQuestion ?? null,
+          // v2.0 fields (Spec 009 v2.1 Section 11.3) -- additive only; do not
+          // affect lesson_order/learning_path_id, which remain the fields the
+          // current Learning Center and progress calculations depend on.
+          track_id: lesson.trackId ?? null,
+          module_id: lesson.moduleId ?? null,
+          difficulty: lesson.difficulty ?? null,
+          depth: lesson.depth ?? null,
+          tags: lesson.tags ?? null,
+          prerequisites: lesson.prerequisites ?? null,
+          related_lessons: lesson.relatedLessons ?? null,
+          persona_tags: lesson.personaTags ?? null,
+          ai_tutor_prompts: lesson.aiTutorPrompts ?? null,
         },
         { onConflict: 'slug' }
       )

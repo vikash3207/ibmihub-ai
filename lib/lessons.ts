@@ -26,6 +26,20 @@ export interface Lesson {
   content_source_path: string
   estimated_reading_time: number | null
   ai_tutor_starter_question: string | null
+  // v2.0 fields (Spec 009 v2.1 Section 11.3) -- additive metadata columns
+  // from supabase/migrations/004_lesson_v2_metadata.sql. Not yet read by any
+  // page; typed here so the data is available to a future track-catalog UI
+  // without another interface change. lesson_order and learning_path_id
+  // above remain the fields that currently drive ordering and progress.
+  track_id: string | null
+  module_id: string | null
+  difficulty: string | null
+  depth: string | null
+  tags: string[] | null
+  prerequisites: string[] | null
+  related_lessons: string[] | null
+  persona_tags: string[] | null
+  ai_tutor_prompts: string[] | null
 }
 
 /** Return all Published lessons ordered by lesson_order. */
