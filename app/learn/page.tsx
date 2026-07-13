@@ -1,8 +1,11 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
+import { BookOpen } from 'lucide-react'
 import { getPublishedLessonCount } from '@/lib/lessons'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
+import { Card } from '@/components/ui/card'
+import { buttonVariants } from '@/components/ui/button'
 
 export const metadata: Metadata = {
   title: 'Learning Center',
@@ -23,7 +26,10 @@ export default async function LearnPage() {
         </p>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+      <Card className="border-l-4 border-l-blue-600">
+        <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <BookOpen className="h-5 w-5" aria-hidden="true" />
+        </div>
         <h2 className="text-xl font-semibold text-slate-900 mb-2">{IBM_I_FUNDAMENTALS_PATH_NAME}</h2>
         <p className="text-sm text-slate-600 leading-relaxed mb-4">
           Foundational IBM i concepts, from what the platform is to basic development workflow --
@@ -37,7 +43,7 @@ export default async function LearnPage() {
           <Link
             href="/learn/ibm-i-fundamentals"
             prefetch={false}
-            className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+            className={buttonVariants({ variant: 'primary' })}
           >
             Start Learning
           </Link>
@@ -46,7 +52,7 @@ export default async function LearnPage() {
             Lesson content is being finalized -- check back soon.
           </div>
         )}
-      </div>
+      </Card>
     </div>
   )
 }

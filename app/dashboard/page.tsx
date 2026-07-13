@@ -1,10 +1,13 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
+import { BookOpen, Sparkles, TrendingUp } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
+import { Card } from '@/components/ui/card'
+import { buttonVariants } from '@/components/ui/button'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
 // so a production visitor's real session (not a build-time snapshot) decides
@@ -50,6 +53,7 @@ export default async function DashboardPage() {
 
   const completedCount = lessons.filter((lesson) => completedLessonIds.has(lesson.id)).length
   const pathComplete = lessons.length > 0 && completedCount === lessons.length
+  const progressPercent = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0
 
   // Lessons are already ordered by lesson_order (getPublishedLessons), so the
   // first array match is the lowest-order Published lesson not yet completed.
@@ -68,16 +72,31 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Dashboard</h1>
         <p className="text-slate-600 leading-relaxed">{welcomeMessage}</p>
+
         {lessons.length > 0 && (
-          <p className="text-sm text-slate-500 mt-2">
-            {completedCount} of {lessons.length} lessons completed
-          </p>
+          <div className="mt-4 max-w-sm">
+            <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
+              <span className="flex items-center gap-1">
+                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
+                IBM i Fundamentals progress
+              </span>
+              <span>
+                {completedCount} of {lessons.length} completed
+              </span>
+            </div>
+            <div className="h-2 w-full rounded-full bg-slate-100">
+              <div
+                className="h-2 rounded-full bg-blue-600 transition-[width]"
+                style={{ width: `${progressPercent}%` }}
+              />
+            </div>
+          </div>
         )}
       </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-white p-6 shadow-sm">
+      <Card className="border-l-4 border-l-blue-600">
         {pathComplete ? (
           <>
             <h2 className="text-lg font-semibold text-slate-900 mb-2">Path complete</h2>
@@ -87,7 +106,7 @@ export default async function DashboardPage() {
             <Link
               href="/learn/ibm-i-fundamentals"
               prefetch={false}
-              className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+              className={buttonVariants({ variant: 'primary' })}
             >
               View All Lessons
             </Link>
@@ -100,7 +119,7 @@ export default async function DashboardPage() {
               <Link
                 href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
                 prefetch={false}
-                className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+                className={buttonVariants({ variant: 'primary' })}
               >
                 Start {nextLesson.title}
               </Link>
@@ -115,7 +134,7 @@ export default async function DashboardPage() {
                 <Link
                   href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
                   prefetch={false}
-                  className="inline-flex items-center justify-center rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-700 transition-colors"
+                  className={buttonVariants({ variant: 'primary' })}
                 >
                   Continue
                 </Link>
@@ -123,30 +142,32 @@ export default async function DashboardPage() {
             )}
           </>
         )}
-      </div>
+      </Card>
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <Link
-          href="/learn/ibm-i-fundamentals"
-          prefetch={false}
-          className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
-        >
-          <span className="block font-semibold text-slate-900">Learning Center</span>
-          <span className="block text-sm text-slate-600 mt-1">
-            View all {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
-          </span>
+        <Link href="/learn/ibm-i-fundamentals" prefetch={false} className="block">
+          <Card className="h-full transition-shadow hover:shadow-md">
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <BookOpen className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <span className="block font-semibold text-slate-900">Learning Center</span>
+            <span className="block text-sm text-slate-600 mt-1">
+              View all {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
+            </span>
+          </Card>
         </Link>
 
-        <Link
-          href="/ai-tutor"
-          prefetch={false}
-          className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-slate-300 transition-colors"
-        >
-          <span className="block font-semibold text-slate-900">AI Tutor</span>
-          <span className="block text-sm text-slate-600 mt-1">
-            Ask IBM i questions for educational guidance. It cannot connect to a real IBM i
-            system, execute code, or analyze production code.
-          </span>
+        <Link href="/ai-tutor" prefetch={false} className="block">
+          <Card variant="ai" className="h-full transition-shadow hover:shadow-md">
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
+              <Sparkles className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <span className="block font-semibold text-slate-900">AI Tutor</span>
+            <span className="block text-sm text-slate-600 mt-1">
+              Ask IBM i questions for educational guidance. It cannot connect to a real IBM i
+              system, execute code, or analyze production code.
+            </span>
+          </Card>
         </Link>
       </div>
     </div>
