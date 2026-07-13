@@ -27,12 +27,6 @@ export async function SiteHeader() {
           {SITE_NAME}
         </Link>
         <nav className="flex items-center gap-3 sm:gap-5">
-          <Link
-            href="/learn"
-            className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
-          >
-            Learning Center
-          </Link>
           {user ? (
             <>
               <Link
@@ -41,6 +35,12 @@ export async function SiteHeader() {
                 className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
               >
                 Dashboard
+              </Link>
+              <Link
+                href="/learn"
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Learning Center
               </Link>
               <Link
                 href="/ai-tutor"
@@ -57,6 +57,12 @@ export async function SiteHeader() {
             </>
           ) : (
             <>
+              <Link
+                href="/learn"
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Learning Center
+              </Link>
               <Link
                 href="/auth/login"
                 className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
