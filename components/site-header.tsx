@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Cpu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/lib/actions/auth'
-import { SITE_NAME } from '@/lib/config'
+import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
 import { Button, buttonVariants } from '@/components/ui/button'
 
 /**
@@ -56,9 +56,17 @@ export async function SiteHeader() {
               </form>
             </>
           ) : (
-            <Link href="/auth/login" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
-              Log in
-            </Link>
+            <>
+              <Link
+                href="/auth/login"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Log in
+              </Link>
+              <Link href="/auth/sign-up" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
+                {PRIMARY_CTA_LABEL}
+              </Link>
+            </>
           )}
         </nav>
       </div>

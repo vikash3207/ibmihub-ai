@@ -5,7 +5,7 @@
  */
 
 /** Primary landing page CTA label - update here when transitioning to a new launch phase. */
-export const PRIMARY_CTA_LABEL = 'Create Free Account'
+export const PRIMARY_CTA_LABEL = 'Start Learning Free'
 
 /** Site name used in metadata and UI */
 export const SITE_NAME = 'IBMiHub AI'
