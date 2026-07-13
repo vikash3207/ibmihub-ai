@@ -50,7 +50,7 @@ export async function SiteHeader() {
                 AI Tutor
               </Link>
               <form>
-                <Button type="submit" formAction={logout} variant="ghost" size="sm" className="px-0">
+                <Button type="submit" formAction={logout} variant="secondary" size="sm">
                   Log out
                 </Button>
               </form>

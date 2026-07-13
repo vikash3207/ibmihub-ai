@@ -4,6 +4,8 @@ import {
   Sparkles,
   TrendingUp,
   Unlock,
+  Route,
+  Award,
   ShieldAlert,
   CheckCircle2,
   GraduationCap,
@@ -11,10 +13,12 @@ import {
 } from 'lucide-react'
 import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
 import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
+import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
+import { cn } from '@/lib/utils'
 
 // Renders SiteHeader, which reads the auth session -- never statically cache
 // this page or its header could serve a stale/incorrect logged-in state.
@@ -23,7 +27,7 @@ export const dynamic = 'force-dynamic'
 const FEATURES = [
   {
     icon: BookOpen,
-    title: 'IBM i Fundamentals',
+    title: 'Structured Curriculum',
     body: 'A structured, beginner-friendly learning path covering IBM i concepts, RPGLE, CLLE, Db2 for i, job logs, and more.',
   },
   {
@@ -37,17 +41,22 @@ const FEATURES = [
     body: 'Mark lessons complete and pick up exactly where you left off, every time you come back.',
   },
   {
-    icon: Unlock,
-    title: 'Free First Lesson',
-    body: 'Preview the first lesson of IBM i Fundamentals in full -- no account required.',
+    icon: Award,
+    title: 'Career-Ready IBM i Skills',
+    body: 'Build practical foundations that support IBM i development, support, modernization, and long-term career growth.',
   },
 ]
 
 const STATS = [
-  { value: String(IBM_I_FUNDAMENTALS_LESSONS.length), label: 'Structured lessons' },
-  { value: '1', label: 'Guided learning path' },
-  { value: 'Free', label: 'First lesson preview' },
-  { value: 'AI', label: 'Tutor for IBM i concepts' },
+  {
+    icon: BookOpen,
+    value: String(IBM_I_FUNDAMENTALS_LESSONS.length),
+    label: 'Structured lessons',
+    accent: 'blue' as const,
+  },
+  { icon: Route, value: '1', label: 'Guided fundamentals path', accent: 'blue' as const },
+  { icon: Unlock, value: 'Free', label: 'First lesson preview', accent: 'blue' as const },
+  { icon: Sparkles, value: 'AI', label: 'Tutor for IBM i concepts', accent: 'cyan' as const },
 ]
 
 const AUDIENCE = [
@@ -65,7 +74,12 @@ const AUDIENCE = [
 
 const AI_TUTOR_SAMPLE_PROMPTS = ['What is a job log in IBM i?', 'Show a simple RPGLE example.']
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <SiteHeader />
@@ -76,12 +90,15 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute -top-32 left-1/2 h-[36rem] w-[36rem] -translate-x-1/2 rounded-full bg-blue-600/20 blur-[120px]" />
         <div className="pointer-events-none absolute top-1/3 right-0 h-[24rem] w-[24rem] rounded-full bg-cyan-500/20 blur-[100px]" />
 
-        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 pt-24 sm:pt-32 pb-32 sm:pb-40">
+        <div className="relative mx-auto max-w-5xl px-4 sm:px-6 pt-20 sm:pt-24 pb-20 sm:pb-24">
           <div className="text-center">
-            <Badge variant="ai" className="mb-6 border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
+            <Badge variant="ai" className="mb-4 border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
-              Private beta
+              AI-powered IBM i learning
             </Badge>
+            <p className="mb-3 text-base sm:text-lg font-semibold text-cyan-300">
+              Master IBM&nbsp;i from Zero to Expert.
+            </p>
 
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-6">
               The AI-powered learning platform for IBM&nbsp;i professionals.
@@ -112,7 +129,7 @@ export default function LandingPage() {
               not fake user data. Represents genuine IBMiHub AI concepts
               (a lesson, progress, Mark Complete, the AI Tutor) using the
               same visual language as the real app. */}
-          <div className="relative mt-16 sm:mt-20 mx-auto max-w-3xl">
+          <div className="relative mt-12 sm:mt-14 mx-auto max-w-3xl">
             <Card className="border-slate-200/10 shadow-2xl shadow-blue-950/50">
               <div className="flex items-center gap-2 border-b border-slate-100 pb-4 mb-4">
                 <span className="h-2.5 w-2.5 rounded-full bg-red-300" />
@@ -162,13 +179,30 @@ export default function LandingPage() {
       <main className="flex-1">
         {/* -- Trust / credibility strip (honest MVP facts only) --------- */}
         <section className="bg-slate-50 border-b border-slate-100">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 py-10 sm:py-12">
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-6 text-center">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6 py-14 sm:py-16">
+            <div className="text-center mb-8">
+              <Badge variant="neutral">Built for practical IBM i learning</Badge>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
               {STATS.map((stat) => (
-                <div key={stat.label}>
+                <Card
+                  key={stat.label}
+                  className={cn(
+                    'p-6 text-center border-t-4 transition-shadow hover:shadow-md',
+                    stat.accent === 'cyan' ? 'border-t-cyan-500' : 'border-t-blue-600'
+                  )}
+                >
+                  <div
+                    className={cn(
+                      'mx-auto mb-3 flex h-10 w-10 items-center justify-center rounded-lg',
+                      stat.accent === 'cyan' ? 'bg-cyan-100 text-cyan-700' : 'bg-blue-50 text-blue-600'
+                    )}
+                  >
+                    <stat.icon className="h-5 w-5" aria-hidden="true" />
+                  </div>
                   <div className="text-2xl sm:text-3xl font-bold text-slate-900">{stat.value}</div>
                   <div className="mt-1 text-xs sm:text-sm text-slate-500">{stat.label}</div>
-                </div>
+                </Card>
               ))}
             </div>
           </div>
@@ -284,9 +318,15 @@ export default function LandingPage() {
                 Get clear, plain-language explanations of RPGLE, CLLE, and Db2 for i concepts, tuned for
                 the IBM&nbsp;i ecosystem specifically -- not a generic programming assistant.
               </p>
-              <Link href="/auth/sign-up" className={buttonVariants({ variant: 'ai' })}>
-                Create a free account
-              </Link>
+              {user ? (
+                <Link href="/ai-tutor" prefetch={false} className={buttonVariants({ variant: 'ai' })}>
+                  Open AI Tutor
+                </Link>
+              ) : (
+                <Link href="/auth/sign-up" className={buttonVariants({ variant: 'ai' })}>
+                  Sign up to try AI Tutor
+                </Link>
+              )}
             </div>
           </div>
         </section>

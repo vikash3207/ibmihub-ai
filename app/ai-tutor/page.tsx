@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ShieldAlert, Sparkles } from 'lucide-react'
@@ -41,6 +42,12 @@ export default async function AiTutorPage() {
   return (
     <div className="space-y-8">
       <div>
+        <Link
+          href="/learn"
+          className="mb-3 inline-block text-sm text-slate-500 hover:text-slate-900 transition-colors"
+        >
+          &larr; Back to Learning Center
+        </Link>
         <div className="mb-2 flex items-center gap-2">
           <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
             <Sparkles className="h-5 w-5" aria-hidden="true" />
