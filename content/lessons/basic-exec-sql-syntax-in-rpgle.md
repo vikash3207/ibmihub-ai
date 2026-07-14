@@ -3,8 +3,8 @@
 ## Learning Objective
 
 By the end of this lesson, you will be able to write the basic
-`EXEC SQL` / `END-EXEC` structure that every embedded SQL statement in
-RPGLE uses.
+`EXEC SQL` block structure that every embedded SQL statement in
+free-format RPGLE uses.
 
 ## Simple Explanation
 

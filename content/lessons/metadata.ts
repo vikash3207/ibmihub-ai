@@ -2602,17 +2602,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- SQLRPGLE / Embedded SQL Basics Batch 1 (PR #78): what SQLRPGLE is
   // through embedded UPDATE/DELETE ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #80 (SQLRPGLE / Embedded SQL Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'what-is-sqlrpgle',
     title: 'What is SQLRPGLE?',
     shortDescription: 'What SQLRPGLE is: free-format RPGLE with embedded SQL statements written directly inside the program.',
     lessonOrder: 113,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/what-is-sqlrpgle.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Why would a developer choose embedded SQL over native RPGLE file I/O for a particular task?',
@@ -2635,7 +2633,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How CHAIN, READ, SETLL/READE, WRITE, UPDATE, and DELETE each correspond to an embedded SQL equivalent.',
     lessonOrder: 114,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/native-rpgle-file-io-vs-embedded-sql.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What is a concrete situation where embedded SQL would clearly be easier to write than native RPGLE file I/O?',
@@ -2658,7 +2656,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The EXEC SQL / semicolon block structure every embedded SQL statement in RPGLE uses.',
     lessonOrder: 115,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-exec-sql-syntax-in-rpgle.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would happen if I forgot the semicolon at the end of an EXEC SQL statement?',
@@ -2681,7 +2679,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a host variable is, and how the colon prefix distinguishes it from a table column inside embedded SQL.',
     lessonOrder: 116,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/host-variables-in-sqlrpgle.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would happen if I forgot the colon before a host variable inside an EXEC SQL statement?',
@@ -2704,7 +2702,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using embedded SELECT INTO to retrieve one row into host variables, and checking SQLCODE the way %FOUND is checked after CHAIN.',
     lessonOrder: 117,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/select-into-for-reading-one-row.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would happen if my program used custName right after SELECT INTO without checking SQLCODE first?',
@@ -2727,7 +2725,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Declaring, opening, fetching from, and closing an SQL cursor to read every matching row, one at a time.',
     lessonOrder: 118,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/using-sql-cursor-to-read-multiple-rows.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would happen if I called FETCH after SQLCODE had already reached 100?',
@@ -2750,7 +2748,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using embedded INSERT to add a new row using host variables, the embedded SQL equivalent of native WRITE.',
     lessonOrder: 119,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/insert-with-embedded-sql.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would happen if I listed the columns and values in a different order by mistake?',
@@ -2773,7 +2771,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using embedded UPDATE and DELETE with a WHERE clause, and how this differs from native operations acting on the most recently retrieved record.',
     lessonOrder: 120,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/update-and-delete-with-embedded-sql.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would happen if my WHERE clause on an embedded DELETE accidentally matched every row in the table?',
@@ -2792,17 +2790,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- SQLRPGLE / Embedded SQL Basics Batch 2 (PR #79): SQLCODE/SQLSTATE
   // through common mistakes and best practices ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #80 (SQLRPGLE / Embedded SQL Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'sqlcode-and-sqlstate-basics-in-sqlrpgle',
     title: 'SQLCODE and SQLSTATE Basics in SQLRPGLE',
     shortDescription: 'What SQLCODE and SQLSTATE each report after an embedded SQL statement runs, and how they relate to each other.',
     lessonOrder: 121,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqlcode-and-sqlstate-basics-in-sqlrpgle.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "Are there SQLSTATE values that don't have a simple matching SQLCODE number?",
@@ -2825,7 +2821,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A clean, reliable three-way pattern for handling the SQLCODE = 100 "not found" case, distinguishing it from a genuine error.',
     lessonOrder: 122,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/handling-no-row-found-in-sqlrpgle.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What message would be misleading to show a user if SQLCODE = 100 were treated as a genuine error?',
@@ -2848,7 +2844,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Writing a complete cursor FETCH loop that accumulates counts and totals across every fetched row, not just displays it.',
     lessonOrder: 123,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/fetch-loop-for-reading-multiple-rows.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "What would happen to custCount and balTotal if the cursor's query matched zero rows?",
@@ -2871,7 +2867,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Writing WHERE conditions with comparison operators and AND/OR to filter embedded SQL results beyond simple equality.',
     lessonOrder: 124,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-where-conditions-in-embedded-sql.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I write a WHERE clause for customers with a balance under 100 or over 10000, but not in between?',
@@ -2894,7 +2890,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "Using ORDER BY to control query result order, and why this is separate from a physical file's own key or access path.",
     lessonOrder: 125,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/order-by-and-result-ordering.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Can I use ORDER BY on more than one column at once, such as balance then name?',
@@ -2917,7 +2913,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Writing a simple two-table JOIN in an embedded SQL cursor, combining CUSTMAST and ORDHIST on a shared customer number.',
     lessonOrder: 126,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/simple-join-in-sqlrpgle.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What kind of join would show every customer even if they have no orders at all?',
@@ -2940,7 +2936,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What NULL means in Db2 for i, why it differs from blank or zero, and how to detect it using a null indicator.',
     lessonOrder: 127,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/null-handling-basics-in-sqlrpgle.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I set a column to NULL using an embedded INSERT or UPDATE statement?',
@@ -2963,7 +2959,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common beginner mistakes across embedded SQL in RPGLE, and a simple set of best practices to avoid them.',
     lessonOrder: 128,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-sqlrpgle-mistakes-and-best-practices.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Which of these common mistakes is easiest to accidentally reintroduce when modifying existing code?',
