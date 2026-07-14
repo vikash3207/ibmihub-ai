@@ -31,8 +31,9 @@ Here, ordinary RPGLE variable declarations and a `dsply` statement sit
 right alongside an **`EXEC SQL`** block, a standard SQL `SELECT`
 statement embedded directly in the program. This lesson introduces that
 this mixing is possible and what it is called; the exact rules for
-writing an `EXEC SQL` block are covered in the next lesson, and this
-particular `SELECT INTO` pattern is covered in full later in this group.
+writing an `EXEC SQL` block are covered in the Basic EXEC SQL Syntax in
+RPGLE lesson later in this group, and this particular `SELECT INTO`
+pattern is covered in full in the SELECT INTO for Reading One Row lesson.
 
 ## Why It Matters
 
