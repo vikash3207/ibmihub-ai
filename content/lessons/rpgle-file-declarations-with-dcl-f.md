@@ -75,9 +75,9 @@ lesson, which are always declared individually with `dcl-s`.
 
 **"Do I always need the keyed keyword?"**
 Only if the program intends to access the file by key, using `CHAIN`,
-covered in a later lesson in this group. A program that only reads
-through a file from beginning to end, without looking up specific
-records by key, does not need `keyed`.
+`SETLL`, `READE`, or `READP`, all covered in later lessons in this group.
+A program that only reads through a file from beginning to end, without
+looking up or positioning by key, does not need `keyed`.
 
 ## Quick Recap
 
@@ -86,7 +86,7 @@ records by key, does not need `keyed`.
 - `disk` identifies a database file, distinct from `workstn` used for
   display files.
 - `keyed` is added when the program intends to access the file by key
-  using `CHAIN`.
+  using `CHAIN`, `SETLL`, `READE`, or `READP`.
 - An externally described file's fields are brought into the program
   automatically, without needing to be redeclared individually.
 
