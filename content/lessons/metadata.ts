@@ -3354,17 +3354,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Debugging & Troubleshooting Batch 1 (PR #84): why debugging matters
   // through common debugging mistakes ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #86 (Debugging & Troubleshooting Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'why-debugging-matters-on-ibm-i',
     title: 'Why Debugging Matters on IBM i',
     shortDescription: 'Why debugging is a normal, routine part of IBM i development, not a sign that something has gone wrong.',
     lessonOrder: 145,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/why-debugging-matters-on-ibm-i.md',
     estimatedReadingTime: 5,
     aiTutorStarterQuestion: 'What is the difference between a systematic debugging approach and just guessing at what might be wrong?',
@@ -3387,7 +3385,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What STRDBG does, what a program needs before it can be debugged this way, and what happens once the debugger starts.',
     lessonOrder: 146,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/strdbg-basics-for-rpgle.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How do I know whether a program was compiled with debugging data?',
@@ -3410,7 +3408,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Setting a breakpoint at a specific line, running a program until it stops there, and stepping through its logic.',
     lessonOrder: 147,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/setting-and-using-breakpoints.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What is the difference between stepping over a statement and stepping into it?',
@@ -3433,7 +3431,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "Displaying a variable's current value while paused in a debug session to confirm or rule out where a calculation goes wrong.",
     lessonOrder: 148,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/watching-variables-during-debug.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would it mean if custBal itself already held an unexpected value before the calculation even ran?',
@@ -3456,7 +3454,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a job log actually contains, using DSPJOBLOG to view one, and why it is one of the most important IBM i troubleshooting tools.',
     lessonOrder: 149,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/understanding-job-logs.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I find the job log for a job that already ended?',
@@ -3479,7 +3477,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The structure of an IBM i message ID, such as CPF9897 or RNQ1218, and why that structure matters for understanding a message.',
     lessonOrder: 150,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/reading-ibm-i-message-ids.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I look up exactly what a specific CPF message number means?',
@@ -3493,7 +3491,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     personaTags: ['beginner'],
     aiTutorPrompts: [
       'How would I look up exactly what a specific CPF message number means?',
-      'What happens if an inquiry message is never actually replied to?',
+      'How can I tell whether a specific message is an inquiry message that needs a reply?',
     ],
   },
   {
@@ -3502,7 +3500,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Distinguishing a compile error, caught before a program runs, from a runtime error, which only surfaces while it executes.',
     lessonOrder: 151,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/compile-errors-vs-runtime-errors.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some other common examples of runtime errors besides an unchecked CHAIN result?',
@@ -3525,7 +3523,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common beginner mistakes when debugging on IBM i, and a simple set of best practices to avoid them.',
     lessonOrder: 152,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-debugging-mistakes.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Which of these common mistakes is easiest to accidentally repeat even after learning about it once?',
@@ -3544,17 +3542,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Debugging & Troubleshooting Batch 2 (PR #85): DSPJOB/WRKACTJOB
   // through the debugging checklist ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #86 (Debugging & Troubleshooting Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'dspjob-and-job-information-basics',
     title: 'DSPJOB and Job Information Basics',
     shortDescription: "What DSPJOB shows, and how to use it to inspect a job's log, call stack, library list, and basic attributes.",
     lessonOrder: 153,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/dspjob-and-job-information-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What other information does DSPJOB show besides job log, call stack, and library list?',
@@ -3577,7 +3573,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using WRKACTJOB to find active jobs on the system and read their basic status.',
     lessonOrder: 154,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/wrkactjob-basics-for-developers.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I use WRKACTJOB to find a batch job by the name I gave it with SBMJOB?',
@@ -3600,7 +3596,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Moving from an error message in a job log to the specific program and statement that actually failed.',
     lessonOrder: 155,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/finding-program-failures-from-error-messages.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "What additional detail does a message's full display typically show beyond its short summary text?",
@@ -3623,7 +3619,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a call stack is, and how to use it to see which programs and procedures are currently active in a job.',
     lessonOrder: 156,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/understanding-call-stack-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How does the call stack help when a failure happens several calls deep into a process?',
@@ -3646,7 +3642,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The basic practical difference between debugging an interactive job and a batch job, and a simple beginner-level approach.',
     lessonOrder: 157,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-batch-jobs-at-a-beginner-level.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "How would I find a specific batch job's job log once it has already finished running?",
@@ -3669,7 +3665,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Connecting job log messages to specific SQLRPGLE and native file I/O problems covered earlier in this path.',
     lessonOrder: 158,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/using-job-logs-for-sqlrpgle-and-file-io-issues.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would a record lock conflict message actually look like in a job log?',
@@ -3692,7 +3688,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A simple, ordered troubleshooting flow that connects every debugging tool covered across this lesson group.',
     lessonOrder: 159,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-troubleshooting-flow-for-ibm-i-developers.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would make it reasonable to skip straight to STRDBG without checking the job log first?',
@@ -3715,7 +3711,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A condensed, practical checklist to run through during an actual debugging session, drawing on both Debugging Batches.',
     lessonOrder: 160,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-checklist-for-beginners.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Which items on this checklist would I skip if a program failed with a compile error?',
