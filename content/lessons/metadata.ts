@@ -1477,17 +1477,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     ],
   },
   // --- Display Files / 5250 UI Batch 1 (PR #68): display file basics through inquiry screen flow ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #70 (Display Files / 5250 UI Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'what-is-a-display-file-in-ibm-i',
     title: 'What is a Display File in IBM i?',
     shortDescription: 'What a display file is, how it relates to 5250 screens, and how it fits alongside physical and logical files.',
     lessonOrder: 65,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/what-is-a-display-file-in-ibm-i.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some other examples of workstation files besides display files?',
@@ -1510,7 +1508,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The row-and-column grid a 5250 screen is built on, and simple principles for designing a readable, usable screen.',
     lessonOrder: 66,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/5250-screen-design-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Are there IBM i screens that use a different grid size than 24 rows by 80 columns?',
@@ -1533,7 +1531,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a record format means for a display file, and how it differs from the single record format a physical file has.',
     lessonOrder: 67,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/display-file-record-formats.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How does an RPGLE program actually choose which record format to show?',
@@ -1556,7 +1554,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The difference between an input field, an output field, and a both field on a 5250 screen, and why it matters to RPGLE.',
     lessonOrder: 68,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/input-output-and-both-fields-in-display-files.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What happens if I accidentally define a field that should be input-only as output instead?',
@@ -1579,7 +1577,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How a display file connects a function key press to a numbered indicator, and how RPGLE reads that indicator.',
     lessonOrder: 69,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/function-keys-and-response-indicators-in-display-files.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'When would I choose CAxx instead of CFxx for a function key?',
@@ -1602,7 +1600,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Common DDS keywords like TEXT, DSPATR, and COLOR that describe how a display file field looks and behaves.',
     lessonOrder: 70,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-display-file-dds-keywords.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some common DSPATR options besides highlighting and underlining?',
@@ -1625,7 +1623,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to declare a display file in free-format RPGLE with dcl-f workstn, and use exfmt to show and read a record format.',
     lessonOrder: 71,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rpgle-program-calling-a-display-file.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What is the difference between exfmt and using separate write and read operations?',
@@ -1648,7 +1646,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A complete, simple RPGLE program that shows an entry screen, processes input, and shows a results screen in a loop.',
     lessonOrder: 72,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/simple-inquiry-screen-flow.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would this program change if it needed to look up real customer data instead of using fixed values?',
@@ -1666,17 +1664,17 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     ],
   },
   // --- Display Files / 5250 UI Batch 2 (PR #69): indicators in depth through best practices ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #70 (Display Files / 5250 UI Review + Publish Pass)
+  // after a technical and structural review; the indicators lesson was
+  // expanded with a concrete RPGLE example for setting a conditioning
+  // indicator (see display-file-indicators-explained.md).
   {
     slug: 'display-file-indicators-explained',
     title: 'Display File Indicators Explained',
     shortDescription: 'The two directions a display file indicator can flow: conditioning indicators into the screen, response indicators out.',
     lessonOrder: 73,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/display-file-indicators-explained.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How does an RPGLE program actually turn a conditioning indicator on or off before exfmt?',
@@ -1699,7 +1697,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Common function key conventions like F3=Exit, F5=Refresh, and F12=Cancel, and handling several function keys at once.',
     lessonOrder: 74,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/function-keys-in-more-depth.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Are there other common function key conventions besides F3, F5, F12, and F1?',
@@ -1722,7 +1720,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Basic DDS validation keywords like CHECK(MF), RANGE, VALUES, and COMP that validate a field before RPGLE sees it.',
     lessonOrder: 75,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/screen-field-validation-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What is the difference between RANGE and COMP for validating a numeric field?',
@@ -1745,7 +1743,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How ERRMSG and ERRMSGID display an error message tied to a field, connecting validation failures to what the user sees.',
     lessonOrder: 76,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/displaying-error-messages-on-5250-screens.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I show an error message for a business rule the RPGLE program checks, rather than basic DDS validation?',
@@ -1768,7 +1766,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a window record is, and how it lets a display file show a small popup screen over the current one.',
     lessonOrder: 77,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/window-records-and-simple-popup-screens.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How does IBM i decide exactly where on the screen a window record appears?',
@@ -1791,7 +1789,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How exfmt combines separate write and read operations, and when using them separately makes more sense.',
     lessonOrder: 78,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/read-write-exfmt-and-screen-flow.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What are some other realistic reasons to use write and read separately instead of exfmt?',
@@ -1814,7 +1812,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The general, reusable pattern behind most simple IBM i inquiry screens, including validation, error messages, and function keys.',
     lessonOrder: 79,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-inquiry-screen-pattern.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would this pattern change for a screen that lets a user update data instead of just looking it up?',
@@ -1837,7 +1835,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Common beginner mistakes with display files, such as unreset conditioning indicators and reused indicator numbers.',
     lessonOrder: 80,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-display-file-mistakes-and-best-practices.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some other common display file mistakes beyond the ones in this lesson?',
