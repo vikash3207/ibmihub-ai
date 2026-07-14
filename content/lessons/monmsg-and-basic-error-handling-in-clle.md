@@ -75,6 +75,16 @@ No. `CPF0000` is a common, broad choice covering general escape messages,
 but `MONMSG` can also watch for a specific message identifier when a
 program needs to respond differently to one particular kind of problem.
 
+**"Does a MONMSG watch every command in my program, or just one?"**
+This is one of the most common points of confusion with `MONMSG`, so it is
+worth being precise about. A `MONMSG` written directly after one specific
+command, as in the example above, watches only that one command. If a
+different, later command in the program also needs the same protection, it
+generally needs its own `MONMSG` placed directly after it. Beginners often
+assume one `MONMSG`, once written, automatically protects every command
+that follows it, which is not the case for a `MONMSG` attached this way to
+a single command.
+
 ## Quick Recap
 
 - `MONMSG` is placed directly after a command to watch for a specific
@@ -85,6 +95,8 @@ program needs to respond differently to one particular kind of problem.
   by `THEN` in `IF` commands.
 - `MONMSG` lets a CLLE program handle failures in a controlled way, the
   same goal `monitor` serves in RPGLE.
+- A `MONMSG` attached to one specific command only watches that command;
+  it does not automatically protect other commands later in the program.
 
 ## Try Asking the AI Tutor
 

@@ -19,7 +19,8 @@ A command, including a `CALL` to another program, is submitted to run in
 batch using **`SBMJOB`** (Submit Job):
 
 ```clle
-SBMJOB CMD(CALL PGM(PROCESSORDER) PARM(&CUSTNAME &ORDERTOTAL)) JOB(ORDERPROC)
+SBMJOB CMD(CALL PGM(PROCESSORDER) PARM(&CUSTNAME &ORDERTOTAL)) +
+  JOB(ORDERPROC) JOBQ(QBATCH)
 ```
 
 Here, `CMD` names the command to run, in this case a `CALL` to
@@ -28,9 +29,18 @@ Here, `CMD` names the command to run, in this case a `CALL` to
 checking its job log, as covered in the Job Logs and Spool Files Basics
 lesson.
 
+Submitting a job does not run it immediately. `SBMJOB` places the new
+batch job onto a **job queue**, named here with `JOBQ(QBATCH)`, a holding
+area IBM i uses to line up batch jobs and release them to run according to
+that queue's own settings, such as how many jobs it allows to run at once.
+This means a submitted job might start running right away, or might wait
+briefly behind other jobs already using that queue, depending on what else
+is going on at the time.
+
 Once submitted, the batch job runs independently: the interactive session
 that submitted it is immediately free to continue with other work, rather
-than waiting for the batch job to finish.
+than waiting for the batch job to finish, and rather than waiting for it to
+even start.
 
 ## Why It Matters
 
@@ -75,14 +85,24 @@ Not quite. `CALL` is the command being run; the batch job is the unit of
 work IBM i creates to actually run that command independently, as
 introduced conceptually in the Job Logs and Spool Files Basics lesson.
 
+**"Does a submitted job start running the instant SBMJOB is executed?"**
+Not necessarily. `SBMJOB` places the job onto a job queue, and that job
+queue decides when the job actually starts, based on its own settings and
+whatever else is currently using it. A submitted job is waiting to run,
+not necessarily running yet, even though it has already been accepted by
+the system.
+
 ## Quick Recap
 
 - Work can run interactively, tied to a signed-on session, or as a batch
   job, running independently.
-- `SBMJOB CMD(...) JOB(...)` submits a command to run as a named batch
-  job.
+- `SBMJOB CMD(...) JOB(...) JOBQ(...)` submits a command to run as a named
+  batch job, placed onto the specified job queue.
+- A job queue holds submitted batch jobs and releases them to run based on
+  its own settings, so a submitted job may not start running immediately.
 - Submitting work to batch frees the interactive session immediately,
-  rather than making it wait for that work to finish.
+  rather than making it wait for that work to even start, let alone
+  finish.
 - Batch jobs are commonly used for long-running or resource-intensive
   work, such as nightly processing.
 
@@ -95,3 +115,5 @@ example, try asking:
   yet?"
 - "What are some other reasons to use SBMJOB besides freeing up an
   interactive session?"
+- "What happens if a job queue already has several jobs waiting when I
+  submit a new one?"
