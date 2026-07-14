@@ -1740,8 +1740,8 @@ export const PRACTICE_QUESTIONS: PracticeQuestion[] = [
     ],
     correctAnswer: 'An embedded SQL cursor with a LIKE condition, loading matches into a subfile',
     explanation:
-      'A partial-name search naturally fits an embedded SQL cursor with LIKE, and showing multiple matches at once naturally fits a subfile -- combining both concepts from different topics.',
-    relatedLessonSlugs: ['sqlrpgle-interview-scenarios', 'understanding-rrn-in-subfile-programs'],
+      'A partial-name search naturally fits an embedded SQL cursor with LIKE, and showing multiple matches at once naturally fits a subfile -- combining both concepts from different topics, exactly as the SQLRPGLE Search Screen mini project does.',
+    relatedLessonSlugs: ['sqlrpgle-search-screen', 'understanding-rrn-in-subfile-programs'],
     tags: ['mixed-review', 'sqlrpgle', 'subfiles'],
     difficulty: 'beginner',
   },
@@ -1776,7 +1776,7 @@ export const PRACTICE_QUESTIONS: PracticeQuestion[] = [
     correctAnswer: 'Option fields plus READC, then CHAIN to the selected record and EXFMT a detail screen',
     explanation:
       'This combines subfile row-selection (option field, READC) with native file I/O (CHAIN) and display files (EXFMT) -- exactly the combination used in the Subfile Row Selection with Detail Screen mini project.',
-    relatedLessonSlugs: ['simple-order-list-subfile', 'understanding-rrn-in-subfile-programs'],
+    relatedLessonSlugs: ['subfile-row-selection-with-detail-screen', 'simple-order-list-subfile'],
     tags: ['mixed-review', 'subfiles'],
     difficulty: 'beginner',
   },
