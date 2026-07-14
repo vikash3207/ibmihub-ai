@@ -4108,17 +4108,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Real-World Mini Projects Batch 1 (PR #90): Customer Inquiry
   // Program through End-to-End Mini DMS-Style Flow ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #92 (Real-World Mini Projects Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'customer-inquiry-program',
     title: 'Mini Project: Customer Inquiry Program',
     shortDescription: 'A complete interactive inquiry program combining a display file, CHAIN, and %FOUND to look up a customer by number.',
     lessonOrder: 177,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/customer-inquiry-program.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add a second input field to CUSTDSPF for the user to search by customer name instead of number?',
@@ -4141,7 +4139,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A second, independent inquiry program applying the Customer Inquiry Program pattern to a new item master file.',
     lessonOrder: 178,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/item-master-lookup-program.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would change in this program if ITEMPF needed to be looked up by a description search instead of an exact item number?',
@@ -4164,7 +4162,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A subfile screen listing every order for one customer, combining SETLL/READE with the subfile load-display pattern.',
     lessonOrder: 179,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/simple-order-list-subfile.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add a running total of order amounts to ORDCTL, updated as each order loads into the subfile?',
@@ -4187,7 +4185,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A printer file report program listing every customer balance with a grand total, designed to run as a batch job.',
     lessonOrder: 180,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/batch-report-program.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add a count of customers alongside the balance total on this report?',
@@ -4210,7 +4208,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A CLLE program that checks a required file, overrides a printer file to an output queue, and submits a report as a batch job.',
     lessonOrder: 181,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/clle-wrapper-to-run-a-report.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add a MONMSG specifically around the OVRPRTF command in this wrapper?',
@@ -4233,7 +4231,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The Customer Inquiry Program rebuilt using embedded SQL instead of native CHAIN, as a direct side-by-side comparison.',
     lessonOrder: 182,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqlrpgle-customer-lookup.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What would this program look like if it needed to distinguish SQLCODE = 100 from a genuine database error, rather than treating any nonzero value the same way?',
@@ -4256,7 +4254,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A deliberately broken payment-processing program, debugged using the job log, STRDBG, breakpoints, and EVAL.',
     lessonOrder: 183,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-a-broken-file-io-program.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What would the job log message actually look like for this specific UPDATE failure?',
@@ -4279,7 +4277,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A small order-entry-to-report flow tracing one order through entry, listing, and reporting, connecting several mini projects together.',
     lessonOrder: 184,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/end-to-end-mini-dms-style-flow.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What would need to change in this flow to support an order with three different items instead of just one?',
@@ -4298,17 +4296,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Real-World Mini Projects Batch 2 (PR #91): Customer Maintenance
   // Add/Change/Delete through Batch Job Failure Investigation ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #92 (Real-World Mini Projects Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'customer-maintenance-add-change-delete',
     title: 'Mini Project: Customer Maintenance Add/Change/Delete',
     shortDescription: 'A maintenance program letting a user add, change, or delete a customer, extending the read-only Customer Inquiry Program.',
     lessonOrder: 185,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/customer-maintenance-add-change-delete.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add a confirmation screen before actually deleting a customer in CUSTMNT?',
@@ -4331,7 +4327,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "A proper interactive order entry screen, building the End-to-End Mini DMS-Style Flow's minimal order-writing sketch into a real program.",
     lessonOrder: 186,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/order-entry-skeleton.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I validate the customer number against CUSTMAST before accepting a new order?',
@@ -4354,7 +4350,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Extending the CLLE Wrapper to Run a Report with a genuine submit-job flow, confirming the batch job actually completed.',
     lessonOrder: 187,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/report-with-clle-submit-job-flow.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "What would it take to have RUNRPTC itself check WRKSBMJOB's status, rather than relying on a person to check manually?",
@@ -4377,7 +4373,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Adding an option field and a detail screen to the Simple Order List Subfile, letting a user select and drill into one order.',
     lessonOrder: 188,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/subfile-row-selection-with-detail-screen.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add a second option letting the user delete an order directly from this subfile?',
@@ -4400,7 +4396,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A partial-name search screen using an embedded SQL cursor with a LIKE-based WHERE clause, loading matches into a subfile.',
     lessonOrder: 189,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqlrpgle-search-screen.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I change this search to match only names starting with the entered text, rather than containing it anywhere?',
@@ -4423,7 +4419,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'An order history report printing a subtotal each time the customer changes, combining a control break with a running grand total.',
     lessonOrder: 190,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/printer-file-report-with-totals.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How would I add an order count alongside the amount subtotal for each customer?',
@@ -4446,7 +4442,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A guided exercise: two users updating the same customer at nearly the same moment, investigated with WRKOBJLCK.',
     lessonOrder: 191,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/troubleshooting-locked-record-scenario.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would CUSTMNT be changed to show a clear message to User B instead of just failing?',
@@ -4469,7 +4465,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "A guided exercise: a nightly batch report that fails silently, investigated using WRKSBMJOB and the batch job's own job log.",
     lessonOrder: 192,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/batch-job-failure-investigation.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I add a second CHKOBJ check for ORDHIST to this wrapper?',
