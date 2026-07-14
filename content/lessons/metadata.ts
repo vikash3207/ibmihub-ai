@@ -3730,17 +3730,16 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- IBM i Operations / Jobs / System Basics Batch 1 (PR #87): jobs
   // explained through common operations commands ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #89 (IBM i Operations / Jobs / System Basics Review +
+  // Publish Pass) after a technical and structural review found no
+  // unresolved issues.
   {
     slug: 'ibm-i-jobs-explained',
     title: 'IBM i Jobs Explained',
     shortDescription: 'What identifies a job on IBM i (name, user, and job number), and where a job actually runs.',
     lessonOrder: 161,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-jobs-explained.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Why would IBM i let two jobs share the exact same job name at the same time?',
@@ -3763,7 +3762,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Comparing interactive and batch jobs: how each is started, and what that difference means in practice.',
     lessonOrder: 162,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/interactive-jobs-vs-batch-jobs.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some other ways besides SBMJOB that a batch job might get started?',
@@ -3786,7 +3785,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Distinguishing a job queue (jobs waiting to run) from an output queue (spool files waiting to print), using WRKJOBQ.',
     lessonOrder: 163,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/job-queues-and-output-queues.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would make a batch job wait a long time on a job queue before starting?',
@@ -3809,7 +3808,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a subsystem is, and how a job queue connects to it.',
     lessonOrder: 164,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/subsystems-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would happen if a job queue were not tied to any subsystem at all?',
@@ -3832,7 +3831,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "How a library list can change during a job with ADDLIBLE/RMVLIBLE, and where a batch job's starting library list comes from.",
     lessonOrder: 165,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/library-list-in-real-job-execution.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What SBMJOB setting would let me control exactly what library list a submitted batch job starts with?',
@@ -3855,7 +3854,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an object lock is, how it differs from a record lock, and using WRKOBJLCK to see what is locking an object.',
     lessonOrder: 166,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/object-locks-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would I do if WRKOBJLCK shows another job holding a lock I need released?',
@@ -3878,7 +3877,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an authority is, the difference between public and private authority, and why an authority failure happens.',
     lessonOrder: 167,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/authorities-and-object-access-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would a developer typically find out what authority they currently have to a specific object?',
@@ -3901,7 +3900,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A condensed, practical reference for which everyday IBM i operations command to reach for, depending on the question.',
     lessonOrder: 168,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-operations-commands-for-developers.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Which of these commands would help most if I suspected an authority problem rather than a locking problem?',
@@ -3920,17 +3919,16 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- IBM i Operations / Jobs / System Basics Batch 2 (PR #88): submitted
   // jobs through common operations mistakes ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #89 (IBM i Operations / Jobs / System Basics Review +
+  // Publish Pass) after a technical and structural review found no
+  // unresolved issues.
   {
     slug: 'submitted-jobs-and-wrksbmjob',
     title: 'Submitted Jobs and WRKSBMJOB',
     shortDescription: 'Using WRKSBMJOB to track a submitted batch job from submission through to completion.',
     lessonOrder: 169,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/submitted-jobs-and-wrksbmjob.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How long does a completed job typically stay listed in WRKSBMJOB before it disappears?',
@@ -3953,7 +3951,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "How retrieving a batch job's job log differs practically from checking your own current job's log.",
     lessonOrder: 170,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/job-logs-in-batch-jobs.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "What would happen if I ran DSPJOBLOG expecting to see a batch job's log but forgot to identify it first?",
@@ -3976,7 +3974,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A few common IBM i job status values, ACTIVE, JOBQ, OUTQ, and MSGW, and what each generally means.',
     lessonOrder: 171,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/job-status-values-explained.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would I need to do if I found a job stuck in MSGW status?',
@@ -3999,7 +3997,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The basic difference between submitting a job to run immediately and scheduling one to run automatically later.',
     lessonOrder: 172,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-job-scheduling-concepts.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I check whether a specific job ran because it was scheduled or because someone submitted it manually?',
@@ -4022,7 +4020,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Deciding what to do once you have confirmed another job is holding an object lock you need released.',
     lessonOrder: 173,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/handling-object-locks-as-a-developer.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "What information would help me decide whether it's safe to end a job holding a lock I need released?",
@@ -4045,7 +4043,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Recognizing an authority failure in a job log and following a practical process for investigating it.',
     lessonOrder: 174,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/authority-failures-and-how-to-investigate-them.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would the investigation steps look like if the object turned out to be locked instead of an authority problem?',
@@ -4068,7 +4066,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Recognizing and diagnosing the two most common library list problems: an object appearing missing, and the wrong version being found.',
     lessonOrder: 175,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/library-list-problems-in-real-applications.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I confirm which specific version of an object a program actually found, once I suspect a search-order problem?',
@@ -4091,7 +4089,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common beginner mistakes across IBM i jobs, queues, locks, authorities, and library lists, and best practices to avoid them.',
     lessonOrder: 176,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-operations-mistakes-and-best-practices.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Which of these common mistakes is easiest to accidentally repeat even after learning about it once?',
