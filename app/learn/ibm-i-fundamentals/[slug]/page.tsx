@@ -167,8 +167,8 @@ export default async function LessonPage({ params }: Props) {
         </p>
         <p className="text-sm text-slate-600 mt-1 leading-relaxed">
           The AI Tutor is for educational guidance only. It cannot connect to a real IBM i
-          system, execute code, or analyze production code -- it does not know which lesson
-          you are reading.
+          system, execute code, or analyze production code. Opening it from here shares this
+          lesson&apos;s title and content so it can answer questions about it directly.
         </p>
         {lesson.ai_tutor_starter_question && (
           <p className="text-sm text-slate-500 italic mt-2">
@@ -176,7 +176,7 @@ export default async function LessonPage({ params }: Props) {
           </p>
         )}
         <Link
-          href="/ai-tutor"
+          href={`/ai-tutor?lesson=${encodeURIComponent(lesson.slug)}`}
           prefetch={false}
           className={buttonVariants({ variant: 'ai', className: 'mt-3' })}
         >

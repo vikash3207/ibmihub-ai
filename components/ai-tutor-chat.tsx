@@ -1,13 +1,15 @@
 'use client'
 
 import { useState } from 'react'
-import { ThumbsUp, ThumbsDown, Sparkles } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, Sparkles, BookOpen } from 'lucide-react'
 import { submitAiTutorFeedback } from '@/lib/actions/ai-tutor-feedback'
 import { buttonVariants } from '@/components/ui/button'
 
 /** Must match app/api/ai-tutor/route.ts -- client-side mirror for UX only. */
 const MAX_USER_TURNS = 20
 const MAX_MESSAGE_LENGTH = 4000
+/** Must match the header name set in app/api/ai-tutor/route.ts. */
+const CONTEXT_LABEL_HEADER = 'X-Ai-Tutor-Context-Label'
 
 interface ChatMessage {
   id: string
@@ -17,8 +19,15 @@ interface ChatMessage {
 
 type FeedbackState = 'none' | 'helpful' | 'not_helpful'
 
+export interface InitialLessonContext {
+  slug: string
+  title: string
+}
+
 interface Props {
   starterPrompts: string[]
+  /** Set when AI Tutor was opened from a specific lesson page (e.g. ?lesson=slug). */
+  initialLessonContext?: InitialLessonContext | null
 }
 
 /**
@@ -188,12 +197,15 @@ function ThinkingIndicator() {
   )
 }
 
-export function AiTutorChat({ starterPrompts }: Props) {
+export function AiTutorChat({ starterPrompts, initialLessonContext }: Props) {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [feedback, setFeedback] = useState<Record<string, FeedbackState>>({})
+  const [contextLabel, setContextLabel] = useState<string | null>(
+    initialLessonContext ? `Using lesson context: ${initialLessonContext.title}` : null
+  )
 
   const userTurnCount = messages.filter((m) => m.role === 'user').length
   const limitReached = userTurnCount >= MAX_USER_TURNS
@@ -231,6 +243,7 @@ export function AiTutorChat({ starterPrompts }: Props) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           messages: nextMessages.map((m) => ({ role: m.role, content: m.content })),
+          ...(initialLessonContext ? { lessonSlug: initialLessonContext.slug } : {}),
         }),
       })
 
@@ -247,6 +260,15 @@ export function AiTutorChat({ starterPrompts }: Props) {
         setMessages((prev) => prev.filter((m) => m.id !== assistantId))
         setError(message)
         return
+      }
+
+      const rawContextLabel = response.headers.get(CONTEXT_LABEL_HEADER)
+      if (rawContextLabel) {
+        try {
+          setContextLabel(decodeURIComponent(rawContextLabel))
+        } catch {
+          // Malformed header value -- keep whatever label was already shown.
+        }
       }
 
       const reader = response.body.getReader()
@@ -279,6 +301,13 @@ export function AiTutorChat({ starterPrompts }: Props) {
 
   return (
     <div className="space-y-4">
+      {contextLabel && (
+        <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+          <BookOpen className="h-3 w-3" aria-hidden="true" />
+          {contextLabel}
+        </div>
+      )}
+
       {messages.length === 0 && (
         <div className="rounded-2xl border border-cyan-100 bg-cyan-50/60 p-6">
           <p className="text-sm font-medium text-slate-700 mb-3">Try asking:</p>

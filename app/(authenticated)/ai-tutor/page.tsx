@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ShieldAlert, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
+import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
 import { AiTutorChat } from '@/components/ai-tutor-chat'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
@@ -28,7 +29,11 @@ const PRIVACY_NOTICE =
   'operational changes, validate with official documentation and an experienced IBM i ' +
   'professional.'
 
-export default async function AiTutorPage() {
+interface Props {
+  searchParams: Promise<{ lesson?: string }>
+}
+
+export default async function AiTutorPage({ searchParams }: Props) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -37,6 +42,12 @@ export default async function AiTutorPage() {
   if (!user) {
     redirect('/auth/login?next=%2Fai-tutor')
   }
+
+  const { lesson: lessonSlug } = await searchParams
+  // A missing, unknown, or unpublished ?lesson= value is a normal case here --
+  // AI Tutor simply falls back to its general, course-wide context.
+  const lesson = lessonSlug ? await getPublishedLessonBySlugOrNull(lessonSlug) : null
+  const initialLessonContext = lesson ? { slug: lesson.slug, title: lesson.title } : null
 
   return (
     <div className="space-y-8">
@@ -57,7 +68,7 @@ export default async function AiTutorPage() {
         <p className="text-sm text-amber-900 leading-relaxed">{PRIVACY_NOTICE}</p>
       </div>
 
-      <AiTutorChat starterPrompts={STARTER_PROMPTS} />
+      <AiTutorChat starterPrompts={STARTER_PROMPTS} initialLessonContext={initialLessonContext} />
     </div>
   )
 }
