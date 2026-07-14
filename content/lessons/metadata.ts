@@ -257,18 +257,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     aiTutorPrompts: ['What should I focus on learning next after finishing IBM i Fundamentals?'],
   },
   // --- Phase 1 Content Batch 1 (PR #58) ---
-  // Status intentionally 'Review Ready', not 'Published': content is complete
-  // and quality-bar-passing, but per Spec 009 Section 7 / CONTENT-FR-006, only
-  // a Product Owner/Founder Approved -> Published transition makes a lesson
-  // visible or countable toward the progress denominator. That transition is
-  // a deliberate follow-up action, not part of this content-expansion PR.
+  // Published in PR #61 (Phase 1 Review + Publish Pass 1) after a technical
+  // and structural review found no unresolved issues.
   {
     slug: 'as400-iseries-and-ibm-i-naming-explained',
     title: 'AS/400, iSeries, and IBM i Naming Explained',
     shortDescription: 'Why the same platform has been called AS/400, iSeries, System i, and IBM i, and how these names relate to each other.',
     lessonOrder: 13,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/as400-iseries-and-ibm-i-naming-explained.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "If AS/400 and IBM i are the same platform, why do people still call it AS/400?",
@@ -291,7 +288,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What IBM i Access Client Solutions (ACS) is, what its main tools do, and how it fits alongside the 5250 interface.',
     lessonOrder: 14,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-access-client-solutions-overview.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What is the difference between the 5250 emulator in ACS and the database tool in ACS?',
@@ -314,7 +311,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What happens when you sign on to IBM i, what a user profile is, and why your current library affects what you can find.',
     lessonOrder: 15,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/signing-on-user-profiles-and-current-library.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How is current library related to the library list I learned about earlier?',
@@ -337,7 +334,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How IBM i command names follow a verb-plus-object pattern, and how commands and parameters fit together.',
     lessonOrder: 16,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-command-structure.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some other common verb abbreviations used in IBM i commands besides CRT, DSP, WRK, and DLT?',
@@ -360,7 +357,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to use the F4 prompt to fill in command parameters interactively, and how to use built-in command help.',
     lessonOrder: 17,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/using-f4-prompt-and-command-help.md',
     estimatedReadingTime: 5,
     aiTutorStarterQuestion: 'What happens if I press Enter on a prompt screen without filling in a required parameter?',
@@ -383,7 +380,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Common IBM i object types like *LIB, *FILE, *PGM, *USRPRF, and *OUTQ, and what each one is generally used for.',
     lessonOrder: 18,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-object-types.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some other IBM i object types besides *LIB, *FILE, *PGM, *USRPRF, and *OUTQ?',
@@ -401,18 +398,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     ],
   },
   // --- Phase 1 Content Batch 2 (PR #59): libraries, objects, source members, IFS ---
-  // Status intentionally 'Review Ready', not 'Published' -- same rationale as
-  // Batch 1 (PR #58): content is complete and quality-bar-passing, but only a
-  // Product Owner/Founder Approved -> Published transition (Spec 009 Section 7 /
-  // CONTENT-FR-006) makes a lesson visible or countable toward the progress
-  // denominator.
+  // Published in PR #61 (Phase 1 Review + Publish Pass 1) after a technical
+  // and structural review found no unresolved issues.
   {
     slug: 'library-list-explained-in-depth',
     title: 'Library List Explained in Depth',
     shortDescription: 'The parts that make up an IBM i library list, the order IBM i searches them in, and how to view your own library list.',
     lessonOrder: 19,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/library-list-explained-in-depth.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What is the difference between the system portion and the user portion of a library list?',
@@ -435,7 +429,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a source physical file is, what a source member is, and how RPGLE and CLLE source code is typically organized.',
     lessonOrder: 20,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/source-physical-files-and-source-members.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How is a source member different from the compiled program it produces?',
@@ -458,7 +452,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What the Integrated File System (IFS) is, how its directory structure differs from libraries and objects, and when it is used.',
     lessonOrder: 21,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ifs-basics-for-ibm-i-beginners.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What are some common uses of the IFS on IBM i besides configuration files?',
@@ -481,7 +475,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The key differences between a native IBM i object and an IFS stream file, and how to recognize which model applies.',
     lessonOrder: 22,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/native-objects-vs-stream-files.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What commands are commonly used to copy data between a native object and a stream file?',
@@ -504,7 +498,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Basic IBM i object naming rules, what a qualified object name is, and why qualifying a library removes ambiguity.',
     lessonOrder: 23,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/object-naming-and-qualified-names-in-practice.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What happens if I use a qualified name for a library that does not exist?',
@@ -527,7 +521,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What the WRKOBJ, DSPOBJD, and WRKLIB commands are each used for, and which one to reach for depending on the task.',
     lessonOrder: 24,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/working-with-wrkobj-dspobjd-and-wrklib.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "What kind of information does DSPOBJD show that WRKOBJ doesn't?",
@@ -545,18 +539,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     ],
   },
   // --- Phase 1 Content Batch 3 (PR #60): Db2 for i, DDS, keys, access paths, basic SQL ---
-  // Status intentionally 'Review Ready', not 'Published' -- same rationale as
-  // Batch 1 (#58) and Batch 2 (#59): content is complete and quality-bar-passing,
-  // but only a Product Owner/Founder Approved -> Published transition
-  // (Spec 009 Section 7 / CONTENT-FR-006) makes a lesson visible or countable
-  // toward the progress denominator.
+  // Published in PR #61 (Phase 1 Review + Publish Pass 1) after a technical
+  // and structural review found no unresolved issues.
   {
     slug: 'dds-and-sql-two-ways-to-define-db2-for-i-data',
     title: 'DDS and SQL: Two Ways to Define Db2 for i Data',
     shortDescription: 'How Db2 for i data can be defined using either traditional DDS or modern SQL, and why both approaches still coexist today.',
     lessonOrder: 25,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/dds-and-sql-two-ways-to-define-db2-for-i-data.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Why would a team choose SQL over DDS for a brand new IBM i project?',
@@ -579,7 +570,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The structure of a DDS-defined physical file, including record formats, in more detail than the introductory lesson.',
     lessonOrder: 26,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/physical-files-explained-in-depth.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What command is used to compile DDS source into a physical file object?',
@@ -602,7 +593,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to read a simple DDS field definition: field name, data type, and length.',
     lessonOrder: 27,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/dds-field-definitions.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What is the difference between packed decimal and zoned decimal data in DDS?',
@@ -625,7 +616,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What makes a physical file keyed, how key fields relate to DDS field definitions, and why keyed access matters.',
     lessonOrder: 28,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/keyed-physical-files.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What happens if I try to add a record with a duplicate key value to a keyed physical file?',
@@ -648,7 +639,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What logical files can do beyond reordering data: keyed ordering, field selection, and select/omit.',
     lessonOrder: 29,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/logical-files-explained-in-depth.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "How does a logical file's key relate to the key of its underlying physical file?",
@@ -671,7 +662,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an access path is, how it supports keyed physical and logical files, and why it is a meaningful design tradeoff.',
     lessonOrder: 30,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/access-paths-and-why-they-matter.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Does an arrival sequence physical file have any kind of access path at all?',
@@ -694,7 +685,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Comparing an SQL-defined table directly against a DDS-defined physical file: key similarities and practical differences.',
     lessonOrder: 31,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sql-tables-vs-dds-physical-files.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What is the SQL equivalent of a DDS key field?',
@@ -717,7 +708,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a basic SQL SELECT statement does, how to read one, and a common way to run one against Db2 for i data.',
     lessonOrder: 32,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/basic-select-on-ibm-i.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How do I select specific columns instead of using * in a SELECT statement?',
