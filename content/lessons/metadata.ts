@@ -2978,17 +2978,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Printer Files / Reports Batch 1 (PR #81): what a printer file is
   // through common mistakes and best practices ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #83 (Printer Files / Reports Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'what-is-a-printer-file-in-ibm-i',
     title: 'What is a Printer File in IBM i?',
     shortDescription: 'What a printer file is, how it fits alongside physical, logical, and display files, and what its output becomes.',
     lessonOrder: 129,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/what-is-a-printer-file-in-ibm-i.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Why would IBM i produce a spool file instead of printing immediately?',
@@ -3011,7 +3009,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How a printer file DDS describes printed report lines, and how this compares to DDS used for physical and display files.',
     lessonOrder: 130,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/printer-file-dds-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How does a printer file know when to start printing on a new page?',
@@ -3034,7 +3032,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Why a printer file DDS commonly defines several record formats: heading, detail, and total lines.',
     lessonOrder: 131,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/report-record-formats.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What would a report look like if it only had a detail record format and nothing else?',
@@ -3057,7 +3055,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Declaring a printer file with dcl-f, and using WRITE to print a specific record format.',
     lessonOrder: 132,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rpgle-program-writing-to-a-printer-file.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'What happens if I write DTLFMT without ever writing HDGFMT first?',
@@ -3080,7 +3078,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Writing a complete report loop that prints a heading once and a detail line for every row of underlying data.',
     lessonOrder: 133,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/report-headings-and-detail-lines.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I add a total record format that prints once at the very end of this loop?',
@@ -3103,7 +3101,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What page overflow is, and how an RPGLE program uses an overflow indicator to reprint a heading on each new page.',
     lessonOrder: 134,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/page-overflow-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Does the overflow indicator turn itself back off after the heading is reprinted?',
@@ -3126,7 +3124,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "What happens to a printer file's output after it is written, and how a spool file relates to an output queue.",
     lessonOrder: 135,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/spool-files-and-output-queues.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Can a spool file be moved from one output queue to another?',
@@ -3149,7 +3147,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common beginner mistakes across printer files and basic report programs, and a simple set of best practices to avoid them.',
     lessonOrder: 136,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-printer-file-mistakes-and-best-practices.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Which of these common mistakes is easiest to accidentally reintroduce when modifying an existing report?',
@@ -3168,17 +3166,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Printer Files / Reports Batch 2 (PR #82): report totals through
   // printer file vs display file vs database file ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #83 (Printer Files / Reports Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'report-totals-and-summary-lines',
     title: 'Report Totals and Summary Lines',
     shortDescription: "Accumulating a running total across a report's detail lines and printing it once as a summary line at the end.",
     lessonOrder: 137,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/report-totals-and-summary-lines.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I add a count of customers alongside the balance total on this same report?',
@@ -3201,7 +3197,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Distinguishing a report-level heading, printed once, from a page-level heading, printed again on every page.',
     lessonOrder: 138,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/multi-record-format-reports.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would this report look like if RPTHDG were accidentally written inside the read loop instead of before it?',
@@ -3224,7 +3220,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The difference between automatic page overflow and a deliberate page break triggered by a control break in the data.',
     lessonOrder: 139,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/controlling-page-breaks.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would this pattern change if the report needed to break on a region field instead of a customer number?',
@@ -3247,7 +3243,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What WRKSPLF shows, and how to use it to find, view, and manage spool files created by jobs you have run.',
     lessonOrder: 140,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/working-with-spool-files-using-wrksplf.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: "What would I do differently if I needed to see someone else's spool files instead of my own?",
@@ -3270,7 +3266,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What WRKOUTQ shows, and how its scope, one specific output queue across users, differs from WRKSPLF.',
     lessonOrder: 141,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/working-with-output-queues-using-wrkoutq.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Would WRKOUTQ or WRKSPLF be the better choice for checking on a report a coworker ran, not me?',
@@ -3293,7 +3289,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a printer file override does at a basic level, using a simple OVRPRTF example changing output queue and hold status.',
     lessonOrder: 142,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/printer-file-overrides-basics.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'How would I change this override to print three copies instead of holding the output?',
@@ -3316,7 +3312,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A practical checklist for common report problems: missing spool file, wrong output queue, report not printing, blank report, wrong page breaks.',
     lessonOrder: 143,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-report-output-problems.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What is the fastest first check when a user says their report never printed?',
@@ -3339,7 +3335,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Comparing printer files, display files, and database files: what each is for, and which RPGLE operations pair with each.',
     lessonOrder: 144,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/printer-file-vs-display-file-vs-database-file.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Could a single RPGLE program realistically use all three file types at once, and if so, why?',
