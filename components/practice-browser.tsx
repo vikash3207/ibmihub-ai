@@ -125,7 +125,11 @@ function QuestionCard({
 
 export function PracticeBrowser({ topics, questions, lessonTitleBySlug, initialTopicId }: PracticeBrowserProps) {
   const validInitialTopicId = initialTopicId && topics.some((t) => t.id === initialTopicId) ? initialTopicId : null
-  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(validInitialTopicId)
+  // Default to the first topic rather than "All Topics" on first load -- with
+  // 16 topics and 96 questions, rendering every question at once by default
+  // makes for a very long, slow-to-scan first page load. "All Topics" is
+  // still one click away for anyone who wants to browse everything.
+  const [selectedTopicId, setSelectedTopicId] = useState<string | null>(validInitialTopicId ?? topics[0]?.id ?? null)
 
   const questionsByTopic = useMemo(() => {
     const map = new Map<string, PracticeQuestion[]>()
