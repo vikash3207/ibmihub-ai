@@ -4484,17 +4484,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Interview and Job Readiness Batch 1 (PR #93): IBM i Developer
   // Interview Roadmap through Real Support Ticket Analysis for Beginners ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #95 (Interview & Job Readiness Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'ibm-i-developer-interview-roadmap',
     title: 'IBM i Developer Interview Roadmap',
     shortDescription: "A roadmap for using this course's Interview and Professional Readiness lessons, covering what to revise first and how interviews are typically structured.",
     lessonOrder: 193,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-developer-interview-roadmap.md',
     estimatedReadingTime: 6,
     aiTutorStarterQuestion: 'Can you ask me a beginner-level IBM i interview question and give me feedback on how I answer it?',
@@ -4517,7 +4515,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Common beginner-level RPGLE interview questions about program structure, control flow, and built-in functions, with guidance on how to answer them well.',
     lessonOrder: 194,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rpgle-basic-interview-questions.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you ask me a few beginner RPGLE interview questions about SELECT/WHEN and DO loops, one at a time?',
@@ -4540,7 +4538,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Interview scenarios covering CHAIN, %FOUND, WRITE, UPDATE, and DELETE, with a focus on explaining common file I/O mistakes clearly.',
     lessonOrder: 195,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rpgle-file-io-interview-scenarios.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: "Can you give me a broken RPGLE file I/O snippet and ask me to find what's wrong with it?",
@@ -4563,7 +4561,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Interview scenarios covering when to use CLLE, MONMSG error handling, and batch job orchestration with CHKOBJ, OVRPRTF, and SBMJOB.',
     lessonOrder: 196,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/clle-interview-scenarios.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you walk me through why a CLLE wrapper might report success even though the program it submitted failed?',
@@ -4586,7 +4584,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Interview scenarios covering SELECT INTO, SQLCODE, host variables, and partial-name searches with LIKE.',
     lessonOrder: 197,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqlrpgle-interview-scenarios.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a SQLRPGLE snippet with a subtle SQLCODE mistake and ask me to spot it?',
@@ -4609,7 +4607,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Interview questions covering display file screen flow, subfile loading, clearing, and row selection with READC.',
     lessonOrder: 198,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/display-file-and-subfile-interview-questions.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: "Can you give me a subfile snippet that's missing the clear step and ask me to spot the bug?",
@@ -4632,7 +4630,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Practice structuring clear, ordered answers to common IBM i debugging scenarios, from job log first to STRDBG.',
     lessonOrder: 199,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-scenario-based-questions.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a debugging scenario and ask me to explain my investigation steps out loud, one at a time?',
@@ -4655,7 +4653,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Walk through six realistic, small IBM i support tickets and practice naming a likely cause and first check for each one.',
     lessonOrder: 200,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/real-support-ticket-analysis-for-beginners.md',
     estimatedReadingTime: 9,
     aiTutorStarterQuestion: 'Can you give me a short, realistic IBM i support ticket and ask me to walk through my investigation plan?',
@@ -4674,17 +4672,15 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Interview and Job Readiness Batch 2 (PR #94): Explaining Your IBM i
   // Project Experience through Mock IBM i Developer Interview ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator.
+  // Published in PR #95 (Interview & Job Readiness Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
   {
     slug: 'explaining-your-ibm-i-project-experience',
     title: 'Explaining Your IBM i Project Experience',
     shortDescription: 'How to describe the mini projects from this course clearly and honestly, the way a beginner interview might ask you to.',
     lessonOrder: 201,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/explaining-your-ibm-i-project-experience.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you ask me to describe one of my mini projects and give me feedback on how specific my answer was?',
@@ -4707,7 +4703,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Code-reading style RPGLE interview practice: explaining what a snippet does and spotting a missing %FOUND check.',
     lessonOrder: 202,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rpgle-scenario-based-interview-practice.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you show me a short RPGLE snippet with a bug and ask me to find it, one snippet at a time?',
@@ -4730,7 +4726,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to build a balanced answer for when to use embedded SQL versus native RPGLE file I/O, instead of preferring one universally.',
     lessonOrder: 203,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqlrpgle-vs-native-io-interview-discussion.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "Can you give me a small IBM i scenario and ask me whether I'd use native file I/O or embedded SQL, and why?",
@@ -4753,7 +4749,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Practice narrating your debugging process step by step for live, in-the-moment interview questions.',
     lessonOrder: 204,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-live-issue-interview-practice.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: "Can you walk me through a debugging scenario one step at a time and ask what I'd check at each point?",
@@ -4776,7 +4772,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A full start-to-finish walkthrough of one realistic support ticket, from specifics gathered to confirming the fix worked.',
     lessonOrder: 205,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-support-ticket-walkthrough.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: "Can you give me one support ticket and ask me to walk through it start to finish, including how I'd confirm my fix?",
@@ -4799,7 +4795,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to turn course mini projects into specific, honest resume points you can defend if asked a follow-up question.',
     lessonOrder: 206,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/resume-points-for-ibm-i-developers.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you help me turn my order entry mini project into a specific, honest resume point?',
@@ -4822,7 +4818,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A focused list of the weak-answer patterns that show up across RPGLE, CLLE, SQLRPGLE, subfile, and debugging interview questions.',
     lessonOrder: 207,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-interview-mistakes.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "Can you review my answer to a debugging question and tell me if it's too generic?",
@@ -4845,7 +4841,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A capstone mock interview mixing definition questions, code-reading questions, and scenario-based questions in one sitting.',
     lessonOrder: 208,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/mock-ibm-i-developer-interview.md',
     estimatedReadingTime: 9,
     aiTutorStarterQuestion: 'Can you run a short mock IBM i interview with me, mixing a definition question, a code snippet, and a scenario question?',
