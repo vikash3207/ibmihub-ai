@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { BookOpen, Sparkles, TrendingUp } from 'lucide-react'
+import { BookOpen, Sparkles, TrendingUp, ClipboardCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
@@ -144,7 +144,7 @@ export default async function DashboardPage() {
         )}
       </Card>
 
-      <div className="grid sm:grid-cols-2 gap-4">
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Link href="/learn/ibm-i-fundamentals" prefetch={false} className="block">
           <Card className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
@@ -153,6 +153,18 @@ export default async function DashboardPage() {
             <span className="block font-semibold text-slate-900">Learning Center</span>
             <span className="block text-sm text-slate-600 mt-1">
               View all {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
+            </span>
+          </Card>
+        </Link>
+
+        <Link href="/practice" prefetch={false} className="block">
+          <Card className="h-full transition-shadow hover:shadow-md">
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <span className="block font-semibold text-slate-900">Practice Questions</span>
+            <span className="block text-sm text-slate-600 mt-1">
+              Check your understanding of beginner IBM i topics with short practice questions.
             </span>
           </Card>
         </Link>

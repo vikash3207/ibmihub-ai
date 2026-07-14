@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Check, Sparkles } from 'lucide-react'
+import { Check, Sparkles, ClipboardCheck } from 'lucide-react'
 import { getPublishedLessonBySlug, getPublishedLessons, loadLessonMarkdown } from '@/lib/lessons'
 import { renderLessonMarkdown } from '@/lib/markdown'
 import { createClient } from '@/lib/supabase/server'
@@ -9,6 +9,7 @@ import { LessonContent } from '@/components/lesson-content'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
+import { getPracticeTopicIdForLesson } from '@/content/practice/questions'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button, buttonVariants } from '@/components/ui/button'
@@ -48,6 +49,7 @@ export default async function LessonPage({ params }: Props) {
 
   const isPreview = lesson.lesson_order === 1
   const canRead = isPreview || Boolean(user)
+  const practiceTopicId = getPracticeTopicIdForLesson(lesson.slug)
 
   const currentIndex = lessons.findIndex((l) => l.id === lesson.id)
   const previousLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null
@@ -183,6 +185,17 @@ export default async function LessonPage({ params }: Props) {
           Ask the AI Tutor
         </Link>
       </Card>
+
+      {practiceTopicId && (
+        <Link
+          href={`/practice?topic=${encodeURIComponent(practiceTopicId)}`}
+          prefetch={false}
+          className="flex items-center gap-1.5 text-sm font-medium text-blue-600 hover:text-blue-800"
+        >
+          <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
+          Practice this topic
+        </Link>
+      )}
 
       <nav className="flex items-center justify-between border-t border-slate-100 pt-6">
         {previousLesson ? (
