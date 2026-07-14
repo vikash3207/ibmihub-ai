@@ -82,6 +82,29 @@ export async function getPublishedLessonBySlug(slug: string): Promise<Lesson> {
   return data as Lesson
 }
 
+/**
+ * Same lookup as getPublishedLessonBySlug, but returns null instead of
+ * calling notFound() for a missing/unpublished/invalid slug. For callers
+ * (e.g. AI Tutor lesson-context resolution) where an unknown slug is a
+ * normal, recoverable case rather than a 404 page.
+ */
+export async function getPublishedLessonBySlugOrNull(slug: string): Promise<Lesson | null> {
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('*')
+    .eq('slug', slug)
+    .eq('status', 'Published')
+    .maybeSingle()
+
+  if (error) {
+    console.error('getPublishedLessonBySlugOrNull error:', error.message)
+    return null
+  }
+
+  return (data as Lesson) ?? null
+}
+
 /** Return the count of Published lessons (used as progress denominator). */
 export async function getPublishedLessonCount(): Promise<number> {
   const supabase = await createClient()

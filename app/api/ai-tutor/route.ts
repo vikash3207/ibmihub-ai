@@ -9,12 +9,20 @@ import {
   type TutorUsage,
   type TutorErrorKind,
 } from '@/lib/ai/anthropic'
-import { AI_TUTOR_SYSTEM_PROMPT } from '@/lib/ai/system-prompt'
+import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
+import { getLessonContext, formatLessonContextForPrompt } from '@/lib/ai/lesson-context'
+import { retrieveRelevantLessons, formatRetrievedLessonsForPrompt } from '@/lib/ai/retrieve-lessons'
 
 /** Spec 006-style session cap: 1 turn = 1 user-authored message. */
 const MAX_USER_TURNS = 20
 /** Simple per-message abuse/cost guardrail. */
 const MAX_MESSAGE_LENGTH = 4000
+/** How many supplementary related lessons to surface alongside a specific lesson's own context. */
+const RELATED_LESSONS_WHEN_LESSON_KNOWN = 3
+/** How many lessons to retrieve when there is no specific lesson context. */
+const RELATED_LESSONS_GENERAL = 5
+/** Response header carrying a ready-to-display context indicator label for the client UI. */
+const CONTEXT_LABEL_HEADER = 'X-Ai-Tutor-Context-Label'
 
 type UsageStatus = 'success' | 'error' | 'rate_limited'
 
@@ -106,6 +114,67 @@ function parseMessages(body: unknown): TutorMessage[] | Response {
   return messages
 }
 
+/**
+ * Parse the optional lessonSlug field. Returns undefined for anything
+ * missing or not slug-shaped -- an invalid or unknown lessonSlug is a
+ * normal, silently-ignored case here, never a 400.
+ */
+function parseLessonSlug(body: unknown): string | undefined {
+  if (typeof body !== 'object' || body === null) {
+    return undefined
+  }
+  const raw = (body as { lessonSlug?: unknown }).lessonSlug
+  if (typeof raw !== 'string') {
+    return undefined
+  }
+  const trimmed = raw.trim()
+  if (trimmed.length === 0 || trimmed.length > 200 || !/^[a-z0-9-]+$/.test(trimmed)) {
+    return undefined
+  }
+  return trimmed
+}
+
+/**
+ * Resolve this request's course-content grounding: the current lesson's
+ * content (if a valid lessonSlug was provided) plus, either alongside it or
+ * on its own, a small set of retrieved lessons relevant to the learner's
+ * latest message. Returns the composed system prompt and a short,
+ * ready-to-display label describing what context was used (or null if
+ * none was found/applicable).
+ */
+async function resolveGrounding(
+  lessonSlug: string | undefined,
+  latestUserMessage: string
+): Promise<{ systemPrompt: string; contextLabel: string | null }> {
+  if (lessonSlug) {
+    const lessonContext = await getLessonContext(lessonSlug)
+    if (lessonContext) {
+      const sections = [formatLessonContextForPrompt(lessonContext)]
+      const related = await retrieveRelevantLessons(latestUserMessage, {
+        maxResults: RELATED_LESSONS_WHEN_LESSON_KNOWN,
+        excludeSlug: lessonContext.slug,
+      })
+      if (related.length > 0) {
+        sections.push(formatRetrievedLessonsForPrompt(related))
+      }
+      return {
+        systemPrompt: buildGroundedSystemPrompt(sections),
+        contextLabel: `Using lesson context: ${lessonContext.title}`,
+      }
+    }
+    // Unknown/unpublished lessonSlug -- fall through to general retrieval below.
+  }
+
+  const related = await retrieveRelevantLessons(latestUserMessage, { maxResults: RELATED_LESSONS_GENERAL })
+  const systemPrompt = buildGroundedSystemPrompt([formatRetrievedLessonsForPrompt(related)])
+  const contextLabel =
+    related.length > 0
+      ? `Using course context: ${related.length} related lesson${related.length === 1 ? '' : 's'}`
+      : null
+
+  return { systemPrompt, contextLabel }
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient()
   const {
@@ -128,12 +197,29 @@ export async function POST(request: NextRequest) {
     return parsed
   }
   const messages = parsed
+  const lessonSlug = parseLessonSlug(body)
+  const latestUserMessage = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
+
+  let systemPrompt: string
+  let contextLabel: string | null
+  try {
+    const grounding = await resolveGrounding(lessonSlug, latestUserMessage)
+    systemPrompt = grounding.systemPrompt
+    contextLabel = grounding.contextLabel
+  } catch (err) {
+    // Grounding is an enhancement, not a hard dependency -- if lesson lookup
+    // or retrieval fails for any reason, fall back to the ungrounded prompt
+    // rather than breaking the AI Tutor response entirely.
+    console.error('AI Tutor grounding resolution failed:', err)
+    systemPrompt = buildGroundedSystemPrompt([])
+    contextLabel = null
+  }
 
   let textStream: AsyncIterable<string>
   let usagePromise: Promise<TutorUsage | null>
 
   try {
-    const result = streamTutorResponse(AI_TUTOR_SYSTEM_PROMPT, messages)
+    const result = streamTutorResponse(systemPrompt, messages)
     textStream = result.textStream
     usagePromise = result.usage
   } catch (err) {
@@ -176,7 +262,13 @@ export async function POST(request: NextRequest) {
     await logUsage(supabase, user.id, 'success', usage)
   })
 
-  return new Response(stream, {
-    headers: { 'Content-Type': 'text/plain; charset=utf-8' },
-  })
+  const headers: Record<string, string> = { 'Content-Type': 'text/plain; charset=utf-8' }
+  if (contextLabel) {
+    // Header values must be Latin-1; lesson titles are plain English text,
+    // but encode defensively so any unexpected character can never break
+    // response construction. The client decodes with decodeURIComponent.
+    headers[CONTEXT_LABEL_HEADER] = encodeURIComponent(contextLabel)
+  }
+
+  return new Response(stream, { headers })
 }

@@ -8,13 +8,15 @@ const nextConfig = {
   // --webpack is passed explicitly, or during legacy CI/tool chains).
   turbopack: {},
 
-  // The lesson detail route reads Markdown files from content/lessons at
-  // request time (lib/lessons.ts). The file path isn't a static import, so
-  // the bundler can't discover it through static analysis; this tells the
-  // file tracer explicitly which files that route needs, instead of it
-  // falling back to tracing the whole project.
+  // The lesson detail route, and the AI Tutor API route (lib/ai/lesson-context.ts
+  // and lib/ai/retrieve-lessons.ts, both via lib/lessons.ts's loadLessonMarkdown),
+  // read Markdown files from content/lessons at request time. The file path
+  // isn't a static import, so the bundler can't discover it through static
+  // analysis; this tells the file tracer explicitly which files those routes
+  // need, instead of it falling back to tracing the whole project.
   outputFileTracingIncludes: {
     '/learn/ibm-i-fundamentals/[slug]': ['./content/lessons/*.md'],
+    '/api/ai-tutor': ['./content/lessons/*.md'],
   },
 
   webpack(config) {
