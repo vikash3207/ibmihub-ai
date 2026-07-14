@@ -40,11 +40,14 @@ operations is a topic for later, more advanced lessons.
 
 ## Practical Example
 
-Imagine a program working with `ORDHIST` that needs to check the order
-placed immediately before a specific one, perhaps to compare order amounts.
-After positioning on the order in question, `readp ORDHIST;` retrieves the
-record just before it in key order, without needing to read forward through
-the entire file from the beginning to find it.
+Imagine a program working with `ORDHIST` that needs to find the last order
+placed by whichever customer's key comes immediately before customer
+1042's, perhaps while scanning backward through customer groups. After
+`setll custNbr ORDHIST;` positions the file immediately before customer
+1042's first order, `readp ORDHIST;` retrieves the record immediately
+before that position: the last order belonging to whichever customer's key
+sorts just before 1042, without needing to read forward through the entire
+file from the beginning to find it.
 
 This is a simplified, illustrative example rather than a specific real
 program, but it reflects the basic, everyday shape of reading backward
