@@ -76,6 +76,46 @@ export const PRACTICE_TOPICS: PracticeTopic[] = [
     label: 'SQLRPGLE Basics',
     description: 'SELECT INTO, SQLCODE, host variables, and WHERE conditions in embedded SQL.',
   },
+  {
+    id: 'display-files',
+    label: 'Display Files / 5250 UI',
+    description: 'EXFMT, response indicators, function keys, and input/output/both fields.',
+  },
+  {
+    id: 'subfiles',
+    label: 'Subfiles',
+    description: 'Subfile vs subfile control record formats, RRN, SFLCLR, and load-all vs page-at-a-time.',
+  },
+  {
+    id: 'printer-files',
+    label: 'Printer Files / Reports',
+    description: 'Spool files, output queues, WRKSPLF, and report heading/detail/total lines.',
+  },
+  {
+    id: 'debugging',
+    label: 'Debugging & Troubleshooting',
+    description: 'STRDBG, breakpoints, job logs, message IDs, and compile vs runtime errors.',
+  },
+  {
+    id: 'ibm-i-operations',
+    label: 'IBM i Operations / Jobs / System Basics',
+    description: 'Interactive vs batch jobs, job/output queues, MSGW, library lists, locks, and authority.',
+  },
+  {
+    id: 'mini-projects',
+    label: 'Real-World Mini Projects',
+    description: "Questions drawn from the course's mini projects: which objects, patterns, and debugging steps apply.",
+  },
+  {
+    id: 'interview-readiness',
+    label: 'Interview & Job Readiness',
+    description: 'Practice explaining IBM i concepts clearly, the way an interview or job discussion might ask.',
+  },
+  {
+    id: 'mixed-review',
+    label: 'Mixed Scenario Review',
+    description: 'Cross-topic scenario questions that combine concepts from more than one area at once.',
+  },
 ]
 
 export const PRACTICE_QUESTIONS: PracticeQuestion[] = [
@@ -924,6 +964,835 @@ export const PRACTICE_QUESTIONS: PracticeQuestion[] = [
       'A successful query and a correctly-displayed screen are two separate things. Checking SQLCODE confirms the lookup itself worked; separately confirming the copy-back step catches the other common cause of this symptom.',
     relatedLessonSlugs: ['select-into-for-reading-one-row', 'sqlrpgle-customer-lookup'],
     tags: ['sqlrpgle', 'debugging'],
+    difficulty: 'beginner',
+  },
+
+  // --- Display Files / 5250 UI ---
+  {
+    id: 'disp-1',
+    topicId: 'display-files',
+    title: 'What EXFMT does',
+    question: 'What does EXFMT do when called with a display file record format?',
+    type: 'multiple-choice',
+    options: [
+      'It only writes the format to the screen without reading a response',
+      "It writes the record format to the screen and reads back the user's response, in one combined operation",
+      'It permanently deletes the record format',
+      'It compiles the display file',
+    ],
+    correctAnswer: "It writes the record format to the screen and reads back the user's response, in one combined operation",
+    explanation:
+      "EXFMT combines showing a record format and reading the user's response into a single operation -- the most common way an RPGLE program interacts with a display file.",
+    relatedLessonSlugs: ['what-is-a-display-file-in-ibm-i', 'rpgle-program-calling-a-display-file', 'read-write-exfmt-and-screen-flow'],
+    tags: ['display-files', 'exfmt'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'disp-2',
+    topicId: 'display-files',
+    title: 'What a response indicator is for',
+    question: 'What is a response indicator used for in a display file?',
+    type: 'multiple-choice',
+    options: [
+      'Encrypting the screen',
+      'Recording which function key the user pressed so the RPGLE program can respond accordingly',
+      'Declaring a new physical file',
+      "Storing the customer's balance",
+    ],
+    correctAnswer: 'Recording which function key the user pressed so the RPGLE program can respond accordingly',
+    explanation:
+      'A response indicator is tied to a function key (like F3) in the DDS. After EXFMT returns, the program checks that indicator to find out which key the user pressed.',
+    relatedLessonSlugs: ['function-keys-and-response-indicators-in-display-files'],
+    tags: ['display-files', 'function-keys', 'indicators'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'disp-3',
+    topicId: 'display-files',
+    title: 'Input, output, and both fields',
+    question: 'What is the difference between an input field, an output field, and a both field on a display file?',
+    type: 'multiple-choice',
+    options: [
+      'There is no real difference',
+      'An input field only receives typed data, an output field only shows data, and a both field can both show and receive data',
+      'Output fields are always numeric',
+      'Both fields can only be used in subfiles',
+    ],
+    correctAnswer: 'An input field only receives typed data, an output field only shows data, and a both field can both show and receive data',
+    explanation:
+      'Input fields let the user type a value in, output fields only display a value the program sets, and both fields do both -- showing a value and letting the user change it.',
+    relatedLessonSlugs: ['input-output-and-both-fields-in-display-files'],
+    tags: ['display-files', 'fields'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'disp-4',
+    topicId: 'display-files',
+    title: 'Reading an indicator check',
+    question: 'After EXFMT returns, a program checks *in03. What does that check accomplish?',
+    type: 'scenario',
+    correctAnswer:
+      'It checks whether the user pressed F3 (or whichever key *in03 is tied to), so the program can decide whether to exit or continue.',
+    explanation:
+      'Indicators like *in03 are the RPGLE side of a DDS-defined function key. Checking it after EXFMT is how the program finds out which key, if any, the user pressed.',
+    relatedLessonSlugs: ['function-keys-and-response-indicators-in-display-files', 'rpgle-program-calling-a-display-file'],
+    tags: ['display-files', 'indicators'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'disp-5',
+    topicId: 'display-files',
+    title: 'Conditioning indicators',
+    question: 'What is a conditioning indicator used for on a display file field?',
+    type: 'multiple-choice',
+    options: [
+      'To control whether that field is shown or hidden depending on a program condition',
+      'To permanently delete a field',
+      'To sort subfile rows',
+      'To connect to Db2 for i',
+    ],
+    correctAnswer: 'To control whether that field is shown or hidden depending on a program condition',
+    explanation:
+      "A conditioning indicator lets the same record format show or hide a field (like an error message) depending on whether the RPGLE program turns that indicator on or off.",
+    relatedLessonSlugs: ['display-file-indicators-explained'],
+    tags: ['display-files', 'indicators'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'disp-6',
+    topicId: 'display-files',
+    title: 'A function key that does nothing',
+    question: 'A screen program calls EXFMT in a loop, but pressing a function key seems to do nothing. What would you check first?',
+    type: 'scenario',
+    correctAnswer:
+      'Confirm the function key actually has a response indicator wired up to it in the DDS, and that the RPGLE program is checking the correct indicator number after EXFMT.',
+    explanation:
+      "If a function key \"does nothing,\" the most common cause is a mismatch or missing wiring between the DDS-defined indicator and the indicator the RPGLE program actually checks.",
+    relatedLessonSlugs: ['function-keys-and-response-indicators-in-display-files', 'read-write-exfmt-and-screen-flow'],
+    tags: ['display-files', 'troubleshooting'],
+    difficulty: 'beginner',
+  },
+
+  // --- Subfiles ---
+  {
+    id: 'sfl-1',
+    topicId: 'subfiles',
+    title: 'Subfile record vs control record format',
+    question: 'What is the difference between a subfile record format and a subfile control record format?',
+    type: 'multiple-choice',
+    options: [
+      'They are exactly the same',
+      "The subfile record format defines one row's layout; the subfile control record format manages the subfile as a whole, like clearing and displaying it",
+      'The control record format holds the actual data rows',
+      'Only the subfile record format can have function keys',
+    ],
+    correctAnswer:
+      "The subfile record format defines one row's layout; the subfile control record format manages the subfile as a whole, like clearing and displaying it",
+    explanation:
+      'A subfile record format (SFL) defines what one row looks like. A subfile control record format (SFLCTL) is paired with it and manages subfile-wide behavior such as clearing, sizing, and displaying it.',
+    relatedLessonSlugs: ['what-is-a-subfile-in-ibm-i', 'subfile-record-format-vs-subfile-control-record-format'],
+    tags: ['subfiles'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'sfl-2',
+    topicId: 'subfiles',
+    title: 'What RRN identifies',
+    question: 'What does RRN identify in a subfile program?',
+    type: 'multiple-choice',
+    options: [
+      "A customer's business key, like a customer number",
+      'The relative position of a record within the subfile -- unrelated to any business meaning',
+      "The record's field length",
+      'The library the subfile lives in',
+    ],
+    correctAnswer: 'The relative position of a record within the subfile -- unrelated to any business meaning',
+    explanation:
+      "RRN (Relative Record Number) identifies a record's position within the subfile itself, such as first-written or second-written -- it's not a business key like a customer or order number.",
+    relatedLessonSlugs: ['understanding-rrn-in-subfile-programs'],
+    tags: ['subfiles', 'rrn'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'sfl-3',
+    topicId: 'subfiles',
+    title: 'What SFLCLR does',
+    question: 'What does the SFLCLR indicator do when turned on?',
+    type: 'multiple-choice',
+    options: [
+      'It clears the subfile so it can be reloaded with new rows',
+      "It permanently deletes the subfile's DDS",
+      'It displays the subfile on screen',
+      'It sorts the subfile by key',
+    ],
+    correctAnswer: 'It clears the subfile so it can be reloaded with new rows',
+    explanation:
+      "Turning on the indicator tied to SFLCLR clears out the subfile's existing rows, a required step before loading a fresh set of rows -- forgetting it is one of the most common subfile bugs.",
+    relatedLessonSlugs: ['sfldsp-sfldspctl-and-sflclr-explained', 'clearing-and-reloading-a-subfile'],
+    tags: ['subfiles', 'sflclr'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'sfl-4',
+    topicId: 'subfiles',
+    title: 'Stale rows after a new search',
+    question: 'A subfile shows the same rows from a previous search after a user runs a new search. What is the most likely cause?',
+    type: 'scenario',
+    correctAnswer:
+      "The subfile was never cleared (SFLCLR) before being reloaded with the new search's rows, so old rows are still present alongside or instead of the new ones.",
+    explanation:
+      'This is a very common subfile bug: forgetting the clear-then-load pattern. The subfile must be cleared before writing the new set of rows for a fresh search.',
+    relatedLessonSlugs: ['clearing-and-reloading-a-subfile', 'sfldsp-sfldspctl-and-sflclr-explained'],
+    tags: ['subfiles', 'troubleshooting'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'sfl-5',
+    topicId: 'subfiles',
+    title: 'Load-all vs page-at-a-time',
+    question: 'What is the main difference between a load-all subfile and a page-at-a-time subfile?',
+    type: 'multiple-choice',
+    options: [
+      'There is no real difference',
+      'A load-all subfile loads every matching row up front; a page-at-a-time subfile loads only enough rows to fill the visible page, loading more as the user scrolls',
+      'Page-at-a-time subfiles cannot have function keys',
+      'Load-all subfiles are always faster regardless of data size',
+    ],
+    correctAnswer:
+      'A load-all subfile loads every matching row up front; a page-at-a-time subfile loads only enough rows to fill the visible page, loading more as the user scrolls',
+    explanation:
+      'Load-all is simpler to code but loads everything immediately, which can be wasteful for very large result sets. Page-at-a-time loads incrementally, which scales better for large amounts of data but requires more careful RRN handling.',
+    relatedLessonSlugs: ['load-all-subfile-concept', 'page-at-a-time-subfile-concept'],
+    tags: ['subfiles', 'design'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'sfl-6',
+    topicId: 'subfiles',
+    title: 'Reading only changed rows',
+    question: 'Which native RPGLE operation reads only the subfile rows a user actually changed?',
+    type: 'multiple-choice',
+    options: ['READ', 'READC', 'CHAIN', 'SETLL'],
+    correctAnswer: 'READC',
+    explanation:
+      'READC reads only the subfile rows the user actually changed (like typing an option), rather than every row in the subfile, which READ would do.',
+    relatedLessonSlugs: ['understanding-rrn-in-subfile-programs'],
+    tags: ['subfiles', 'readc'],
+    difficulty: 'beginner',
+  },
+
+  // --- Printer Files / Reports ---
+  {
+    id: 'prt-1',
+    topicId: 'printer-files',
+    title: 'Printer file vs spool file',
+    question: 'What is the difference between a printer file and a spool file?',
+    type: 'multiple-choice',
+    options: [
+      'They are the same thing',
+      'A printer file is the object an RPGLE program writes to; a spool file is the actual output produced by one run, waiting on an output queue',
+      'A spool file is a type of physical file',
+      'A printer file only exists after printing finishes',
+    ],
+    correctAnswer:
+      'A printer file is the object an RPGLE program writes to; a spool file is the actual output produced by one run, waiting on an output queue',
+    explanation:
+      "The printer file (*FILE, type printer) is the object a program writes report output to. Each run produces a spool file, the actual queued output, sitting on an output queue until it's printed or viewed.",
+    relatedLessonSlugs: ['what-is-a-printer-file-in-ibm-i', 'printer-file-vs-display-file-vs-database-file'],
+    tags: ['printer-files', 'spool-files'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'prt-2',
+    topicId: 'printer-files',
+    title: 'What an output queue is',
+    question: 'What is an output queue?',
+    type: 'multiple-choice',
+    options: [
+      'A list of programs waiting to compile',
+      'A holding area where spool files wait until they are printed, viewed, or otherwise processed',
+      'A type of logical file',
+      'A library containing only printer files',
+    ],
+    correctAnswer: 'A holding area where spool files wait until they are printed, viewed, or otherwise processed',
+    explanation:
+      "An output queue holds spool files after they're created, until they are actually printed or otherwise handled -- similar in spirit to a print queue on other systems.",
+    relatedLessonSlugs: ['spool-files-and-output-queues'],
+    tags: ['printer-files', 'output-queues'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'prt-3',
+    topicId: 'printer-files',
+    title: 'What WRKSPLF lets you do',
+    question: 'What does WRKSPLF let you do?',
+    type: 'multiple-choice',
+    options: [
+      'Compile a printer file',
+      'See and work with your own spool files, such as checking their status or viewing their content',
+      'Delete a library',
+      'Submit a batch job',
+    ],
+    correctAnswer: 'See and work with your own spool files, such as checking their status or viewing their content',
+    explanation:
+      'WRKSPLF (Work with Spooled Files) lets you see your own spool files and take actions on them, such as viewing, holding, or releasing them.',
+    relatedLessonSlugs: ['working-with-spool-files-using-wrksplf'],
+    tags: ['printer-files', 'commands'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'prt-4',
+    topicId: 'printer-files',
+    title: 'Heading vs detail record formats',
+    question: 'In a typical IBM i report, what is the purpose of a heading record format versus a detail record format?',
+    type: 'multiple-choice',
+    options: [
+      "There is no difference; they're interchangeable",
+      'The heading format is printed once (or once per page) for column titles; the detail format is printed once per data row',
+      'The detail format only prints on the last page',
+      'The heading format holds the actual business data',
+    ],
+    correctAnswer:
+      'The heading format is printed once (or once per page) for column titles; the detail format is printed once per data row',
+    explanation:
+      'A heading record format typically prints column titles once at the top (or repeated each page); a detail record format prints once for every row of actual data in the report.',
+    relatedLessonSlugs: ['report-headings-and-detail-lines'],
+    tags: ['printer-files', 'reports'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'prt-5',
+    topicId: 'printer-files',
+    title: 'Why the grand total prints once, at the end',
+    question: "Why does a report commonly write its grand total record format only once, after the main read loop ends?",
+    type: 'scenario',
+    correctAnswer:
+      'Because the grand total needs to reflect the fully accumulated value across every detail row, which is only known once the loop has finished processing all of them.',
+    explanation:
+      "A grand total accumulator only holds its final, correct value after every detail row has been processed, so the total format is written once, after the loop, not on every pass.",
+    relatedLessonSlugs: ['report-totals-and-summary-lines'],
+    tags: ['printer-files', 'totals'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'prt-6',
+    topicId: 'printer-files',
+    title: 'Completed job, missing spool file',
+    question:
+      'A report finishes with WRKSBMJOB showing it completed successfully, but no spool file appears. What would you check?',
+    type: 'scenario',
+    correctAnswer:
+      'Check whether a printer file override actually took effect, whether the specified output queue exists, or whether the report program failed after the point the wrapper considered its job done.',
+    explanation:
+      "A job showing as complete doesn't guarantee a spool file was actually produced -- checking the override, the output queue, and the batch job's own job log narrows down where the gap is.",
+    relatedLessonSlugs: ['spool-files-and-output-queues', 'printer-file-vs-display-file-vs-database-file'],
+    tags: ['printer-files', 'troubleshooting'],
+    difficulty: 'beginner',
+  },
+
+  // --- Debugging & Troubleshooting ---
+  {
+    id: 'dbg-1',
+    topicId: 'debugging',
+    title: 'What STRDBG lets you do',
+    question: 'What does STRDBG let you do?',
+    type: 'multiple-choice',
+    options: [
+      'Delete a program',
+      'Start an interactive debug session against a program, letting you set breakpoints and inspect variables',
+      'Submit a batch job',
+      'Compile RPGLE source',
+    ],
+    correctAnswer: 'Start an interactive debug session against a program, letting you set breakpoints and inspect variables',
+    explanation:
+      'STRDBG starts a debug session, the tool you use to set breakpoints, step through code, and inspect variable values while a program runs.',
+    relatedLessonSlugs: ['why-debugging-matters-on-ibm-i', 'strdbg-basics-for-rpgle'],
+    tags: ['debugging', 'strdbg'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'dbg-2',
+    topicId: 'debugging',
+    title: 'What a breakpoint is for',
+    question: 'What is a breakpoint used for during debugging?',
+    type: 'multiple-choice',
+    options: [
+      'Permanently stopping a program',
+      'Pausing program execution at a specific line so you can inspect variables at that exact moment',
+      'Deleting a line of code',
+      'Compiling faster',
+    ],
+    correctAnswer: 'Pausing program execution at a specific line so you can inspect variables at that exact moment',
+    explanation:
+      'A breakpoint pauses execution right before a specific line runs, letting you inspect variable values at that exact moment rather than guessing what they were.',
+    relatedLessonSlugs: ['setting-and-using-breakpoints'],
+    tags: ['debugging', 'breakpoints'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'dbg-3',
+    topicId: 'debugging',
+    title: 'Why check the job log first',
+    question: 'Why is checking the job log usually the first troubleshooting step, before starting a debug session?',
+    type: 'scenario',
+    correctAnswer:
+      'The job log often already names the failing program and statement directly, which can make starting a full debug session unnecessary.',
+    explanation:
+      'The job log frequently contains enough detail (the failing statement, the message ID) to point straight at the cause, saving the time of starting a debug session for something already explained.',
+    relatedLessonSlugs: ['understanding-job-logs', 'basic-troubleshooting-flow-for-ibm-i-developers'],
+    tags: ['debugging', 'job-logs'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'dbg-4',
+    topicId: 'debugging',
+    title: 'What a message ID is',
+    question: 'What is the purpose of an IBM i message ID, like CPF9801?',
+    type: 'multiple-choice',
+    options: [
+      "It's a random tracking number with no real meaning",
+      'It identifies a specific, documented condition or error, letting you look up exactly what it means',
+      "It only appears in RPGLE programs, never CLLE",
+      'It replaces the need for a job log',
+    ],
+    correctAnswer: 'It identifies a specific, documented condition or error, letting you look up exactly what it means',
+    explanation:
+      'A message ID like CPF9801 identifies a specific, documented condition, letting you (or a MONMSG in a CLLE program) recognize and respond to that exact situation.',
+    relatedLessonSlugs: ['reading-ibm-i-message-ids'],
+    tags: ['debugging', 'message-ids'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'dbg-5',
+    topicId: 'debugging',
+    title: 'Compile errors vs runtime errors',
+    question: 'What is the difference between a compile error and a runtime error?',
+    type: 'multiple-choice',
+    options: [
+      'They are the same thing',
+      "A compile error means the program never successfully built and can't run at all; a runtime error means the program compiled fine but failed while actually running",
+      'A runtime error always means a missing library',
+      'A compile error only happens in CLLE, never RPGLE',
+    ],
+    correctAnswer:
+      "A compile error means the program never successfully built and can't run at all; a runtime error means the program compiled fine but failed while actually running",
+    explanation:
+      "Distinguishing these matters: a runtime error tells you the program's logic compiled correctly, so the problem is in what happens as it executes -- not a syntax problem.",
+    relatedLessonSlugs: ['compile-errors-vs-runtime-errors'],
+    tags: ['debugging'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'dbg-6',
+    topicId: 'debugging',
+    title: 'The recommended first troubleshooting step',
+    question: 'What is the recommended first step in a basic IBM i troubleshooting flow?',
+    type: 'multiple-choice',
+    options: [
+      'Immediately start STRDBG',
+      'Check the job log first, since it often narrows down the problem before you need any other tool',
+      'Recompile the program without changes',
+      'Delete and recreate the file',
+    ],
+    correctAnswer: 'Check the job log first, since it often narrows down the problem before you need any other tool',
+    explanation:
+      'The basic troubleshooting flow starts with the job log, since it frequently already explains what happened, before reaching for more involved tools like a debugger.',
+    relatedLessonSlugs: ['basic-troubleshooting-flow-for-ibm-i-developers'],
+    tags: ['debugging'],
+    difficulty: 'beginner',
+  },
+
+  // --- IBM i Operations / Jobs / System Basics ---
+  {
+    id: 'ops-1',
+    topicId: 'ibm-i-operations',
+    title: 'Interactive vs batch jobs',
+    question: 'What is the difference between an interactive job and a batch job?',
+    type: 'multiple-choice',
+    options: [
+      'There is no difference',
+      'An interactive job is tied to a user actively working at a screen; a batch job runs independently, typically without anyone waiting on it in real time',
+      'Batch jobs can never fail',
+      'Interactive jobs always run overnight',
+    ],
+    correctAnswer:
+      'An interactive job is tied to a user actively working at a screen; a batch job runs independently, typically without anyone waiting on it in real time',
+    explanation:
+      'An interactive job responds to a user\'s real-time actions, like typing at a 5250 screen. A batch job runs independently, often submitted to run without anyone actively waiting on it.',
+    relatedLessonSlugs: ['ibm-i-jobs-explained', 'interactive-jobs-vs-batch-jobs'],
+    tags: ['operations', 'jobs'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'ops-2',
+    topicId: 'ibm-i-operations',
+    title: 'Job queue vs output queue',
+    question: 'What is the difference between a job queue and an output queue?',
+    type: 'multiple-choice',
+    options: [
+      'They are the same thing',
+      'A job queue holds jobs waiting to run; an output queue holds spool files waiting to be printed or viewed',
+      'An output queue holds jobs; a job queue holds spool files',
+      'Only batch jobs use queues',
+    ],
+    correctAnswer: 'A job queue holds jobs waiting to run; an output queue holds spool files waiting to be printed or viewed',
+    explanation:
+      'A job queue holds submitted jobs waiting for their turn to actually run. An output queue holds the spool file output that jobs produce, waiting to be printed or viewed -- two different kinds of waiting.',
+    relatedLessonSlugs: ['job-queues-and-output-queues'],
+    tags: ['operations', 'job-queues'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'ops-3',
+    topicId: 'ibm-i-operations',
+    title: 'What MSGW usually means',
+    question: "What does it usually mean when a job's status shows MSGW?",
+    type: 'multiple-choice',
+    options: [
+      'The job finished successfully',
+      'The job is waiting for a reply to an inquiry message before it can continue',
+      'The job was deleted',
+      'The job is running faster than normal',
+    ],
+    correctAnswer: 'The job is waiting for a reply to an inquiry message before it can continue',
+    explanation:
+      "MSGW means the job is waiting on a message, typically an inquiry message that needs a reply before the job can proceed -- checking the job's message queue reveals exactly what it's waiting on.",
+    relatedLessonSlugs: ['job-status-values-explained'],
+    tags: ['operations', 'msgw'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'ops-4',
+    topicId: 'ibm-i-operations',
+    title: 'Works from one library list, not another',
+    question:
+      'A program works fine when run from one library list but fails to find an object when run from another. What would you check?',
+    type: 'scenario',
+    correctAnswer:
+      "Compare the two library lists directly -- the object likely lives in a library that's missing from, or positioned differently in, the failing library list.",
+    explanation:
+      'This is a classic library list problem: the same program behaves differently purely because of what libraries are (or aren\'t) in the library list it\'s running with.',
+    relatedLessonSlugs: ['library-list-problems-in-real-applications'],
+    tags: ['operations', 'library-list', 'troubleshooting'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'ops-5',
+    topicId: 'ibm-i-operations',
+    title: 'Two users, one record',
+    question: 'Why might two users both trying to update the same record run into a conflict?',
+    type: 'scenario',
+    correctAnswer:
+      "One user's job holds a lock on that record while updating it, and the second job's own attempt to lock or update the same record conflicts with that existing lock -- a normal, expected situation, not necessarily a bug.",
+    explanation:
+      "Object/record locks are IBM i's way of preventing two jobs from corrupting the same record at once. A lock conflict between two genuinely simultaneous updates is expected behavior, not a sign that the program itself is broken.",
+    relatedLessonSlugs: ['object-locks-basics'],
+    tags: ['operations', 'locks'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'ops-6',
+    topicId: 'ibm-i-operations',
+    title: 'Visibility vs authority',
+    question: 'If an object clearly exists and is visible to a user, does that guarantee the user has authority to update it?',
+    type: 'multiple-choice',
+    options: [
+      'Yes, visibility always implies full authority',
+      'No -- an object existing and being visible is separate from having the specific authority needed to perform an operation like update',
+      'Only for physical files',
+      'Only if the user is signed on interactively',
+    ],
+    correctAnswer:
+      'No -- an object existing and being visible is separate from having the specific authority needed to perform an operation like update',
+    explanation:
+      'Authority is checked per operation. A user can see an object exists without having, for example, the authority to change it -- these are two separate questions.',
+    relatedLessonSlugs: ['authorities-and-object-access-basics'],
+    tags: ['operations', 'authority'],
+    difficulty: 'beginner',
+  },
+
+  // --- Real-World Mini Projects ---
+  {
+    id: 'proj-1',
+    topicId: 'mini-projects',
+    title: 'Customer Inquiry Program pieces',
+    question: 'In the Customer Inquiry Program mini project, what two things does the RPGLE program tie together?',
+    type: 'multiple-choice',
+    options: ['A display file and a keyed physical file', 'Two printer files', 'A subfile and a data area', 'Two CLLE programs'],
+    correctAnswer: 'A display file and a keyed physical file',
+    explanation:
+      'The Customer Inquiry Program mini project ties together a display file (for the screen) and a keyed physical file (CUSTMAST), using CHAIN to look up a customer by number.',
+    relatedLessonSlugs: ['customer-inquiry-program'],
+    tags: ['mini-projects'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'proj-2',
+    topicId: 'mini-projects',
+    title: 'Loading the order list subfile',
+    question: "In the Simple Order List Subfile mini project, which native operations load the subfile with one customer's orders?",
+    type: 'multiple-choice',
+    options: ['CHAIN alone', 'SETLL followed by READE', 'WRITE in a loop with no key check', 'DELETE followed by WRITE'],
+    correctAnswer: 'SETLL followed by READE',
+    explanation:
+      'Since a customer can have multiple orders sharing the same key, SETLL positions to the first matching key and a READE loop reads every order sharing it, writing each into the subfile.',
+    relatedLessonSlugs: ['simple-order-list-subfile'],
+    tags: ['mini-projects', 'subfiles'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'proj-3',
+    topicId: 'mini-projects',
+    title: 'Batch Report Program fails at runtime',
+    question: "The Batch Report Program mini project's RPT001R program is failing at runtime. What is the first thing you would check?",
+    type: 'scenario',
+    correctAnswer: 'Check the job log first -- it likely names the exact failing statement, before reaching for a debug session.',
+    explanation:
+      'Consistent with the general troubleshooting flow, checking the job log first is the right move even for a mini-project program, since it usually explains the failure directly.',
+    relatedLessonSlugs: ['batch-report-program', 'debugging-a-broken-file-io-program'],
+    tags: ['mini-projects', 'debugging'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'proj-4',
+    topicId: 'mini-projects',
+    title: 'Why add looks different from update/delete',
+    question:
+      "In the Customer Maintenance Add/Change/Delete mini project, why don't the add (WRITE) and update/delete (CHAIN then UPDATE/DELETE) branches follow the same pattern?",
+    type: 'scenario',
+    correctAnswer:
+      "Adding a new customer has no existing record to retrieve first, so it just WRITEs; updating or deleting requires a CHAIN first (and an %FOUND check) since those operations need an existing record to act on.",
+    explanation:
+      'WRITE creates a new record and needs no prior lookup. UPDATE and DELETE both require a current record, established via a preceding CHAIN and %FOUND check -- this is why the add branch looks different from the other two.',
+    relatedLessonSlugs: ['customer-maintenance-add-change-delete'],
+    tags: ['mini-projects', 'file-io'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'proj-5',
+    topicId: 'mini-projects',
+    title: 'Same code, different outcome',
+    question:
+      "In the Troubleshooting Locked Record Scenario mini project, why does User A's update succeed while User B's fails, even though they ran the exact same code?",
+    type: 'scenario',
+    correctAnswer:
+      "User A locked the record first and successfully updated it; User B's own update then conflicts with the fact that the record changed since User B's own CHAIN, a timing issue rather than a code bug.",
+    explanation:
+      'This mini project deliberately shows that identical code can behave differently purely due to timing between two jobs acting on the same record -- not because the code itself is wrong.',
+    relatedLessonSlugs: ['troubleshooting-locked-record-scenario'],
+    tags: ['mini-projects', 'locks'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'proj-6',
+    topicId: 'mini-projects',
+    title: "The wrapper's blind spot",
+    question: "In the Batch Job Failure Investigation mini project, what was the actual gap in the CLLE wrapper's CHKOBJ check?",
+    type: 'scenario',
+    correctAnswer:
+      'The wrapper only checked CUSTMAST with CHKOBJ, but the report program RPT002R also depended on ORDHIST, which was never checked -- so the wrapper reported success even though the report later failed on the unchecked file.',
+    explanation:
+      "This mini project's whole point is that a CHKOBJ check is only as complete as the objects it actually names -- missing even one dependency creates a false sense of safety.",
+    relatedLessonSlugs: ['batch-job-failure-investigation'],
+    tags: ['mini-projects', 'troubleshooting'],
+    difficulty: 'beginner',
+  },
+
+  // --- Interview & Job Readiness ---
+  {
+    id: 'int-1',
+    topicId: 'interview-readiness',
+    title: 'Strong vs weak CHAIN answer',
+    question: "Which is the stronger interview answer to \"What does CHAIN do?\"",
+    type: 'multiple-choice',
+    options: [
+      '"CHAIN reads a file."',
+      '"CHAIN retrieves one specific record from a keyed file by its key value, and you check %FOUND afterward to confirm whether it actually existed."',
+      '"CHAIN is a type of loop."',
+      '"CHAIN only works with SQL."',
+    ],
+    correctAnswer:
+      '"CHAIN retrieves one specific record from a keyed file by its key value, and you check %FOUND afterward to confirm whether it actually existed."',
+    explanation:
+      "A strong interview answer connects the concept to how it's actually used and checked, rather than a vague one-line restatement. Naming %FOUND shows you understand the full pattern, not just the keyword.",
+    relatedLessonSlugs: ['ibm-i-developer-interview-roadmap', 'rpgle-file-io-interview-scenarios', 'chain-for-keyed-access'],
+    tags: ['interview-readiness'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'int-2',
+    topicId: 'interview-readiness',
+    title: 'Explaining CHAIN vs READ',
+    question: 'How would you explain the difference between CHAIN and READ in an interview?',
+    type: 'scenario',
+    correctAnswer:
+      'CHAIN retrieves one specific record directly by key, typically on a keyed file; READ reads the next record in sequence (arrival or key order) without targeting a specific key value.',
+    explanation:
+      'A strong answer contrasts the two directly: CHAIN is for a targeted, single lookup; READ is for stepping through records in sequence, one at a time.',
+    relatedLessonSlugs: ['rpgle-file-io-interview-scenarios'],
+    tags: ['interview-readiness', 'file-io'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'int-3',
+    topicId: 'interview-readiness',
+    title: 'Explaining SQLCODE 100',
+    question: 'How would you explain what SQLCODE = 100 means in an interview?',
+    type: 'scenario',
+    correctAnswer:
+      'SQLCODE 100 specifically means no row matched the query -- a normal, often-expected outcome, not the same as a genuine database error.',
+    explanation:
+      "Being able to name the specific value (100) and explain that it's an expected \"not found\" condition, distinct from a real error, is exactly the kind of specific answer that stands out in an interview.",
+    relatedLessonSlugs: ['sqlrpgle-interview-scenarios', 'sqlcode-and-sqlstate-basics-in-sqlrpgle'],
+    tags: ['interview-readiness', 'sqlrpgle'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'int-4',
+    topicId: 'interview-readiness',
+    title: 'Explaining a record lock scenario',
+    question: 'How would you explain a record lock scenario if asked about it in an interview?',
+    type: 'scenario',
+    correctAnswer:
+      'Two jobs both trying to update the same record at nearly the same time can hit a lock conflict -- this is normal, expected behavior, not necessarily a bug, and WRKOBJLCK can show which job holds which lock.',
+    explanation:
+      "A strong answer recognizes that a lock conflict is often just timing between two legitimate jobs, not a code defect -- and names a real tool (WRKOBJLCK) for investigating it.",
+    relatedLessonSlugs: ['common-ibm-i-interview-mistakes', 'real-support-ticket-analysis-for-beginners'],
+    tags: ['interview-readiness', 'locks'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'int-5',
+    topicId: 'interview-readiness',
+    title: 'Explaining job log usage',
+    question: "How would you explain job log usage if asked how you'd start debugging a failing program?",
+    type: 'scenario',
+    correctAnswer:
+      "Check the job log first, since it usually names the failing program and statement directly -- only start a debug session if the job log doesn't already make the cause clear.",
+    explanation:
+      'This answer shows a structured process (job log first, debugger second) rather than jumping straight to the most involved tool, which is exactly what interviewers are usually listening for.',
+    relatedLessonSlugs: ['debugging-scenario-based-questions'],
+    tags: ['interview-readiness', 'debugging'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'int-6',
+    topicId: 'interview-readiness',
+    title: 'Spotting the weaker answer',
+    question:
+      "Which is the weaker answer, and why: (a) \"I would just start debugging\" or (b) \"I would check the job log first, then debug if needed\"?",
+    type: 'scenario',
+    correctAnswer:
+      '(a) is weaker, because it skips straight to the most involved tool without first checking a source (the job log) that often already explains the problem.',
+    explanation:
+      'Interviewers are listening for a structured, ordered process. Jumping straight to a debugger, without mentioning the job log, signals a less methodical approach.',
+    relatedLessonSlugs: ['common-ibm-i-interview-mistakes', 'mock-ibm-i-developer-interview'],
+    tags: ['interview-readiness'],
+    difficulty: 'beginner',
+  },
+
+  // --- Mixed Scenario Review ---
+  {
+    id: 'mix-1',
+    topicId: 'mixed-review',
+    title: 'UPDATE without a %FOUND check',
+    question: "A program CHAINs to a keyed file, then immediately calls UPDATE without checking %FOUND. What happens if the key doesn't exist?",
+    type: 'multiple-choice',
+    options: [
+      'The program silently does nothing',
+      'UPDATE fails at runtime, since there is no current record for it to act on',
+      'A new record is automatically created',
+      'The program automatically retries with a different key',
+    ],
+    correctAnswer: 'UPDATE fails at runtime, since there is no current record for it to act on',
+    explanation:
+      "This is one of the most common RPGLE file I/O mistakes -- skipping the %FOUND check before UPDATE or DELETE causes a runtime failure whenever the key doesn't match a record.",
+    relatedLessonSlugs: ['chain-for-keyed-access', 'common-rpgle-file-io-mistakes-and-best-practices'],
+    tags: ['mixed-review', 'file-io'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'mix-2',
+    topicId: 'mixed-review',
+    title: 'A missing step, not a broken program',
+    question:
+      "A subfile shows stale data from a previous search, and separately, a batch report is missing a spool file even though WRKSBMJOB shows it completed. What do both symptoms have in common?",
+    type: 'scenario',
+    correctAnswer:
+      "Both point to a missing or incomplete step, not a fundamentally broken program -- the subfile needs a clear-before-reload step, and the report needs its own job log checked separately from the wrapper's.",
+    explanation:
+      'Both scenarios are examples of a common theme: a symptom that looks like a bug is often actually a missing step (clearing a subfile, checking the right job log) rather than broken logic.',
+    relatedLessonSlugs: ['clearing-and-reloading-a-subfile', 'batch-job-failure-investigation'],
+    tags: ['mixed-review', 'troubleshooting'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'mix-3',
+    topicId: 'mixed-review',
+    title: 'Combining SQL search with a subfile',
+    question: 'You need to search customers by partial name and display multiple matches on screen. Which combination of concepts applies?',
+    type: 'multiple-choice',
+    options: [
+      'CHAIN plus a display file record format',
+      'An embedded SQL cursor with a LIKE condition, loading matches into a subfile',
+      'SETLL alone, with no subfile',
+      'A printer file only',
+    ],
+    correctAnswer: 'An embedded SQL cursor with a LIKE condition, loading matches into a subfile',
+    explanation:
+      'A partial-name search naturally fits an embedded SQL cursor with LIKE, and showing multiple matches at once naturally fits a subfile -- combining both concepts from different topics.',
+    relatedLessonSlugs: ['sqlrpgle-interview-scenarios', 'understanding-rrn-in-subfile-programs'],
+    tags: ['mixed-review', 'sqlrpgle', 'subfiles'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'mix-4',
+    topicId: 'mixed-review',
+    title: "Wrapper success vs the job's own outcome",
+    question:
+      "A CLLE wrapper submits a report program as a batch job. The wrapper's own job log shows success. Where would you actually find out whether the report program itself failed?",
+    type: 'scenario',
+    correctAnswer:
+      "In the submitted batch job's own separate job log, not the wrapper's -- the wrapper's job log only confirms it submitted successfully, not that the submitted job itself succeeded.",
+    explanation:
+      "A submitted job (via SBMJOB) runs independently with its own job log. Confirming the wrapper submitted successfully is a separate question from confirming the submitted job itself completed without error.",
+    relatedLessonSlugs: ['batch-job-failure-investigation', 'job-queues-and-output-queues'],
+    tags: ['mixed-review', 'operations'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'mix-5',
+    topicId: 'mixed-review',
+    title: 'Combining subfile selection with a detail screen',
+    question:
+      'Which two mini-project concepts would you combine to build a screen that lets a user select one row from a list and see its full detail?',
+    type: 'multiple-choice',
+    options: [
+      'A load-all subfile plus DELETE',
+      'Option fields plus READC, then CHAIN to the selected record and EXFMT a detail screen',
+      'A printer file plus MONMSG',
+      'CRTLIB plus DSPLIB',
+    ],
+    correctAnswer: 'Option fields plus READC, then CHAIN to the selected record and EXFMT a detail screen',
+    explanation:
+      'This combines subfile row-selection (option field, READC) with native file I/O (CHAIN) and display files (EXFMT) -- exactly the combination used in the Subfile Row Selection with Detail Screen mini project.',
+    relatedLessonSlugs: ['simple-order-list-subfile', 'understanding-rrn-in-subfile-programs'],
+    tags: ['mixed-review', 'subfiles'],
+    difficulty: 'beginner',
+  },
+  {
+    id: 'mix-6',
+    topicId: 'mixed-review',
+    title: 'MSGW and job log investigation share a habit',
+    question:
+      "In an interview, you're asked to explain why a job might be in MSGW status and how you'd investigate it. What ties this question to earlier debugging concepts?",
+    type: 'scenario',
+    correctAnswer:
+      'Both rely on the same underlying habit: checking the specific message the job (or job log) is actually reporting, rather than guessing, before taking any action.',
+    explanation:
+      "Whether it's a job in MSGW or a job log after a program failure, the core skill is the same: read the actual message detail first, since it usually tells you exactly what's needed.",
+    relatedLessonSlugs: ['job-status-values-explained', 'basic-troubleshooting-flow-for-ibm-i-developers'],
+    tags: ['mixed-review', 'operations', 'debugging'],
     difficulty: 'beginner',
   },
 ]
