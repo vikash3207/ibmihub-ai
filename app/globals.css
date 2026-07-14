@@ -5,3 +5,29 @@
 :root {
   color-scheme: light;
 }
+
+/*
+ * Tailwind Typography's `prose-code:*` modifiers (used in
+ * components/lesson-content.tsx for inline `code` styling) apply to every
+ * `code` element, including ones inside `pre` fenced code blocks. Those
+ * utility classes are emitted in Tailwind's utilities layer, which wins
+ * the cascade over the typography plugin's own built-in `pre code` reset,
+ * so the inline-code background/padding/rounded-corner styling was
+ * bleeding into code blocks -- painting a light box over the dark `pre`
+ * background instead of showing the code text. This restores the
+ * plugin's intended "plain, inherited" styling for code inside `pre`,
+ * regardless of what the inline-code utilities set.
+ */
+.prose pre code {
+  background-color: transparent !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+  font-weight: inherit !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
+
+.prose pre code::before,
+.prose pre code::after {
+  content: none !important;
+}
