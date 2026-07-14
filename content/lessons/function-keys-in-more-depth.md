@@ -33,7 +33,7 @@ another.
 A screen supporting several function keys simply ties each one to its own
 `CFxx` or `CAxx` keyword and its own indicator:
 
-```
+```text
 CF03  ->  *IN03  (Exit)
 CF05  ->  *IN05  (Refresh)
 CF12  ->  *IN12  (Cancel)

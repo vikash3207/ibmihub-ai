@@ -1,13 +1,11 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Lock, Check } from 'lucide-react'
 import { getPublishedLessons } from '@/lib/lessons'
 import { createClient } from '@/lib/supabase/server'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
-import { Badge } from '@/components/ui/badge'
-import { cn } from '@/lib/utils'
+import { LessonBrowser } from '@/components/lesson-browser'
 
 // Reads the auth session to decide lock icons/completed badges per lesson --
 // never statically cache; always compute fresh per request.
@@ -65,53 +63,12 @@ export default async function IbmIFundamentalsPage() {
           Lessons for this path are still being written and reviewed. Check back soon.
         </div>
       ) : (
-        <ol className="space-y-3">
-          {lessons.map((lesson) => {
-            const isPreview = lesson.lesson_order === 1
-            const isLocked = !isPreview && !user
-            const isCompleted = user && completedLessonIds.has(lesson.id)
-
-            return (
-              <li key={lesson.id}>
-                <Link
-                  href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
-                  prefetch={false}
-                  className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
-                >
-                  <span
-                    className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
-                      isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
-                    )}
-                  >
-                    {isCompleted ? <Check className="h-4 w-4" aria-hidden="true" /> : lesson.lesson_order}
-                  </span>
-                  <span className="flex-1">
-                    <span className="flex items-center gap-2">
-                      <span className="font-semibold text-slate-900">{lesson.title}</span>
-                      {isPreview && <Badge variant="success">Free preview</Badge>}
-                      {isLocked && (
-                        <Badge variant="locked">
-                          <Lock className="h-3 w-3" aria-hidden="true" />
-                          Log in to access
-                        </Badge>
-                      )}
-                      {isCompleted && (
-                        <Badge variant="success">
-                          <Check className="h-3 w-3" aria-hidden="true" />
-                          Completed
-                        </Badge>
-                      )}
-                    </span>
-                    <span className="block text-sm text-slate-600 mt-1">
-                      {lesson.short_description}
-                    </span>
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
-        </ol>
+        <LessonBrowser
+          lessons={lessons}
+          totalLessons={totalLessons}
+          completedLessonIds={Array.from(completedLessonIds)}
+          isLoggedIn={Boolean(user)}
+        />
       )}
 
       {lessons.length > 0 && lessons.length < totalLessons && (
