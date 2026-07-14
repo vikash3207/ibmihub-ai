@@ -36,6 +36,27 @@ report what happened, and telling these two directions apart is essential
 to understanding what a given indicator on a display file is actually
 doing.
 
+Setting a conditioning indicator in free-format RPGLE uses the same
+`*IN` naming style already familiar from checking response indicators,
+just as an assignment instead of a condition:
+
+```rpgle
+if orderTotal > 1000;
+  *in30 = *on;
+else;
+  *in30 = *off;
+endif;
+
+exfmt CONFIRMFMT;
+```
+
+Here, the program decides whether indicator 30 should be on or off based
+on `orderTotal`, before `exfmt` shows the screen. The display file's DDS,
+not shown here since this lesson group describes DDS in prose rather than
+column-based source, would condition the "Manager Approval Required" line
+on that same indicator 30, so it only appears when the program has turned
+it on.
+
 ## Why It Matters
 
 Getting this direction backwards is a common, genuine source of confusion:
