@@ -43,6 +43,13 @@ export async function SiteHeader() {
                 Learning Center
               </Link>
               <Link
+                href="/practice"
+                prefetch={false}
+                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
+              >
+                Practice
+              </Link>
+              <Link
                 href="/ai-tutor"
                 prefetch={false}
                 className="text-sm font-medium text-cyan-700 hover:text-cyan-800 transition-colors"
