@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { BookOpen } from 'lucide-react'
 import { getPublishedLessonCount } from '@/lib/lessons'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
-import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
 import { Card } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 
@@ -15,7 +14,6 @@ export const metadata: Metadata = {
 
 export default async function LearnPage() {
   const publishedCount = await getPublishedLessonCount()
-  const totalLessons = IBM_I_FUNDAMENTALS_LESSONS.length
 
   return (
     <div className="space-y-8">
@@ -36,7 +34,7 @@ export default async function LearnPage() {
           covering libraries and objects, the 5250 interface, RPGLE, CLLE, Db2 for i, and more.
         </p>
         <p className="text-sm text-slate-500 mb-4">
-          {publishedCount} of {totalLessons} lessons published
+          {publishedCount} lessons published
         </p>
 
         {publishedCount > 0 ? (
