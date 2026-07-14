@@ -75,9 +75,9 @@ even touch.
 
 **"Are these mistakes only a concern for large, complex applications?"**
 No. Even a small, two-module application can run into any of these,
-particularly the missing `%FOUND`-style prototype mismatch or
-forgetting to relist a recompiled module. Scale changes how painful a
-mistake is to track down, not whether it can happen at all.
+particularly a mismatched prototype or forgetting to relist a
+recompiled module. Scale changes how painful a mistake is to track
+down, not whether it can happen at all.
 
 **"Is there one single fix that prevents all of these?"**
 No, but the habit underlying most of them is the same: treat modules,

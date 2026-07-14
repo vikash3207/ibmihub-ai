@@ -4872,18 +4872,17 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Advanced RPGLE / ILE Batch 1 (PR #102): OPM vs ILE through
   // Activation Groups Basics ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. First intermediate/professional-depth lessons in the
-  // curriculum; every lesson before this batch is beginner/foundation.
+  // Published in PR #104 (Advanced RPGLE / ILE Review + Publish Pass) after a
+  // technical and structural review found no unresolved issues. First
+  // intermediate/professional-depth lessons in the curriculum; every lesson
+  // before this batch is beginner/foundation.
   {
     slug: 'opm-vs-ile-on-ibm-i',
     title: 'OPM vs ILE on IBM i',
     shortDescription: 'The difference between the Original Program Model and the Integrated Language Environment, and why ILE was introduced.',
     lessonOrder: 209,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/opm-vs-ile-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can an OPM program call an ILE program, or do the two models have to match?',
@@ -4906,7 +4905,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The three ILE object types -- module, program, and service program -- and how they relate to one another.',
     lessonOrder: 210,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/modules-programs-and-service-programs.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'If I change one module, do I need to rebuild every program that uses it?',
@@ -4929,7 +4928,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Compiling free-format RPGLE source into a module with CRTRPGMOD, and what that command does and does not produce.',
     lessonOrder: 211,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/creating-rpgle-modules-with-crtrpgmod.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would happen if I left out ctl-opt nomain on a module meant to be bound into a program?',
@@ -4952,7 +4951,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using CRTPGM to bind one or more modules into a runnable program, and what binding actually means.',
     lessonOrder: 212,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/binding-modules-into-programs-with-crtpgm.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: "What error would I likely see if I ran CRTPGM without listing a module that CUSTMAIN actually calls?",
@@ -4975,7 +4974,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Why a prototype is required to call a procedure defined in another module, and how it pairs with a procedure interface.',
     lessonOrder: 213,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/prototypes-and-procedure-interfaces-in-ile.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What is a copy member, and how does it help keep a prototype consistent across several calling programs?',
@@ -4998,7 +4997,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The difference between a procedure only callable within its own module and one exported for other modules to call.',
     lessonOrder: 214,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/internal-procedures-vs-exported-procedures.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I decide whether a specific procedure should be internal or exported?',
@@ -5021,7 +5020,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a service program is, why it is useful once several programs share logic, and creating one with CRTSRVPGM.',
     lessonOrder: 215,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/introduction-to-service-programs.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: "How is calling a procedure in a service program different, from the calling program's point of view, than calling one in a directly bound module?",
@@ -5044,7 +5043,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an activation group is at a conceptual level, and why it matters for how programs and service programs behave at runtime.',
     lessonOrder: 216,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/activation-groups-basics.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would be a realistic reason to want a program to keep its own activation group separate from its caller\'s?',
@@ -5063,10 +5062,10 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Advanced RPGLE / ILE Batch 2 (PR #103): Binding Directories Basics
   // through Common ILE Mistakes and Best Practices ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Builds directly on Batch 1 (PR #102); same intermediate/
+  // Published in PR #104 (Advanced RPGLE / ILE Review + Publish Pass) after a
+  // technical and structural review found and fixed one minor content issue
+  // (a confusing, unrelated %FOUND reference in the mistakes capstone
+  // lesson). Builds directly on Batch 1 (PR #102); same intermediate/
   // professional depth as that batch.
   {
     slug: 'binding-directories-basics',
@@ -5074,7 +5073,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a binding directory is, and how it lets CRTPGM find shared modules and service programs automatically.',
     lessonOrder: 217,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/binding-directories-basics.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would happen if CUSTUTIL were listed both in a binding directory and directly on BNDSRVPGM at the same time?',
@@ -5097,7 +5096,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Creating a service program with CRTSRVPGM and binding a program to it with BNDSRVPGM, versus binding a module directly.',
     lessonOrder: 218,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/creating-service-programs-with-crtsrvpgm.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why would binding to a shared service program be preferable to binding the same module directly into three separate programs?',
@@ -5120,7 +5119,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What binder source is, and why EXPORT(*SRCFILE) offers more deliberate control than EXPORT(*ALL).',
     lessonOrder: 219,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/binder-source-introduction.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why might a shop prefer EXPORT(*SRCFILE) over EXPORT(*ALL) even for a fairly small service program?',
@@ -5143,7 +5142,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: "Signatures as a compatibility fingerprint of a service program's exports, and why they matter to callers.",
     lessonOrder: 220,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/service-program-signatures-at-a-beginner-level.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "What would actually happen at runtime if a calling program's remembered signature no longer matched the service program?",
@@ -5166,7 +5165,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A conceptual, safe process for updating a service program without breaking programs that already depend on it.',
     lessonOrder: 221,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/updating-service-programs-safely.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I find out which programs actually call a specific exported procedure before changing it?',
@@ -5189,7 +5188,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Common, realistic activation-group-related symptoms, such as files not staying open between calls, and their likely causes.',
     lessonOrder: 222,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/activation-group-problems-and-common-confusions.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I check which activation group a specific program actually runs in?',
@@ -5212,7 +5211,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using STRDBG against a program built from multiple bound modules, and reading a call stack across module boundaries.',
     lessonOrder: 223,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-ile-programs.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What would the call stack look like if CUSTMAIN called a service program procedure that itself called another internal procedure?',
@@ -5235,7 +5234,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common mistakes beginners make with ILE modules, programs, and service programs, drawn from across both ILE batches.',
     lessonOrder: 224,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ile-mistakes-and-best-practices.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a small ILE snippet with one of these mistakes and ask me to spot it?',
