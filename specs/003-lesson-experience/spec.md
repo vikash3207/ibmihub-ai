@@ -9,9 +9,9 @@
 | Spec ID | 003 |
 | Feature | Lesson Experience |
 | Status | Approved |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Product + Engineering |
-| Last Updated | 2026-07-01 |
+| Last Updated | 2026-07-15 |
 
 ### Source Documents
 
@@ -19,11 +19,12 @@
 |---|---|---|
 | PRD.md | v2.9 | Primary product requirements source |
 | planning/SPRINT_1_DECISION_REGISTER.md | v0.3 | Resolved Sprint 1 blocking decisions |
-| specs/001-ai-tutor/spec.md | v1.0 Approved | AI Tutor integration reference |
+| specs/001-ai-tutor/spec.md | v1.1 Approved | AI Tutor integration reference (embedded panel behavior now governed there; see LESSON-FR-011) |
 | specs/002-learning-center/spec.md | v1.0 Approved | Learning Center context and access rules |
 | docs/adr/ADR-001-mvp-technology-stack.md | v0.1 Accepted | Next.js + TypeScript stack decision |
 | docs/adr/ADR-003-database-and-storage.md | v0.1 Accepted | Content storage decisions |
 | docs/adr/ADR-004-authentication-approach.md | v0.1 Accepted | Supabase Auth authentication decision |
+| planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md | PR #126 | Design proposal behind this v1.1 revision |
 
 ---
 
@@ -56,8 +57,8 @@ The MVP Lesson Experience covers the reading and completion experience for a sin
 | Mark Complete button for authenticated users | An authenticated user can mark a lesson as complete from the lesson page |
 | First lesson public preview | Lesson 1 (What is IBM i?) is fully readable without authentication |
 | Login prompt for protected lessons | Unauthenticated users who attempt to open lessons beyond Lesson 1 see a login/sign-up prompt |
-| AI Tutor link from lesson page | Each lesson page includes a visible link to the AI Tutor at `/ai-tutor` |
-| Optional AI Tutor starter question | If present in lesson metadata, a suggested question is displayed near the AI Tutor link |
+| Embedded AI Tutor panel from lesson page | Each lesson page includes a trigger that opens the AI Tutor as an embedded panel (desktop) / full-screen sheet (mobile), grounded in the current lesson, without navigating away (Spec 001 v1.1 AI-TUTOR-FR-020; **supersedes v1.0's link-only behavior**) |
+| Optional AI Tutor starter question | If present in lesson metadata, a suggested question is displayed near the AI Tutor trigger |
 | Published/reviewed lesson enforcement | Only lessons with a published status may be accessed; draft lessons are inaccessible to all users |
 
 ---
@@ -70,8 +71,9 @@ The following capabilities must not be included in the MVP Lesson Experience imp
 |---|---|
 | Quizzes and knowledge checks | Deferred to post-MVP (D-PROD-003) |
 | Standalone or inline glossary | Deferred to post-MVP (D-PROD-004) |
-| Lesson-aware embedded AI | Deferred to post-MVP (D-AI-003); AI Tutor link only |
-| Inline AI side panel or chat overlay | Not in MVP scope; would require lesson-aware context |
+| Server-side persisted AI Tutor conversation history | Not in the first embedded panel implementation (Spec 001 v1.1, D-AI-004 unchanged) |
+| AI Tutor selected-text ask feature | Deferred to a later, separate PR (Spec 001 v1.1) |
+| Embedded panel resize | Deferred to a later, separate PR; fixed-width panel in the first implementation (Spec 001 v1.1) |
 | Lesson comments or discussion | Future feature |
 | Video lessons | Not in MVP curriculum |
 | Interactive 5250 terminal or lab | Future feature (PRD 11, Phase 4) |
@@ -105,7 +107,7 @@ A user who already works with IBM i and uses the Lesson Experience to refresh sp
 
 - Navigate directly to a specific lesson without starting from Lesson 1
 - Skim lesson content rather than reading it word for word
-- Use the AI Tutor link to ask a follow-up question about a concept
+- Use the AI Tutor trigger to ask a follow-up question about a concept
 - Mark a lesson complete after reviewing it
 
 The lesson page must serve this persona as an efficient reference experience without forcing sequential reading.
@@ -123,8 +125,8 @@ The lesson page must serve this persona as an efficient reference experience wit
 | US-LE-005 | Any user | Navigate to the previous lesson | I can revisit earlier content if needed |
 | US-LE-006 | Authenticated user | Click Mark Complete at the end of a lesson | I can record my progress through the IBM i Fundamentals path |
 | US-LE-007 | Authenticated user | See the lesson marked as completed after clicking Mark Complete | I have confirmation that my progress was saved |
-| US-LE-008 | Any user | Click a link to the AI Tutor from the lesson page | I can ask a question about what I just read |
-| US-LE-009 | Any user | See a suggested starter question near the AI Tutor link | I get help understanding what I could ask the AI Tutor about this lesson |
+| US-LE-008 | Any user | Open the AI Tutor from the lesson page without losing my place in the lesson | I can ask a question about what I just read while still seeing it |
+| US-LE-009 | Any user | See a suggested starter question near the AI Tutor trigger | I get help understanding what I could ask the AI Tutor about this lesson |
 | US-LE-010 | Any user | Receive a clear error or redirect when I navigate to a lesson that does not exist or is not published | I do not see a blank page or confusing technical error |
 
 ---
@@ -276,25 +278,27 @@ At the end of Lesson 1 (the unauthenticated preview lesson), the page must promp
 
 ---
 
-### LESSON-FR-011 — AI Tutor Link
+### LESSON-FR-011 — AI Tutor Trigger (Embedded Panel)
 
-Each lesson page must include a visible link to the AI Tutor.
+Each lesson page must include a visible trigger to open the AI Tutor.
 
-- The AI Tutor link must direct the user to the AI Tutor at `/ai-tutor` (Spec 001)
-- The link must be contextually presented to encourage lesson-related questions (e.g., "Have a question about this lesson? Ask the AI Tutor")
-- The AI Tutor link must be visible to both authenticated and unauthenticated users
-- The AI Tutor is not embedded in the lesson page (no lesson-aware AI, no side panel); the link navigates away from the lesson
+- The trigger must open the AI Tutor as an **embedded panel** (desktop right-side panel; mobile full-screen sheet), grounded in the current lesson, without navigating the user away from the lesson (Spec 001 v1.1 AI-TUTOR-FR-018, AI-TUTOR-FR-020) — **this supersedes the v1.0 requirement that the link navigate to `/ai-tutor`**
+- The trigger must be contextually presented to encourage lesson-related questions (e.g., "Have a question about this lesson? Ask the AI Tutor")
+- The trigger must be visible to both authenticated and unauthenticated users; an unauthenticated user who opens the panel sees the same login prompt the standalone `/ai-tutor` page already shows, not a broken or silently non-functional panel (Spec 001 AI-TUTOR-FR-001)
+- The lesson content must remain visible alongside the panel on desktop/tablet widths, per Spec 001 AI-TUTOR-FR-020
+- The standalone `/ai-tutor` route (including `?lesson=<slug>` links) remains available as a fallback/general entry point and must continue to work unchanged (Spec 001 AI-TUTOR-FR-022) — for example, for any existing bookmarked or shared link that points directly at `/ai-tutor?lesson=<slug>`
+- The lesson page's AI Tutor trigger must use the same shared panel implementation used by the Practice page's trigger (Spec 001 AI-TUTOR-FR-023), not a lesson-specific implementation
 
 **Priority:** Must Have
-**Source:** PRD 13.7 FR-LESSON-007; Spec 001 AI Tutor; Spec 002 LEARNING-FR-009
+**Source:** PRD 13.7 FR-LESSON-007; Spec 001 v1.1 AI-TUTOR-FR-018/020/022/023; Spec 002 LEARNING-FR-009
 
 ---
 
 ### LESSON-FR-012 — Optional AI Tutor Starter Question
 
-If a lesson's metadata includes an AI Tutor starter question, it must be displayed near the AI Tutor link.
+If a lesson's metadata includes an AI Tutor starter question, it must be displayed near the AI Tutor trigger.
 
-- The starter question should be displayed as a suggested prompt the user can use when visiting the AI Tutor
+- The starter question should be displayed as a suggested prompt the user can use when opening the AI Tutor
 - Starter questions are optional; if no starter question is present in lesson metadata, nothing is shown in its place
 - Starter questions must not be displayed as required or mandatory questions
 
@@ -469,11 +473,12 @@ The following UX requirements define the expected layout and interaction pattern
 - Code blocks are rendered in a monospace font, visually distinct from prose text
 - The reading area must have comfortable line length and font size for extended reading
 
-### AI Tutor Callout or Link
+### AI Tutor Callout / Trigger
 
-- A contextual call-to-action linking to the AI Tutor appears within the lesson page
-- The AI Tutor link is positioned in a way that feels natural within the lesson flow — either after a content section or at the end of the lesson
-- If a starter question is present in lesson metadata, it is displayed near the AI Tutor link
+- A contextual call-to-action to open the AI Tutor appears within the lesson page
+- The trigger is positioned in a way that feels natural within the lesson flow — either after a content section or at the end of the lesson
+- If a starter question is present in lesson metadata, it is displayed near the AI Tutor trigger
+- Activating the trigger opens the embedded panel (desktop) / full-screen sheet (mobile) described in Spec 001 v1.1, rather than navigating to a separate page
 
 ### Mark Complete Area
 
@@ -545,7 +550,7 @@ The Lesson Experience feature depends on the following approved decisions and re
 | Spec 002: Learning Center | Defines the learning path structure, lesson ordering, and route conventions that the Lesson Experience implements at the page level |
 | Spec 004: User Account and Onboarding | Authentication must be in place before the access rules in Section 11 can be enforced |
 | Spec 006: Progress Tracking | Mark Complete writes a completion record; completed lesson state is read from the progress tracking implementation |
-| Spec 001: AI Tutor | The AI Tutor link on each lesson page routes to the AI Tutor feature; Spec 001 governs AI Tutor behavior |
+| Spec 001: AI Tutor | The AI Tutor trigger on each lesson page opens the embedded AI Tutor panel (v1.1); Spec 001 governs all AI Tutor behavior, including the embedded panel, grounding, and the standalone `/ai-tutor` route |
 | Spec 009: Content Governance | The content review and publication workflow governs which lessons qualify as published and therefore accessible (LESSON-FR-005, LESSON-FR-014) |
 
 ---
@@ -588,10 +593,13 @@ The Lesson Experience feature is considered implementation-complete and ready fo
 
 ### AI Tutor Integration
 
-- [ ] Each lesson page includes a visible link to the AI Tutor at `/ai-tutor`
-- [ ] The AI Tutor link is accessible to both authenticated and unauthenticated users
-- [ ] A starter question is displayed near the AI Tutor link when one is present in lesson metadata
+- [ ] Each lesson page includes a visible trigger that opens the AI Tutor as an embedded panel (desktop) / full-screen sheet (mobile), grounded in the current lesson
+- [ ] The AI Tutor trigger is accessible to both authenticated and unauthenticated users; an unauthenticated user sees a login prompt within/via the panel, not a broken experience
+- [ ] The lesson content remains visible alongside the panel on desktop/tablet widths
+- [ ] A starter question is displayed near the AI Tutor trigger when one is present in lesson metadata
 - [ ] No starter question placeholder is shown when the metadata field is absent
+- [ ] The standalone `/ai-tutor` route, including `?lesson=<slug>` links, still works unchanged
+- [ ] Navigating to the next/previous lesson with the panel open preserves the conversation and updates the context indicator to the new lesson
 
 ### Error Handling
 
@@ -603,7 +611,8 @@ The Lesson Experience feature is considered implementation-complete and ready fo
 
 - [ ] No quiz or knowledge check is present on any lesson page
 - [ ] No glossary feature is embedded in the lesson page
-- [ ] The AI Tutor is not embedded as a side panel or inline chat; only a link to `/ai-tutor` is present
+- [ ] No AI Tutor conversation content is persisted server-side (Spec 001 v1.1, D-AI-004 unchanged)
+- [ ] No AI Tutor selected-text ask feature or panel resize control is present in this implementation
 - [ ] No interactive 5250 lab or RPG playground is present
 - [ ] No code execution or real IBM i connectivity is present
 - [ ] No content authoring or CMS editing UI is accessible to users
@@ -618,8 +627,9 @@ The Lesson Experience feature is considered implementation-complete and ready fo
 | Draft lesson exposure — a draft lesson URL is discoverable or accessible despite not being listed | Low | High | Enforce draft access control server-side on every request; return 404 for all non-published lesson routes; test specifically for draft content exposure before beta |
 | Confusing login gate — unauthenticated users reach a lesson and do not understand why they are blocked | Medium | Medium | Login prompt must clearly communicate what the user must do and why (to save progress and continue learning); do not show a generic 401 error page |
 | Mark Complete dependency on progress tracking — Spec 006 is not ready when the Lesson Experience is built | Medium | Medium | Coordinate implementation with Spec 006 before building the Mark Complete behavior; do not implement a separate progress model in the lesson page |
-| Lesson page becoming too feature-heavy — pressure to add quizzes, AI side panels, or glossary tooltips during implementation | Medium | Medium | This spec explicitly excludes these features; any addition requires Product Owner approval and a PRD update |
-| AI Tutor link causes context confusion — user clicks the link expecting lesson-aware AI but gets a generic AI Tutor | Low | Medium | The AI Tutor link label should set correct expectations: "Ask the AI Tutor a question" rather than implying the AI Tutor knows the lesson; the optional starter question helps frame the interaction |
+| Lesson page becoming too feature-heavy — pressure to add quizzes or glossary tooltips during implementation | Medium | Medium | This spec explicitly excludes these features; any addition requires Product Owner approval and a PRD update |
+| Embedded panel causes context confusion — user expects the panel's context indicator to always reflect the exact lesson they're reading | Low | Medium | The panel must display an explicit, human-readable context label (Spec 001 v1.1 AI-TUTOR-FR-020) so the learner can see at a glance what the AI Tutor is grounded in, rather than assuming context silently |
+| Practice-question answer leakage — a learner receives the correct answer from the AI Tutor before revealing it in the Practice UI | Low | High | Spec 001 v1.1 AI-TUTOR-FR-021 requires the correct answer/explanation to be omitted from the context payload entirely before reveal, not merely withheld by prompt instruction |
 | Long lessons feel unstructured — lessons without clear sections feel hard to read | Low | Medium | Content governance (Spec 009) must require lessons to use headings that break the content into navigable sections |
 | Static generation vs. authenticated access tension — statically generated lesson pages may complicate per-user access control | Medium | Medium | Resolve the static vs. server-side rendering strategy during implementation planning; the authenticated access check may require server-side rendering or a hybrid approach for protected lessons |
 
@@ -674,3 +684,4 @@ This specification must be reviewed and approved by the Product Owner before any
 | 2026-07-01 | 0.1 | Initial draft — full MVP Lesson Experience spec based on PRD v2.9, Spec 001, and Spec 002 |
 | 2026-07-01 | 0.2 | Cleanup after review; resolved Mark Complete state, code block rendering, and slug format decisions |
 | 2026-07-01 | 1.0 | Approved Lesson Experience SDD spec for implementation planning |
+| 2026-07-15 | 1.1 | Product Owner approved (PR #127, following the PR #126 design proposal): LESSON-FR-011 rewritten so the lesson page's AI Tutor trigger opens an embedded panel grounded in the current lesson, superseding the v1.0 "link navigates away, not embedded" requirement; removed the now-superseded "Lesson-aware embedded AI" / "Inline AI side panel" out-of-scope rows (see Spec 001 v1.1 for the full amended AI Tutor scope); updated the AI Tutor Integration and Out-of-Scope Verification acceptance checklists and the context-confusion/answer-leakage risk entries accordingly. Standalone `/ai-tutor` behavior (Spec 001 AI-TUTOR-FR-022) is unaffected. |

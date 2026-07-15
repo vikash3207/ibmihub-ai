@@ -9,21 +9,22 @@
 | Spec ID | 001 |
 | Feature | AI Tutor |
 | Status | Approved |
-| Version | 1.0 |
+| Version | 1.1 |
 | Owner | Product + Engineering |
-| Last Updated | 2026-07-01 |
+| Last Updated | 2026-07-15 |
 
 ### Source Documents
 
 | Document | Version | Role |
 |---|---|---|
 | PRD.md | v2.9 | Primary product requirements source |
-| planning/SPRINT_1_DECISION_REGISTER.md | v0.3 | Resolved Sprint 1 blocking decisions |
+| planning/SPRINT_1_DECISION_REGISTER.md | v0.3 | Resolved Sprint 1 blocking decisions (D-AI-003 scope amended by this spec's v1.1 revision; see Revision History) |
 | docs/adr/ADR-005-ai-provider-and-model.md | v0.1 Accepted | AI provider, model, and abstraction decisions |
 | docs/adr/ADR-001-mvp-technology-stack.md | v0.1 Accepted | Next.js + TypeScript stack decision |
 | docs/adr/ADR-002-hosting-and-deployment.md | v0.1 Accepted | Vercel hosting decision |
 | docs/adr/ADR-003-database-and-storage.md | v0.1 Accepted | Supabase PostgreSQL and storage decisions |
 | docs/adr/ADR-004-authentication-approach.md | v0.1 Accepted | Supabase Auth authentication decision |
+| planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md | PR #126 | Design proposal and architecture investigation behind this v1.1 revision |
 
 ---
 
@@ -55,9 +56,14 @@ The MVP AI Tutor is a text-based, authenticated, session-scoped conversational a
 | IBM i-focused conceptual Q&A | Users can ask questions about IBM i concepts, RPGLE, CLLE, SQL, DDS, 5250, job logs, and IBM i development workflows |
 | Beginner-friendly explanations | The AI Tutor adjusts language and depth for users who identify as new to IBM i |
 | Working developer refresh support | The AI Tutor supports more direct, practical answers for users who already work with IBM i |
-| Prompt-guidance-only behavior | The AI Tutor operates on a well-crafted system prompt only; no lesson-aware context, no RAG, no fine-tuning (D-AI-003) |
+| Prompt-guidance behavior, extended with grounding | The AI Tutor operates on a well-crafted system prompt, extended with lesson-aware and course-aware grounding (see below); no fine-tuning (D-AI-003, **amended v1.1** — see Revision History) |
+| Lesson-aware context grounding | When opened from a specific lesson, the AI Tutor's system prompt is grounded in that lesson's actual title, summary, tags, and body content (D-AI-003, **amended v1.1**) |
+| Course-aware retrieval grounding | The AI Tutor's system prompt is additionally grounded with a small set of Published lessons retrieved by keyword relevance to the learner's latest message — a lightweight, non-vector form of retrieval, not full embedding-based RAG (D-AI-003, **amended v1.1**) |
+| Practice-question-aware context grounding | When opened from a Practice question, the AI Tutor's system prompt is grounded in that question's text, options, and (only after the learner reveals it) the correct answer and explanation (**new in v1.1**; see AI-TUTOR-FR-021) |
+| Embedded AI Tutor panel | The AI Tutor can be opened as an embedded panel (desktop right-side panel; mobile full-screen sheet) from lesson pages and the Practice page, without navigating away from the current content (**new in v1.1**, supersedes the MVP exclusion in Spec 001 v1.0 Section 12 and Spec 003 v1.0 LESSON-FR-011; see AI-TUTOR-FR-020) |
+| Standalone AI Tutor route | `/ai-tutor` remains available as a dedicated, general-purpose tutor page, unaffected by the embedded panel (see AI-TUTOR-FR-022) |
 | Authenticated usage only | AI Tutor is only available to logged-in users; unauthenticated users see a login prompt (D-PROD-005) |
-| Session-level conversation context | Conversation history is maintained within a single browser session; it is not persisted server-side across sessions (D-AI-004) |
+| Session-level conversation context | Conversation history is maintained within the current browser session/client-side navigation; it is not persisted server-side across sessions (D-AI-004, unchanged) |
 | Safety and uncertainty messaging | The AI Tutor communicates that its responses may be incomplete or incorrect and should be validated before production use |
 | Sensitive data warning | The AI Tutor includes clear guidance near the input area discouraging users from sharing private code, job logs, credentials, or customer data |
 | AI response feedback collection | Users can mark individual AI responses as helpful or not helpful |
@@ -72,13 +78,15 @@ The following capabilities must not be included in the MVP AI Tutor implementati
 
 | Excluded Capability | Reason |
 |---|---|
-| Lesson-aware AI (AI knowing current lesson context) | Deferred to post-MVP; adds pipeline complexity (D-AI-003) |
-| Retrieval-Augmented Generation (RAG) | Not required for MVP prompt-guidance approach (D-AI-003) |
+| Vector-embedding-based Retrieval-Augmented Generation | The lightweight, keyword-based retrieval grounding described in Section 3 is in scope; a full vector-embedding/similarity-search RAG pipeline is not required and remains out of scope (D-AI-003, **amended v1.1** — narrowed, not removed) |
 | Fine-tuning or model customization | Not approved for MVP; requires separate review |
 | Real IBM i system connectivity | Explicitly prohibited in MVP (PRD 18.14, D-TECH-003) |
 | Private production source code upload | Explicitly prohibited in MVP (PRD 18.15) |
 | Sensitive production job log upload | Explicitly prohibited in MVP (PRD 18.15) |
-| Server-side persistent AI conversation history | Not persisted across sessions in MVP (D-AI-004) |
+| Server-side persistent AI conversation history (including within the embedded panel) | Not persisted across sessions in the first embedded-panel implementation (D-AI-004, unchanged); panel conversation persists only across client-side navigation in memory, per AI-TUTOR-FR-024 |
+| AI Tutor selected-text ask feature | Deferred to a later, separate PR (planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 12); not part of the first embedded panel implementation |
+| Embedded panel resize | Deferred to a later, separate PR; the first embedded panel implementation uses a fixed-width desktop panel |
+| 5250 emulator or IDE-style companion panel | Future feature; unrelated to and out of scope for the embedded AI Tutor panel work |
 | AI-generated production-safe guarantees | The AI Tutor must never claim production correctness |
 | Automatic code execution or compilation | Not in MVP scope (PRD 12, Section MVP Explicit Exclusions) |
 | Full job log analyzer feature | Post-MVP (PRD 11, Full Product Scope table) |
@@ -87,6 +95,7 @@ The following capabilities must not be included in the MVP AI Tutor implementati
 | Autonomous agent actions | Not in MVP scope |
 | Customer-specific knowledge base ingestion | Future only (PRD 15.3) |
 | Organization-level AI usage controls | Future only; enterprise features excluded from MVP |
+| Practice scoring, certificates, badges, rankings, or payment changes | Unrelated to and explicitly out of scope for the embedded AI Tutor panel work |
 
 ---
 
@@ -380,6 +389,105 @@ The AI Tutor must produce responses in a consistent, structured style.
 
 ---
 
+### AI-TUTOR-FR-018 — Lesson-Aware Context Grounding
+
+The AI Tutor must ground its system prompt in the current lesson's actual content when opened with a known lesson context.
+
+- The request must accept a lesson identifier (e.g. a lesson slug); an unknown, missing, or unpublished value must be treated as a normal "no specific lesson context" case, never an error
+- Only Published lessons may ever be resolved into grounding content — Review Ready and Draft lesson content must never reach the AI Tutor's system prompt
+- The grounded content must include, at minimum, the lesson's title, short description, tags, and a bounded excerpt of its body content (a fixed maximum character length, to keep prompt size predictable)
+- The UI must display a short, human-readable label describing what context is in use (e.g. "Using lesson context: <lesson title>")
+
+**Priority:** Must Have
+**Source:** Amends D-AI-003 (v1.1); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 2
+
+---
+
+### AI-TUTOR-FR-019 — Course-Aware Retrieval Grounding
+
+The AI Tutor must supplement its system prompt with a small set of Published lessons relevant to the learner's latest message, whether or not a specific lesson context is known.
+
+- Retrieval must be a lightweight, deterministic mechanism (e.g. keyword/token overlap scoring across title, tags, description, and body) — a full vector-embedding similarity search is explicitly not required (see Section 4)
+- Retrieval must only ever consider Published lessons
+- When a specific lesson context is already known (AI-TUTOR-FR-018), retrieval should exclude that lesson and surface a small number of additional, related lessons alongside it
+- When no specific lesson context is known, retrieval should surface a slightly larger set of generally relevant lessons as the sole grounding source
+- If retrieval finds no relevant lessons, the AI Tutor must proceed with an honest "the course may not cover this yet" framing rather than fabricating course coverage
+
+**Priority:** Must Have
+**Source:** Amends D-AI-003 (v1.1); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 2
+
+---
+
+### AI-TUTOR-FR-020 — Embedded AI Tutor Panel
+
+The AI Tutor must be available as an embedded panel from lesson pages and the Practice page, in addition to the standalone `/ai-tutor` route.
+
+- On desktop/tablet widths, the AI Tutor must open as a right-side panel alongside the current lesson or practice content, which must remain visible and unobstructed
+- On mobile widths, the AI Tutor must open as a full-screen overlay/sheet rather than an unusable split layout; the underlying content remains mounted (state preserved) but is not required to be visible while the sheet is open
+- The panel must display a short context indicator describing what lesson or practice question the current conversation is grounded in (see AI-TUTOR-FR-018 and AI-TUTOR-FR-021), a close control, and a control to explicitly start a new chat
+- Opening the panel must not navigate the browser away from the current lesson or practice page
+- The embedded panel and the standalone `/ai-tutor` page must share one underlying implementation for conversation handling, streaming, and feedback — not two independently maintained code paths (see AI-TUTOR-FR-023)
+
+**Priority:** Must Have
+**Source:** Supersedes Spec 001 v1.0 Section 12 ("not embedded... in MVP") and Spec 003 v1.0 LESSON-FR-011 ("not embedded... link navigates away"); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md
+
+---
+
+### AI-TUTOR-FR-021 — Practice Question Context and Answer-Reveal Safety
+
+When the AI Tutor is opened from a Practice question, its context payload must reflect the question's current reveal state, and must never leak an unrevealed answer.
+
+- The context payload may include, at minimum: a question identifier, the question text, its answer options (if multiple-choice), the learner's selected answer (if any), and any `relatedLessonSlugs` for supplementary retrieval
+- **Before** the learner has revealed the answer in the existing Practice UI, the context payload sent to the AI Tutor must **omit** the correct answer and explanation entirely — not merely instruct the model to withhold them. Omitting the data is the required mechanism; a prompt instruction alone is not sufficient
+- **After** the learner has revealed the answer, the context payload may include the correct answer and explanation, so the AI Tutor can discuss why the answer is correct
+- If a learner asks the AI Tutor to reveal an answer that has not been revealed in the UI, the AI Tutor cannot disclose information it was never given — it may only encourage the learner to use the existing "Reveal answer" control
+
+**Priority:** Must Have
+**Source:** Product Owner decision (this revision); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 9
+
+---
+
+### AI-TUTOR-FR-022 — Standalone AI Tutor Route Retained
+
+The standalone `/ai-tutor` route must continue to function exactly as before the embedded panel is introduced.
+
+- `/ai-tutor` remains a dedicated, full-page AI Tutor experience, unauthenticated visitors still see a login prompt rather than a functional input area
+- Existing direct links to `/ai-tutor`, including `/ai-tutor?lesson=<slug>`, must continue to work unchanged
+- The standalone route and the embedded panel must both be built on the same underlying conversation/streaming implementation (AI-TUTOR-FR-023), so improvements to one are not silently missed by the other
+
+**Priority:** Must Have
+**Source:** Product Owner decision (this revision); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 5
+
+---
+
+### AI-TUTOR-FR-023 — Single Shared Panel Implementation
+
+The embedded AI Tutor panel must be implemented as one shared provider/component set, reused by every entry point.
+
+- Lesson pages and the Practice page must trigger the same shared panel component with different context payloads (AI-TUTOR-FR-018/019/021) — not separate, independently-built lesson and practice implementations
+- Panel open/closed state and conversation state must be held by a single shared provider mounted high enough in the page layout tree to survive client-side navigation between a lesson page and the Practice page
+- Conversation streaming, message rendering, and feedback collection logic must be shared with (not duplicated from) the standalone `/ai-tutor` page's existing implementation
+
+**Priority:** Must Have
+**Source:** Product Owner decision (this revision); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 3
+
+---
+
+### AI-TUTOR-FR-024 — Panel Conversation Persistence Across Client-Side Navigation
+
+The embedded panel's conversation must persist across client-side navigation between lessons and practice questions, without being persisted server-side.
+
+- Navigating to the next/previous lesson, or to a different practice topic/question, while the panel is open must preserve the existing conversation history
+- The panel's context indicator must update to reflect the new lesson or question, without clearing the conversation
+- Closing and reopening the panel (with no navigation in between) must preserve the conversation
+- A full browser page refresh resets the panel to closed and the conversation to empty — this is expected and matches the existing, unchanged D-AI-004 behavior (no server-side conversation persistence)
+- An explicit "new chat" user action clears the conversation; this must be the only way conversation history is cleared while the browser session/tab remains open
+
+**Priority:** Must Have
+**Source:** Product Owner decision (this revision); planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 6
+
+---
+
 ## 8. Non-Functional Requirements
 
 ### NFR: Security
@@ -567,11 +675,20 @@ The production system prompt must be reviewed by the Product Owner before beta l
 
 The following UX requirements define the expected user experience of the AI Tutor feature. Specific visual design, layout, and component choices are to be determined during implementation.
 
-### AI Tutor Page
+### AI Tutor Page (Standalone)
 
-- The AI Tutor is a dedicated full-page experience accessible at `/ai-tutor`.
+- The AI Tutor remains available as a dedicated full-page experience accessible at `/ai-tutor` (AI-TUTOR-FR-022).
 - The AI Tutor must be clearly presented as an IBM i learning assistant, not a general programming assistant.
-- Lessons may include a link that navigates the user to `/ai-tutor`, but the AI Tutor is not embedded as a lesson-aware side panel or modal in MVP.
+- This standalone page is the fallback/general-purpose entry point; the embedded panel (below) is the contextual entry point from lesson and practice pages.
+
+### Embedded AI Tutor Panel (v1.1 — supersedes the v1.0 "not embedded in MVP" boundary)
+
+- Lesson pages and the Practice page trigger the AI Tutor as an **embedded panel** rather than navigating to `/ai-tutor` (AI-TUTOR-FR-020).
+- **Desktop/tablet:** the panel opens as a right-side panel alongside the current lesson or practice content, at a fixed width; the underlying content remains visible and unobstructed. No resizing in the first implementation (see Section 4, Out of Scope).
+- **Mobile:** the panel opens as a full-screen overlay/sheet. A squeezed split layout is explicitly disallowed below the desktop/tablet breakpoint. The chat input must remain visible and must not be obscured by the on-screen keyboard.
+- The panel displays: a short context indicator (e.g. "Using lesson context: <title>" or "Using context: Practice question — <title>"), a close control, and a "new chat" control.
+- The panel and the standalone `/ai-tutor` page share one underlying conversation/streaming/feedback implementation (AI-TUTOR-FR-023) — this is not a second, separately maintained chat experience.
+- Conversation state persists across client-side navigation between lessons and practice questions while the panel remains open, and resets only on an explicit "new chat" action or a full page refresh (AI-TUTOR-FR-024).
 
 ### Empty State — Starter Prompts
 
@@ -640,8 +757,8 @@ The AI Tutor feature depends on the following decisions, which have all been app
 | Authentication | Supabase Auth — users must be authenticated to use the AI Tutor | D-TECH-004, ADR-004 |
 | Database | Supabase PostgreSQL — feedback records and token usage metadata stored here | D-TECH-003, ADR-003 |
 | AI Provider | Anthropic, Claude Sonnet 4.6 as default; Claude Haiku 4.5 as cost fallback | D-AI-001, ADR-005 |
-| Prompt approach | Prompt-guidance only; no lesson-aware context in MVP | D-AI-003 |
-| Conversation history | Session-level only; not persisted server-side | D-AI-004 |
+| Prompt approach | Prompt-guidance, extended with lesson-aware and course-aware (keyword-retrieval) grounding; no vector-embedding RAG | D-AI-003 (amended v1.1) |
+| Conversation history | Session-level / client-side-navigation-level only; not persisted server-side | D-AI-004 (unchanged) |
 | Hosting | Vercel — AI service layer runs as Next.js API route or Server Action on Vercel serverless | D-TECH-002, ADR-002 |
 | Tech stack | Next.js + TypeScript — AI service layer implemented as a server-side module | D-TECH-001, ADR-001 |
 | Privacy notice wording | Final wording to be confirmed before beta (OQ-AI-005) | OQ-AI-005 |
@@ -714,6 +831,20 @@ The AI Tutor feature is considered implementation-complete and ready for beta wh
 - [ ] The Product Owner has reviewed the final system prompt and confirmed it matches the AI behavior rules in Section 9
 - [ ] The Product Owner has confirmed the privacy notice wording before beta launch
 
+### Embedded Panel and Grounding (v1.1)
+
+- [ ] From a lesson page, opening the AI Tutor opens an embedded panel without navigating away; the lesson remains visible on desktop
+- [ ] From the Practice page, opening the AI Tutor opens an embedded panel without navigating away; the question card remains visible on desktop
+- [ ] On a mobile-width viewport, the panel opens as a full-screen sheet, not a squeezed split layout, and the chat input is never obscured
+- [ ] A question asked with a known lesson context produces a response grounded in that lesson's actual content
+- [ ] A question asked with a known, revealed practice-question context produces a response referencing that question's actual correct answer/explanation
+- [ ] A question asked with a known, **unrevealed** practice-question context never receives or states the correct answer
+- [ ] Navigating to another lesson or practice question with the panel open preserves the conversation and updates only the context indicator
+- [ ] An explicit "new chat" action clears the conversation; a full page refresh also resets to closed/empty
+- [ ] The standalone `/ai-tutor` route, including `?lesson=` seeding, continues to work unchanged
+- [ ] No Review Ready or Draft lesson content is ever included in a panel's context payload, for either the lesson or practice-question path
+- [ ] The embedded panel and `/ai-tutor` share one underlying conversation implementation, verified by code review (not two divergent implementations)
+
 ---
 
 ## 15. Risks and Mitigations
@@ -777,3 +908,4 @@ This specification must be reviewed and approved by the Product Owner before any
 | 2026-07-01 | 0.1 | Initial draft — full MVP AI Tutor spec based on PRD v2.9 and Sprint 1 Decision Register v0.3 |
 | 2026-07-01 | 0.2 | Cleanup after review; resolved MVP AI Tutor UX and feedback open questions |
 | 2026-07-01 | 1.0 | Approved AI Tutor SDD spec for implementation planning |
+| 2026-07-15 | 1.1 | Product Owner approved (PR #127, following the PR #126 design proposal): amends D-AI-003 to bring already-shipped lesson-aware context grounding and keyword-based course retrieval formally into scope (narrowing, not removing, the RAG exclusion to "no vector-embedding RAG"); adds the embedded AI Tutor panel (desktop right-side panel, mobile full-screen sheet) for lesson and Practice pages as new in-scope capability, superseding the v1.0 "not embedded... in MVP" UX boundary; adds practice-question context grounding with an explicit pre-reveal/post-reveal answer-safety rule (AI-TUTOR-FR-021); requires one shared panel implementation reused by both entry points and the standalone page (AI-TUTOR-FR-023); clarifies that D-AI-004 (no server-side conversation persistence) is unchanged -- the panel's persistence is scoped to client-side navigation only. New FR-018 through FR-024 added; out-of-scope table updated accordingly (selected-text ask, panel resize, and Supabase chat persistence explicitly deferred to a later PR). |
