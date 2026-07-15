@@ -10,18 +10,13 @@ import {
   type TutorErrorKind,
 } from '@/lib/ai/anthropic'
 import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
-import { getLessonContext, formatLessonContextForPrompt } from '@/lib/ai/lesson-context'
-import { retrieveRelevantLessons, formatRetrievedLessonsForPrompt } from '@/lib/ai/retrieve-lessons'
+import { retrieveCourseContext, formatCourseContextForPrompt } from '@/lib/ai/retrieve-course-context'
 import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
 
 /** Spec 006-style session cap: 1 turn = 1 user-authored message. */
 const MAX_USER_TURNS = 20
 /** Simple per-message abuse/cost guardrail. */
 const MAX_MESSAGE_LENGTH = 4000
-/** How many supplementary related lessons to surface alongside a specific lesson's own context. */
-const RELATED_LESSONS_WHEN_LESSON_KNOWN = 3
-/** How many lessons to retrieve when there is no specific lesson context. */
-const RELATED_LESSONS_GENERAL = 5
 /** Response header carrying a ready-to-display context indicator label for the client UI. */
 const CONTEXT_LABEL_HEADER = 'X-Ai-Tutor-Context-Label'
 
@@ -246,56 +241,40 @@ function parseContext(body: unknown): ParsedAiTutorContext {
 }
 
 /**
- * Resolve this request's course-content grounding from the parsed context:
- * the current lesson's actual content (AI-TUTOR-FR-018), the current
- * practice question (AI-TUTOR-FR-021), or a general course-wide retrieval
- * fallback (AI-TUTOR-FR-019) -- plus, for the lesson and practice cases, a
- * small set of additionally retrieved lessons relevant to the learner's
- * latest message. Returns the composed system prompt and a short,
- * ready-to-display label describing what context was used (or null if none
- * was found/applicable).
+ * Resolve this request's course-content grounding via the single, shared
+ * RAG v2 retrieval entry point (lib/ai/retrieve-course-context.ts) --
+ * lesson-origin, practice-origin, and general questions all go through the
+ * exact same retrieveCourseContext() call, differing only in which options
+ * are set, per Spec 001 v1.1 AI-TUTOR-FR-023 (one implementation, not
+ * three). Returns the composed system prompt and a short, ready-to-display
+ * label describing what context was used (or null if none was
+ * found/applicable).
  */
 async function resolveGrounding(
   context: ParsedAiTutorContext,
   latestUserMessage: string
 ): Promise<{ systemPrompt: string; contextLabel: string | null }> {
-  if (context?.sourceType === 'lesson') {
-    const lessonContext = await getLessonContext(context.lessonSlug)
-    if (lessonContext) {
-      const sections = [formatLessonContextForPrompt(lessonContext)]
-      const related = await retrieveRelevantLessons(latestUserMessage, {
-        maxResults: RELATED_LESSONS_WHEN_LESSON_KNOWN,
-        excludeSlug: lessonContext.slug,
-      })
-      if (related.length > 0) {
-        sections.push(formatRetrievedLessonsForPrompt(related))
-      }
-      return {
-        systemPrompt: buildGroundedSystemPrompt(sections),
-        contextLabel: `Using lesson context: ${lessonContext.title}`,
-      }
-    }
-    // Unknown/unpublished lessonSlug -- fall through to general retrieval below.
-  }
+  const practiceSection = context?.sourceType === 'practice' ? formatPracticeContextForPrompt(context) : null
 
-  if (context?.sourceType === 'practice') {
-    const sections = [formatPracticeContextForPrompt(context)]
-    const related = await retrieveRelevantLessons(latestUserMessage, { maxResults: RELATED_LESSONS_WHEN_LESSON_KNOWN })
-    if (related.length > 0) {
-      sections.push(formatRetrievedLessonsForPrompt(related))
-    }
-    return {
-      systemPrompt: buildGroundedSystemPrompt(sections),
-      contextLabel: `Using practice context: ${context.questionTitle}`,
-    }
-  }
+  const result = await retrieveCourseContext({
+    query: latestUserMessage,
+    currentLessonSlug: context?.sourceType === 'lesson' ? context.lessonSlug : undefined,
+    relatedLessonSlugs: context?.sourceType === 'practice' ? context.relatedLessonSlugs : undefined,
+  })
 
-  const related = await retrieveRelevantLessons(latestUserMessage, { maxResults: RELATED_LESSONS_GENERAL })
-  const systemPrompt = buildGroundedSystemPrompt([formatRetrievedLessonsForPrompt(related)])
-  const contextLabel =
-    related.length > 0
-      ? `Using course context: ${related.length} related lesson${related.length === 1 ? '' : 's'}`
-      : null
+  const sections = practiceSection ? [practiceSection, formatCourseContextForPrompt(result)] : [formatCourseContextForPrompt(result)]
+  const systemPrompt = buildGroundedSystemPrompt(sections)
+
+  let contextLabel: string | null
+  if (context?.sourceType === 'lesson' && result.resolvedCurrentLesson) {
+    contextLabel = `Using lesson context: ${result.resolvedCurrentLesson.title}`
+  } else if (context?.sourceType === 'practice') {
+    contextLabel = `Using practice context: ${context.questionTitle}`
+  } else if (result.chunks.length > 0) {
+    contextLabel = `Using course context: ${result.chunks.length} related section${result.chunks.length === 1 ? '' : 's'}`
+  } else {
+    contextLabel = null
+  }
 
   return { systemPrompt, contextLabel }
 }
