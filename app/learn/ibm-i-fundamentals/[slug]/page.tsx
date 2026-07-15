@@ -225,7 +225,13 @@ export default async function LessonPage({ params, searchParams }: Props) {
         {previousLesson ? (
           <Link
             href={
-              sidebarTopic
+              // This nav walks the full course order, which can cross a
+              // topic boundary (e.g. the last lesson of one batch to the
+              // first lesson of the next). Only carry the topic context
+              // forward when the adjacent lesson actually belongs to it --
+              // otherwise the next page's sidebar would show the wrong
+              // topic's lesson list.
+              sidebarTopic && sidebarTopic.match(previousLesson)
                 ? `/learn/ibm-i-fundamentals/${previousLesson.slug}?topic=${sidebarTopic.id}`
                 : `/learn/ibm-i-fundamentals/${previousLesson.slug}`
             }
@@ -241,7 +247,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
         {nextLesson ? (
           <Link
             href={
-              sidebarTopic
+              sidebarTopic && sidebarTopic.match(nextLesson)
                 ? `/learn/ibm-i-fundamentals/${nextLesson.slug}?topic=${sidebarTopic.id}`
                 : `/learn/ibm-i-fundamentals/${nextLesson.slug}`
             }
