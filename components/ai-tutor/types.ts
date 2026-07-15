@@ -66,3 +66,19 @@ export function getContextKey(context: AiTutorContext): string {
       return 'general'
   }
 }
+
+/**
+ * A compact, UI-safe reference to a lesson an AI Tutor response was
+ * grounded in (PR #132 -- Source / Related Lesson References Polish).
+ * Deliberately excludes chunk text, score, and match reasons: those are
+ * internal retrieval details (lib/ai/retrieve-course-context.ts), not
+ * something to show a learner. `heading` is only ever present when a
+ * single distinct section of that lesson was used, to keep the display to
+ * one line per source rather than listing every matched section.
+ */
+export interface AiTutorSourceRef {
+  lessonTitle: string
+  lessonSlug: string
+  lessonPath: string
+  heading?: string
+}

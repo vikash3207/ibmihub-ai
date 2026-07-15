@@ -48,6 +48,7 @@ export function EmbeddedAiTutorPanel() {
     error,
     requiresLogin,
     feedback,
+    sources,
     limitReached,
     closePanel,
     newChat,
@@ -132,6 +133,7 @@ export function EmbeddedAiTutorPanel() {
               error={error}
               feedback={feedback}
               onFeedback={handleFeedback}
+              sources={sources}
             />
           </div>
           <div className="shrink-0 border-t border-slate-100 px-4 py-3">

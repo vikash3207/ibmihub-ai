@@ -3,6 +3,7 @@
 import { ThumbsUp, ThumbsDown, Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
+import type { AiTutorSourceRef } from './types'
 
 /**
  * Shared, presentational AI Tutor conversation UI (Spec 001 v1.1
@@ -155,6 +156,31 @@ function AssistantContentBlocks({ blocks }: { blocks: Block[] }) {
   )
 }
 
+/**
+ * Compact "Sources used" block for a single assistant reply (PR #132).
+ * Deliberately title-first and link-only: no raw chunk text, no visible
+ * relevance score. `heading` (present only when a lesson contributed a
+ * single distinct section -- see buildSourceRefs in the API route) is
+ * shown as light secondary text, never its own link.
+ */
+function SourcesList({ sources }: { sources: AiTutorSourceRef[] }) {
+  return (
+    <div className="mb-2">
+      <p className="mb-1 font-medium text-slate-500">Sources used</p>
+      <ul className="space-y-0.5">
+        {sources.map((source) => (
+          <li key={source.lessonSlug} className="text-slate-600">
+            <Link href={source.lessonPath} className="font-medium text-cyan-700 hover:underline">
+              {source.lessonTitle}
+            </Link>
+            {source.heading && <span className="text-slate-400"> — {source.heading}</span>}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
 function ThinkingIndicator() {
   return (
     <span className="inline-flex items-center gap-1 py-1" aria-label="AI Tutor is thinking">
@@ -173,6 +199,8 @@ export interface ChatMessageListProps {
   onFeedback: (responseId: string, isHelpful: boolean) => void
   starterPrompts?: string[]
   onStarterPromptClick?: (prompt: string) => void
+  /** Source lesson references per assistant message id (PR #132) -- omitted or empty means that reply shows no "Sources used" block. */
+  sources?: Record<string, AiTutorSourceRef[]>
 }
 
 /** The scrollable part of a conversation: starter prompts, message bubbles, and any error banner. Contains no input -- see ChatComposer. */
@@ -184,6 +212,7 @@ export function ChatMessageList({
   onFeedback,
   starterPrompts,
   onStarterPromptClick,
+  sources,
 }: ChatMessageListProps) {
   const lastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null
 
@@ -251,27 +280,32 @@ export function ChatMessageList({
                   ) : null}
 
                   {message.role === 'assistant' && message.content && !isCurrentlyStreaming && (
-                    <div className="mt-3 flex items-center gap-4 border-t border-slate-100 pt-2 text-xs">
-                      <button
-                        type="button"
-                        onClick={() => onFeedback(message.id, true)}
-                        disabled={feedback[message.id] === 'helpful' || feedback[message.id] === 'not_helpful'}
-                        className="inline-flex items-center gap-1 text-slate-500 hover:text-emerald-700 disabled:cursor-default disabled:text-emerald-600 disabled:hover:text-emerald-600"
-                      >
-                        <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
-                        {feedback[message.id] === 'helpful' ? 'Thanks for your feedback' : 'Helpful'}
-                      </button>
-                      {feedback[message.id] !== 'helpful' && (
+                    <div className="mt-3 border-t border-slate-100 pt-2 text-xs">
+                      {sources?.[message.id] && sources[message.id].length > 0 && (
+                        <SourcesList sources={sources[message.id]} />
+                      )}
+                      <div className="flex items-center gap-4">
                         <button
                           type="button"
-                          onClick={() => onFeedback(message.id, false)}
-                          disabled={feedback[message.id] === 'not_helpful'}
-                          className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 disabled:cursor-default disabled:text-slate-400 disabled:hover:text-slate-400"
+                          onClick={() => onFeedback(message.id, true)}
+                          disabled={feedback[message.id] === 'helpful' || feedback[message.id] === 'not_helpful'}
+                          className="inline-flex items-center gap-1 text-slate-500 hover:text-emerald-700 disabled:cursor-default disabled:text-emerald-600 disabled:hover:text-emerald-600"
                         >
-                          <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
-                          {feedback[message.id] === 'not_helpful' ? 'Thanks for your feedback' : 'Not helpful'}
+                          <ThumbsUp className="h-3.5 w-3.5" aria-hidden="true" />
+                          {feedback[message.id] === 'helpful' ? 'Thanks for your feedback' : 'Helpful'}
                         </button>
-                      )}
+                        {feedback[message.id] !== 'helpful' && (
+                          <button
+                            type="button"
+                            onClick={() => onFeedback(message.id, false)}
+                            disabled={feedback[message.id] === 'not_helpful'}
+                            className="inline-flex items-center gap-1 text-slate-500 hover:text-slate-900 disabled:cursor-default disabled:text-slate-400 disabled:hover:text-slate-400"
+                          >
+                            <ThumbsDown className="h-3.5 w-3.5" aria-hidden="true" />
+                            {feedback[message.id] === 'not_helpful' ? 'Thanks for your feedback' : 'Not helpful'}
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
@@ -342,6 +376,8 @@ export interface ChatThreadProps {
   onFeedback: (responseId: string, isHelpful: boolean) => void
   starterPrompts?: string[]
   onStarterPromptClick?: (prompt: string) => void
+  /** Source lesson references per assistant message id (PR #132). */
+  sources?: Record<string, AiTutorSourceRef[]>
   /** Set when the last request failed with 401 -- the caller isn't authenticated. */
   requiresLogin?: boolean
   loginHref?: string
@@ -366,6 +402,7 @@ export function ChatThread({
   onFeedback,
   starterPrompts,
   onStarterPromptClick,
+  sources,
   requiresLogin,
   loginHref,
 }: ChatThreadProps) {
@@ -390,6 +427,7 @@ export function ChatThread({
         onFeedback={onFeedback}
         starterPrompts={starterPrompts}
         onStarterPromptClick={onStarterPromptClick}
+        sources={sources}
       />
       <ChatComposer
         input={input}

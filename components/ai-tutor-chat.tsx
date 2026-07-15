@@ -35,6 +35,7 @@ export function AiTutorChat({ starterPrompts, initialLessonContext }: Props) {
     error,
     requiresLogin,
     feedback,
+    sources,
     limitReached,
     updateContext,
     submitMessage,
@@ -83,6 +84,7 @@ export function AiTutorChat({ starterPrompts, initialLessonContext }: Props) {
         limitReached={limitReached}
         feedback={feedback}
         onFeedback={handleFeedback}
+        sources={sources}
         starterPrompts={starterPrompts}
         onStarterPromptClick={setInput}
         requiresLogin={requiresLogin}
