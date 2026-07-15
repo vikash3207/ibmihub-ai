@@ -6015,14 +6015,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- IBM i Security Fundamentals Batch 1 (PR #114): User Profiles and
   // Group Profiles through IBM i Security Best Practices for Developers ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Addresses the second P0 gap identified in the IBM i Master
-  // Topic Coverage Audit (PR #110): IBM i security beyond basic object
-  // authority. First use of the new 'security-and-compliance' trackId added
-  // to tracks.ts in this PR, per the audit's own recommendation -- no
-  // existing track fit a dedicated security batch. Builds on, and
+  // Published in PR #116 (IBM i Security Fundamentals Review + Publish
+  // Pass) after a technical and structural review found and fixed one
+  // minor cross-batch accuracy issue (see PR #116). Addresses the second
+  // P0 gap identified in the IBM i Master Topic Coverage Audit (PR #110):
+  // IBM i security beyond basic object authority. First use of the
+  // 'security-and-compliance' trackId added to tracks.ts in PR #114, per
+  // the audit's own recommendation -- no existing track fit a dedicated
+  // security batch. Builds on, and
   // deliberately does not duplicate, the existing beginner-level
   // authorities-and-object-access-basics and
   // authority-failures-and-how-to-investigate-them lessons (ibm-i-operations
@@ -6034,7 +6034,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a user profile and a group profile are, and why group profiles make managing authority for many users practical.',
     lessonOrder: 257,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/user-profiles-and-group-profiles-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "Can you walk me through how I'd figure out which group profile a specific user belongs to?",
@@ -6057,7 +6057,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How authority applies differently to a library, a file, a program, and a command, building on the authority basics already covered.',
     lessonOrder: 258,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/object-authority-in-depth.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through a scenario where a user can run a program but the program itself still fails with an authority error?',
@@ -6080,7 +6080,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The difference between public authority and private authority, and why setting public authority deliberately matters.',
     lessonOrder: 259,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/public-authority-and-private-authority-in-depth.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me an example of an object where a more generous public authority would actually be a reasonable, deliberate choice?',
@@ -6103,7 +6103,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an authorization list is and why it simplifies managing authority across many objects at once.',
     lessonOrder: 260,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/authorization-lists-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you help me decide whether a specific set of files I have in mind would be a good candidate for a shared authorization list?',
@@ -6126,7 +6126,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a special authority is, and why granting one, especially *ALLOBJ, deserves caution.',
     lessonOrder: 261,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/special-authorities-explained.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What questions should I ask before granting a user profile a special authority like *ALLOBJ or *SECADM?',
@@ -6149,7 +6149,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What adopted authority is, how USRPRF(*OWNER) changes whose authority applies while a program runs, and why it must be used responsibly.',
     lessonOrder: 262,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/adopted-authority-basics.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What kind of program would be a reasonable candidate for adopted authority, versus one that should not use it?',
@@ -6172,7 +6172,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A more complete authority-failure investigation accounting for group profiles, authorization lists, and adopted authority.',
     lessonOrder: 263,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/investigating-authority-failures-in-depth.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through a short authority-failure scenario and ask me to identify which of the four sources is actually the problem?',
@@ -6195,7 +6195,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Practical security habits for everyday IBM i development work: least privilege, avoiding *ALLOBJ overuse, and protecting sensitive data.',
     lessonOrder: 264,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ibm-i-security-best-practices-for-developers.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short scenario where a developer is tempted to take a security shortcut, and ask me what the better approach would be?',
@@ -6214,18 +6214,18 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- IBM i Security Fundamentals Batch 2 (PR #115): QSECURITY System
   // Value through Common IBM i Security Mistakes and Best Practices ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Builds directly on Batch 1 (PR #114); same intermediate/
-  // professional depth, still extending the security-and-compliance track.
+  // Published in PR #116 (IBM i Security Fundamentals Review + Publish
+  // Pass) after a technical and structural review found no unresolved
+  // issues in this batch's own content. Builds directly on Batch 1
+  // (PR #114); same intermediate/professional depth, still extending the
+  // security-and-compliance track.
   {
     slug: 'qsecurity-system-value-explained',
     title: 'QSECURITY System Value Explained',
     shortDescription: 'What the QSECURITY system value is and why its level shapes how strictly every other security concept in this course is enforced.',
     lessonOrder: 265,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/qsecurity-system-value-explained.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why would a company running important business applications generally want a higher QSECURITY level rather than a lower one?',
@@ -6248,7 +6248,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What QAUDJRN is: the system-wide security audit journal, and how it differs from a single job\'s own job log.',
     lessonOrder: 266,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/auditing-basics-and-qaudjrn-overview.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me an example of a security question that a job log could never answer, but QAUDJRN could?',
@@ -6271,7 +6271,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an exit point is, what an exit program is generally expected to do, and how it compares to a database trigger.',
     lessonOrder: 267,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/exit-points-and-exit-programs-overview.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me another realistic example of a system operation that might benefit from an exit program?',
@@ -6294,7 +6294,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How IFS authority differs from native object authority, and why securing a database file does not automatically secure related IFS data.',
     lessonOrder: 268,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ifs-security-basics.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why might a shop that is careful about native object authority still overlook IFS directory permissions?',
@@ -6317,7 +6317,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a digital certificate and TLS are, conceptually, and how they relate to the HTTPS already introduced earlier in this course.',
     lessonOrder: 269,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/digital-certificates-and-tls-concepts-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What could go wrong, conceptually, if a caller connected to an API without a valid certificate being checked at all?',
@@ -6340,7 +6340,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What RCAC and FIELDPROC each do differently from a plain table constraint, enforcing access and transformation based on who is asking.',
     lessonOrder: 270,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rcac-and-field-procedures-overview.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me another realistic scenario where RCAC would be a better fit than a plain check constraint?',
@@ -6363,7 +6363,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What Authority Collection is, and how it replaces guessing with an observed, evidence-based record of what authority a user or program needs.',
     lessonOrder: 271,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/authority-collection-overview.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you walk me through how Authority Collection results might be used to safely remove an overly broad authority grant?',
@@ -6386,7 +6386,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common IBM i security mistakes developers make, drawn from across both Security Fundamentals batches.',
     lessonOrder: 272,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-security-mistakes-and-best-practices.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short scenario where a developer is tempted to skip one of these best practices, and ask me to spot the risk?',

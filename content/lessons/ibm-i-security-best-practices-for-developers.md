@@ -91,10 +91,10 @@ not reserved only for the most obviously sensitive systems.
 - These habits address the same underlying risk: security that looks
   fine on the surface while a real problem is quietly present
   underneath.
-- Advanced topics such as audit journal analysis, exit point
-  programming, row and column access control, and multi-factor
-  authentication build on these fundamentals, and are natural next
-  steps for a future, deeper security batch.
+- Advanced topics such as the security audit journal, exit points and
+  exit programs, row and column access control, and multi-factor
+  authentication build on these fundamentals, and are covered next at
+  an overview level, continuing where this lesson leaves off.
 
 ## Try Asking the AI Tutor
 
