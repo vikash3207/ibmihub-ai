@@ -10,8 +10,9 @@ import {
   type TutorErrorKind,
 } from '@/lib/ai/anthropic'
 import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
-import { retrieveCourseContext, formatCourseContextForPrompt, type CourseContextResult } from '@/lib/ai/retrieve-course-context'
+import { retrieveCourseContext, formatCourseContextForPrompt } from '@/lib/ai/retrieve-course-context'
 import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
+import { buildSourceRefs } from '@/lib/ai/build-source-refs'
 import type { AiTutorSourceRef } from '@/components/ai-tutor/types'
 
 /** Spec 006-style session cap: 1 turn = 1 user-authored message. */
@@ -22,8 +23,6 @@ const MAX_MESSAGE_LENGTH = 4000
 const CONTEXT_LABEL_HEADER = 'X-Ai-Tutor-Context-Label'
 /** Response header carrying a JSON-encoded, UI-safe list of source lesson references (PR #132). */
 const SOURCES_HEADER = 'X-Ai-Tutor-Sources'
-/** Never show more than this many distinct lesson sources under a single reply -- keeps "Sources used" compact. */
-const MAX_SOURCE_REFS = 5
 
 type UsageStatus = 'success' | 'error' | 'rate_limited'
 
@@ -243,50 +242,6 @@ function parseContext(body: unknown): ParsedAiTutorContext {
   }
 
   return undefined
-}
-
-/**
- * Build a compact, UI-safe, deduplicated source list from a retrieval
- * result (PR #132 -- Source / Related Lesson References Polish). One entry
- * per distinct lesson, in the chunks' existing relevance order (current
- * lesson bucket first, then general retrieval by score) -- never one entry
- * per chunk/heading, matching the "Sources used" UX the request specified.
- * `heading` is only kept when a lesson contributed exactly one distinct
- * section, so a lesson with multiple matched sections shows as a single
- * clean title-only line rather than an ambiguous/repeated heading.
- *
- * Gated on hasStrongMatch: a weak/incidental retrieval result must not
- * produce a visible source list that implies confident course coverage
- * (the "PowerHA" case from PR #131 QA) -- callers should only attach this
- * to the response when the gate passes.
- */
-function buildSourceRefs(result: CourseContextResult): AiTutorSourceRef[] {
-  if (!result.hasStrongMatch) {
-    return []
-  }
-
-  const headingsBySlug = new Map<string, Set<string>>()
-  const order: string[] = []
-  const bySlug = new Map<string, { lessonTitle: string; lessonSlug: string; lessonPath: string }>()
-
-  for (const chunk of result.chunks) {
-    if (!bySlug.has(chunk.lessonSlug)) {
-      bySlug.set(chunk.lessonSlug, {
-        lessonTitle: chunk.lessonTitle,
-        lessonSlug: chunk.lessonSlug,
-        lessonPath: chunk.lessonPath,
-      })
-      order.push(chunk.lessonSlug)
-      headingsBySlug.set(chunk.lessonSlug, new Set())
-    }
-    headingsBySlug.get(chunk.lessonSlug)!.add(chunk.heading)
-  }
-
-  return order.slice(0, MAX_SOURCE_REFS).map((slug) => {
-    const lesson = bySlug.get(slug)!
-    const headings = headingsBySlug.get(slug)!
-    return headings.size === 1 ? { ...lesson, heading: [...headings][0] } : lesson
-  })
 }
 
 /**

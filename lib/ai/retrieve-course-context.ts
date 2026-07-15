@@ -223,24 +223,9 @@ export async function retrieveCourseContext(options: CourseContextOptions): Prom
 }
 
 /**
- * Format a retrieval result as a prompt section. Honest about a weak/empty
- * result: distinguishes "nothing found" from "found some loosely-related
- * chunks, but treat that as weak coverage" (planning/AI_TUTOR_RAG_V2_DESIGN_AUDIT.md
- * Section D.4/G) rather than only checking whether the array is empty.
+ * Re-exported from lib/ai/format-course-context.ts, which holds the actual
+ * implementation -- kept as a separate, non-server-only module so it (and
+ * the regression checks that exercise it) don't need this file's Supabase/fs
+ * dependencies. See that file's header comment for why.
  */
-export function formatCourseContextForPrompt(result: CourseContextResult): string {
-  if (result.chunks.length === 0) {
-    return 'No closely related course content was found in the IBMiHub AI course catalog for this question. This may be a topic the course does not cover deeply yet.'
-  }
-
-  const header = 'These IBMiHub AI course sections may be relevant to the question:'
-  const body = result.chunks
-    .map((c, i) => `${i + 1}. "${c.lessonTitle}" (slug: ${c.lessonSlug}) -- ${c.heading}\n   ${c.chunkText}`)
-    .join('\n\n')
-
-  const weakNote = result.hasStrongMatch
-    ? ''
-    : '\n\n(Note: these are only loosely related matches, not a strong or confident hit -- treat this as weak or absent course coverage, not confirmation the course covers this topic in depth.)'
-
-  return `${header}\n\n${body}${weakNote}`
-}
+export { formatCourseContextForPrompt } from './format-course-context'
