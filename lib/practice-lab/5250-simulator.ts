@@ -18,6 +18,7 @@ export type PracticeLabCommandOutcome =
   | 'success'
   | 'empty-input'
   | 'unsupported-command'
+  | 'blocked-action'
   | 'missing-parameter'
   | 'wrong-parameter-value'
   | 'near-miss'
@@ -39,6 +40,8 @@ export function normalizeCommand(raw: string): string {
 }
 
 const FALLBACK_MESSAGE = 'This command is not available in this practice exercise yet.'
+const BLOCKED_ACTION_MESSAGE =
+  'This simulator only supports investigation commands. It does not run job-control actions.'
 
 /**
  * Classify a learner's typed input against one exercise's expected
@@ -55,6 +58,15 @@ export function evaluateCommand(rawInput: string, check: PracticeLabCommandCheck
   const acceptedNormalized = check.acceptedCommands.map(normalizeCommand)
   if (acceptedNormalized.includes(normalized)) {
     return { outcome: 'success', message: '' }
+  }
+
+  // Checked before the "is this even the right command" check below, since a
+  // blocked action (e.g. ENDJOB) is a different command name entirely --
+  // it should get its own safety-focused message, not the generic
+  // "not available in this lab yet" fallback a truly unrelated command gets.
+  const typedCommandName = normalized.split(' ')[0]
+  if (check.blockedActionCommands?.some((cmd) => cmd.toUpperCase() === typedCommandName)) {
+    return { outcome: 'blocked-action', message: BLOCKED_ACTION_MESSAGE }
   }
 
   const commandNameNormalized = check.commandName.toUpperCase()

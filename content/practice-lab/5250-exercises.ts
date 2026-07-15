@@ -3,10 +3,16 @@
  *
  * Sourced from planning/5250_PRACTICE_LAB_SQL_CONSOLE_DESIGN_PROPOSAL.md
  * Section 4 (PR #134). PR #136 implemented command-line-basics, wrkobj,
- * and dspobjd; PR #137 adds wrksplf, wrkoutq, dspjob, and wrkactjob --
- * all seven are now `status: 'available'` with full simulator content.
- * wrklib, investigate-msgw-job, and wrkobjlck-object-lock remain
- * `status: 'planned'` for a later troubleshooting-focused PR.
+ * and dspobjd; PR #137 added wrksplf, wrkoutq, dspjob, and wrkactjob; PR
+ * #138 adds a troubleshooting-focused batch -- msgw-job, dspjob-joblog
+ * (new), and wrkobjlck. All ten are now `status: 'available'` with full
+ * simulator content. Only wrklib remains `status: 'planned'`.
+ *
+ * The msgw-job/dspjob-joblog/wrkobjlck exercises (PR #138) also set
+ * commandCheck.blockedActionCommands, so a learner trying a real
+ * job-control action (ENDJOB, RLSJOB, CHGJOB, SNDRPY) gets a distinct,
+ * safety-focused message instead of the generic "not available" fallback
+ * -- see lib/practice-lab/5250-simulator.ts.
  *
  * All simulated data below (library/object/job names, dates, contents) is
  * fabricated training data, never real IBM i output (Spec 010 Safety Rules).
@@ -309,24 +315,146 @@ export const PRACTICE_LAB_5250_EXERCISES: PracticeLabExercise[] = [
   },
   {
     id: '5250-09',
-    slug: 'investigate-msgw-job',
-    title: 'Investigate a MSGW job',
+    slug: 'msgw-job',
+    title: 'Investigate a MSGW Job',
     labType: '5250',
     difficulty: 'intermediate',
     summary: 'Recognize MSGW (message-wait) status and the workflow to find out what message a job is waiting on.',
-    learningObjectives: ['Identify a job in MSGW status', 'Explain that MSGW means waiting, not hung or crashed'],
+    learningObjectives: [
+      'Identify a job in MSGW status',
+      'Explain that MSGW means waiting, not hung or crashed',
+      'Know the safe first step before acting on a stuck job',
+    ],
     relatedLessonSlugs: ['job-status-values-explained', 'reading-ibm-i-message-ids'],
-    status: 'planned',
+    status: 'available',
+    instructions:
+      'A job showing MSGW status is waiting for someone to reply to a message -- it has not crashed or ' +
+      'hung. Use WRKACTJOB to find it. Try: WRKACTJOB',
+    initialScreen: {
+      title: 'Command Entry',
+      lines: ['Type a command below and press Enter to run it.', '', 'Command ===>'],
+    },
+    commandCheck: {
+      commandName: 'WRKACTJOB',
+      acceptedCommands: ['WRKACTJOB', 'WRKACTJOB SBS(QINTER)', 'WRKACTJOB SBS(QBATCH)'],
+      blockedActionCommands: ['ENDJOB', 'RLSJOB', 'CHGJOB', 'SNDRPY'],
+    },
+    hints: [
+      'WRKACTJOB on its own lists every active job -- look for a Status column showing MSGW.',
+      'WRKACTJOB SBS(QBATCH) narrows the list down if you already suspect a batch job.',
+    ],
+    successMessage:
+      "Notice the ORDJOB row is in MSGW status. That means the job is paused, waiting for a reply to a " +
+      "message -- not stuck or crashed. On a real system, the safe next step is to read that job's job " +
+      "log before doing anything else (see the next exercise), not to end or change it right away.",
+    successScreen: {
+      title: 'Work with Active Jobs',
+      lines: [
+        'Subsystem   Job         User        Number   Status   CPU%',
+        'QINTER      DEMOUSER    DEMOUSER    100234   RUN      2.1',
+        'QBATCH      ORDJOB      DEMOUSER    123456   MSGW     0.0',
+        'QBATCH      RPTJOB      DEMOUSER    123458   RUN      1.4',
+      ],
+    },
   },
   {
     id: '5250-10',
-    slug: 'wrkobjlck-object-lock',
-    title: 'Find an object lock using WRKOBJLCK',
+    slug: 'dspjob-joblog',
+    title: 'Review a Job Log with DSPJOB OPTION(*JOBLOG)',
+    labType: '5250',
+    difficulty: 'intermediate',
+    summary: 'Use DSPJOB OPTION(*JOBLOG) to see why a job is waiting, by reading its message log.',
+    learningObjectives: [
+      'Run DSPJOB OPTION(*JOBLOG) against a specific job',
+      'Read a message ID and message text at a beginner level',
+      'Explain why the job log is the first place to check on a stuck job',
+    ],
+    relatedLessonSlugs: ['dspjob-and-job-information-basics', 'reading-ibm-i-message-ids'],
+    status: 'available',
+    instructions:
+      'The job log explains what a job has been doing and what it is waiting on. Try: ' +
+      'DSPJOB JOB(123456/DEMOUSER/ORDJOB) OPTION(*JOBLOG)',
+    initialScreen: {
+      title: 'Command Entry',
+      lines: ['Type a command below and press Enter to run it.', '', 'Command ===> DSPJOB'],
+    },
+    commandCheck: {
+      commandName: 'DSPJOB',
+      acceptedCommands: ['DSPJOB JOB(123456/DEMOUSER/ORDJOB) OPTION(*JOBLOG)', 'DSPJOB OPTION(*JOBLOG)'],
+      // OPTION is the parameter that actually unlocks the job-log view in
+      // this exercise (JOB(...) just narrows which job -- it's optional,
+      // defaulting to "the current job", per the accepted forms above), so
+      // OPTION is what gets the specific "missing parameter" message here.
+      requiredParamName: 'OPTION',
+      acceptedParamValues: ['*JOBLOG'],
+      blockedActionCommands: ['ENDJOB', 'RLSJOB', 'CHGJOB', 'SNDRPY'],
+    },
+    hints: [
+      'DSPJOB needs OPTION(*JOBLOG) to jump straight to a job\'s messages.',
+      'Add JOB(123456/DEMOUSER/ORDJOB) if you want a specific job\'s log instead of your own current job.',
+    ],
+    successMessage:
+      'This simulated job log shows why ORDJOB is waiting: a resource it needs is locked by another job, ' +
+      'and a device message needs a reply. Reading the job log oldest-to-newest like this is usually the ' +
+      'fastest way to understand what a job is actually doing before you act on it.',
+    successScreen: {
+      title: 'Display Job Log -- ORDJOB (123456/DEMOUSER)',
+      lines: [
+        'MSGID     Severity   Time       Text',
+        'CPF1124   00         09:14:02   Job 123456/DEMOUSER/ORDJOB started.',
+        'CPF0907   40         09:14:55   Object CUSTPF in library IBMIHUB locked by another job.',
+        'CPA5305   60         09:15:10   Device or resource not available -- reply required.',
+      ],
+    },
+  },
+  {
+    id: '5250-11',
+    slug: 'wrkobjlck',
+    title: 'Find an Object Lock using WRKOBJLCK',
     labType: '5250',
     difficulty: 'intermediate',
     summary: 'Recognize that "why can\'t I update/delete this object" is often an object-lock question, and WRKOBJLCK is the tool to answer it.',
-    learningObjectives: ['Run WRKOBJLCK against an object', 'Explain the difference between a shared and an exclusive lock'],
+    learningObjectives: [
+      'Run WRKOBJLCK against an object',
+      'Explain the difference between a lock holder and a job waiting on that lock',
+      'Explain the difference between a shared and an exclusive lock',
+    ],
     relatedLessonSlugs: ['object-locks-basics', 'handling-object-locks-as-a-developer'],
-    status: 'planned',
+    status: 'available',
+    instructions:
+      'WRKOBJLCK shows which jobs currently hold a lock on an object. Try: WRKOBJLCK OBJ(CUSTPF) OBJTYPE(*FILE)',
+    initialScreen: {
+      title: 'Command Entry',
+      lines: ['Type a command below and press Enter to run it.', '', 'Command ===> WRKOBJLCK OBJ('],
+    },
+    commandCheck: {
+      commandName: 'WRKOBJLCK',
+      acceptedCommands: [
+        'WRKOBJLCK OBJ(CUSTPF) OBJTYPE(*FILE)',
+        'WRKOBJLCK OBJ(IBMIHUB/CUSTPF) OBJTYPE(*FILE)',
+        'WRKOBJLCK OBJ(IBMIHUB/ORDHDR) OBJTYPE(*FILE)',
+      ],
+      requiredParamName: 'OBJ',
+      acceptedParamValues: ['CUSTPF', 'IBMIHUB/CUSTPF', 'IBMIHUB/ORDHDR'],
+      blockedActionCommands: ['ENDJOB', 'RLSJOB', 'CHGJOB', 'SNDRPY'],
+    },
+    hints: [
+      'WRKOBJLCK needs both OBJ and OBJTYPE, like OBJ(CUSTPF) OBJTYPE(*FILE).',
+      'You can also check ORDHDR: OBJ(IBMIHUB/ORDHDR) OBJTYPE(*FILE).',
+    ],
+    successMessage:
+      "This simulated screen shows ORDJOB holding a *SHRUPD (shared-for-update) lock on CUSTPF -- that's " +
+      "why another job trying to update it has to wait. WRKOBJLCK only shows you who holds the lock; it " +
+      "does not release it or change anything.",
+    successScreen: {
+      title: 'Work with Object Locks',
+      lines: [
+        'Object: CUSTPF     Library: IBMIHUB     Type: *FILE',
+        '',
+        'Job          User        Number   Lock Type',
+        'ORDJOB       DEMOUSER    123456   *SHRUPD',
+        'RPTJOB       DEMOUSER    123458   *SHRRD',
+      ],
+    },
   },
 ]

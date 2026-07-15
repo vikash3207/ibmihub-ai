@@ -9,10 +9,12 @@
  * the design rationale.
  *
  * PR #135 defined the base exercise metadata shape (used by both the 5250
- * and SQL placeholder lists). PR #136 adds the 5250 simulator fields below
+ * and SQL placeholder lists). PR #136 added the 5250 simulator fields below
  * -- command validation/dispatch logic itself lives in
- * lib/practice-lab/5250-simulator.ts, not here. The SQL console's own
- * validation engine/fields are still PR #137's scope.
+ * lib/practice-lab/5250-simulator.ts, not here. PR #138 adds
+ * `blockedActionCommands` for the troubleshooting exercises' safety
+ * messaging. The SQL console's own validation engine/fields are still a
+ * later PR's scope.
  */
 
 export type PracticeLabType = '5250' | 'sql'
@@ -46,6 +48,8 @@ export interface PracticeLabCommandCheck {
   requiredParamName?: string
   /** Object/library-style values accepted inside `requiredParamName(...)`, used only for a friendly "no such object in this lab" message -- not a security boundary. */
   acceptedParamValues?: string[]
+  /** Real-world job-control/action command names (e.g. 'ENDJOB', 'RLSJOB') that should get a distinct, safety-focused "this simulator only supports investigation commands" message instead of the generic unsupported-command fallback -- used by the troubleshooting exercises (PR #138) where a learner might plausibly try to "fix" what they just investigated. */
+  blockedActionCommands?: string[]
 }
 
 export interface PracticeLabExercise {

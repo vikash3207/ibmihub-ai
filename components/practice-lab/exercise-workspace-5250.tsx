@@ -38,6 +38,7 @@ export function ExerciseWorkspace5250({ exercise, relatedLessons }: Props) {
   const [hintsRevealed, setHintsRevealed] = useState(0)
 
   const hints = exercise.hints ?? []
+  const isTroubleshootingExercise = (exercise.commandCheck?.blockedActionCommands?.length ?? 0) > 0
 
   function handleSubmit() {
     if (!exercise.commandCheck) return
@@ -66,7 +67,13 @@ export function ExerciseWorkspace5250({ exercise, relatedLessons }: Props) {
 
   return (
     <div className="space-y-6">
-      <SimulatorNotice />
+      <SimulatorNotice
+        extraNote={
+          isTroubleshootingExercise
+            ? 'Investigation commands are simulated. No jobs, locks, messages, or objects are changed.'
+            : undefined
+        }
+      />
 
       <ExerciseInstructions
         instructions={exercise.instructions ?? exercise.summary}

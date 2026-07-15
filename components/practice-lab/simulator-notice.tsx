@@ -1,5 +1,10 @@
 import { ShieldAlert } from 'lucide-react'
 
+interface Props {
+  /** An extra sentence appended below the standard notice -- used by the troubleshooting exercises (PR #138) to clarify that investigation commands never change simulated state. */
+  extraNote?: string
+}
+
 /**
  * Shared safety/disclaimer copy for every Practice Lab page (Spec 010,
  * PR #135). Must appear on the landing page and both module pages -- this
@@ -8,13 +13,14 @@ import { ShieldAlert } from 'lucide-react'
  * mirroring the same honesty commitment already in the AI Tutor's system
  * prompt (lib/ai/system-prompt.ts).
  */
-export function SimulatorNotice() {
+export function SimulatorNotice({ extraNote }: Props) {
   return (
     <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4 text-sm text-amber-900">
       <ShieldAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden="true" />
       <p className="leading-relaxed">
         This is a guided simulator for learning. It does not connect to a real IBM i system.
         Commands and SQL here run only against simulated / sample training data.
+        {extraNote && <> {extraNote}</>}
       </p>
     </div>
   )
