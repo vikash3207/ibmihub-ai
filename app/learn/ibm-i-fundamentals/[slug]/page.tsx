@@ -10,6 +10,9 @@ import { LessonReaderLayout } from '@/components/lesson-reader-layout'
 import { LessonSidebar, type LessonSidebarItem } from '@/components/lesson-sidebar'
 import { getTopicById, getTopicForLesson } from '@/lib/topics'
 import { getMasterCategoryLabel } from '@/lib/master-categories'
+import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
+import { SyncActiveLessonContext } from '@/components/ai-tutor/sync-active-lesson-context'
+import type { AiTutorContext } from '@/components/ai-tutor/types'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
@@ -77,6 +80,15 @@ export default async function LessonPage({ params, searchParams }: Props) {
     ? `/learn/ibm-i-fundamentals?topic=${sidebarTopic.id}`
     : '/learn/ibm-i-fundamentals'
   const categoryLabel = getMasterCategoryLabel(lesson.master_category_id)
+  const aiTutorContext: Extract<AiTutorContext, { sourceType: 'lesson' }> = {
+    sourceType: 'lesson',
+    lessonSlug: lesson.slug,
+    lessonTitle: lesson.title,
+    lessonPath: `/learn/ibm-i-fundamentals/${lesson.slug}`,
+    topicId: sidebarTopic?.id,
+    masterCategoryId: lesson.master_category_id ?? undefined,
+    suggestedQuestion: lesson.ai_tutor_starter_question ?? undefined,
+  }
 
   const loginHref = `/auth/login?next=${encodeURIComponent(`/learn/ibm-i-fundamentals/${lesson.slug}`)}`
 
@@ -190,6 +202,8 @@ export default async function LessonPage({ params, searchParams }: Props) {
         </Card>
       )}
 
+      <SyncActiveLessonContext context={aiTutorContext} />
+
       <Card variant="ai">
         <p className="flex items-center gap-1.5 text-sm font-medium text-cyan-900">
           <Sparkles className="h-4 w-4" aria-hidden="true" />
@@ -198,20 +212,17 @@ export default async function LessonPage({ params, searchParams }: Props) {
         <p className="text-sm text-slate-600 mt-1 leading-relaxed">
           The AI Tutor is for educational guidance only. It cannot connect to a real IBM i
           system, execute code, or analyze production code. Opening it from here shares this
-          lesson&apos;s title and content so it can answer questions about it directly.
+          lesson&apos;s title and content so it can answer questions about it directly, without
+          leaving this page.
         </p>
         {lesson.ai_tutor_starter_question && (
           <p className="text-sm text-slate-500 italic mt-2">
             Try asking: &ldquo;{lesson.ai_tutor_starter_question}&rdquo;
           </p>
         )}
-        <Link
-          href={`/ai-tutor?lesson=${encodeURIComponent(lesson.slug)}`}
-          prefetch={false}
-          className={buttonVariants({ variant: 'ai', className: 'mt-3' })}
-        >
+        <AskAiTutorButton context={aiTutorContext} className="mt-3">
           Ask the AI Tutor
-        </Link>
+        </AskAiTutorButton>
       </Card>
 
       {practiceTopicId && (

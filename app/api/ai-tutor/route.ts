@@ -12,6 +12,7 @@ import {
 import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
 import { getLessonContext, formatLessonContextForPrompt } from '@/lib/ai/lesson-context'
 import { retrieveRelevantLessons, formatRetrievedLessonsForPrompt } from '@/lib/ai/retrieve-lessons'
+import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
 
 /** Spec 006-style session cap: 1 turn = 1 user-authored message. */
 const MAX_USER_TURNS = 20
@@ -114,16 +115,8 @@ function parseMessages(body: unknown): TutorMessage[] | Response {
   return messages
 }
 
-/**
- * Parse the optional lessonSlug field. Returns undefined for anything
- * missing or not slug-shaped -- an invalid or unknown lessonSlug is a
- * normal, silently-ignored case here, never a 400.
- */
-function parseLessonSlug(body: unknown): string | undefined {
-  if (typeof body !== 'object' || body === null) {
-    return undefined
-  }
-  const raw = (body as { lessonSlug?: unknown }).lessonSlug
+/** A slug-shaped string, or undefined if the value isn't one. */
+function parseSlug(raw: unknown): string | undefined {
   if (typeof raw !== 'string') {
     return undefined
   }
@@ -134,20 +127,140 @@ function parseLessonSlug(body: unknown): string | undefined {
   return trimmed
 }
 
+/** A short, plain-text field within a sane length bound, or undefined. */
+function parseShortText(raw: unknown, maxLength: number): string | undefined {
+  if (typeof raw !== 'string') {
+    return undefined
+  }
+  const trimmed = raw.trim()
+  if (trimmed.length === 0 || trimmed.length > maxLength) {
+    return undefined
+  }
+  return trimmed
+}
+
+interface LessonAiTutorContext {
+  sourceType: 'lesson'
+  lessonSlug: string
+}
+
+interface PracticeAiTutorContext {
+  sourceType: 'practice'
+  questionTitle: string
+  questionText: string
+  options?: string[]
+  selectedAnswer?: string
+  revealed: boolean
+  correctAnswer?: string
+  explanation?: string
+  relatedLessonSlugs?: string[]
+}
+
+type ParsedAiTutorContext = LessonAiTutorContext | PracticeAiTutorContext | undefined
+
+const MAX_QUESTION_TEXT_LENGTH = 2000
+const MAX_OPTION_LENGTH = 500
+const MAX_OPTIONS = 12
+const MAX_EXPLANATION_LENGTH = 2000
+
 /**
- * Resolve this request's course-content grounding: the current lesson's
- * content (if a valid lessonSlug was provided) plus, either alongside it or
- * on its own, a small set of retrieved lessons relevant to the learner's
+ * Parse the optional `context` field into a known context shape. Returns
+ * undefined for anything missing, malformed, or of an unrecognized
+ * sourceType -- an invalid/unknown context is always a normal "fall back to
+ * general grounding" case here, never a 400. This also supports the legacy
+ * `{ lessonSlug }`-only body shape from before the embedded panel, so any
+ * caller still using it keeps working unchanged.
+ */
+function parseContext(body: unknown): ParsedAiTutorContext {
+  if (typeof body !== 'object' || body === null) {
+    return undefined
+  }
+
+  const legacyLessonSlug = parseSlug((body as { lessonSlug?: unknown }).lessonSlug)
+  if (legacyLessonSlug) {
+    return { sourceType: 'lesson', lessonSlug: legacyLessonSlug }
+  }
+
+  const raw = (body as { context?: unknown }).context
+  if (typeof raw !== 'object' || raw === null) {
+    return undefined
+  }
+  const sourceType = (raw as { sourceType?: unknown }).sourceType
+
+  if (sourceType === 'lesson') {
+    const lessonSlug = parseSlug((raw as { lessonSlug?: unknown }).lessonSlug)
+    if (!lessonSlug) {
+      return undefined
+    }
+    return { sourceType: 'lesson', lessonSlug }
+  }
+
+  if (sourceType === 'practice') {
+    const questionTitle = parseShortText((raw as { questionTitle?: unknown }).questionTitle, 300)
+    const questionText = parseShortText((raw as { questionText?: unknown }).questionText, MAX_QUESTION_TEXT_LENGTH)
+    if (!questionTitle || !questionText) {
+      return undefined
+    }
+
+    const rawOptions = (raw as { options?: unknown }).options
+    const options =
+      Array.isArray(rawOptions)
+        ? rawOptions
+            .filter((o): o is string => typeof o === 'string' && o.length > 0 && o.length <= MAX_OPTION_LENGTH)
+            .slice(0, MAX_OPTIONS)
+        : undefined
+
+    const selectedAnswer = parseShortText((raw as { selectedAnswer?: unknown }).selectedAnswer, MAX_OPTION_LENGTH)
+    const revealed = (raw as { revealed?: unknown }).revealed === true
+
+    // correctAnswer/explanation are only ever honored when revealed === true
+    // -- this is the server-side half of the AI-TUTOR-FR-021 guarantee. A
+    // payload claiming revealed: false but still carrying an answer has that
+    // answer silently dropped here, never forwarded to the model.
+    const correctAnswer = revealed
+      ? parseShortText((raw as { correctAnswer?: unknown }).correctAnswer, MAX_OPTION_LENGTH)
+      : undefined
+    const explanation = revealed
+      ? parseShortText((raw as { explanation?: unknown }).explanation, MAX_EXPLANATION_LENGTH)
+      : undefined
+
+    const rawRelated = (raw as { relatedLessonSlugs?: unknown }).relatedLessonSlugs
+    const relatedLessonSlugs = Array.isArray(rawRelated)
+      ? rawRelated.filter((s): s is string => typeof s === 'string' && parseSlug(s) !== undefined)
+      : undefined
+
+    return {
+      sourceType: 'practice',
+      questionTitle,
+      questionText,
+      options,
+      selectedAnswer,
+      revealed,
+      correctAnswer,
+      explanation,
+      relatedLessonSlugs,
+    }
+  }
+
+  return undefined
+}
+
+/**
+ * Resolve this request's course-content grounding from the parsed context:
+ * the current lesson's actual content (AI-TUTOR-FR-018), the current
+ * practice question (AI-TUTOR-FR-021), or a general course-wide retrieval
+ * fallback (AI-TUTOR-FR-019) -- plus, for the lesson and practice cases, a
+ * small set of additionally retrieved lessons relevant to the learner's
  * latest message. Returns the composed system prompt and a short,
- * ready-to-display label describing what context was used (or null if
- * none was found/applicable).
+ * ready-to-display label describing what context was used (or null if none
+ * was found/applicable).
  */
 async function resolveGrounding(
-  lessonSlug: string | undefined,
+  context: ParsedAiTutorContext,
   latestUserMessage: string
 ): Promise<{ systemPrompt: string; contextLabel: string | null }> {
-  if (lessonSlug) {
-    const lessonContext = await getLessonContext(lessonSlug)
+  if (context?.sourceType === 'lesson') {
+    const lessonContext = await getLessonContext(context.lessonSlug)
     if (lessonContext) {
       const sections = [formatLessonContextForPrompt(lessonContext)]
       const related = await retrieveRelevantLessons(latestUserMessage, {
@@ -163,6 +276,18 @@ async function resolveGrounding(
       }
     }
     // Unknown/unpublished lessonSlug -- fall through to general retrieval below.
+  }
+
+  if (context?.sourceType === 'practice') {
+    const sections = [formatPracticeContextForPrompt(context)]
+    const related = await retrieveRelevantLessons(latestUserMessage, { maxResults: RELATED_LESSONS_WHEN_LESSON_KNOWN })
+    if (related.length > 0) {
+      sections.push(formatRetrievedLessonsForPrompt(related))
+    }
+    return {
+      systemPrompt: buildGroundedSystemPrompt(sections),
+      contextLabel: `Using practice context: ${context.questionTitle}`,
+    }
   }
 
   const related = await retrieveRelevantLessons(latestUserMessage, { maxResults: RELATED_LESSONS_GENERAL })
@@ -197,13 +322,13 @@ export async function POST(request: NextRequest) {
     return parsed
   }
   const messages = parsed
-  const lessonSlug = parseLessonSlug(body)
+  const context = parseContext(body)
   const latestUserMessage = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
 
   let systemPrompt: string
   let contextLabel: string | null
   try {
-    const grounding = await resolveGrounding(lessonSlug, latestUserMessage)
+    const grounding = await resolveGrounding(context, latestUserMessage)
     systemPrompt = grounding.systemPrompt
     contextLabel = grounding.contextLabel
   } catch (err) {
