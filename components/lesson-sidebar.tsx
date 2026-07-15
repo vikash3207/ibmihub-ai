@@ -13,6 +13,10 @@ interface LessonSidebarProps {
   topicLabel: string
   topicId?: string
   learningCenterHref: string
+  /** Optional master-category context (PR #123) for the current lesson --
+   *  purely a display caption, does not affect items/filtering/navigation. */
+  categoryLabel?: string
+  categorySubLabel?: string
 }
 
 function hrefFor(slug: string, topicId: string | undefined) {
@@ -75,7 +79,15 @@ function LessonList({
  * collapsible list uses a native <details>/<summary> element so no
  * client-side JavaScript is required for the drawer behavior.
  */
-export function LessonSidebar({ items, currentSlug, topicLabel, topicId, learningCenterHref }: LessonSidebarProps) {
+export function LessonSidebar({
+  items,
+  currentSlug,
+  topicLabel,
+  topicId,
+  learningCenterHref,
+  categoryLabel,
+  categorySubLabel,
+}: LessonSidebarProps) {
   const currentIndex = items.findIndex((item) => item.slug === currentSlug)
   const previousItem = currentIndex > 0 ? items[currentIndex - 1] : null
   const nextItem = currentIndex >= 0 && currentIndex < items.length - 1 ? items[currentIndex + 1] : null
@@ -95,6 +107,12 @@ export function LessonSidebar({ items, currentSlug, topicLabel, topicId, learnin
         <p className="text-xs text-slate-400">
           {currentIndex >= 0 ? currentIndex + 1 : '?'} of {items.length} in this topic
         </p>
+        {categoryLabel && (
+          <p className="mt-1 text-xs text-slate-400">
+            {categoryLabel}
+            {categorySubLabel ? ` · ${categorySubLabel}` : ''}
+          </p>
+        )}
       </div>
 
       <div className="flex items-center gap-2 text-xs">

@@ -9,6 +9,7 @@ import { LessonContent } from '@/components/lesson-content'
 import { LessonReaderLayout } from '@/components/lesson-reader-layout'
 import { LessonSidebar, type LessonSidebarItem } from '@/components/lesson-sidebar'
 import { getTopicById, getTopicForLesson } from '@/lib/topics'
+import { getMasterCategoryLabel } from '@/lib/master-categories'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
@@ -75,6 +76,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
   const learningCenterHref = sidebarTopic
     ? `/learn/ibm-i-fundamentals?topic=${sidebarTopic.id}`
     : '/learn/ibm-i-fundamentals'
+  const categoryLabel = getMasterCategoryLabel(lesson.master_category_id)
 
   const loginHref = `/auth/login?next=${encodeURIComponent(`/learn/ibm-i-fundamentals/${lesson.slug}`)}`
 
@@ -103,6 +105,8 @@ export default async function LessonPage({ params, searchParams }: Props) {
           topicLabel={sidebarTopic?.label ?? 'Nearby Lessons'}
           topicId={sidebarTopic?.id}
           learningCenterHref={learningCenterHref}
+          categoryLabel={categoryLabel}
+          categorySubLabel={lesson.master_subcategory ?? undefined}
         />
       }
     >
