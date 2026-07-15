@@ -87,7 +87,7 @@ export function evaluateCommand(rawInput: string, check: PracticeLabCommandCheck
       if (!matchesKnownValue) {
         return {
           outcome: 'wrong-parameter-value',
-          message: `There's no object named ${typedValue || '(blank)'} in this lab yet -- try ${check.acceptedParamValues[0]}.`,
+          message: `There's no match for ${check.requiredParamName}(${typedValue}) in this lab yet -- try ${check.requiredParamName}(${check.acceptedParamValues[0]}).`,
         }
       }
     }
