@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Check, Sparkles, ClipboardCheck } from 'lucide-react'
+import { Check, Sparkles, ClipboardCheck, Clock } from 'lucide-react'
 import { getPublishedLessonBySlug, getPublishedLessons, loadLessonMarkdown } from '@/lib/lessons'
 import { renderLessonMarkdown } from '@/lib/markdown'
 import { createClient } from '@/lib/supabase/server'
@@ -122,16 +122,19 @@ export default async function LessonPage({ params, searchParams }: Props) {
         />
       }
     >
-    <article className="space-y-8">
-      <div>
-        <p className="text-sm text-slate-500">
+    <article className="space-y-8 rounded-2xl border border-slate-100 bg-white p-6 shadow-sm sm:p-8">
+      <div className="border-b border-slate-100 pb-6">
+        <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
           Lesson {lesson.lesson_order} of {lessons.length}
         </p>
-        <h1 className="text-3xl font-bold text-slate-900 mt-1 mb-2">{lesson.title}</h1>
-        <p className="text-slate-600 leading-relaxed">{lesson.short_description}</p>
-        <div className="mt-2 flex items-center gap-2">
+        <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{lesson.title}</h1>
+        <p className="mt-3 text-base text-slate-600 leading-relaxed">{lesson.short_description}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-3 text-sm text-slate-500">
           {lesson.estimated_reading_time !== null && (
-            <span className="text-sm text-slate-400">~{lesson.estimated_reading_time} min read</span>
+            <span className="inline-flex items-center gap-1.5">
+              <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+              ~{lesson.estimated_reading_time} min read
+            </span>
           )}
           {isCompleted && <Badge variant="success"><Check className="h-3 w-3" aria-hidden="true" />Completed</Badge>}
         </div>
@@ -236,7 +239,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
         </Link>
       )}
 
-      <nav className="flex items-center justify-between border-t border-slate-100 pt-6">
+      <nav className="flex items-center justify-between gap-3 border-t border-slate-100 pt-6">
         {previousLesson ? (
           <Link
             href={
@@ -251,9 +254,10 @@ export default async function LessonPage({ params, searchParams }: Props) {
                 : `/learn/ibm-i-fundamentals/${previousLesson.slug}`
             }
             prefetch={false}
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            className="flex min-w-0 max-w-[48%] items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
           >
-            &larr; {previousLesson.title}
+            <span aria-hidden="true">&larr;</span>
+            <span className="truncate">{previousLesson.title}</span>
           </Link>
         ) : (
           <span />
@@ -267,17 +271,19 @@ export default async function LessonPage({ params, searchParams }: Props) {
                 : `/learn/ibm-i-fundamentals/${nextLesson.slug}`
             }
             prefetch={false}
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            className="flex min-w-0 max-w-[48%] items-center justify-end gap-2 rounded-xl border border-slate-200 px-4 py-3 text-right text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
           >
-            {nextLesson.title} &rarr;
+            <span className="truncate">{nextLesson.title}</span>
+            <span aria-hidden="true">&rarr;</span>
           </Link>
         ) : (
           <Link
             href="/learn/ibm-i-fundamentals"
             prefetch={false}
-            className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
+            className="flex min-w-0 max-w-[48%] items-center justify-end gap-2 rounded-xl border border-slate-200 px-4 py-3 text-right text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
           >
-            {IBM_I_FUNDAMENTALS_PATH_NAME} &rarr;
+            <span className="truncate">{IBM_I_FUNDAMENTALS_PATH_NAME}</span>
+            <span aria-hidden="true">&rarr;</span>
           </Link>
         )}
       </nav>
