@@ -1,10 +1,16 @@
 /**
  * Deterministic, explainable keyword scoring for AI Tutor retrieval (RAG v2
- * MVP -- planning/AI_TUTOR_RAG_V2_DESIGN_AUDIT.md Section D). Server-only.
+ * MVP -- planning/AI_TUTOR_RAG_V2_DESIGN_AUDIT.md Section D).
  * No vector embeddings, no external calls -- pure token-overlap arithmetic,
  * so a given query always scores the same way against the same chunk.
+ *
+ * Not tagged `server-only`: this module is pure (no fs/db access, just
+ * arithmetic over strings passed in by the caller) and is imported directly
+ * by scripts/rag-regression.ts (PR #133) for regression testing, which
+ * cannot run inside Next's server-component bundling context. Only
+ * lib/ai/retrieve-course-context.ts (itself server-only) imports this in
+ * the app, so nothing client-facing is affected.
  */
-import 'server-only'
 
 import type { LessonChunk } from './lesson-chunks'
 

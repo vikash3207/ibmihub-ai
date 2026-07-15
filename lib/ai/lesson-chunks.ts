@@ -17,8 +17,14 @@
  * ## Practical Example, ## Common Confusions, ## Quick Recap,
  * ## Try Asking the AI Tutor), so splitting on level-2 (`##`) headings
  * reliably produces one chunk per section for every lesson in the catalog.
+ *
+ * Not tagged `server-only`: this module is pure (no fs/db access, just
+ * string/regex processing of markdown text passed in by the caller) and is
+ * imported directly by scripts/rag-regression.ts (PR #133) for regression
+ * testing, which cannot run inside Next's server-component bundling context.
+ * Only lib/ai/retrieve-course-context.ts (itself server-only) imports this
+ * in the app, so nothing client-facing is affected.
  */
-import 'server-only'
 
 export interface ChunkableLesson {
   slug: string
