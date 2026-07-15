@@ -31,3 +31,46 @@
 .prose pre code::after {
   content: none !important;
 }
+
+/*
+ * PR #140 (Lesson Content Visual Polish). These additions are new,
+ * separate selectors -- none of them touch `.prose pre code` or its
+ * `::before`/`::after` rules above, so the fix those rules apply is
+ * unaffected.
+ */
+
+/*
+ * A small, purely cosmetic "Code" label in the top-right corner of every
+ * fenced code block. `padding-top` makes room for it above the first line
+ * of code; this only adds space; it does not need `!important` since
+ * nothing else in the utility chain sets `pre`'s padding-top.
+ */
+.prose pre {
+  position: relative;
+  padding-top: 2.25rem;
+}
+
+.prose pre::before {
+  content: 'Code';
+  position: absolute;
+  top: 0.65rem;
+  right: 0.9rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgb(148 163 184 / 0.65);
+}
+
+/*
+ * Simple, JS-free responsive tables: a wide table scrolls horizontally
+ * within its own bounds instead of overflowing the page or squishing
+ * columns unreadably -- the one exception mobile lesson content is
+ * expected to scroll (alongside code blocks), per Spec 010-adjacent
+ * mobile conventions already used elsewhere in this app.
+ */
+.prose table {
+  display: block;
+  overflow-x: auto;
+  white-space: nowrap;
+}
