@@ -6,6 +6,8 @@ import { Check, X, Sparkles } from 'lucide-react'
 import type { PracticeQuestion, PracticeTopic } from '@/content/practice/questions'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
+import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
+import type { AiTutorContext } from '@/components/ai-tutor/types'
 
 interface PracticeBrowserProps {
   topics: PracticeTopic[]
@@ -35,6 +37,23 @@ function QuestionCard({
   }
 
   const linkableRelatedLessons = question.relatedLessonSlugs.filter((slug) => lessonTitleBySlug[slug])
+
+  // AI-TUTOR-FR-021 (Spec 001 v1.1): correctAnswer/explanation are only ever
+  // spread into this object when `revealed` is true -- an unrevealed
+  // question's context literally never contains them, so there is nothing
+  // for the AI Tutor to leak prematurely.
+  const aiTutorContext: AiTutorContext = {
+    sourceType: 'practice',
+    questionId: question.id,
+    topicId: question.topicId,
+    questionTitle: question.title,
+    questionText: question.question,
+    options: question.options,
+    selectedAnswer: selectedOption ?? undefined,
+    revealed,
+    relatedLessonSlugs: question.relatedLessonSlugs,
+    ...(revealed ? { correctAnswer: question.correctAnswer, explanation: question.explanation } : {}),
+  }
 
   return (
     <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
@@ -108,17 +127,21 @@ function QuestionCard({
               ))}
             </div>
           )}
-
-          <Link
-            href={linkableRelatedLessons[0] ? `/ai-tutor?lesson=${encodeURIComponent(linkableRelatedLessons[0])}` : '/ai-tutor'}
-            prefetch={false}
-            className="inline-flex items-center gap-1.5 text-sm text-cyan-700 hover:text-cyan-800"
-          >
-            <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
-            Ask the AI Tutor to explain this question
-          </Link>
         </div>
       )}
+
+      <div className={revealed ? 'mt-3' : 'mt-4 border-t border-slate-100 pt-3'}>
+        <AskAiTutorButton
+          context={aiTutorContext}
+          variant="ghost"
+          size="sm"
+          showIcon={false}
+          className="gap-1.5 px-0 py-0 text-sm text-cyan-700 hover:text-cyan-800"
+        >
+          <Sparkles className="h-3.5 w-3.5" aria-hidden="true" />
+          {revealed ? 'Ask the AI Tutor to explain this question' : 'Ask the AI Tutor about this question'}
+        </AskAiTutorButton>
+      </div>
     </div>
   )
 }
