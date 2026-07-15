@@ -6,6 +6,9 @@ import { getPublishedLessonBySlug, getPublishedLessons, loadLessonMarkdown } fro
 import { renderLessonMarkdown } from '@/lib/markdown'
 import { createClient } from '@/lib/supabase/server'
 import { LessonContent } from '@/components/lesson-content'
+import { LessonReaderLayout } from '@/components/lesson-reader-layout'
+import { LessonSidebar, type LessonSidebarItem } from '@/components/lesson-sidebar'
+import { getTopicById, getTopicForLesson } from '@/lib/topics'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
@@ -21,6 +24,7 @@ export const dynamic = 'force-dynamic'
 
 interface Props {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ topic?: string }>
 }
 
 // Deduped per request: generateMetadata and the page component both need the
@@ -38,8 +42,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function LessonPage({ params }: Props) {
+export default async function LessonPage({ params, searchParams }: Props) {
   const { slug } = await params
+  const { topic: topicParam } = await searchParams
   const lesson = await getLesson(slug)
 
   const [lessons, supabase] = await Promise.all([getPublishedLessons(), createClient()])
@@ -55,6 +60,21 @@ export default async function LessonPage({ params }: Props) {
   const previousLesson = currentIndex > 0 ? lessons[currentIndex - 1] : null
   const nextLesson =
     currentIndex >= 0 && currentIndex < lessons.length - 1 ? lessons[currentIndex + 1] : null
+
+  // Sidebar context: prefer the ?topic= the learner arrived with (e.g. from
+  // a filtered Learning Center list or another sidebar link); fall back to
+  // inferring a topic from the lesson's own trackId so the sidebar always
+  // shows a useful group, even when opened directly with no filter context.
+  const sidebarTopic = getTopicById(topicParam) ?? getTopicForLesson(lesson)
+  const sidebarLessons = sidebarTopic ? lessons.filter(sidebarTopic.match) : lessons.slice(Math.max(0, currentIndex - 5), currentIndex + 6)
+  const sidebarItems: LessonSidebarItem[] = sidebarLessons.map((l) => ({
+    slug: l.slug,
+    title: l.title,
+    lessonOrder: l.lesson_order,
+  }))
+  const learningCenterHref = sidebarTopic
+    ? `/learn/ibm-i-fundamentals?topic=${sidebarTopic.id}`
+    : '/learn/ibm-i-fundamentals'
 
   const loginHref = `/auth/login?next=${encodeURIComponent(`/learn/ibm-i-fundamentals/${lesson.slug}`)}`
 
@@ -75,16 +95,20 @@ export default async function LessonPage({ params }: Props) {
     : false
 
   return (
+    <LessonReaderLayout
+      sidebar={
+        <LessonSidebar
+          items={sidebarItems}
+          currentSlug={lesson.slug}
+          topicLabel={sidebarTopic?.label ?? 'Nearby Lessons'}
+          topicId={sidebarTopic?.id}
+          learningCenterHref={learningCenterHref}
+        />
+      }
+    >
     <article className="space-y-8">
       <div>
-        <Link
-          href="/learn/ibm-i-fundamentals"
-          prefetch={false}
-          className="text-sm text-slate-500 hover:text-slate-900"
-        >
-          &larr; {IBM_I_FUNDAMENTALS_PATH_NAME}
-        </Link>
-        <p className="text-sm text-slate-500 mt-2">
+        <p className="text-sm text-slate-500">
           Lesson {lesson.lesson_order} of {lessons.length}
         </p>
         <h1 className="text-3xl font-bold text-slate-900 mt-1 mb-2">{lesson.title}</h1>
@@ -200,7 +224,11 @@ export default async function LessonPage({ params }: Props) {
       <nav className="flex items-center justify-between border-t border-slate-100 pt-6">
         {previousLesson ? (
           <Link
-            href={`/learn/ibm-i-fundamentals/${previousLesson.slug}`}
+            href={
+              sidebarTopic
+                ? `/learn/ibm-i-fundamentals/${previousLesson.slug}?topic=${sidebarTopic.id}`
+                : `/learn/ibm-i-fundamentals/${previousLesson.slug}`
+            }
             prefetch={false}
             className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
           >
@@ -212,7 +240,11 @@ export default async function LessonPage({ params }: Props) {
 
         {nextLesson ? (
           <Link
-            href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
+            href={
+              sidebarTopic
+                ? `/learn/ibm-i-fundamentals/${nextLesson.slug}?topic=${sidebarTopic.id}`
+                : `/learn/ibm-i-fundamentals/${nextLesson.slug}`
+            }
             prefetch={false}
             className="text-sm font-medium text-slate-600 hover:text-blue-600 transition-colors"
           >
@@ -229,5 +261,6 @@ export default async function LessonPage({ params }: Props) {
         )}
       </nav>
     </article>
+    </LessonReaderLayout>
   )
 }

@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import { getPublishedLessons } from '@/lib/lessons'
 import { createClient } from '@/lib/supabase/server'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
-import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { LessonBrowser } from '@/components/lesson-browser'
 
@@ -23,14 +22,13 @@ export default async function IbmIFundamentalsPage() {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const totalLessons = IBM_I_FUNDAMENTALS_LESSONS.length
   const completedLessonIds = user ? await getCompletedLessonIdsForUser(user.id) : new Set<string>()
   const completedCount = lessons.filter((lesson) => completedLessonIds.has(lesson.id)).length
   const progressPercent =
     user && lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto max-w-3xl space-y-6">
       <div>
         <Link href="/learn" className="text-sm text-slate-500 hover:text-slate-900">
           &larr; Learning Center
@@ -65,14 +63,9 @@ export default async function IbmIFundamentalsPage() {
       ) : (
         <LessonBrowser
           lessons={lessons}
-          totalLessons={totalLessons}
           completedLessonIds={Array.from(completedLessonIds)}
           isLoggedIn={Boolean(user)}
         />
-      )}
-
-      {lessons.length > 0 && lessons.length < totalLessons && (
-        <p className="text-sm text-slate-500">More lessons are being added.</p>
       )}
     </div>
   )

@@ -2,44 +2,12 @@
 
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
+import { useSearchParams } from 'next/navigation'
 import { Lock, Check, Search, X } from 'lucide-react'
 import type { Lesson } from '@/lib/lessons'
+import { TOPIC_FILTERS } from '@/lib/topics'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-
-interface TopicFilter {
-  id: string
-  label: string
-  match: (lesson: Lesson) => boolean
-}
-
-/**
- * Buckets are derived from real trackId values in content/lessons/tracks.ts,
- * with RPGLE/File I/O and Display Files/Subfiles each split from their
- * shared trackId using the `tags` convention already used consistently
- * across every lesson in those two tracks ('file-io' and 'subfiles').
- */
-const TOPIC_FILTERS: TopicFilter[] = [
-  { id: 'foundations', label: 'Foundations', match: (l) => l.track_id === 'ibm-i-foundations' },
-  { id: 'commands', label: 'Commands', match: (l) => l.track_id === '5250-terminal-and-commands' },
-  { id: 'libraries-objects-ifs', label: 'Libraries, Objects & IFS', match: (l) => l.track_id === 'libraries-objects-and-ifs' },
-  { id: 'db2-dds', label: 'Db2 / DDS', match: (l) => l.track_id === 'db2-for-i-and-dds' },
-  { id: 'rpgle', label: 'RPGLE', match: (l) => l.track_id === 'rpgle-beginner' && !(l.tags ?? []).includes('file-io') },
-  { id: 'file-io', label: 'File I/O', match: (l) => l.track_id === 'rpgle-beginner' && (l.tags ?? []).includes('file-io') },
-  { id: 'clle', label: 'CLLE', match: (l) => l.track_id === 'clle' },
-  {
-    id: 'display-files',
-    label: 'Display Files',
-    match: (l) => l.track_id === 'display-files-and-subfiles' && !(l.tags ?? []).includes('subfiles'),
-  },
-  { id: 'subfiles', label: 'Subfiles', match: (l) => l.track_id === 'display-files-and-subfiles' && (l.tags ?? []).includes('subfiles') },
-  { id: 'sqlrpgle', label: 'SQLRPGLE', match: (l) => l.track_id === 'sql-for-ibm-i' },
-  { id: 'printer-files', label: 'Printer Files', match: (l) => l.track_id === 'printer-files-and-reports' },
-  { id: 'debugging', label: 'Debugging', match: (l) => l.track_id === 'debugging-and-job-logs' },
-  { id: 'operations', label: 'Operations', match: (l) => l.track_id === 'ibm-i-operations' },
-  { id: 'mini-projects', label: 'Mini Projects', match: (l) => l.track_id === 'real-world-projects' },
-  { id: 'interview', label: 'Interview Readiness', match: (l) => l.track_id === 'interview-and-professional-readiness' },
-]
 
 function matchesQuery(lesson: Lesson, query: string): boolean {
   const haystack = [lesson.title, lesson.short_description, ...(lesson.tags ?? [])].join(' ').toLowerCase()
@@ -48,14 +16,22 @@ function matchesQuery(lesson: Lesson, query: string): boolean {
 
 interface LessonBrowserProps {
   lessons: Lesson[]
-  totalLessons: number
   completedLessonIds: string[]
   isLoggedIn: boolean
 }
 
-export function LessonBrowser({ lessons, totalLessons, completedLessonIds, isLoggedIn }: LessonBrowserProps) {
+export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: LessonBrowserProps) {
+  // Reads the ?topic= query param once, on mount, so a link like
+  // /learn/ibm-i-fundamentals?topic=sqlrpgle (e.g. from a lesson sidebar's
+  // "back to Learning Center" link) reopens with that filter pre-applied.
+  // Intentionally a one-time seed, not kept in sync with URL changes after
+  // that -- filter interactions here stay in local component state.
+  const searchParams = useSearchParams()
   const [query, setQuery] = useState('')
-  const [topicId, setTopicId] = useState<string | null>(null)
+  const [topicId, setTopicId] = useState<string | null>(() => {
+    const requested = searchParams.get('topic')
+    return requested && TOPIC_FILTERS.some((t) => t.id === requested) ? requested : null
+  })
 
   const completedSet = useMemo(() => new Set(completedLessonIds), [completedLessonIds])
   const activeTopic = TOPIC_FILTERS.find((t) => t.id === topicId)
@@ -118,7 +94,7 @@ export function LessonBrowser({ lessons, totalLessons, completedLessonIds, isLog
 
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>
-            Showing {filteredLessons.length} of {totalLessons} lessons
+            Showing {filteredLessons.length} of {lessons.length} lessons
           </span>
           {hasActiveFilter && (
             <button
@@ -148,10 +124,14 @@ export function LessonBrowser({ lessons, totalLessons, completedLessonIds, isLog
             const isLocked = !isPreview && !isLoggedIn
             const isCompleted = completedSet.has(lesson.id)
 
+            const lessonHref = activeTopic
+              ? `/learn/ibm-i-fundamentals/${lesson.slug}?topic=${activeTopic.id}`
+              : `/learn/ibm-i-fundamentals/${lesson.slug}`
+
             return (
               <li key={lesson.id}>
                 <Link
-                  href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
+                  href={lessonHref}
                   prefetch={false}
                   className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
                 >
