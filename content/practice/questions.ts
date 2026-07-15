@@ -11,7 +11,10 @@
  */
 
 export type PracticeQuestionType = 'multiple-choice' | 'scenario'
-export type PracticeDifficulty = 'beginner'
+/** 'intermediate' added alongside the professional-depth practice topics
+ *  (Advanced RPGLE/ILE, Integration, Advanced SQL, Security, Journaling,
+ *  Save/Restore) -- existing 'beginner' questions and topics are unaffected. */
+export type PracticeDifficulty = 'beginner' | 'intermediate'
 
 export interface PracticeTopic {
   id: string
@@ -115,6 +118,36 @@ export const PRACTICE_TOPICS: PracticeTopic[] = [
     id: 'mixed-review',
     label: 'Mixed Scenario Review',
     description: 'Cross-topic scenario questions that combine concepts from more than one area at once.',
+  },
+  {
+    id: 'rpgle-ile',
+    label: 'Advanced RPGLE / ILE',
+    description: 'Modules, programs, service programs, binding, activation groups, and ILE debugging.',
+  },
+  {
+    id: 'integration-modernization',
+    label: 'Modern IBM i / APIs / Integration',
+    description: 'REST APIs, JSON, HTTP methods and status codes, integration security, and debugging integrations.',
+  },
+  {
+    id: 'advanced-sql',
+    label: 'Advanced SQL for IBM i',
+    description: 'DDL, constraints, stored procedures, triggers, UDFs, SQLCA/SQLCODE/SQLSTATE, and static vs dynamic SQL.',
+  },
+  {
+    id: 'security',
+    label: 'IBM i Security',
+    description: 'Object authority, authorization lists, special and adopted authority, QSECURITY, QAUDJRN, and exit points.',
+  },
+  {
+    id: 'journaling-commitment-control',
+    label: 'Journaling & Commitment Control',
+    description: 'Journals and journal receivers, STRJRNPF, DSPJRN, commitment control, and COMMIT/ROLLBACK.',
+  },
+  {
+    id: 'save-restore',
+    label: 'Save/Restore & Object Backup',
+    description: 'SAVOBJ/RSTOBJ, SAVLIB/RSTLIB, save files, GO SAVE, safe restores, and backup vs journaling vs HA.',
   },
 ]
 
@@ -1794,6 +1827,1385 @@ export const PRACTICE_QUESTIONS: PracticeQuestion[] = [
     relatedLessonSlugs: ['job-status-values-explained', 'basic-troubleshooting-flow-for-ibm-i-developers'],
     tags: ['mixed-review', 'operations', 'debugging'],
     difficulty: 'beginner',
+  },
+
+  // --- Advanced RPGLE / ILE (added in PR #125) ---
+  {
+    id: 'ile-1',
+    topicId: 'rpgle-ile',
+    title: 'OPM vs ILE',
+    question:
+      'What is the key architectural difference between OPM (Original Program Model) and ILE (Integrated Language Environment) programs on IBM i?',
+    type: 'multiple-choice',
+    options: [
+      'ILE programs can be built from separately compiled modules bound together; OPM programs are compiled as a single, self-contained unit.',
+      'OPM programs run faster than ILE programs in every case.',
+      'ILE is a newer version of RPG syntax, unrelated to how programs are compiled or bound.',
+      'OPM programs cannot call other programs, while ILE programs can.',
+    ],
+    correctAnswer:
+      'ILE programs can be built from separately compiled modules bound together; OPM programs are compiled as a single, self-contained unit.',
+    explanation:
+      "ILE's defining feature is modular compilation: modules can be compiled independently and then bound together into a program or service program, enabling code reuse and independent updates. OPM programs compile straight to a single program object with no separate module step.",
+    relatedLessonSlugs: ['opm-vs-ile-on-ibm-i', 'modules-programs-and-service-programs'],
+    tags: ['ile', 'opm', 'architecture'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-2',
+    topicId: 'rpgle-ile',
+    title: 'Module, Program, and Service Program',
+    question: 'Which statement correctly distinguishes a module, a program, and a service program in ILE?',
+    type: 'multiple-choice',
+    options: [
+      "A module is compiled but not yet bound into anything runnable; a program is bound and directly callable as a job's entry point; a service program is bound and exports procedures for other programs to call.",
+      'A module and a program are the same thing; only a service program is different.',
+      'A service program is just a program with a different file extension.',
+      'A module can be called directly from the command line, just like a program.',
+    ],
+    correctAnswer:
+      "A module is compiled but not yet bound into anything runnable; a program is bound and directly callable as a job's entry point; a service program is bound and exports procedures for other programs to call.",
+    explanation:
+      'These three ILE object types sit at different stages: a module is a compiled building block, a program is something a job can call directly, and a service program is a bound collection of reusable, exported procedures other programs call into.',
+    relatedLessonSlugs: ['modules-programs-and-service-programs', 'creating-rpgle-modules-with-crtrpgmod'],
+    tags: ['ile', 'modules', 'service-programs'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-3',
+    topicId: 'rpgle-ile',
+    title: 'CRTRPGMOD',
+    question: 'What does CRTRPGMOD produce, and what must happen before that output can actually run?',
+    type: 'multiple-choice',
+    options: [
+      'CRTRPGMOD produces a *MODULE object; it must still be bound into a *PGM or *SRVPGM (e.g. with CRTPGM) before it can run.',
+      'CRTRPGMOD produces a runnable *PGM object directly.',
+      'CRTRPGMOD produces source code only, with no compilation.',
+      'CRTRPGMOD produces a *SRVPGM object directly, skipping the module step.',
+    ],
+    correctAnswer:
+      'CRTRPGMOD produces a *MODULE object; it must still be bound into a *PGM or *SRVPGM (e.g. with CRTPGM) before it can run.',
+    explanation:
+      'CRTRPGMOD only compiles source into a *MODULE -- a building block, not a runnable object. Binding it into a *PGM or *SRVPGM is a separate, later step.',
+    relatedLessonSlugs: ['creating-rpgle-modules-with-crtrpgmod', 'binding-modules-into-programs-with-crtpgm'],
+    tags: ['ile', 'crtrpgmod', 'modules'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-4',
+    topicId: 'rpgle-ile',
+    title: 'Binding Modules with CRTPGM',
+    question:
+      'A developer has three separately compiled modules: ORDHDR, ORDDTL, and ORDCALC. They want a single runnable program that uses all three. What command would they use, and what does it do?',
+    type: 'scenario',
+    correctAnswer:
+      'CRTPGM, specifying all three modules in its MODULE parameter -- it binds them together into one *PGM object.',
+    explanation:
+      'CRTPGM is the command that takes one or more previously compiled *MODULE objects and binds them into a single *PGM (or, with CRTSRVPGM, a *SRVPGM). Binding happens at this step, not at compile time.',
+    relatedLessonSlugs: ['binding-modules-into-programs-with-crtpgm', 'creating-rpgle-modules-with-crtrpgmod'],
+    tags: ['ile', 'crtpgm', 'binding'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-5',
+    topicId: 'rpgle-ile',
+    title: 'Prototypes and Procedure Interfaces',
+    question: 'Why does a procedure need both a prototype and a procedure interface in ILE RPGLE?',
+    type: 'multiple-choice',
+    options: [
+      'The prototype tells the caller how to call the procedure (parameters/return type); the procedure interface defines the same signature inside the procedure itself, so the two must match.',
+      'The prototype and procedure interface are two names for exactly the same single declaration.',
+      'The procedure interface is only needed for procedures with no parameters.',
+      'The prototype is only used for procedures written in CLLE, not RPGLE.',
+    ],
+    correctAnswer:
+      'The prototype tells the caller how to call the procedure (parameters/return type); the procedure interface defines the same signature inside the procedure itself, so the two must match.',
+    explanation:
+      'The prototype and procedure interface describe the same calling contract from two sides -- the caller and the procedure itself -- and a mismatch between them is a common source of compile or runtime errors.',
+    relatedLessonSlugs: ['prototypes-and-procedure-interfaces-in-ile', 'parameters-and-prototypes-in-rpgle'],
+    tags: ['ile', 'prototypes', 'procedures'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-6',
+    topicId: 'rpgle-ile',
+    title: 'Internal vs Exported Procedures',
+    question: "What makes a procedure 'exported' rather than just 'internal' in ILE?",
+    type: 'multiple-choice',
+    options: [
+      "An exported procedure is declared in a service program's binder source so other programs can call it; an internal procedure can only be called from within the same module/program.",
+      'Exported procedures run faster than internal procedures.',
+      'Internal procedures cannot use parameters.',
+      'Exported procedures must be written in a separate programming language.',
+    ],
+    correctAnswer:
+      "An exported procedure is declared in a service program's binder source so other programs can call it; an internal procedure can only be called from within the same module/program.",
+    explanation:
+      "Export status is what makes a procedure visible outside its own module -- it's the mechanism a service program uses to offer procedures to other programs, via its binder source.",
+    relatedLessonSlugs: ['internal-procedures-vs-exported-procedures', 'binder-source-introduction'],
+    tags: ['ile', 'procedures', 'export'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-7',
+    topicId: 'rpgle-ile',
+    title: 'Why Use a Service Program',
+    question:
+      'A shop has a set of validation routines (e.g. checking a customer number format) used by a dozen different programs. What is the main benefit of putting these in a service program rather than copying the logic into each program?',
+    type: 'scenario',
+    correctAnswer:
+      'Every calling program shares one bound copy of the logic -- when the validation rule changes, updating and rebinding the service program updates it for every caller, without touching or recompiling each individual program.',
+    explanation:
+      'This is the core value of service programs: centralizing reusable logic so it is maintained in one place. Copy-pasting the same logic into every program means every copy has to be found and changed separately whenever the rule changes.',
+    relatedLessonSlugs: ['introduction-to-service-programs', 'modules-programs-and-service-programs'],
+    tags: ['ile', 'service-programs', 'reuse'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-8',
+    topicId: 'rpgle-ile',
+    title: 'Activation Groups',
+    question: 'What is an activation group, at a conceptual level?',
+    type: 'multiple-choice',
+    options: [
+      'A runtime scope that groups together the resources (like open files and static storage) that ILE programs use while running, controlling when those resources are activated and reclaimed.',
+      'A special type of RPG data structure.',
+      'A naming convention for RPG procedures.',
+      'A setting that only affects how source code is formatted.',
+    ],
+    correctAnswer:
+      'A runtime scope that groups together the resources (like open files and static storage) that ILE programs use while running, controlling when those resources are activated and reclaimed.',
+    explanation:
+      'Activation groups control the lifetime of runtime resources shared across bound programs -- understanding them matters for both correctness (state that persists or resets unexpectedly) and debugging.',
+    relatedLessonSlugs: ['activation-groups-basics', 'opm-vs-ile-on-ibm-i'],
+    tags: ['ile', 'activation-groups'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-9',
+    topicId: 'rpgle-ile',
+    title: 'Binding Directories',
+    question:
+      'What problem does a binding directory solve when compiling a program that calls procedures in several service programs?',
+    type: 'multiple-choice',
+    options: [
+      'It lets the compiler automatically resolve which service program a called procedure lives in, without the programmer having to list every *SRVPGM by hand.',
+      'It replaces the need for binder source entirely.',
+      'It stores the actual compiled machine code for every program in the library.',
+      'It is only used for CLLE programs, not RPGLE.',
+    ],
+    correctAnswer:
+      'It lets the compiler automatically resolve which service program a called procedure lives in, without the programmer having to list every *SRVPGM by hand.',
+    explanation:
+      'Binding directories save repetitive, error-prone manual bookkeeping -- instead of specifying every service program on every compile, the compiler looks them up automatically.',
+    relatedLessonSlugs: ['binding-directories-basics', 'creating-service-programs-with-crtsrvpgm'],
+    tags: ['ile', 'binding-directories'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-10',
+    topicId: 'rpgle-ile',
+    title: 'Creating a Service Program',
+    question:
+      'Besides compiling the modules that make up a service program, what additional step (compared to creating a plain *PGM) does creating a *SRVPGM with CRTSRVPGM typically require?',
+    type: 'multiple-choice',
+    options: [
+      'Providing binder source (an export list) that declares which procedures the service program makes available to callers.',
+      'Nothing -- CRTSRVPGM works identically to CRTPGM with no extra input.',
+      'Writing the service program in a different language than its callers.',
+      'Manually assigning an activation group number to every calling program.',
+    ],
+    correctAnswer:
+      'Providing binder source (an export list) that declares which procedures the service program makes available to callers.',
+    explanation:
+      'Binder source is what makes a service program usable by other programs -- it explicitly declares the exported interface, rather than exposing everything the service program happens to contain.',
+    relatedLessonSlugs: ['creating-service-programs-with-crtsrvpgm', 'binder-source-introduction'],
+    tags: ['ile', 'crtsrvpgm', 'binder-source'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-11',
+    topicId: 'rpgle-ile',
+    title: 'Service Program Signatures',
+    question:
+      "Why does changing a service program's exported procedure -- for example, adding a new required parameter -- carry real risk for existing callers?",
+    type: 'scenario',
+    correctAnswer:
+      'If the change alters the exported signature in a way that breaks binary compatibility, programs bound to the old signature can fail at runtime (or need to be recompiled/rebound) once the service program is updated.',
+    explanation:
+      'Service program signatures exist to protect callers from silent incompatibility. A careless update to an exported procedure can break every program that calls it, sometimes without an obvious compile-time warning.',
+    relatedLessonSlugs: ['service-program-signatures-at-a-beginner-level', 'updating-service-programs-safely'],
+    tags: ['ile', 'service-programs', 'signatures'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-12',
+    topicId: 'rpgle-ile',
+    title: 'Updating a Service Program Safely',
+    question:
+      "What is the safest general practice when you need to change what a widely-used service program's exported procedure does?",
+    type: 'multiple-choice',
+    options: [
+      "Prefer additive changes (e.g. a new procedure or an optional parameter) over altering an existing exported procedure's required signature, and deliberately test dependent programs rather than assuming the change is safe.",
+      'Just change the procedure body directly -- since RPGLE recompiles automatically, no other program is ever affected.',
+      'Delete the old service program and let callers figure out that it is gone.',
+      'Signature safety is only a concern for CLLE, not RPGLE service programs.',
+    ],
+    correctAnswer:
+      "Prefer additive changes (e.g. a new procedure or an optional parameter) over altering an existing exported procedure's required signature, and deliberately test dependent programs rather than assuming the change is safe.",
+    explanation:
+      'Additive, backward-compatible changes protect existing callers; changing a required signature in place is exactly the kind of edit that has a real chance of silently breaking other programs.',
+    relatedLessonSlugs: ['updating-service-programs-safely', 'service-program-signatures-at-a-beginner-level'],
+    tags: ['ile', 'best-practices'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-13',
+    topicId: 'rpgle-ile',
+    title: 'Activation Group Troubleshooting',
+    question:
+      'A program intermittently shows leftover data from a previous call, or fails to release a resource, in a way that seems tied to how it is activated. What ILE concept is most directly implicated, and where would a developer start investigating?',
+    type: 'scenario',
+    correctAnswer:
+      'Activation groups -- since they control when resources like static storage and open files are activated and reclaimed, a mismatched or shared activation group between programs is a common cause of this kind of leftover-state symptom.',
+    explanation:
+      'Activation-group-related problems are a classic source of confusing, hard-to-reproduce ILE bugs precisely because they affect when storage and files are reset -- not something visible from reading the RPG logic alone.',
+    relatedLessonSlugs: ['activation-group-problems-and-common-confusions', 'activation-groups-basics'],
+    tags: ['ile', 'troubleshooting', 'activation-groups'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'ile-14',
+    topicId: 'rpgle-ile',
+    title: 'Debugging Across Modules',
+    question:
+      'When debugging a program built from multiple bound modules with STRDBG, what do you need to make sure of to be able to step into and see variables from a specific module?',
+    type: 'multiple-choice',
+    options: [
+      'The module was compiled with debug data enabled and is covered by the debug session, since each module needs its own debug information to show its source and variables.',
+      'Nothing special -- STRDBG automatically shows full source for every module in a program regardless of how it was compiled.',
+      'Only the main module can ever be debugged; bound-in modules are always invisible to the debugger.',
+      'Debugging a multi-module program requires a completely different tool than STRDBG.',
+    ],
+    correctAnswer:
+      'The module was compiled with debug data enabled and is covered by the debug session, since each module needs its own debug information to show its source and variables.',
+    explanation:
+      "Debug visibility is per-module, tied to how that module was compiled -- it's a common surprise for developers new to ILE debugging when a module they expected to step into shows no source.",
+    relatedLessonSlugs: ['debugging-ile-programs', 'creating-rpgle-modules-with-crtrpgmod'],
+    tags: ['ile', 'debugging', 'strdbg'],
+    difficulty: 'intermediate',
+  },
+
+  // --- Modern IBM i / APIs / Integration (added in PR #125) ---
+  {
+    id: 'apiint-1',
+    topicId: 'integration-modernization',
+    title: 'What a REST API Is',
+    question: "In the context of IBM i integration, what does it mean to 'expose IBM i logic as a REST API'?",
+    type: 'multiple-choice',
+    options: [
+      'Wrapping existing IBM i business logic (e.g. an RPGLE program or service program) behind an HTTP endpoint, so external systems can call it over the network and get back structured data like JSON.',
+      'Rewriting all RPGLE programs in a web programming language.',
+      'Installing a website on the IBM i IFS with no connection to existing programs.',
+      'Replacing 5250 green-screen access with a mouse-driven interface.',
+    ],
+    correctAnswer:
+      'Wrapping existing IBM i business logic (e.g. an RPGLE program or service program) behind an HTTP endpoint, so external systems can call it over the network and get back structured data like JSON.',
+    explanation:
+      'Exposing logic as an API is about adding an HTTP-reachable front door to logic that already exists -- not rewriting or replacing the underlying RPGLE.',
+    relatedLessonSlugs: ['why-apis-matter-on-ibm-i', 'rest-api-concepts-for-ibm-i-developers'],
+    tags: ['api', 'rest', 'integration'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-2',
+    topicId: 'integration-modernization',
+    title: 'HTTP Methods',
+    question:
+      'Which HTTP method is conventionally used to retrieve data without changing anything on the server, and which is conventionally used to create a new resource?',
+    type: 'multiple-choice',
+    options: [
+      'GET retrieves data without side effects; POST typically creates a new resource.',
+      'DELETE retrieves data; GET creates a new resource.',
+      'PUT and GET are interchangeable and always mean the same thing.',
+      'POST is only used for logging in, never for creating data.',
+    ],
+    correctAnswer: 'GET retrieves data without side effects; POST typically creates a new resource.',
+    explanation:
+      'HTTP methods carry a conventional meaning that well-behaved APIs follow: GET for safe reads, POST for creating something new, among others.',
+    relatedLessonSlugs: ['http-methods-and-status-codes-for-ibm-i-developers', 'rest-api-concepts-for-ibm-i-developers'],
+    tags: ['http', 'methods', 'rest'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-3',
+    topicId: 'integration-modernization',
+    title: 'HTTP Status Codes',
+    question: 'An API call returns HTTP status 404. What does that most likely tell the caller?',
+    type: 'multiple-choice',
+    options: [
+      'The requested resource (e.g. a specific record or endpoint) could not be found.',
+      'The request succeeded and returned exactly the data requested.',
+      'The server experienced an unexpected internal error unrelated to the request.',
+      'The caller does not have permission to access the resource.',
+      ],
+    correctAnswer: 'The requested resource (e.g. a specific record or endpoint) could not be found.',
+    explanation:
+      "404 specifically means 'not found' -- different from a 401/403 permission problem or a 500 server error, which is exactly why meaningful status codes help a caller react correctly.",
+    relatedLessonSlugs: ['http-methods-and-status-codes-for-ibm-i-developers', 'api-error-handling-basics'],
+    tags: ['http', 'status-codes'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-4',
+    topicId: 'integration-modernization',
+    title: 'JSON Basics',
+    question: 'What is JSON, at a basic level, and why does it matter for RPGLE developers building or consuming APIs?',
+    type: 'multiple-choice',
+    options: [
+      'A lightweight, text-based data format built from key-value pairs and arrays; RPGLE programs need to construct or parse JSON to exchange data with most modern APIs.',
+      'A binary file format that cannot be read as text.',
+      'A programming language that replaces RPGLE for API work.',
+      'A type of database index used only in Db2 for i.',
+    ],
+    correctAnswer:
+      'A lightweight, text-based data format built from key-value pairs and arrays; RPGLE programs need to construct or parse JSON to exchange data with most modern APIs.',
+    explanation:
+      'JSON is the data format, not a replacement language -- RPGLE still does the work, but it needs to build or read JSON text to talk to most modern APIs.',
+    relatedLessonSlugs: ['json-basics-for-rpgle-developers', 'json-parsing-concepts-in-rpgle'],
+    tags: ['json', 'rpgle', 'data-format'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-5',
+    topicId: 'integration-modernization',
+    title: 'Designing a Request/Response',
+    question:
+      "You're designing an API endpoint that returns a customer's order history. What should the response generally include, beyond just the raw order data, to be genuinely useful to the calling system?",
+    type: 'scenario',
+    correctAnswer:
+      "Enough structure for the caller to understand the result unambiguously -- typically an explicit status/success indicator and clear field names, not just a bare list of values the caller has to guess the meaning of.",
+    explanation:
+      "Good request/response design is about returning data in a predictable, self-describing shape so the calling system doesn't have to guess field meanings or handle edge cases (like an empty order history) inconsistently.",
+    relatedLessonSlugs: ['api-request-and-response-design-basics', 'json-basics-for-rpgle-developers'],
+    tags: ['api-design', 'request-response'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-6',
+    topicId: 'integration-modernization',
+    title: 'IFS and API Payloads',
+    question: "Why might an integration built on IBM i use the IFS to temporarily store an API's request or response payload?",
+    type: 'multiple-choice',
+    options: [
+      'The IFS provides a convenient stream-file location to stage or log a JSON payload during processing, separate from native database objects.',
+      'API payloads must always be stored in the IFS before they can be parsed.',
+      'The IFS is required to establish an HTTP connection.',
+      'Native database files cannot hold any text data, so the IFS is the only option.',
+    ],
+    correctAnswer:
+      'The IFS provides a convenient stream-file location to stage or log a JSON payload during processing, separate from native database objects.',
+    explanation:
+      'The IFS is a practical staging/logging location for payload data during integration work -- not a required step, but a common and useful one.',
+    relatedLessonSlugs: ['ifs-and-api-payload-files', 'logging-integration-requests-and-responses'],
+    tags: ['ifs', 'integration', 'payloads'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-7',
+    topicId: 'integration-modernization',
+    title: 'Calling an External API from IBM i',
+    question: 'What does an IBM i program generally need in order to call an external (non-IBM i) REST API?',
+    type: 'multiple-choice',
+    options: [
+      'A way to make an outbound HTTP request plus logic to build the request and parse the JSON response.',
+      'Nothing beyond standard RPGLE file I/O -- calling an external API is identical to reading a physical file.',
+      'A dedicated physical network cable per API being called.',
+      'The external API must be rewritten in RPGLE first.',
+    ],
+    correctAnswer: 'A way to make an outbound HTTP request plus logic to build the request and parse the JSON response.',
+    explanation:
+      'Calling out to an external API is a different pattern from native file I/O -- it needs an HTTP mechanism plus request/response handling logic.',
+    relatedLessonSlugs: ['calling-external-apis-from-ibm-i', 'json-parsing-concepts-in-rpgle'],
+    tags: ['integration', 'external-apis'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-8',
+    topicId: 'integration-modernization',
+    title: 'Exposing IBM i Logic as an API',
+    question:
+      'What is typically the most practical way to expose existing IBM i business logic (already implemented in RPGLE) as an API, without a full rewrite?',
+    type: 'multiple-choice',
+    options: [
+      "Wrap the existing logic in a service program or callable procedure, then front it with an HTTP layer that translates requests into calls to that existing logic and its output into an HTTP response.",
+      'Delete the existing RPGLE logic and write it again from scratch in a web framework.',
+      'APIs cannot be built on top of existing RPGLE logic under any circumstances.',
+      'Only CLLE programs can be exposed as APIs, never RPGLE.',
+    ],
+    correctAnswer:
+      "Wrap the existing logic in a service program or callable procedure, then front it with an HTTP layer that translates requests into calls to that existing logic and its output into an HTTP response.",
+    explanation:
+      'This wrap-and-front-end approach is exactly the modernization pattern this batch covers: reuse existing logic rather than rewriting it.',
+    relatedLessonSlugs: ['exposing-ibm-i-logic-as-an-api', 'modern-ibm-i-development-overview'],
+    tags: ['api', 'modernization', 'service-programs'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-9',
+    topicId: 'integration-modernization',
+    title: 'Common Integration Mistake',
+    question:
+      'A new integration works fine in testing but starts failing intermittently once a second system also starts calling it heavily. What common IBM i integration mistake does this scenario suggest should be checked?',
+    type: 'scenario',
+    correctAnswer:
+      'Not accounting for concurrent access/volume -- e.g. object locks or resource contention -- which is a commonly-cited integration mistake once real, concurrent traffic starts hitting the integration.',
+    explanation:
+      'Integrations tested with only a single caller often miss issues that only appear under concurrent load, such as lock contention or assumptions that break once multiple systems call in around the same time.',
+    relatedLessonSlugs: ['common-ibm-i-integration-mistakes', 'debugging-api-integration-issues'],
+    tags: ['integration', 'troubleshooting', 'common-mistakes'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-10',
+    topicId: 'integration-modernization',
+    title: 'API Error Handling',
+    question:
+      "Why is it better for an API to return a specific, meaningful status code and message on failure, rather than always returning a generic '200 OK' with an error buried in the body text?",
+    type: 'multiple-choice',
+    options: [
+      "Calling systems and standard tooling rely on the HTTP status code itself to detect failure automatically; hiding errors inside a '200 OK' response can cause callers to treat a failed request as if it succeeded.",
+      'HTTP status codes have no effect on how calling systems behave.',
+      'Generic 200 responses are always preferred because they are simpler to generate.',
+      'Meaningful status codes are only relevant for internal APIs, never external ones.',
+    ],
+    correctAnswer:
+      "Calling systems and standard tooling rely on the HTTP status code itself to detect failure automatically; hiding errors inside a '200 OK' response can cause callers to treat a failed request as if it succeeded.",
+    explanation:
+      'Status codes are the primary signal most HTTP tooling checks -- burying an error inside a 200 response defeats that mechanism and risks silent failures downstream.',
+    relatedLessonSlugs: ['api-error-handling-basics', 'http-methods-and-status-codes-for-ibm-i-developers'],
+    tags: ['api', 'error-handling', 'status-codes'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-11',
+    topicId: 'integration-modernization',
+    title: 'Securing APIs',
+    question: 'At a beginner level, what is a basic but essential security consideration for an API exposed from IBM i?',
+    type: 'multiple-choice',
+    options: [
+      "Confirming who is making the request (authentication) and whether they're allowed to do what they're asking (authorization), rather than assuming any caller who can reach the endpoint should be trusted.",
+      'Security is unnecessary as long as the API is only used internally.',
+      'HTTPS/TLS provides authentication automatically, so no other check is needed.',
+      'API security is only a concern for the network team, never for the developer writing the endpoint.',
+    ],
+    correctAnswer:
+      "Confirming who is making the request (authentication) and whether they're allowed to do what they're asking (authorization), rather than assuming any caller who can reach the endpoint should be trusted.",
+    explanation:
+      'Reachability is not the same as trust -- authentication and authorization are the baseline checks that keep an API from acting on behalf of just anyone who can send it a request.',
+    relatedLessonSlugs: ['securing-ibm-i-apis-at-a-beginner-level', 'why-apis-matter-on-ibm-i'],
+    tags: ['api', 'security', 'authentication'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-12',
+    topicId: 'integration-modernization',
+    title: 'Batch vs Real-Time Integration',
+    question:
+      'A nightly file of thousands of orders needs to be sent to a partner system, versus a single order lookup needed instantly while a customer is on a support call. Which integration approach fits each, and why?',
+    type: 'scenario',
+    correctAnswer:
+      "The nightly bulk transfer fits batch integration (processing many records together on a schedule); the instant lookup fits real-time integration (an immediate request/response for one record) -- forcing either into the other's pattern creates unnecessary complexity or delay.",
+    explanation:
+      'Choosing batch vs real-time should match the actual timing and volume needs of the use case: bulk, non-urgent transfers fit batch; single, time-sensitive lookups fit real-time.',
+    relatedLessonSlugs: ['batch-vs-real-time-integration', 'why-apis-matter-on-ibm-i'],
+    tags: ['integration', 'batch', 'real-time'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'apiint-13',
+    topicId: 'integration-modernization',
+    title: 'Debugging an API Integration Issue',
+    question:
+      "An integration is returning unexpected data, and the RPGLE logic looks correct on its own. What's a good first troubleshooting step specific to an API/integration context, before assuming the business logic is wrong?",
+    type: 'multiple-choice',
+    options: [
+      'Log and inspect the actual request and response payloads (and status code) as they cross the integration boundary, to confirm what was actually sent and received.',
+      'Immediately rewrite the RPGLE logic without checking anything else.',
+      'Assume the issue must be a hardware problem.',
+      'Skip investigation and just retry the call repeatedly until it works.',
+    ],
+    correctAnswer:
+      'Log and inspect the actual request and response payloads (and status code) as they cross the integration boundary, to confirm what was actually sent and received.',
+    explanation:
+      "Integration bugs often live at the boundary, not in the business logic -- confirming what actually crossed that boundary is a faster, more targeted first step than assuming the logic itself is wrong.",
+    relatedLessonSlugs: ['debugging-api-integration-issues', 'logging-integration-requests-and-responses'],
+    tags: ['debugging', 'integration', 'api'],
+    difficulty: 'intermediate',
+  },
+
+  // --- Advanced SQL for IBM i (added in PR #125) ---
+  {
+    id: 'asql-1',
+    topicId: 'advanced-sql',
+    title: 'DDL vs DML',
+    question: 'What is the difference between DDL and DML in SQL, using CREATE TABLE and INSERT as examples?',
+    type: 'multiple-choice',
+    options: [
+      'CREATE TABLE is DDL (Data Definition Language) -- it defines the structure of database objects; INSERT is DML (Data Manipulation Language) -- it works with the data inside those objects.',
+      'DDL and DML are two names for exactly the same set of SQL statements.',
+      'DDL only applies to DDS-described files, never SQL tables.',
+      'DML statements can create new tables, just like DDL.',
+    ],
+    correctAnswer:
+      'CREATE TABLE is DDL (Data Definition Language) -- it defines the structure of database objects; INSERT is DML (Data Manipulation Language) -- it works with the data inside those objects.',
+    explanation:
+      'DDL shapes the structure (tables, indexes, views); DML works with the rows inside that structure -- keeping the two straight helps when reading SQL documentation or error messages.',
+    relatedLessonSlugs: ['ddl-on-ibm-i-create-alter-drop-table', 'basic-select-on-ibm-i'],
+    tags: ['sql', 'ddl', 'dml'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-2',
+    topicId: 'advanced-sql',
+    title: 'Indexes and Views',
+    question: "What's the difference between a SQL index and a SQL view on Db2 for i?",
+    type: 'multiple-choice',
+    options: [
+      'An index speeds up how the database finds rows for certain queries; a view is a stored, named query that presents data without duplicating the underlying data.',
+      'An index and a view both physically duplicate all the underlying table\'s data.',
+      'A view is used only for performance tuning, never for simplifying a query.',
+      'An index is required before a table can contain any data.',
+    ],
+    correctAnswer:
+      'An index speeds up how the database finds rows for certain queries; a view is a stored, named query that presents data without duplicating the underlying data.',
+    explanation:
+      'An index is a performance structure; a view is a saved query definition -- neither one duplicates the base data the way a full copy would.',
+    relatedLessonSlugs: ['sql-indexes-and-views-on-db2-for-i', 'access-paths-and-why-they-matter'],
+    tags: ['sql', 'indexes', 'views'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-3',
+    topicId: 'advanced-sql',
+    title: 'Constraints',
+    question:
+      'A CUSTOMER table has a CUSTNO column that must be unique, and an ORDERS table with a CUSTNO column that must always match a real customer. Which constraints fit each requirement?',
+    type: 'scenario',
+    correctAnswer:
+      'CUSTOMER.CUSTNO should have a UNIQUE (or PRIMARY KEY) constraint; ORDERS.CUSTNO should have a FOREIGN KEY constraint referencing CUSTOMER.CUSTNO.',
+    explanation:
+      'PRIMARY KEY/UNIQUE constraints enforce uniqueness within one table; FOREIGN KEY constraints enforce that a value in one table corresponds to a real value in another table -- exactly what this scenario needs.',
+    relatedLessonSlugs: ['constraints-on-ibm-i-primary-foreign-unique-check', 'ddl-on-ibm-i-create-alter-drop-table'],
+    tags: ['sql', 'constraints', 'data-integrity'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-4',
+    topicId: 'advanced-sql',
+    title: 'SQL Stored Procedures',
+    question: 'What is an SQL (SQL PL) stored procedure, at a basic level?',
+    type: 'multiple-choice',
+    options: [
+      'A named, precompiled block of SQL and SQL PL control-flow logic stored in the database that can be called to run a sequence of operations.',
+      'A view that automatically updates itself on a schedule.',
+      'A synonym for a database trigger.',
+      'A type of index used only for text search.',
+    ],
+    correctAnswer: 'A named, precompiled block of SQL and SQL PL control-flow logic stored in the database that can be called to run a sequence of operations.',
+    explanation:
+      'A stored procedure packages multiple SQL statements and control-flow logic behind one callable name, rather than sending each statement separately.',
+    relatedLessonSlugs: ['sql-stored-procedures-on-ibm-i', 'external-stored-procedures-with-rpgle'],
+    tags: ['sql', 'stored-procedures'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-5',
+    topicId: 'advanced-sql',
+    title: 'External Stored Procedures',
+    question: 'How does an external stored procedure differ from an SQL (SQL PL) stored procedure?',
+    type: 'multiple-choice',
+    options: [
+      "An external stored procedure's logic lives in a separately compiled program (such as an RPGLE program), which SQL calls; an SQL PL stored procedure's logic is written directly in SQL PL and stored inside the database.",
+      'External stored procedures cannot accept parameters.',
+      'There is no real difference -- both terms describe the exact same mechanism.',
+      'External stored procedures can only be called from CLLE, never from SQL.',
+    ],
+    correctAnswer:
+      "An external stored procedure's logic lives in a separately compiled program (such as an RPGLE program), which SQL calls; an SQL PL stored procedure's logic is written directly in SQL PL and stored inside the database.",
+    explanation:
+      'The distinction is where the logic lives and is written -- an external stored procedure delegates to an existing compiled program, while SQL PL stored procedures are self-contained in the database.',
+    relatedLessonSlugs: ['external-stored-procedures-with-rpgle', 'sql-stored-procedures-on-ibm-i'],
+    tags: ['sql', 'stored-procedures', 'rpgle'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-6',
+    topicId: 'advanced-sql',
+    title: 'Triggers',
+    question: 'What does a database trigger do, conceptually?',
+    type: 'multiple-choice',
+    options: [
+      'It automatically runs a defined block of logic in response to a specific database event (like an INSERT, UPDATE, or DELETE) on a table, without the application explicitly calling it.',
+      'It is a manual command a user runs on demand from ACS.',
+      'It only runs once, when the table is first created.',
+      'It replaces the need for constraints entirely.',
+    ],
+    correctAnswer:
+      'It automatically runs a defined block of logic in response to a specific database event (like an INSERT, UPDATE, or DELETE) on a table, without the application explicitly calling it.',
+    explanation:
+      'A trigger fires automatically based on a database event, which is exactly what makes it useful (and risky) -- it runs even if the calling application never explicitly asked it to.',
+    relatedLessonSlugs: ['sql-triggers-on-ibm-i', 'constraints-on-ibm-i-primary-foreign-unique-check'],
+    tags: ['sql', 'triggers', 'data-integrity'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-7',
+    topicId: 'advanced-sql',
+    title: 'User-Defined Functions',
+    question: 'What is a UDF (user-defined function) used for in SQL on IBM i?',
+    type: 'multiple-choice',
+    options: [
+      'Encapsulating a reusable calculation or transformation so it can be called directly inside SQL statements, rather than repeating the same logic in every query.',
+      'Creating a brand-new SQL keyword that changes the language\'s syntax.',
+      'Replacing the need for any table in the database.',
+      'Only formatting output for printer files.',
+    ],
+    correctAnswer:
+      'Encapsulating a reusable calculation or transformation so it can be called directly inside SQL statements, rather than repeating the same logic in every query.',
+    explanation:
+      'A UDF is reusable logic callable from within SQL itself -- similar in spirit to a stored procedure, but designed to be used as part of a SELECT or WHERE clause.',
+    relatedLessonSlugs: ['user-defined-functions-on-ibm-i', 'sql-stored-procedures-on-ibm-i'],
+    tags: ['sql', 'udf', 'functions'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-8',
+    topicId: 'advanced-sql',
+    title: 'SQLCA, SQLCODE, and SQLSTATE',
+    question: 'After running an embedded SQL statement, SQLCODE comes back as 100. What does that typically mean?',
+    type: 'multiple-choice',
+    options: [
+      "No row was found matching the query (a common 'not found' condition), not necessarily an error in the traditional sense.",
+      'The statement caused a fatal, unrecoverable database error.',
+      'The statement succeeded and returned exactly one row.',
+      'SQLCODE 100 always means a syntax error in the SQL statement.',
+    ],
+    correctAnswer:
+      "No row was found matching the query (a common 'not found' condition), not necessarily an error in the traditional sense.",
+    explanation:
+      'SQLCODE 100 is one of the most common values a developer sees -- it signals no matching row, a normal condition to handle deliberately, not a failure to panic over.',
+    relatedLessonSlugs: ['sqlca-sqlcode-and-sqlstate-in-depth', 'handling-no-row-found-in-sqlrpgle'],
+    tags: ['sql', 'sqlcode', 'sqlstate'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-9',
+    topicId: 'advanced-sql',
+    title: 'Static vs Dynamic SQL',
+    question: "What's the core difference between static SQL and dynamic SQL in an RPGLE program?",
+    type: 'multiple-choice',
+    options: [
+      'Static SQL statements are fixed at compile time and precompiled; dynamic SQL statements are built and prepared at run time, allowing the actual SQL text to vary based on runtime conditions.',
+      'Static SQL can only run SELECT statements; dynamic SQL can only run INSERT statements.',
+      'Dynamic SQL is always faster than static SQL in every scenario.',
+      'Static and dynamic SQL produce result sets in incompatible formats.',
+    ],
+    correctAnswer:
+      'Static SQL statements are fixed at compile time and precompiled; dynamic SQL statements are built and prepared at run time, allowing the actual SQL text to vary based on runtime conditions.',
+    explanation:
+      'The difference is when the SQL text is known: static SQL is fixed at compile time; dynamic SQL is assembled and prepared while the program is running.',
+    relatedLessonSlugs: ['static-sql-vs-dynamic-sql-on-ibm-i', 'sql-precompilation-with-crtsqlrpgi'],
+    tags: ['sql', 'static-sql', 'dynamic-sql'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-10',
+    topicId: 'advanced-sql',
+    title: 'CRTSQLRPGI',
+    question: 'What does CRTSQLRPGI do for a program containing embedded SQL statements?',
+    type: 'multiple-choice',
+    options: [
+      'It precompiles the embedded SQL into a form the RPGLE compiler can process, then compiles the resulting program.',
+      'It only compiles the SQL statements, ignoring the RPGLE logic in the same source.',
+      'It is only used for CLLE, never RPGLE.',
+      'It replaces the need for a database entirely.',
+    ],
+    correctAnswer: 'It precompiles the embedded SQL into a form the RPGLE compiler can process, then compiles the resulting program.',
+    explanation:
+      'CRTSQLRPGI is a two-stage process rolled into one command: SQL precompilation followed by the regular RPGLE compile.',
+    relatedLessonSlugs: ['sql-precompilation-with-crtsqlrpgi', 'what-is-sqlrpgle'],
+    tags: ['sql', 'crtsqlrpgi', 'precompilation'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-11',
+    topicId: 'advanced-sql',
+    title: 'Query Optimization Basics',
+    question:
+      'A query filtering on a CUSTNO column that has no useful index is running slowly on a large table. What is a reasonable first step to investigate improving its performance?',
+    type: 'scenario',
+    correctAnswer:
+      'Consider whether an appropriate index (access path) on CUSTNO would let the database find matching rows directly, instead of scanning the whole table -- indexing is usually the first, most impactful thing to check.',
+    explanation:
+      'Query performance problems on large tables very often come down to whether the database has a useful access path for the columns being filtered or joined on.',
+    relatedLessonSlugs: ['query-optimization-basics-on-db2-for-i', 'access-paths-and-why-they-matter'],
+    tags: ['sql', 'query-optimization', 'indexes'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-12',
+    topicId: 'advanced-sql',
+    title: 'SQE vs CQE',
+    question: 'At a beginner-friendly level, what is the main distinction between SQE (SQL Query Engine) and CQE (Classic Query Engine) on IBM i?',
+    type: 'multiple-choice',
+    options: [
+      'They are two different query engines Db2 for i can use to process a query, with SQE being the newer engine generally preferred for SQL-based access.',
+      'SQE and CQE are two names for the exact same underlying engine.',
+      'CQE only works with DDS files, and SQE only works with journaled files.',
+      'SQE is a tool for creating displays, unrelated to query processing.',
+    ],
+    correctAnswer:
+      'They are two different query engines Db2 for i can use to process a query, with SQE being the newer engine generally preferred for SQL-based access.',
+    explanation:
+      'SQE and CQE are alternative internal engines for running a query -- knowing they exist helps make sense of performance discussions and IBM documentation.',
+    relatedLessonSlugs: ['sqe-vs-cqe-at-a-beginner-friendly-level', 'query-optimization-basics-on-db2-for-i'],
+    tags: ['sql', 'sqe', 'cqe'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-13',
+    topicId: 'advanced-sql',
+    title: 'Encoded Vector Indexes',
+    question: 'What is an Encoded Vector Index (EVI) generally well-suited for, compared to a traditional index?',
+    type: 'multiple-choice',
+    options: [
+      'Columns with a relatively small number of distinct values (low cardinality), where an EVI can represent matching rows compactly and efficiently for certain queries.',
+      'Columns that are guaranteed to have a unique value in every row.',
+      'Replacing primary key constraints entirely.',
+      'Storing free-form text documents.',
+    ],
+    correctAnswer:
+      'Columns with a relatively small number of distinct values (low cardinality), where an EVI can represent matching rows compactly and efficiently for certain queries.',
+    explanation:
+      'EVIs are a specialized index type most useful for low-cardinality columns -- a different fit than a traditional index built for high-cardinality, more unique-valued columns.',
+    relatedLessonSlugs: ['encoded-vector-indexes-introduction', 'sql-indexes-and-views-on-db2-for-i'],
+    tags: ['sql', 'evi', 'indexes'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'asql-14',
+    topicId: 'advanced-sql',
+    title: 'Common Advanced SQL Mistake',
+    question:
+      'A developer adds a trigger to a heavily-used table without testing it against high-volume batch inserts first, and a nightly batch job that used to finish quickly starts running much longer. What common advanced-SQL mistake does this illustrate?',
+    type: 'scenario',
+    correctAnswer:
+      'Not accounting for the performance impact a trigger has when it fires on every single row of a large batch operation -- a commonly-cited mistake once triggers, procedures, or constraints are added to tables involved in bulk processing.',
+    explanation:
+      'Triggers run per affected row, so adding non-trivial logic to a trigger on a table involved in large batch operations can quietly turn a fast bulk load into a much slower one.',
+    relatedLessonSlugs: ['common-advanced-sql-mistakes-on-ibm-i', 'sql-triggers-on-ibm-i'],
+    tags: ['sql', 'triggers', 'common-mistakes'],
+    difficulty: 'intermediate',
+  },
+
+  // --- IBM i Security (added in PR #125) ---
+  {
+    id: 'sec-1',
+    topicId: 'security',
+    title: 'User Profiles vs Group Profiles',
+    question:
+      'What is the main practical benefit of assigning users to a group profile rather than only managing authority per individual user profile?',
+    type: 'multiple-choice',
+    options: [
+      'Authority can be granted once to the group profile, and every member inherits it -- avoiding repeating the same authority grant for each individual user.',
+      'Group profiles remove the need for individual user profiles entirely.',
+      'Group profiles are only used for sign-on screens, not authority.',
+      'A user can never belong to more than one group.',
+    ],
+    correctAnswer:
+      'Authority can be granted once to the group profile, and every member inherits it -- avoiding repeating the same authority grant for each individual user.',
+    explanation:
+      'Group profiles exist mainly to simplify authority management -- one grant to the group instead of repeating the same grant across many individual users.',
+    relatedLessonSlugs: ['user-profiles-and-group-profiles-on-ibm-i', 'authorities-and-object-access-basics'],
+    tags: ['security', 'user-profiles', 'group-profiles'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-2',
+    topicId: 'security',
+    title: 'Object Authority',
+    question: "What does 'object authority' fundamentally control on IBM i?",
+    type: 'multiple-choice',
+    options: [
+      'What operations (like read, change, or delete) a specific user or group is allowed to perform against a specific object.',
+      "Which library a user's jobs run in.",
+      'How fast a program executes.',
+      'Which programming language an object was written in.',
+    ],
+    correctAnswer:
+      'What operations (like read, change, or delete) a specific user or group is allowed to perform against a specific object.',
+    explanation:
+      'Object authority is the core mechanism that decides who can do what to a specific object -- everything else in IBM i security builds on this concept.',
+    relatedLessonSlugs: ['object-authority-in-depth', 'authorities-and-object-access-basics'],
+    tags: ['security', 'object-authority'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-3',
+    topicId: 'security',
+    title: 'Public vs Private Authority',
+    question: "What's the difference between an object's public authority and a specific user's private authority to that object?",
+    type: 'multiple-choice',
+    options: [
+      "Public authority applies to any user who doesn't have a more specific private (or group) authority granted; private authority is a grant made directly to one specific user or group.",
+      'Public authority only matters for objects owned by QSECOFR.',
+      'Private authority always overrides public authority no matter what it grants.',
+      'Public and private authority are two names for the same setting.',
+    ],
+    correctAnswer:
+      "Public authority applies to any user who doesn't have a more specific private (or group) authority granted; private authority is a grant made directly to one specific user or group.",
+    explanation:
+      'Public authority is the fallback for anyone without a more specific grant; private authority is a targeted grant that can be more or less permissive than the public setting.',
+    relatedLessonSlugs: ['public-authority-and-private-authority-in-depth', 'object-authority-in-depth'],
+    tags: ['security', 'public-authority', 'private-authority'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-4',
+    topicId: 'security',
+    title: 'Authorization Lists',
+    question: 'Why might a shop use an authorization list instead of granting authority to each object individually?',
+    type: 'multiple-choice',
+    options: [
+      'An authorization list lets many objects share one common list of user authorities -- changing the list once updates authority for every object secured by it.',
+      'Authorization lists can only secure one object at a time.',
+      'Authorization lists remove the need for object ownership.',
+      'Authorization lists are only used for IFS objects, never native objects.',
+    ],
+    correctAnswer:
+      'An authorization list lets many objects share one common list of user authorities -- changing the list once updates authority for every object secured by it.',
+    explanation:
+      'Authorization lists solve the same repetitive-maintenance problem as group profiles, but at the object side: one list, many secured objects.',
+    relatedLessonSlugs: ['authorization-lists-on-ibm-i', 'object-authority-in-depth'],
+    tags: ['security', 'authorization-lists'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-5',
+    topicId: 'security',
+    title: 'Special Authorities',
+    question:
+      'A user profile is granted *ALLOBJ special authority so they can troubleshoot an issue faster. What real risk does this introduce?',
+    type: 'scenario',
+    correctAnswer:
+      '*ALLOBJ grants access to essentially all objects on the system regardless of their individual object authority settings -- if left in place longer than needed, it creates unnecessary risk far beyond the original troubleshooting task.',
+    explanation:
+      'Special authorities like *ALLOBJ operate above normal object-level authority checks, which is exactly why they should be granted narrowly and temporarily, following least-privilege practice.',
+    relatedLessonSlugs: ['special-authorities-explained', 'ibm-i-security-best-practices-for-developers'],
+    tags: ['security', 'special-authorities', 'least-privilege'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-6',
+    topicId: 'security',
+    title: 'Adopted Authority',
+    question: "What does 'adopted authority' mean when a program runs?",
+    type: 'multiple-choice',
+    options: [
+      "The program temporarily runs using the authority of the program's owner (or a designated profile), in addition to or instead of the authority of the user who called it.",
+      'The user calling the program adopts a brand new user profile permanently.',
+      'Adopted authority only applies to CLLE programs, never RPGLE.',
+      'It means the program automatically gets *SECOFR authority regardless of who owns it.',
+    ],
+    correctAnswer:
+      "The program temporarily runs using the authority of the program's owner (or a designated profile), in addition to or instead of the authority of the user who called it.",
+    explanation:
+      "Adopted authority is a deliberate mechanism to let a program perform actions its caller couldn't do directly -- powerful, and worth using carefully.",
+    relatedLessonSlugs: ['adopted-authority-basics', 'special-authorities-explained'],
+    tags: ['security', 'adopted-authority'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-7',
+    topicId: 'security',
+    title: 'Investigating an Authority Failure',
+    question:
+      "A user reports 'not authorized' trying to run a program that used to work. What's a reasonable first step to investigate, beyond just granting *ALLOBJ to make the error go away?",
+    type: 'scenario',
+    correctAnswer:
+      "Look at exactly which object and authority the failure message identifies, and check that user's or group's actual current authority to that object -- rather than immediately granting broad, unnecessary authority.",
+    explanation:
+      'Authority failure messages are specific about which object and authority were involved -- investigating that detail leads to a targeted fix, whereas granting *ALLOBJ just to silence the error undermines least-privilege practice.',
+    relatedLessonSlugs: ['investigating-authority-failures-in-depth', 'object-authority-in-depth'],
+    tags: ['security', 'troubleshooting', 'authority-failures'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-8',
+    topicId: 'security',
+    title: 'QSECURITY System Value',
+    question: 'What does the QSECURITY system value control, at a conceptual level?',
+    type: 'multiple-choice',
+    options: [
+      'The overall security level the system enforces (how strictly user profiles and object authority are required and checked), a system-wide setting rather than a per-object one.',
+      'The password a specific user must use to sign on.',
+      "Which library list a job starts with.",
+      'How many concurrent jobs the system can run.',
+    ],
+    correctAnswer:
+      'The overall security level the system enforces (how strictly user profiles and object authority are required and checked), a system-wide setting rather than a per-object one.',
+    explanation:
+      'QSECURITY sets the baseline security posture for the whole system -- a foundational setting that everything else (object authority, special authorities) operates within.',
+    relatedLessonSlugs: ['qsecurity-system-value-explained', 'ibm-i-security-best-practices-for-developers'],
+    tags: ['security', 'qsecurity', 'system-values'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-9',
+    topicId: 'security',
+    title: 'QAUDJRN',
+    question: 'What is QAUDJRN used for?',
+    type: 'multiple-choice',
+    options: [
+      "It's the system's security audit journal, recording security-relevant events (like authority failures or profile changes) for later review.",
+      "It's a regular database file used to store customer orders.",
+      'It automatically prevents all unauthorized access attempts.',
+      "It's a synonym for a save file used during backups.",
+    ],
+    correctAnswer:
+      "It's the system's security audit journal, recording security-relevant events (like authority failures or profile changes) for later review.",
+    explanation:
+      'QAUDJRN is specifically about recording security-relevant events for review -- a distinct purpose from journaling a business application\'s own database changes.',
+    relatedLessonSlugs: ['auditing-basics-and-qaudjrn-overview', 'qsecurity-system-value-explained'],
+    tags: ['security', 'qaudjrn', 'auditing'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-10',
+    topicId: 'security',
+    title: 'Exit Points and Exit Programs',
+    question: 'What role do exit points and exit programs play in IBM i security?',
+    type: 'multiple-choice',
+    options: [
+      'Exit points are predefined places in system functions (like FTP or ODBC access) where a shop can register its own exit program to run custom checks before the function proceeds.',
+      'Exit points are a type of database index.',
+      'Exit programs replace the need for object authority entirely.',
+      'Exit points only exist for RPGLE compilation, not system access.',
+    ],
+    correctAnswer:
+      'Exit points are predefined places in system functions (like FTP or ODBC access) where a shop can register its own exit program to run custom checks before the function proceeds.',
+    explanation:
+      'Exit points let a shop add its own logic (like extra logging or access checks) at defined moments in system functions -- without modifying the system function itself.',
+    relatedLessonSlugs: ['exit-points-and-exit-programs-overview', 'auditing-basics-and-qaudjrn-overview'],
+    tags: ['security', 'exit-points'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-11',
+    topicId: 'security',
+    title: 'IFS Security',
+    question: 'Does object authority still apply to objects stored in the IFS, the same way it applies to native library objects?',
+    type: 'multiple-choice',
+    options: [
+      'Yes -- IFS objects like stream files and directories have their own authority settings that need to be considered, following similar authority concepts to native objects.',
+      'No -- the IFS has no security model at all; anyone who can sign on can access every IFS file.',
+      'IFS security only applies to files created by IBM-supplied programs.',
+      'IFS objects automatically inherit *ALLOBJ authority for every user.',
+    ],
+    correctAnswer:
+      'Yes -- IFS objects like stream files and directories have their own authority settings that need to be considered, following similar authority concepts to native objects.',
+    explanation:
+      'The IFS looks different from a library-based structure, but authority concepts still apply -- a common misconception is treating the IFS as unsecured by default.',
+    relatedLessonSlugs: ['ifs-security-basics', 'ifs-basics-for-ibm-i-beginners'],
+    tags: ['security', 'ifs'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-12',
+    topicId: 'security',
+    title: 'Digital Certificates and TLS',
+    question: 'At a conceptual level, what problem do digital certificates and TLS solve for IBM i-hosted APIs?',
+    type: 'multiple-choice',
+    options: [
+      "They let a client verify it's really talking to the expected server and encrypt the data in transit, protecting against eavesdropping and impersonation over the network.",
+      'They replace the need for object authority on the server.',
+      'They only matter for internal, same-system communication.',
+      'TLS is only relevant to 5250 terminal sessions, never HTTP-based APIs.',
+    ],
+    correctAnswer:
+      "They let a client verify it's really talking to the expected server and encrypt the data in transit, protecting against eavesdropping and impersonation over the network.",
+    explanation:
+      'TLS and certificates protect the connection itself -- confirming identity and encrypting traffic -- which is a different concern from, and complementary to, object-level authority.',
+    relatedLessonSlugs: ['digital-certificates-and-tls-concepts-on-ibm-i', 'securing-ibm-i-apis-at-a-beginner-level'],
+    tags: ['security', 'tls', 'certificates'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-13',
+    topicId: 'security',
+    title: 'RCAC and Field Procedures',
+    question:
+      'What do Row and Column Access Control (RCAC) and Field Procedures (FIELDPROC) let a shop do, conceptually, that plain object authority cannot?',
+    type: 'multiple-choice',
+    options: [
+      'Control access or transform data at a finer grain than the whole object -- for example, restricting which rows a user can see, or automatically masking a column\'s values.',
+      'They are two names for the exact same object-level authority setting.',
+      'They only apply to DDS-described files, never SQL tables.',
+      'They remove the need for any user profile authority checks.',
+    ],
+    correctAnswer:
+      'Control access or transform data at a finer grain than the whole object -- for example, restricting which rows a user can see, or automatically masking a column\'s values.',
+    explanation:
+      "Plain object authority is all-or-nothing for the whole object; RCAC and FIELDPROC operate at the row and column level, a genuinely finer-grained capability.",
+    relatedLessonSlugs: ['rcac-and-field-procedures-overview', 'object-authority-in-depth'],
+    tags: ['security', 'rcac', 'fieldproc'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'sec-14',
+    topicId: 'security',
+    title: 'Least Privilege in Practice',
+    question:
+      "Two developers explain why a batch job's user profile shouldn't have *ALLOBJ special authority. Developer A says: 'It's just a best practice everyone follows.' Developer B says: 'If that job's authority is ever misused or compromised, *ALLOBJ would expose every object on the system, not just what the job actually needs.' Which explanation better demonstrates understanding of least privilege, and why?",
+    type: 'scenario',
+    correctAnswer:
+      "Developer B's explanation is stronger -- it explains the actual risk being reduced (blast radius if something goes wrong), rather than just citing the practice as a rule to follow without reasoning through why it matters.",
+    explanation:
+      'Least privilege is valuable because it limits the damage possible if something does go wrong, not because it is a rule. A strong answer explains that reasoning; a weak answer just restates the rule.',
+    relatedLessonSlugs: ['ibm-i-security-best-practices-for-developers', 'special-authorities-explained'],
+    tags: ['security', 'least-privilege', 'best-practices'],
+    difficulty: 'intermediate',
+  },
+
+  // --- Journaling & Commitment Control (added in PR #125) ---
+  {
+    id: 'jrn-1',
+    topicId: 'journaling-commitment-control',
+    title: 'Journal vs Journal Receiver',
+    question: "What's the relationship between a journal and a journal receiver on IBM i?",
+    type: 'multiple-choice',
+    options: [
+      'The journal is the object that journaled changes are directed to; the journal receiver is where journal entries are physically stored, and receivers can be swapped over time as they fill up.',
+      'A journal and a journal receiver are two names for the exact same object.',
+      'A journal receiver is a type of save file used only during a restore.',
+      'A journal can only ever have exactly one receiver for its entire lifetime with no ability to change it.',
+    ],
+    correctAnswer:
+      'The journal is the object that journaled changes are directed to; the journal receiver is where journal entries are physically stored, and receivers can be swapped over time as they fill up.',
+    explanation:
+      'The journal is a stable, named target for journaled changes; the underlying receiver storing those entries can be changed out over time without affecting the journal itself.',
+    relatedLessonSlugs: ['what-is-journaling-on-ibm-i', 'journal-receivers-explained'],
+    tags: ['journaling', 'journal-receivers'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-2',
+    topicId: 'journaling-commitment-control',
+    title: 'Starting Journaling with STRJRNPF',
+    question: 'What does STRJRNPF do?',
+    type: 'multiple-choice',
+    options: [
+      'It starts journaling for a specific physical file, so changes made to that file going forward are recorded as journal entries in the associated journal.',
+      'It permanently deletes a journal receiver.',
+      'It restores a physical file from a save file.',
+      'It is only used to view journal entries, not start journaling.',
+    ],
+    correctAnswer:
+      'It starts journaling for a specific physical file, so changes made to that file going forward are recorded as journal entries in the associated journal.',
+    explanation:
+      'STRJRNPF is the command that actually turns journaling on for a file -- without it, no journal entries are recorded for that file, no matter how the journal itself is configured.',
+    relatedLessonSlugs: ['starting-journaling-with-strjrnpf', 'what-is-journaling-on-ibm-i'],
+    tags: ['journaling', 'strjrnpf'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-3',
+    topicId: 'journaling-commitment-control',
+    title: 'Viewing Journal Entries',
+    question: 'How would a developer look at what changes have actually been journaled for a file?',
+    type: 'multiple-choice',
+    options: [
+      'Use DSPJRN against the journal to view recorded entries, such as which records were added, changed, or deleted and when.',
+      'Open the physical file directly with CHAIN to see the journal entries mixed into the data.',
+      'Journal entries cannot be viewed after they are written; they exist only for internal system use.',
+      'Use WRKOBJLCK to see journal entries.',
+    ],
+    correctAnswer:
+      'Use DSPJRN against the journal to view recorded entries, such as which records were added, changed, or deleted and when.',
+    explanation:
+      'DSPJRN is the tool for actually reviewing what a journal has recorded -- journal entries are meant to be inspectable, not hidden internal-only data.',
+    relatedLessonSlugs: ['viewing-journal-entries-basics', 'journal-receivers-explained'],
+    tags: ['journaling', 'dspjrn'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-4',
+    topicId: 'journaling-commitment-control',
+    title: 'Commitment Control',
+    question: 'What problem does commitment control solve when a single business transaction needs to update more than one file?',
+    type: 'multiple-choice',
+    options: [
+      'It lets a group of related database changes be treated as one all-or-nothing unit -- either every change in the group is applied, or none are.',
+      'It automatically speeds up every database read operation.',
+      'It replaces the need for journaling entirely.',
+      'It only works for a single file, never multiple files in one transaction.',
+    ],
+    correctAnswer:
+      'It lets a group of related database changes be treated as one all-or-nothing unit -- either every change in the group is applied, or none are.',
+    explanation:
+      "Commitment control's whole purpose is protecting against a half-finished multi-file update -- exactly the situation this question describes.",
+    relatedLessonSlugs: ['commitment-control-overview', 'what-is-journaling-on-ibm-i'],
+    tags: ['commitment-control', 'transactions'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-5',
+    topicId: 'journaling-commitment-control',
+    title: 'STRCMTCTL, COMMIT, and ROLLBACK',
+    question: 'In a program using commitment control, what is the difference between COMMIT and ROLLBACK?',
+    type: 'multiple-choice',
+    options: [
+      'COMMIT makes all the changes since the last commit boundary permanent; ROLLBACK undoes all of them, returning the affected data to how it was before that unit of work began.',
+      'COMMIT and ROLLBACK both permanently save the changes, just using different commands.',
+      'ROLLBACK permanently deletes the journal itself.',
+      'COMMIT only works if STRCMTCTL was never called.',
+    ],
+    correctAnswer:
+      'COMMIT makes all the changes since the last commit boundary permanent; ROLLBACK undoes all of them, returning the affected data to how it was before that unit of work began.',
+    explanation:
+      'COMMIT and ROLLBACK are the two possible outcomes of a unit of work under commitment control -- keep everything, or undo everything.',
+    relatedLessonSlugs: ['strcmtctl-commit-and-rollback-basics', 'commitment-control-overview'],
+    tags: ['commitment-control', 'commit', 'rollback'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-6',
+    topicId: 'journaling-commitment-control',
+    title: 'Journaling for Recovery',
+    question: 'A file update job crashes halfway through a large update. How could journaling help investigate or recover from that, assuming the file was journaled?',
+    type: 'scenario',
+    correctAnswer:
+      "The journal contains a record of the changes actually made before the crash, which can be reviewed (and, in a recovery scenario, potentially reapplied) -- something that wouldn't be possible from the file's current state alone.",
+    explanation:
+      'This is exactly why journaling matters for recovery: it preserves a history of changes independent of the file\'s final state, which a point-in-time backup alone cannot provide.',
+    relatedLessonSlugs: ['journaling-for-recovery-and-auditing', 'what-is-journaling-on-ibm-i'],
+    tags: ['journaling', 'recovery'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-7',
+    topicId: 'journaling-commitment-control',
+    title: 'Journaling for Auditing',
+    question: 'Beyond recovery, why might a shop journal a table specifically for auditing purposes?',
+    type: 'multiple-choice',
+    options: [
+      'Journal entries provide a chronological record of what changed and when, which is valuable for reviewing suspicious activity or demonstrating compliance -- a different purpose than recovery, using the same mechanism.',
+      'Auditing and recovery are impossible to support with the same journal.',
+      'Journaling for auditing requires a completely different command set than journaling for recovery.',
+      'Only QAUDJRN can be used for auditing; regular journals cannot support it.',
+    ],
+    correctAnswer:
+      'Journal entries provide a chronological record of what changed and when, which is valuable for reviewing suspicious activity or demonstrating compliance -- a different purpose than recovery, using the same mechanism.',
+    explanation:
+      'The same journal entries that support recovery also support auditing -- the mechanism is identical, but the reason someone reviews them differs.',
+    relatedLessonSlugs: ['journaling-for-recovery-and-auditing', 'auditing-basics-and-qaudjrn-overview'],
+    tags: ['journaling', 'auditing'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-8',
+    topicId: 'journaling-commitment-control',
+    title: 'Common Journaling Mistake',
+    question: "A team assumes that because a file is journaled, they no longer need regular backups of it. What's wrong with that assumption?",
+    type: 'scenario',
+    correctAnswer:
+      "Journaling records a history of changes, but it isn't a substitute for a point-in-time backup -- recovering fully typically still depends on having a base saved copy of the object to apply journal entries against.",
+    explanation:
+      'This is one of the most common journaling/commitment-control mistakes: journaling and backup solve related but different problems, and dropping one because the other exists creates a real recovery gap.',
+    relatedLessonSlugs: ['common-journaling-and-commitment-control-mistakes', 'journaling-for-recovery-and-auditing'],
+    tags: ['journaling', 'common-mistakes', 'backup'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'jrn-9',
+    topicId: 'journaling-commitment-control',
+    title: 'Journaling vs Commitment Control',
+    question: 'Is commitment control possible without journaling being involved at all?',
+    type: 'multiple-choice',
+    options: [
+      "No -- commitment control on IBM i depends on journaling under the hood to track and be able to back out the changes within a unit of work.",
+      'Yes -- commitment control and journaling are completely unrelated features.',
+      'Journaling is only needed after commitment control has already committed a transaction.',
+      'Commitment control replaces journaling entirely, making journaling unnecessary once it is enabled.',
+    ],
+    correctAnswer:
+      "No -- commitment control on IBM i depends on journaling under the hood to track and be able to back out the changes within a unit of work.",
+    explanation:
+      "Commitment control's ability to roll back a unit of work relies on journaling to track what changed -- the two features are directly connected, not independent.",
+    relatedLessonSlugs: ['commitment-control-overview', 'what-is-journaling-on-ibm-i'],
+    tags: ['journaling', 'commitment-control'],
+    difficulty: 'intermediate',
+  },
+
+  // --- Save/Restore & Object Backup (added in PR #125) ---
+  {
+    id: 'svrs-1',
+    topicId: 'save-restore',
+    title: 'SAVOBJ vs SAVLIB',
+    question:
+      'A developer needs to save just one program before making a risky change, not the whole library it lives in. Which command fits, and why?',
+    type: 'scenario',
+    correctAnswer:
+      'SAVOBJ -- it saves one or more specific objects individually, which matches saving just that one program, whereas SAVLIB saves an entire library\'s contents at once.',
+    explanation:
+      "SAVOBJ operates at the individual-object level, exactly matching a 'save just this one thing before I change it' scenario; SAVLIB is the right tool when the goal is the whole library.",
+    relatedLessonSlugs: ['savobj-and-rstobj-basics', 'savlib-and-rstlib-basics'],
+    tags: ['save-restore', 'savobj', 'savlib'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-2',
+    topicId: 'save-restore',
+    title: 'RSTOBJ Target Library',
+    question: 'When running RSTOBJ, does the restored object automatically go back to the exact same library it was originally saved from?',
+    type: 'multiple-choice',
+    options: [
+      'Not necessarily -- RSTOBJ restores to whatever library its own parameters specify, which could be the original library or a different one, so confirming the target library deliberately matters.',
+      'Yes, always -- RSTOBJ has no way to target a different library than the original.',
+      'RSTOBJ can only restore to QGPL.',
+      'RSTOBJ always overwrites every object in the target library, not just the one being restored.',
+    ],
+    correctAnswer:
+      'Not necessarily -- RSTOBJ restores to whatever library its own parameters specify, which could be the original library or a different one, so confirming the target library deliberately matters.',
+    explanation:
+      "RSTOBJ's target is a parameter, not an automatic default back to the original -- exactly why confirming the target library before running it is a genuinely important habit.",
+    relatedLessonSlugs: ['savobj-and-rstobj-basics', 'restoring-objects-safely-in-development-and-test'],
+    tags: ['save-restore', 'rstobj'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-3',
+    topicId: 'save-restore',
+    title: 'Save Files and CRTSAVF',
+    question: "Before running SAVOBJ with DEV(*SAVF) targeting a save file that doesn't exist yet, what needs to happen first?",
+    type: 'multiple-choice',
+    options: [
+      'The save file must be created first, typically with CRTSAVF -- SAVOBJ does not create a missing save file automatically.',
+      'Nothing -- SAVOBJ automatically creates any save file it is pointed at.',
+      'The target library must be deleted and recreated.',
+      'DSPSAVF must be run first to initialize the save file.',
+    ],
+    correctAnswer:
+      'The save file must be created first, typically with CRTSAVF -- SAVOBJ does not create a missing save file automatically.',
+    explanation:
+      "A save file is just another IBM i object that needs to exist before it can be targeted -- CRTSAVF is the missing piece behind every save file used earlier in this batch.",
+    relatedLessonSlugs: ['save-files-explained', 'savobj-and-rstobj-basics'],
+    tags: ['save-restore', 'save-files', 'crtsavf'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-4',
+    topicId: 'save-restore',
+    title: 'DSPSAVF',
+    question: 'What does DSPSAVF actually show you?',
+    type: 'multiple-choice',
+    options: [
+      'Information about what a save file currently contains, such as which objects were saved into it -- not the actual application data inside those saved objects.',
+      'The literal row-by-row data inside the saved database files.',
+      'A live list of jobs currently using the save file.',
+      'The password required to restore from that save file.',
+    ],
+    correctAnswer:
+      'Information about what a save file currently contains, such as which objects were saved into it -- not the actual application data inside those saved objects.',
+    explanation:
+      'DSPSAVF is a confirmation tool -- it tells you what was saved, not a way to browse the saved data directly.',
+    relatedLessonSlugs: ['save-files-explained', 'savobj-and-rstobj-basics'],
+    tags: ['save-restore', 'dspsavf'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-5',
+    topicId: 'save-restore',
+    title: 'GO SAVE Options',
+    question: 'How do GO SAVE options 21, 22, and 23 differ in scope from the everyday SAVOBJ/SAVLIB commands covered elsewhere in this batch?',
+    type: 'multiple-choice',
+    options: [
+      'GO SAVE options operate at a much broader, whole-system or whole-environment scope and are generally an administrator\'s responsibility, unlike the object-level and library-level saves developers use day to day.',
+      'GO SAVE options are just a menu shortcut for running SAVOBJ on a single object.',
+      'GO SAVE options only exist for restoring, never for saving.',
+      'There is no real difference -- GO SAVE options and SAVOBJ save exactly the same scope.',
+    ],
+    correctAnswer:
+      'GO SAVE options operate at a much broader, whole-system or whole-environment scope and are generally an administrator\'s responsibility, unlike the object-level and library-level saves developers use day to day.',
+    explanation:
+      'GO SAVE options are a different scale entirely from the object/library saves a developer runs directly -- useful to recognize, even if a developer rarely runs them personally.',
+    relatedLessonSlugs: ['go-save-options-21-22-and-23-overview', 'savlib-and-rstlib-basics'],
+    tags: ['save-restore', 'go-save'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-6',
+    topicId: 'save-restore',
+    title: 'Restoring Safely',
+    question: 'Before restoring a saved library into what should be a test environment, what should a developer confirm first, and why?',
+    type: 'scenario',
+    correctAnswer:
+      'Confirm the exact target library (to avoid overwriting a production library with a similar name), sufficient authority to that target, and that no other users or jobs are actively using it -- since a restore replaces whatever currently exists at the target.',
+    explanation:
+      "A restore isn't a read-only operation -- it overwrites the target. Confirming the target library, authority, and current activity/locks beforehand is exactly the deliberate process that prevents silently overwriting the wrong thing.",
+    relatedLessonSlugs: ['restoring-objects-safely-in-development-and-test', 'object-locks-basics'],
+    tags: ['save-restore', 'restoring', 'safety'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-7',
+    topicId: 'save-restore',
+    title: 'Backup vs Journaling vs HA',
+    question: 'A system has nightly backups but no journaling and no high availability. If it fails at 3pm, what is lost, and why?',
+    type: 'scenario',
+    correctAnswer:
+      "Everything changed since the previous night's backup is lost -- a backup alone only restores to the point-in-time it was taken; without journaling, there's no ongoing change record to reapply, and without HA, there's no replicated system to fail over to.",
+    explanation:
+      'This scenario is exactly why backup, journaling, and HA are discussed together: each protects against a different kind of loss, and having only one of the three leaves the corresponding gap uncovered.',
+    relatedLessonSlugs: ['backup-vs-journaling-vs-high-availability', 'journaling-for-recovery-and-auditing'],
+    tags: ['save-restore', 'journaling', 'high-availability'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-8',
+    topicId: 'save-restore',
+    title: 'Common Save/Restore Mistake',
+    question:
+      'A developer restores a library into what they believe is their test library, but it turns out to be a similarly-named production library, silently overwriting real objects. What common mistake does this illustrate, and what habit would have prevented it?',
+    type: 'scenario',
+    correctAnswer:
+      'The mistake is not deliberately confirming the exact target library before running the restore -- the preventing habit is treating restore as a deliberate operation with real, immediate effects, and explicitly confirming the target every time.',
+    explanation:
+      'This is one of the most consequential and avoidable save/restore mistakes: a restore looks routine but silently replaces whatever exists at the target, so skipping a deliberate target check is exactly the habit that needs to change.',
+    relatedLessonSlugs: ['common-save-restore-mistakes', 'restoring-objects-safely-in-development-and-test'],
+    tags: ['save-restore', 'common-mistakes', 'troubleshooting'],
+    difficulty: 'intermediate',
+  },
+  {
+    id: 'svrs-9',
+    topicId: 'save-restore',
+    title: 'Why Backup and Restore Matter for Developers',
+    question: 'Why should a developer understand save and restore basics, rather than treating it as purely an administrator\'s concern?',
+    type: 'multiple-choice',
+    options: [
+      'Developers use save/restore directly in everyday situations -- protecting their own work before a risky change, refreshing test data, or investigating why an object looks different than expected.',
+      'Developers never need to run SAVOBJ, RSTOBJ, SAVLIB, or RSTLIB themselves under any circumstance.',
+      'Understanding save/restore is only useful for passing a certification exam.',
+      'Save and restore only matter if a shop has no system administrator at all.',
+    ],
+    correctAnswer:
+      'Developers use save/restore directly in everyday situations -- protecting their own work before a risky change, refreshing test data, or investigating why an object looks different than expected.',
+    explanation:
+      'Save/restore is a genuinely everyday developer tool, not just an admin-only concern -- the whole point of this batch is recognizing and using it responsibly in normal development work.',
+    relatedLessonSlugs: ['why-backup-and-restore-matter-on-ibm-i', 'common-save-restore-mistakes'],
+    tags: ['save-restore', 'development'],
+    difficulty: 'intermediate',
   },
 ]
 
