@@ -57,6 +57,12 @@ async function seed() {
           related_lessons: lesson.relatedLessons ?? null,
           persona_tags: lesson.personaTags ?? null,
           ai_tutor_prompts: lesson.aiTutorPrompts ?? null,
+          // Taxonomy fields (PR #120/#121/#122, planning/LESSON_TAXONOMY_AND_GROUPING_AUDIT.md)
+          // -- additive only; independent of track_id/module_id above, which
+          // remain unchanged and authoritative for the current UI.
+          master_category_id: lesson.masterCategoryId ?? null,
+          master_subcategory: lesson.masterSubcategory ?? null,
+          secondary_category_ids: lesson.secondaryCategoryIds ?? null,
         },
         { onConflict: 'slug' }
       )
