@@ -42,6 +42,7 @@ export const TRACKS: TrackMetadata[] = [
   { id: 'sql-for-ibm-i', name: 'SQL for IBM i', difficultySpan: 'Beginner → Advanced' },
   { id: 'debugging-and-job-logs', name: 'Debugging, Job Logs, and Problem Diagnosis', difficultySpan: 'Beginner → Advanced' },
   { id: 'ibm-i-operations', name: 'IBM i Operations for Developers', difficultySpan: 'Beginner → Intermediate' },
+  { id: 'security-and-compliance', name: 'IBM i Security and Compliance', difficultySpan: 'Intermediate' },
   { id: 'integration-and-modernization', name: 'Integration and Modernization', difficultySpan: 'Intermediate → Advanced' },
   { id: 'real-world-projects', name: 'Real-World Projects', difficultySpan: 'Intermediate → Advanced' },
   { id: 'interview-and-professional-readiness', name: 'Interview and Professional Readiness', difficultySpan: 'All levels' },
