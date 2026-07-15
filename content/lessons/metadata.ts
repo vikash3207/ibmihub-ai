@@ -7267,22 +7267,23 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Save/Restore and Object Backup Basics (PR #119): Why Backup and
   // Restore Matter through Common Save/Restore Mistakes ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Addresses the Object & Library Management gap identified in
-  // the IBM i Master Topic Coverage Audit (PR #110): SAVOBJ/RSTOBJ/SAVLIB
-  // were entirely absent from the catalog. Extends the existing
-  // libraries-objects-and-ifs track rather than creating a new one, per the
-  // audit's own recommendation for this specific gap (unlike Security and
-  // Journaling, which each warranted a dedicated new track).
+  // Published in PR #124 (Save/Restore and Object Backup Review + Publish
+  // Pass) after a technical and structural review found no unresolved
+  // issues; only a few masterSubcategory acronym-casing labels (SAVOBJ,
+  // RSTOBJ, SAVLIB, RSTLIB, GO SAVE, HA) were corrected. Addresses the
+  // Object & Library Management gap identified in the IBM i Master Topic
+  // Coverage Audit (PR #110): SAVOBJ/RSTOBJ/SAVLIB were entirely absent
+  // from the catalog. Extends the existing libraries-objects-and-ifs track
+  // rather than creating a new one, per the audit's own recommendation for
+  // this specific gap (unlike Security and Journaling, which each
+  // warranted a dedicated new track).
   {
     slug: 'why-backup-and-restore-matter-on-ibm-i',
     title: 'Why Backup and Restore Matter on IBM i',
     shortDescription: 'Why understanding save and restore basics matters for a developer, not only for a system administrator.',
     lessonOrder: 281,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/why-backup-and-restore-matter-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me another realistic example of when a developer, rather than an administrator, would want to save an object themselves?',
@@ -7307,14 +7308,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using SAVOBJ and RSTOBJ to save and restore a specific object, without needing to save or restore an entire library.',
     lessonOrder: 282,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/savobj-and-rstobj-basics.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would happen if I ran RSTOBJ and specified a different library than the object was originally saved from?',
     trackId: 'libraries-objects-and-ifs',
     moduleId: 'savobj-rstobj-basics',
     masterCategoryId: 'object-library-management',
-    masterSubcategory: 'Savobj Rstobj Basics',
+    masterSubcategory: 'SAVOBJ and RSTOBJ Basics',
     difficulty: 'intermediate',
     depth: 'professional',
     tags: ['save-restore', 'savobj', 'rstobj'],
@@ -7332,14 +7333,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using SAVLIB and RSTLIB to save and restore an entire library at once, rather than one object at a time.',
     lessonOrder: 283,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/savlib-and-rstlib-basics.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why might a shop prefer SAVLIB over saving objects individually for a test library refresh?',
     trackId: 'libraries-objects-and-ifs',
     moduleId: 'savlib-rstlib-basics',
     masterCategoryId: 'object-library-management',
-    masterSubcategory: 'Savlib Rstlib Basics',
+    masterSubcategory: 'SAVLIB and RSTLIB Basics',
     difficulty: 'intermediate',
     depth: 'professional',
     tags: ['save-restore', 'savlib', 'rstlib'],
@@ -7357,7 +7358,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a save file is, and how to create one with CRTSAVF and inspect it with DSPSAVF.',
     lessonOrder: 284,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/save-files-explained.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What would DSPSAVF show me if I ran it against a save file that had never actually been used in a SAVOBJ or SAVLIB command yet?',
@@ -7382,14 +7383,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What GO SAVE options 21, 22, and 23 are for, at an overview level, and how they differ from everyday object and library saves.',
     lessonOrder: 285,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/go-save-options-21-22-and-23-overview.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why might a shop run option 23 more frequently than option 21?',
     trackId: 'libraries-objects-and-ifs',
     moduleId: 'go-save-options-overview',
     masterCategoryId: 'object-library-management',
-    masterSubcategory: 'Go Save Options Overview',
+    masterSubcategory: 'GO SAVE Options Overview',
     difficulty: 'intermediate',
     depth: 'professional',
     tags: ['save-restore', 'go-save'],
@@ -7407,7 +7408,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A safe, deliberate process for restoring objects: confirming the target library, checking authority, and coordinating with other users and jobs.',
     lessonOrder: 286,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/restoring-objects-safely-in-development-and-test.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What would a good pre-restore checklist look like for a developer about to refresh a test library?',
@@ -7432,14 +7433,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How backup, journaling, and high availability are three distinct, complementary concepts, each answering a different reliability question.',
     lessonOrder: 287,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/backup-vs-journaling-vs-high-availability.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through a scenario where having only backups, but no journaling, would cause a real problem during recovery?',
     trackId: 'libraries-objects-and-ifs',
     moduleId: 'backup-vs-journaling-vs-ha',
     masterCategoryId: 'object-library-management',
-    masterSubcategory: 'Backup Vs Journaling Vs Ha',
+    masterSubcategory: 'Backup vs Journaling vs HA',
     secondaryCategoryIds: ['journaling-commitment-control', 'backup-ha-enterprise-tooling'],
     difficulty: 'intermediate',
     depth: 'professional',
@@ -7458,7 +7459,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common mistakes developers make when first working with save and restore, drawn from across this batch.',
     lessonOrder: 288,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-save-restore-mistakes.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short scenario with one of these mistakes and ask me to spot it?',
