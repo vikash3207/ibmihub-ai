@@ -40,6 +40,14 @@ export interface Lesson {
   related_lessons: string[] | null
   persona_tags: string[] | null
   ai_tutor_prompts: string[] | null
+  // Taxonomy fields (PR #120/#121, planning/LESSON_TAXONOMY_AND_GROUPING_AUDIT.md).
+  // Optional (not `| null`) because no Supabase column or seed wiring exists
+  // yet -- content/lessons/metadata.ts is the only place this data currently
+  // lives. Typed here only so a future PR that adds the matching migration
+  // and seed columns doesn't need another interface change.
+  master_category_id?: string | null
+  master_subcategory?: string | null
+  secondary_category_ids?: string[] | null
 }
 
 /** Return all Published lessons ordered by lesson_order. */
