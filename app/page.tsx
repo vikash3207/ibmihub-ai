@@ -12,7 +12,7 @@ import {
   Code2,
 } from 'lucide-react'
 import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
-import { IBM_I_FUNDAMENTALS_LESSONS } from '@/content/lessons/metadata'
+import { getPublishedLessons } from '@/lib/lessons'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { buttonVariants } from '@/components/ui/button'
@@ -47,17 +47,23 @@ const FEATURES = [
   },
 ]
 
-const STATS = [
-  {
-    icon: BookOpen,
-    value: String(IBM_I_FUNDAMENTALS_LESSONS.length),
-    label: 'Structured lessons',
-    accent: 'blue' as const,
-  },
-  { icon: Route, value: '1', label: 'Guided fundamentals path', accent: 'blue' as const },
-  { icon: Unlock, value: 'Free', label: 'First lesson preview', accent: 'blue' as const },
-  { icon: Sparkles, value: 'AI', label: 'Tutor for IBM i concepts', accent: 'cyan' as const },
-]
+// Built from the Published lesson count once fetched in the page component --
+// learner-facing counts must reflect Published lessons only, never the raw
+// content/lessons/metadata.ts count, which also includes Review Ready/Draft
+// lessons that are not yet visible to learners.
+function buildStats(publishedLessonCount: number) {
+  return [
+    {
+      icon: BookOpen,
+      value: String(publishedLessonCount),
+      label: 'Structured lessons',
+      accent: 'blue' as const,
+    },
+    { icon: Route, value: '1', label: 'Guided fundamentals path', accent: 'blue' as const },
+    { icon: Unlock, value: 'Free', label: 'First lesson preview', accent: 'blue' as const },
+    { icon: Sparkles, value: 'AI', label: 'Tutor for IBM i concepts', accent: 'cyan' as const },
+  ]
+}
 
 const AUDIENCE = [
   {
@@ -76,9 +82,14 @@ const AI_TUTOR_SAMPLE_PROMPTS = ['What is a job log in IBM i?', 'Show a simple R
 
 export default async function LandingPage() {
   const supabase = await createClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  const [
+    {
+      data: { user },
+    },
+    publishedLessons,
+  ] = await Promise.all([supabase.auth.getUser(), getPublishedLessons()])
+
+  const STATS = buildStats(publishedLessons.length)
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -147,7 +158,7 @@ export default async function LandingPage() {
                   </p>
                   <div className="mb-1 flex items-center justify-between text-xs text-slate-400">
                     <span>Path progress</span>
-                    <span>4 of {IBM_I_FUNDAMENTALS_LESSONS.length} completed</span>
+                    <span>4 of {publishedLessons.length} completed</span>
                   </div>
                   <div className="h-2 w-full rounded-full bg-slate-100">
                     <div className="h-2 w-1/3 rounded-full bg-blue-600" />
@@ -243,7 +254,7 @@ export default async function LandingPage() {
               </Badge>
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">IBM i Fundamentals</h2>
               <p className="text-slate-600 leading-relaxed mb-6">
-                A complete, {IBM_I_FUNDAMENTALS_LESSONS.length}-lesson path from what the platform is to
+                A complete, {publishedLessons.length}-lesson path from what the platform is to
                 a basic development workflow -- covering libraries and objects, the 5250 interface,
                 RPGLE, CLLE, Db2 for i, and job logs. Lesson&nbsp;1 is free to preview without an account.
               </p>
@@ -253,10 +264,10 @@ export default async function LandingPage() {
             </div>
             <Card variant="muted" className="p-6">
               <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-700">
-                {IBM_I_FUNDAMENTALS_LESSONS.map((lesson) => (
+                {publishedLessons.map((lesson) => (
                   <li key={lesson.slug} className="flex items-center gap-3">
                     <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-500 shadow-sm">
-                      {lesson.lessonOrder}
+                      {lesson.lesson_order}
                     </span>
                     <span className="truncate">{lesson.title}</span>
                   </li>

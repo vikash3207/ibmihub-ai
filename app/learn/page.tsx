@@ -16,7 +16,7 @@ export default async function LearnPage() {
   const publishedCount = await getPublishedLessonCount()
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto max-w-3xl space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Learning Center</h1>
         <p className="text-slate-600 leading-relaxed">
