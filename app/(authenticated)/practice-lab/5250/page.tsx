@@ -47,8 +47,8 @@ export default async function PracticeLab5250Page() {
       <SimulatorNotice />
 
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Planned exercises</h2>
-        <PracticeLabExerciseList exercises={PRACTICE_LAB_5250_EXERCISES} />
+        <h2 className="text-lg font-semibold text-slate-900 mb-3">Exercises</h2>
+        <PracticeLabExerciseList exercises={PRACTICE_LAB_5250_EXERCISES} basePath="/practice-lab/5250" />
       </div>
     </div>
   )
