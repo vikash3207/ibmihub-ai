@@ -21,6 +21,7 @@ export type PracticeLabSqlOutcome =
   | 'unsupported-statement'
   | 'missing-clause'
   | 'wrong-table'
+  | 'unknown-column'
   | 'wrong-quote-style'
   | 'near-miss'
 
@@ -56,6 +57,17 @@ const FALLBACK_MESSAGE = 'This SQL pattern is not available in this practice exe
 const WRITE_MESSAGE =
   'This practice console does not run INSERT, UPDATE, DELETE, or production SQL in this exercise.'
 const QUOTE_MESSAGE = "Use single quotes around text values, like 'CHICAGO', not double quotes."
+
+/**
+ * Pull the SELECT column list out of a normalized query (already known to
+ * contain " FROM "), split on the normalized ", " separator. Used only by
+ * the optional unknown-column check below -- never for computing a query
+ * result, which stays purely predefined (PracticeLabAcceptedSqlQuery).
+ */
+function extractSelectColumns(normalized: string): string[] {
+  const afterSelect = normalized.slice('SELECT '.length, normalized.indexOf(' FROM '))
+  return afterSelect.split(', ').map((column) => column.trim())
+}
 
 /**
  * Classify a learner's typed SQL against one exercise's expected query.
@@ -96,7 +108,24 @@ export function evaluateSql(rawInput: string, check: PracticeLabSqlCheck): Pract
   if (tableToken !== check.tableName.toUpperCase()) {
     return {
       outcome: 'wrong-table',
-      message: `There's no table named ${tableToken} in this lab yet -- try ${check.tableName}.`,
+      message: `There's no table named ${tableToken} in this lab yet -- check the sample schema panel and try ${check.tableName}.`,
+    }
+  }
+
+  // Opt-in: only exercises that set knownColumns get column-name checking --
+  // skips `*`, function calls like COUNT(*), and alias-qualified references
+  // like C.CUSTNO, since this is plain-column validation, not a real
+  // column/alias resolver.
+  if (check.knownColumns) {
+    const knownColumns = new Set(check.knownColumns.map((column) => column.toUpperCase()))
+    for (const column of extractSelectColumns(normalized)) {
+      if (column === '*' || column.includes('(') || column.includes('.')) continue
+      if (!knownColumns.has(column)) {
+        return {
+          outcome: 'unknown-column',
+          message: `Column ${column} was not found in ${check.tableName}. Check the sample schema and try one of: ${check.knownColumns.join(', ')}.`,
+        }
+      }
     }
   }
 
@@ -104,7 +133,9 @@ export function evaluateSql(rawInput: string, check: PracticeLabSqlCheck): Pract
     return { outcome: 'wrong-quote-style', message: QUOTE_MESSAGE }
   }
 
-  if (check.requiredClause && !normalized.includes(check.requiredClause.toUpperCase())) {
+  // Padded with spaces so a short clause keyword (e.g. "ON") can't false-match
+  // as a substring inside an unrelated word.
+  if (check.requiredClause && !normalized.includes(` ${check.requiredClause.toUpperCase()} `)) {
     return {
       outcome: 'missing-clause',
       message: `This exercise is about using ${check.requiredClause} -- try adding something like ${check.requiredClauseExample}.`,
