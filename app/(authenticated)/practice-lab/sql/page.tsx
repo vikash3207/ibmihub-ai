@@ -47,7 +47,7 @@ export default async function PracticeLabSqlPage() {
       <SimulatorNotice />
 
       <div>
-        <h2 className="text-lg font-semibold text-slate-900 mb-3">Planned exercises</h2>
+        <h2 className="text-lg font-semibold text-slate-900 mb-3">Exercises</h2>
         <PracticeLabExerciseList exercises={PRACTICE_LAB_SQL_EXERCISES} basePath="/practice-lab/sql" />
       </div>
     </div>
