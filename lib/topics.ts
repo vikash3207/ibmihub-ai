@@ -43,6 +43,7 @@ export const TOPIC_FILTERS: TopicFilter[] = [
   { id: 'debugging', label: 'Debugging', match: (l) => l.track_id === 'debugging-and-job-logs' },
   { id: 'operations', label: 'Operations', match: (l) => l.track_id === 'ibm-i-operations' },
   { id: 'security', label: 'Security', match: (l) => l.track_id === 'security-and-compliance' },
+  { id: 'journaling', label: 'Journaling & Commitment Control', match: (l) => l.track_id === 'journaling-and-commitment-control' },
   { id: 'rpgle-ile', label: 'Advanced RPGLE / ILE', match: (l) => l.track_id === 'rpgle-intermediate' || l.track_id === 'rpgle-advanced' },
   { id: 'integration', label: 'Modern IBM i / APIs / Integration', match: (l) => l.track_id === 'integration-and-modernization' },
   { id: 'mini-projects', label: 'Mini Projects', match: (l) => l.track_id === 'real-world-projects' },
