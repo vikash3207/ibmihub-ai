@@ -5253,18 +5253,17 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Modern IBM i / APIs / Integration Batch 1 (PR #105): Modern IBM i
   // Development Overview through Common IBM i Integration Mistakes ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. First batch in the Integration and Modernization track;
-  // same intermediate/professional depth as the Advanced RPGLE / ILE batches.
+  // Published in PR #107 (Modern IBM i / APIs / Integration Review + Publish
+  // Pass) after a technical and structural review found no unresolved
+  // issues. First batch in the Integration and Modernization track; same
+  // intermediate/professional depth as the Advanced RPGLE / ILE batches.
   {
     slug: 'modern-ibm-i-development-overview',
     title: 'Modern IBM i Development Overview',
     shortDescription: 'What "modern IBM i development" actually means: exposing and integrating existing business logic, not replacing IBM i.',
     lessonOrder: 225,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/modern-ibm-i-development-overview.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me another realistic example of existing IBM i logic that a company might want to expose to a new system?',
@@ -5287,7 +5286,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an API is in plain terms, and why APIs are the key building block for integrating IBM i with other systems.',
     lessonOrder: 226,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/why-apis-matter-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me another everyday, non-technical analogy for what an API does?',
@@ -5310,7 +5309,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Core REST API concepts in plain terms: endpoint, request, response, HTTP method, status code, and payload.',
     lessonOrder: 227,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/rest-api-concepts-for-ibm-i-developers.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through what a full request and response might look like for a simple customer lookup endpoint?',
@@ -5333,7 +5332,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to read a simple JSON payload, and how its structure relates to familiar RPGLE fields and records.',
     lessonOrder: 228,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/json-basics-for-rpgle-developers.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you show me a slightly bigger JSON example with a nested object and explain each part?',
@@ -5356,7 +5355,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Why the IFS is a common place for request/response payloads, logs, and other integration artifacts on IBM i.',
     lessonOrder: 229,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ifs-and-api-payload-files.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'What are some good habits for naming and organizing integration files in the IFS so they stay easy to troubleshoot later?',
@@ -5379,7 +5378,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The conceptual steps involved when an IBM i program calls an external API: building, sending, and reading a response.',
     lessonOrder: 230,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/calling-external-apis-from-ibm-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What might a program reasonably do if an external API call times out instead of returning a response?',
@@ -5402,7 +5401,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The high-level pattern for exposing existing RPGLE or SQL logic behind an API endpoint, without rewriting it.',
     lessonOrder: 231,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/exposing-ibm-i-logic-as-an-api.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What are some signs that a specific piece of existing RPGLE logic would be a good candidate to expose as an API?',
@@ -5425,7 +5424,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common mistakes developers make when first working on IBM i integration, drawn from across this batch.',
     lessonOrder: 232,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-ibm-i-integration-mistakes.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short integration scenario with one of these mistakes and ask me to spot it?',
@@ -5444,10 +5443,9 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Modern IBM i / APIs / Integration Batch 2 (PR #106): HTTP Methods
   // and Status Codes through Debugging API Integration Issues ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Builds directly on Batch 1 (PR #105); same intermediate/
+  // Published in PR #107 (Modern IBM i / APIs / Integration Review + Publish
+  // Pass) after a technical and structural review found no unresolved
+  // issues. Builds directly on Batch 1 (PR #105); same intermediate/
   // professional depth as that batch.
   {
     slug: 'http-methods-and-status-codes-for-ibm-i-developers',
@@ -5455,7 +5453,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Mapping GET/POST/PUT/PATCH/DELETE and practical status codes (200/201/400/401/403/404/409/500) to familiar IBM i operations.',
     lessonOrder: 233,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/http-methods-and-status-codes-for-ibm-i-developers.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a few more realistic examples of when an IBM i API might return a 409 instead of a 400?',
@@ -5478,7 +5476,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to design a clean, readable request and response shape for a common IBM i business operation.',
     lessonOrder: 234,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/api-request-and-response-design-basics.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you review a request/response design I come up with for a simple IBM i business operation and suggest improvements?',
@@ -5501,7 +5499,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What it means to parse a JSON payload in RPGLE and map its values into familiar data structures, without depending on a specific library.',
     lessonOrder: 235,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/json-parsing-concepts-in-rpgle.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through parsing a slightly bigger JSON payload with a nested object into RPGLE data structures conceptually?',
@@ -5524,7 +5522,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A practical approach for handling API errors: checking status codes first, deciding what to retry, and what to do next.',
     lessonOrder: 236,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/api-error-handling-basics.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short scenario and ask me to decide the right error-handling response for a few different status codes?',
@@ -5547,7 +5545,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What is generally useful to log for an API request and response, and what should be deliberately left out, such as sensitive data.',
     lessonOrder: 237,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/logging-integration-requests-and-responses.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you help me decide what to include and what to leave out of a log entry for a specific integration scenario?',
@@ -5570,7 +5568,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What authentication, authorization, HTTPS, secrets, and least privilege mean for an IBM i API, at a beginner level.',
     lessonOrder: 238,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/securing-ibm-i-apis-at-a-beginner-level.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'How does the 401 versus 403 status code distinction connect to authentication versus authorization?',
@@ -5593,7 +5591,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How to decide whether a batch or real-time approach is the better fit for a given IBM i integration scenario.',
     lessonOrder: 239,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/batch-vs-real-time-integration.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me a few more examples of integration needs and ask me to decide whether each is batch or real-time?',
@@ -5616,7 +5614,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'A systematic approach for investigating an API integration problem using status codes, logs, job logs, and external responses.',
     lessonOrder: 240,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/debugging-api-integration-issues.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through a short integration debugging scenario step by step, using this order of investigation?',
