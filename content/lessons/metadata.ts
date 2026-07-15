@@ -6406,15 +6406,14 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   // --- Journaling & Commitment Control Basics Batch 1 (PR #117): What is
   // Journaling on IBM i? through Common Journaling and Commitment Control
   // Mistakes ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Addresses the "surprising complete gap" identified in the
+  // Published in PR #118 (Journaling & Commitment Control Review + Publish
+  // Pass) after a technical and structural review found no unresolved
+  // issues. Addresses the "surprising complete gap" identified in the
   // IBM i Master Topic Coverage Audit (PR #110): journaling had zero
   // coverage anywhere in the catalog despite being foundational IBM i
   // knowledge, not merely advanced/enterprise material. First use of the
-  // new 'journaling-and-commitment-control' trackId added to tracks.ts in
-  // this PR, per the audit's own recommendation -- keeps master-list
+  // 'journaling-and-commitment-control' trackId added to tracks.ts in
+  // PR #117, per the audit's own recommendation -- keeps master-list
   // alignment clean rather than folding this content into db2-for-i-and-dds.
   {
     slug: 'what-is-journaling-on-ibm-i',
@@ -6422,7 +6421,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What journaling is: an ongoing record of changes to a journaled table, independent of the table\'s own current contents.',
     lessonOrder: 273,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/what-is-journaling-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me another realistic example of why having a record of past changes, not just current data, would matter?',
@@ -6445,7 +6444,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a journal receiver is, how it relates to a journal, and why receivers must be managed over time as they grow.',
     lessonOrder: 274,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/journal-receivers-explained.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why does it matter that old journal receivers can still be saved even after a new one is attached?',
@@ -6468,7 +6467,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The basic steps involved in starting journaling for a physical file: creating a receiver, a journal, and running STRJRNPF.',
     lessonOrder: 275,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/starting-journaling-with-strjrnpf.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "Why does it matter that journaling only captures changes going forward, not a table's past history?",
@@ -6491,7 +6490,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a journal entry contains and how to view journal entries for a table using DSPJRN, at a basic level.',
     lessonOrder: 276,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/viewing-journal-entries-basics.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you walk me through what a journal entry for a single UPDATE might conceptually contain?',
@@ -6514,7 +6513,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What commitment control is: grouping related changes into a single transaction that succeeds or fails together, and why it depends on journaling.',
     lessonOrder: 277,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/commitment-control-overview.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me another realistic example of a business operation that would need multiple changes to succeed or fail together?',
@@ -6537,7 +6536,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'Using STRCMTCTL, COMMIT, and ROLLBACK to group a set of changes into a transaction that succeeds or fails as a whole.',
     lessonOrder: 278,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/strcmtctl-commit-and-rollback-basics.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through what happens step by step if the INSERT in this example failed but the UPDATE had already succeeded?',
@@ -6560,7 +6559,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How journaling supports recovery, restoring a correct state after a failure, and auditing, tracking what changed and by whom, as related but distinct goals.',
     lessonOrder: 279,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/journaling-for-recovery-and-auditing.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through how journal entries would help recover from a batch job that failed halfway through updating records?',
@@ -6583,7 +6582,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common mistakes developers make when first working with journaling and commitment control, drawn from across this batch.',
     lessonOrder: 280,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-journaling-and-commitment-control-mistakes.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short scenario with one of these mistakes and ask me to spot it?',
