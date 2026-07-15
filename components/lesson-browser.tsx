@@ -6,6 +6,7 @@ import { useSearchParams } from 'next/navigation'
 import { Lock, Check, Search, X } from 'lucide-react'
 import type { Lesson } from '@/lib/lessons'
 import { TOPIC_FILTERS } from '@/lib/topics'
+import { getMasterCategoryCounts, getMasterCategoryLabel } from '@/lib/master-categories'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -32,23 +33,57 @@ export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: Lesso
     const requested = searchParams.get('topic')
     return requested && TOPIC_FILTERS.some((t) => t.id === requested) ? requested : null
   })
+  // Master-category browsing (PR #123) is an independent filter dimension
+  // from the existing trackId-based topic chips above -- both can combine
+  // with search. Not seeded from the URL like topicId; category browsing is
+  // a same-page control, not a link target from elsewhere yet.
+  const [categoryId, setCategoryId] = useState<string | null>(null)
 
   const completedSet = useMemo(() => new Set(completedLessonIds), [completedLessonIds])
   const activeTopic = TOPIC_FILTERS.find((t) => t.id === topicId)
 
+  // Counts only ever come from `lessons`, which the caller (the /learn page)
+  // already restricts to Published lessons via getPublishedLessons() -- so
+  // a category with only Review Ready/Draft lessons naturally shows a 0
+  // count here and is filtered out of the picker below, with no separate
+  // status check needed in this component.
+  const categoryCounts = useMemo(() => getMasterCategoryCounts(lessons), [lessons])
+  const visibleCategories = useMemo(() => categoryCounts.filter((c) => c.count > 0), [categoryCounts])
+  const activeCategoryLabel = categoryId ? getMasterCategoryLabel(categoryId) : undefined
+
   const filteredLessons = useMemo(() => {
     return lessons.filter((lesson) => {
       if (activeTopic && !activeTopic.match(lesson)) return false
+      if (categoryId && lesson.master_category_id !== categoryId) return false
       if (query.trim() && !matchesQuery(lesson, query)) return false
       return true
     })
-  }, [lessons, activeTopic, query])
+  }, [lessons, activeTopic, categoryId, query])
 
-  const hasActiveFilter = query.trim() !== '' || topicId !== null
+  // When browsing a single category, group lessons by masterSubcategory so
+  // related lessons are visually clustered -- otherwise (the default,
+  // existing view) render one flat list exactly as before.
+  const groupedBySubcategory = useMemo(() => {
+    if (!categoryId) return null
+    const order: string[] = []
+    const groups = new Map<string, Lesson[]>()
+    for (const lesson of filteredLessons) {
+      const key = lesson.master_subcategory ?? 'Other'
+      if (!groups.has(key)) {
+        groups.set(key, [])
+        order.push(key)
+      }
+      groups.get(key)!.push(lesson)
+    }
+    return order.map((key) => ({ subcategory: key, lessons: groups.get(key)! }))
+  }, [categoryId, filteredLessons])
+
+  const hasActiveFilter = query.trim() !== '' || topicId !== null || categoryId !== null
 
   function clearFilters() {
     setQuery('')
     setTopicId(null)
+    setCategoryId(null)
   }
 
   return (
@@ -92,6 +127,25 @@ export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: Lesso
           ))}
         </div>
 
+        <div className="flex items-center gap-2 sm:w-72">
+          <label htmlFor="category-select" className="shrink-0 text-xs font-medium text-slate-500">
+            Browse by category
+          </label>
+          <select
+            id="category-select"
+            value={categoryId ?? ''}
+            onChange={(e) => setCategoryId(e.target.value || null)}
+            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="">All categories</option>
+            {visibleCategories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.label} ({category.count})
+              </option>
+            ))}
+          </select>
+        </div>
+
         <div className="flex items-center justify-between text-xs text-slate-500">
           <span>
             Showing {filteredLessons.length} of {lessons.length} lessons
@@ -117,57 +171,100 @@ export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: Lesso
           </button>{' '}
           to see all lessons.
         </div>
+      ) : groupedBySubcategory ? (
+        <div className="space-y-6">
+          {activeCategoryLabel && (
+            <h2 className="text-sm font-semibold text-slate-700">{activeCategoryLabel}</h2>
+          )}
+          {groupedBySubcategory.map((group) => (
+            <div key={group.subcategory} className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                {group.subcategory}
+              </h3>
+              <ol className="space-y-3">
+                {group.lessons.map((lesson) => (
+                  <LessonRow
+                    key={lesson.id}
+                    lesson={lesson}
+                    activeTopic={activeTopic}
+                    isCompleted={completedSet.has(lesson.id)}
+                    isLoggedIn={isLoggedIn}
+                  />
+                ))}
+              </ol>
+            </div>
+          ))}
+        </div>
       ) : (
         <ol className="space-y-3">
-          {filteredLessons.map((lesson) => {
-            const isPreview = lesson.lesson_order === 1
-            const isLocked = !isPreview && !isLoggedIn
-            const isCompleted = completedSet.has(lesson.id)
-
-            const lessonHref = activeTopic
-              ? `/learn/ibm-i-fundamentals/${lesson.slug}?topic=${activeTopic.id}`
-              : `/learn/ibm-i-fundamentals/${lesson.slug}`
-
-            return (
-              <li key={lesson.id}>
-                <Link
-                  href={lessonHref}
-                  prefetch={false}
-                  className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
-                >
-                  <span
-                    className={cn(
-                      'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
-                      isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
-                    )}
-                  >
-                    {isCompleted ? <Check className="h-4 w-4" aria-hidden="true" /> : lesson.lesson_order}
-                  </span>
-                  <span className="flex-1">
-                    <span className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold text-slate-900">{lesson.title}</span>
-                      {isPreview && <Badge variant="success">Free preview</Badge>}
-                      {isLocked && (
-                        <Badge variant="locked">
-                          <Lock className="h-3 w-3" aria-hidden="true" />
-                          Log in to access
-                        </Badge>
-                      )}
-                      {isCompleted && (
-                        <Badge variant="success">
-                          <Check className="h-3 w-3" aria-hidden="true" />
-                          Completed
-                        </Badge>
-                      )}
-                    </span>
-                    <span className="block text-sm text-slate-600 mt-1">{lesson.short_description}</span>
-                  </span>
-                </Link>
-              </li>
-            )
-          })}
+          {filteredLessons.map((lesson) => (
+            <LessonRow
+              key={lesson.id}
+              lesson={lesson}
+              activeTopic={activeTopic}
+              isCompleted={completedSet.has(lesson.id)}
+              isLoggedIn={isLoggedIn}
+            />
+          ))}
         </ol>
       )}
     </div>
+  )
+}
+
+function LessonRow({
+  lesson,
+  activeTopic,
+  isCompleted,
+  isLoggedIn,
+}: {
+  lesson: Lesson
+  activeTopic: { id: string } | undefined
+  isCompleted: boolean
+  isLoggedIn: boolean
+}) {
+  const isPreview = lesson.lesson_order === 1
+  const isLocked = !isPreview && !isLoggedIn
+
+  const lessonHref = activeTopic
+    ? `/learn/ibm-i-fundamentals/${lesson.slug}?topic=${activeTopic.id}`
+    : `/learn/ibm-i-fundamentals/${lesson.slug}`
+
+  return (
+    <li>
+      <Link
+        href={lessonHref}
+        prefetch={false}
+        className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
+      >
+        <span
+          className={cn(
+            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
+            isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
+          )}
+        >
+          {isCompleted ? <Check className="h-4 w-4" aria-hidden="true" /> : lesson.lesson_order}
+        </span>
+        <span className="flex-1">
+          <span className="flex items-center gap-2 flex-wrap">
+            <span className="font-semibold text-slate-900">{lesson.title}</span>
+            {isPreview && <Badge variant="success">Free preview</Badge>}
+            {isLocked && (
+              <Badge variant="locked">
+                <Lock className="h-3 w-3" aria-hidden="true" />
+                Log in to access
+              </Badge>
+            )}
+            {isCompleted && (
+              <Badge variant="success">
+                <Check className="h-3 w-3" aria-hidden="true" />
+                Completed
+              </Badge>
+            )}
+          </span>
+          <span className="block text-sm text-slate-600 mt-1">{lesson.short_description}</span>
+        </span>
+      </Link>
+    </li>
   )
 }
