@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { BookOpen, Sparkles, TrendingUp, ClipboardCheck } from 'lucide-react'
+import { BookOpen, Sparkles, TrendingUp, ClipboardCheck, FlaskConical } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
@@ -178,6 +178,19 @@ export default async function DashboardPage() {
             <span className="block text-sm text-slate-600 mt-1">
               Ask IBM i questions for educational guidance. It cannot connect to a real IBM i
               system, execute code, or analyze production code.
+            </span>
+          </Card>
+        </Link>
+
+        <Link href="/practice-lab" prefetch={false} className="block">
+          <Card className="h-full transition-shadow hover:shadow-md">
+            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+              <FlaskConical className="h-5 w-5" aria-hidden="true" />
+            </div>
+            <span className="block font-semibold text-slate-900">Practice Lab</span>
+            <span className="block text-sm text-slate-600 mt-1">
+              Hands-on 5250-style command practice and an ACS-style SQL console. A guided
+              simulator -- no real IBM i system connection.
             </span>
           </Card>
         </Link>
