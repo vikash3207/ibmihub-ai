@@ -5633,20 +5633,19 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Advanced SQL for IBM i Batch 1 (PR #111): DDL through
   // User-Defined Functions ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Addresses the top P0 gap identified in the IBM i Master
-  // Topic Coverage Audit (PR #110): DDL, constraints, stored procedures,
-  // triggers, and UDFs, extending the existing sql-for-ibm-i track (already
-  // declared Beginner -> Advanced in tracks.ts).
+  // Published in PR #113 (Advanced SQL for IBM i Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
+  // Addresses the top P0 gap identified in the IBM i Master Topic Coverage
+  // Audit (PR #110): DDL, constraints, stored procedures, triggers, and
+  // UDFs, extending the existing sql-for-ibm-i track (already declared
+  // Beginner -> Advanced in tracks.ts).
   {
     slug: 'ddl-on-ibm-i-create-alter-drop-table',
     title: 'DDL on IBM i: CREATE TABLE, ALTER TABLE, and DROP TABLE',
     shortDescription: 'Creating, changing, and removing a Db2 for i table with SQL DDL, and how an SQL table relates to a DDS-created physical file.',
     lessonOrder: 241,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/ddl-on-ibm-i-create-alter-drop-table.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you show me the DDS equivalent of a CREATE TABLE statement I come up with, so I can compare them side by side?',
@@ -5669,7 +5668,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an SQL index and an SQL view are, and how each relates to access paths and logical files already covered in this course.',
     lessonOrder: 242,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sql-indexes-and-views-on-db2-for-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you help me decide whether a specific query I have in mind would be better served by an index or a view?',
@@ -5692,7 +5691,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a database constraint is, and why it is a stronger guarantee than validating the same rule only in application code.',
     lessonOrder: 243,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/constraints-on-ibm-i-primary-foreign-unique-check.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me an example of a check constraint that would make sense for a table with an order quantity column?',
@@ -5715,7 +5714,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What ACS Run SQL Scripts is and why it is a practical everyday tool for testing queries and DDL against Db2 for i.',
     lessonOrder: 244,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/acs-run-sql-scripts-for-ibm-i-developers.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: "What is a good habit for testing a query in Run SQL Scripts before copying it into an RPGLE program's embedded SQL?",
@@ -5738,7 +5737,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a SQL stored procedure is, written in SQL PL, and how it compares to the service program procedures covered earlier in this course.',
     lessonOrder: 245,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sql-stored-procedures-on-ibm-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through what happens step by step when CALL runs a simple SQL stored procedure like the example here?',
@@ -5761,7 +5760,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'How an external stored procedure lets existing RPGLE logic be called through plain SQL, without rewriting it in SQL PL.',
     lessonOrder: 246,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/external-stored-procedures-with-rpgle.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What are some signs that existing RPGLE logic would be a good candidate to expose as an external stored procedure?',
@@ -5784,7 +5783,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a SQL trigger is, when it runs automatically using CREATE TRIGGER, and how it compares to native ADDPFTRG triggers.',
     lessonOrder: 247,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sql-triggers-on-ibm-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me another realistic example of when a trigger would be a better fit than adding the same logic to every calling program?',
@@ -5807,7 +5806,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a user-defined function (UDF) is and how to use one inside a SELECT statement, alongside built-in SQL functions.',
     lessonOrder: 248,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/user-defined-functions-on-ibm-i.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me another example of a calculation that would make a good candidate for a UDF?',
@@ -5826,18 +5825,17 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
   },
   // --- Advanced SQL for IBM i Batch 2 (PR #112): SQLCA/SQLCODE/SQLSTATE
   // through Common Advanced SQL Mistakes ---
-  // Status: 'Review Ready'. Per Spec 009 Section 7 / CONTENT-FR-006, a
-  // Product Owner/Founder Approved -> Published transition is required before
-  // these lessons become visible or countable toward the progress
-  // denominator. Builds directly on Batch 1 (PR #111); same intermediate/
-  // professional depth, still extending the existing sql-for-ibm-i track.
+  // Published in PR #113 (Advanced SQL for IBM i Review + Publish Pass)
+  // after a technical and structural review found no unresolved issues.
+  // Builds directly on Batch 1 (PR #111); same intermediate/professional
+  // depth, still extending the existing sql-for-ibm-i track.
   {
     slug: 'sqlca-sqlcode-and-sqlstate-in-depth',
     title: 'SQLCA, SQLCODE, and SQLSTATE in Depth',
     shortDescription: 'What the SQLCA is, and how to read SQLCODE and SQLSTATE values beyond the single case of SQLCODE 100.',
     lessonOrder: 249,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqlca-sqlcode-and-sqlstate-in-depth.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a few more examples of SQLCODE values and explain what each one generally means?',
@@ -5860,7 +5858,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The difference between static SQL, known and checked at compile time, and dynamic SQL, prepared and executed at runtime.',
     lessonOrder: 250,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/static-sql-vs-dynamic-sql-on-ibm-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me another realistic scenario where dynamic SQL would genuinely be needed instead of static SQL?',
@@ -5883,7 +5881,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What precompilation does and where CRTSQLRPGI fits between embedded SQL source and a runnable RPGLE program.',
     lessonOrder: 251,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sql-precompilation-with-crtsqlrpgi.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'What kind of error message would I expect to see if CRTSQLRPGI failed during the precompile step specifically?',
@@ -5906,7 +5904,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What a query optimizer does conceptually, and how indexes and access paths influence its choice of access plan.',
     lessonOrder: 252,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/query-optimization-basics-on-db2-for-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you walk me through, conceptually, why a missing index might make a query slower without the query itself being wrong?',
@@ -5929,7 +5927,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What SQE and CQE are, why Db2 for i has two query engines, and why this matters when reading performance advice.',
     lessonOrder: 253,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/sqe-vs-cqe-at-a-beginner-friendly-level.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Why might a shop still have query patterns that end up handled by CQE instead of SQE?',
@@ -5952,7 +5950,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What an Encoded Vector Index (EVI) is, and what kind of grouping or summarizing query pattern it is generally built for.',
     lessonOrder: 254,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/encoded-vector-indexes-introduction.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'Can you give me another example of a column that might be a good candidate for an EVI, and explain why?',
@@ -5975,7 +5973,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'What DRDA is and why it matters for querying a Db2 for i database on a different system using ordinary SQL.',
     lessonOrder: 255,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/drda-and-distributed-database-concepts.md',
     estimatedReadingTime: 7,
     aiTutorStarterQuestion: 'How would I decide between DRDA and a REST API approach for a specific integration need between two systems?',
@@ -5998,7 +5996,7 @@ export const IBM_I_FUNDAMENTALS_LESSONS: LessonMetadata[] = [
     shortDescription: 'The most common mistakes developers make when first working with advanced Db2 for i SQL features, drawn from across both batches.',
     lessonOrder: 256,
     learningPathId: 'ibm-i-fundamentals',
-    status: 'Review Ready',
+    status: 'Published',
     contentSourcePath: 'content/lessons/common-advanced-sql-mistakes-on-ibm-i.md',
     estimatedReadingTime: 8,
     aiTutorStarterQuestion: 'Can you give me a short SQL scenario with one of these mistakes and ask me to spot it?',
