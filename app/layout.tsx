@@ -5,6 +5,7 @@ import { Inter } from 'next/font/google'
 import { SITE_NAME } from '@/lib/config'
 import { AiTutorPanelProvider } from '@/components/ai-tutor/ai-tutor-panel-provider'
 import { EmbeddedAiTutorPanel } from '@/components/ai-tutor/embedded-ai-tutor-panel'
+import { AiTutorContentShift } from '@/components/ai-tutor/ai-tutor-content-shift'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
@@ -31,7 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 3).
         */}
         <AiTutorPanelProvider>
-          {children}
+          <AiTutorContentShift>{children}</AiTutorContentShift>
           <EmbeddedAiTutorPanel />
         </AiTutorPanelProvider>
       </body>
