@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
 import { submitAiTutorFeedback } from '@/lib/actions/ai-tutor-feedback'
-import { GENERAL_CONTEXT, getContextLabel, type AiTutorContext } from './types'
+import { GENERAL_CONTEXT, getContextLabel, type AiTutorContext, type AiTutorSourceRef } from './types'
 import type { ChatMessage, FeedbackState } from './chat-thread'
 
 /** Must match app/api/ai-tutor/route.ts. */
@@ -10,6 +10,8 @@ const MAX_USER_TURNS = 20
 const MAX_MESSAGE_LENGTH = 4000
 /** Must match the header name set in app/api/ai-tutor/route.ts. */
 const CONTEXT_LABEL_HEADER = 'X-Ai-Tutor-Context-Label'
+/** Must match the header name set in app/api/ai-tutor/route.ts. */
+const SOURCES_HEADER = 'X-Ai-Tutor-Sources'
 
 interface AiTutorPanelValue {
   isOpen: boolean
@@ -22,6 +24,8 @@ interface AiTutorPanelValue {
   error: string | null
   requiresLogin: boolean
   feedback: Record<string, FeedbackState>
+  /** Source lesson references per assistant message id, from the RAG v2 retrieval used to ground that reply (PR #132). */
+  sources: Record<string, AiTutorSourceRef[]>
   limitReached: boolean
   /** Opens the panel, optionally seeding/replacing the active context (does not clear the conversation). */
   openPanel: (context?: AiTutorContext) => void
@@ -54,6 +58,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   const [error, setError] = useState<string | null>(null)
   const [requiresLogin, setRequiresLogin] = useState(false)
   const [feedback, setFeedback] = useState<Record<string, FeedbackState>>({})
+  const [sources, setSources] = useState<Record<string, AiTutorSourceRef[]>>({})
 
   const userTurnCount = messages.filter((m) => m.role === 'user').length
   const limitReached = userTurnCount >= MAX_USER_TURNS
@@ -78,6 +83,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     setError(null)
     setRequiresLogin(false)
     setFeedback({})
+    setSources({})
   }, [])
 
   const submitMessage = useCallback(
@@ -146,6 +152,16 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
           }
         }
 
+        const rawSources = response.headers.get(SOURCES_HEADER)
+        if (rawSources) {
+          try {
+            const parsed = JSON.parse(decodeURIComponent(rawSources)) as AiTutorSourceRef[]
+            setSources((prev) => ({ ...prev, [assistantId]: parsed }))
+          } catch {
+            // Malformed header value -- this reply just shows no sources.
+          }
+        }
+
         const reader = response.body.getReader()
         const decoder = new TextDecoder()
 
@@ -187,6 +203,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     error,
     requiresLogin,
     feedback,
+    sources,
     limitReached,
     openPanel,
     closePanel,
