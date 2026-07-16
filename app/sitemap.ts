@@ -19,6 +19,9 @@ import { getPublishedLessons } from '@/lib/lessons'
  * routes -- those are also marked `robots: { index: false }` in their own
  * page metadata where applicable (see app/(authenticated)/dashboard/page.tsx
  * and the app/auth/* pages).
+ *
+ * PR #144 adds the Privacy/Terms/Disclaimer pages -- genuinely public,
+ * indexable trust content, unlike the auth/account-specific pages above.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lessons = await getPublishedLessons()
@@ -32,6 +35,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/practice-lab/5250`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/practice-lab/sql`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/ai-tutor`, changeFrequency: 'monthly', priority: 0.5 },
+    { url: `${SITE_URL}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${SITE_URL}/terms`, changeFrequency: 'yearly', priority: 0.3 },
+    { url: `${SITE_URL}/disclaimer`, changeFrequency: 'yearly', priority: 0.3 },
   ]
 
   const lessonRoutes: MetadataRoute.Sitemap = lessons.map((lesson) => ({

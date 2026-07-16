@@ -12,10 +12,11 @@ import {
   GraduationCap,
   Code2,
 } from 'lucide-react'
-import { PRIMARY_CTA_LABEL, SITE_NAME, SITE_DEFAULT_DESCRIPTION } from '@/lib/config'
+import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION } from '@/lib/config'
 import { getPublishedLessons } from '@/lib/lessons'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
+import { SiteFooter } from '@/components/site-footer'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -413,20 +414,7 @@ export default async function LandingPage() {
         </section>
       </main>
 
-      {/* -- Footer ------------------------------------------------------- */}
-      <footer className="border-t border-slate-100 bg-white py-10">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-sm text-slate-400">
-          <div>
-            <span className="font-semibold text-slate-600">{SITE_NAME}</span>
-            <span className="ml-2">AI-guided IBM i learning.</span>
-          </div>
-          <nav className="flex gap-6">
-            <Link href="/learn" className="hover:text-slate-600 transition-colors">
-              Learning Center
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
