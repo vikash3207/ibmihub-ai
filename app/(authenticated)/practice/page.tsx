@@ -67,7 +67,7 @@ export default async function PracticePage({ searchParams }: Props) {
         {INTRO_NOTICE}
       </div>
 
-      <Link href="/practice-lab" prefetch={false} className="block">
+      <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform">
         <Card className="transition-shadow hover:shadow-md">
           <div className="flex items-center gap-3">
             <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">

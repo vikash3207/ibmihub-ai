@@ -39,7 +39,7 @@ export default async function PracticeLabPage() {
       <SimulatorNotice />
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <Link href="/practice-lab/5250" prefetch={false} className="block">
+        <Link href="/practice-lab/5250" className="block active:scale-[0.99] transition-transform">
           <Card className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Terminal className="h-5 w-5" aria-hidden="true" />
@@ -52,7 +52,7 @@ export default async function PracticeLabPage() {
           </Card>
         </Link>
 
-        <Link href="/practice-lab/sql" prefetch={false} className="block">
+        <Link href="/practice-lab/sql" className="block active:scale-[0.99] transition-transform">
           <Card className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <Database className="h-5 w-5" aria-hidden="true" />

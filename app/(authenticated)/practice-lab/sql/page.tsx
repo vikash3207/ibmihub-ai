@@ -29,7 +29,7 @@ export default async function PracticeLabSqlPage() {
   return (
     <div className="space-y-8">
       <div>
-        <Link href="/practice-lab" prefetch={false} className="text-sm text-slate-500 hover:text-slate-700">
+        <Link href="/practice-lab" className="text-sm text-slate-500 transition-colors hover:text-slate-700 active:opacity-70">
           &larr; Practice Lab
         </Link>
         <div className="mb-2 mt-2 flex items-center gap-2">

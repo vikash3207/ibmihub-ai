@@ -3,7 +3,9 @@ import { Cpu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/lib/actions/auth'
 import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/submit-button'
+import { SiteNavLinks } from '@/components/site-nav-links'
 
 /**
  * Shared public header. Server component only -- checks the Supabase session
@@ -27,52 +29,18 @@ export async function SiteHeader() {
           {SITE_NAME}
         </Link>
         <nav className="flex items-center gap-3 sm:gap-5">
+          <SiteNavLinks isLoggedIn={Boolean(user)} />
           {user ? (
-            <>
-              <Link
-                href="/dashboard"
-                prefetch={false}
-                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Dashboard
-              </Link>
-              <Link
-                href="/learn"
-                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Learning Center
-              </Link>
-              <Link
-                href="/practice"
-                prefetch={false}
-                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Practice
-              </Link>
-              <Link
-                href="/ai-tutor"
-                prefetch={false}
-                className="text-sm font-medium text-cyan-700 hover:text-cyan-800 transition-colors"
-              >
-                AI Tutor
-              </Link>
-              <form>
-                <Button type="submit" formAction={logout} variant="secondary" size="sm">
-                  Log out
-                </Button>
-              </form>
-            </>
+            <form>
+              <SubmitButton formAction={logout} variant="secondary" size="sm" pendingLabel="Logging out...">
+                Log out
+              </SubmitButton>
+            </form>
           ) : (
             <>
               <Link
-                href="/learn"
-                className="text-sm text-slate-600 hover:text-slate-900 transition-colors"
-              >
-                Learning Center
-              </Link>
-              <Link
                 href="/auth/login"
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors active:opacity-70"
               >
                 Log in
               </Link>
