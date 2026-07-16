@@ -22,13 +22,21 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-/** Approved onboarding-aware Start Learning copy (Spec 005 DASH-FR-010). */
+/**
+ * Approved onboarding-aware Start Learning copy (Spec 005 DASH-FR-010).
+ * Keys must match app/(authenticated)/onboarding/page.tsx's OPTIONS text
+ * exactly, since that's the literal string saved as onboarding_response.
+ * Renaming the brand here means a user who answered before this PR has an
+ * old-text response that no longer matches a key -- harmless by design,
+ * since an unmatched response already falls back to
+ * DEFAULT_START_LEARNING_COPY below rather than erroring.
+ */
 const START_LEARNING_COPY: Record<string, string> = {
   'I am new to IBM i and want to start learning.':
     'Start with the IBM i Fundamentals path. It is designed to build your understanding step by step.',
   'I already work with IBM i and want to refresh or deepen my knowledge.':
     'Use the IBM i Fundamentals path as a refresher, or jump directly to the topic you want to revisit.',
-  'I am exploring what IBMiHub AI offers.':
+  'I am exploring what iRPGenie offers.':
     'Explore the IBM i Fundamentals path to understand the core concepts before moving into deeper topics.',
 }
 
@@ -65,7 +73,7 @@ export default async function DashboardPage() {
   const welcomeMessage = pathComplete
     ? "Great work -- you've completed the available IBM i Fundamentals lessons."
     : completedCount === 0
-      ? "Welcome to IBMiHub AI. Let's start your IBM i learning journey."
+      ? "Welcome to iRPGenie. Let's start your IBM i learning journey."
       : 'Welcome back. Continue your IBM i learning journey.'
 
   const startLearningCopy = profile?.onboarding_response

@@ -105,7 +105,8 @@ export default function TermsOfUsePage() {
       <h2>Contact</h2>
       <p>
         {SUPPORT_EMAIL ? (
-          <>Questions about these Terms? Email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>.</>
+          <>Questions about these Terms? Email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>, or visit the{' '}
+          <Link href="/contact">Contact page</Link>.</>
         ) : (
           'Contact details will be added before wider launch.'
         )}

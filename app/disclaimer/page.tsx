@@ -1,6 +1,7 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
 import { LegalPageLayout } from '@/components/legal-page-layout'
-import { SITE_NAME, LEGAL_PAGES_LAST_UPDATED } from '@/lib/config'
+import { SITE_NAME, SUPPORT_EMAIL, LEGAL_PAGES_LAST_UPDATED } from '@/lib/config'
 
 export const metadata: Metadata = {
   title: 'Beta & AI Disclaimer',
@@ -93,6 +94,16 @@ export default function DisclaimerPage() {
         Completing lessons, practice questions, or Practice Lab exercises does not guarantee any
         job, certification, salary, or career outcome. {SITE_NAME} is a learning tool, not a
         certification body or placement service.
+      </p>
+
+      <h2>Questions</h2>
+      <p>
+        {SUPPORT_EMAIL ? (
+          <>Questions about this disclaimer? Email <a href={`mailto:${SUPPORT_EMAIL}`}>{SUPPORT_EMAIL}</a>, or visit the{' '}
+          <Link href="/contact">Contact page</Link>.</>
+        ) : (
+          'Contact details will be added before wider launch.'
+        )}
       </p>
     </LegalPageLayout>
   )

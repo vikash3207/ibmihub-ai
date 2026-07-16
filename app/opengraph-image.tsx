@@ -1,9 +1,9 @@
 import { ImageResponse } from 'next/og'
-import { SITE_NAME, SITE_BETA_TAGLINE } from '@/lib/config'
+import { SITE_NAME, SITE_TAGLINE, SITE_BETA_TAGLINE } from '@/lib/config'
 
 export const size = { width: 1200, height: 630 }
 export const contentType = 'image/png'
-export const alt = 'IBMiHub AI -- AI-powered IBM i learning platform'
+export const alt = 'iRPGenie -- AI-powered IBM i, RPGLE & SQL learning'
 
 /**
  * Default Open Graph / social-share image, applied site-wide via Next's
@@ -70,7 +70,7 @@ export default function OpengraphImage() {
           <div style={{ display: 'flex', fontSize: 68, fontWeight: 700 }}>{SITE_NAME}</div>
         </div>
         <div style={{ display: 'flex', fontSize: 38, color: '#cbd5e1', marginBottom: 28 }}>
-          AI-powered IBM i learning
+          {SITE_TAGLINE}
         </div>
         <div style={{ display: 'flex', fontSize: 26, color: '#94a3b8', marginBottom: 40 }}>
           Lessons • Practice • AI Tutor • Practice Lab
