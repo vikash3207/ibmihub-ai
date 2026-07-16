@@ -6,10 +6,12 @@ import type { ReactNode } from 'react'
  * decides how to stay compact there -- see components/lesson-sidebar.tsx).
  *
  * A right-hand column is intentionally not part of this layout yet. Adding
- * one later (5250 emulator, IDE-style practice, an AI Tutor companion
- * panel) only needs a third grid track added here -- this component is the
- * single place that would change, so no page using it needs to be touched
- * again to make room for it.
+ * one later (e.g. a 5250-style Practice Lab panel, IDE-style practice)
+ * only needs a third grid track added here -- this component is the single
+ * place that would change, so no page using it needs to be touched again to
+ * make room for it. (The AI Tutor companion panel, once considered a
+ * candidate for this column, shipped instead as a fixed-position overlay --
+ * see components/ai-tutor/embedded-ai-tutor-panel.tsx -- not a grid column.)
  */
 export function LessonReaderLayout({ sidebar, children }: { sidebar: ReactNode; children: ReactNode }) {
   return (
