@@ -4,6 +4,7 @@ import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Card } from '@/components/ui/card'
 import { ContactForm } from '@/components/contact-form'
+import { PublicBetaNotice } from '@/components/public-beta-notice'
 import { SITE_NAME, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
 
 export const metadata: Metadata = {
@@ -39,17 +40,19 @@ export default function ContactPage() {
         </section>
 
         <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 sm:py-20 space-y-12">
+          <PublicBetaNotice compact />
+
           {/* -- Contact cards ---------------------------------------------- */}
           <div className="grid sm:grid-cols-2 gap-6">
             {SUPPORT_EMAIL && (
-              <Card className="p-6">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <Card className="p-6 border-t-4 border-t-blue-600 shadow-md transition-shadow hover:shadow-lg">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm">
                   <LifeBuoy className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <h2 className="font-semibold text-slate-900 mb-1">Support</h2>
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
-                  className="block text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline mb-3"
+                  className="block text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline mb-3"
                 >
                   {SUPPORT_EMAIL}
                 </a>
@@ -64,14 +67,14 @@ export default function ContactPage() {
             )}
 
             {CONTACT_EMAIL && (
-              <Card variant="ai" className="p-6">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
+              <Card variant="ai" className="p-6 border-t-4 border-t-cyan-500 shadow-md transition-shadow hover:shadow-lg">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-sm">
                   <MessageCircle className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <h2 className="font-semibold text-slate-900 mb-1">General Contact</h2>
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="block text-sm font-medium text-cyan-700 hover:text-cyan-900 hover:underline mb-3"
+                  className="block text-sm font-semibold text-cyan-800 hover:text-cyan-950 hover:underline mb-3"
                 >
                   {CONTACT_EMAIL}
                 </a>
@@ -87,22 +90,23 @@ export default function ContactPage() {
           </div>
 
           {/* -- Founder & Author ---------------------------------------------
-              PR #150. No photo placeholder -- Product Owner asked for one
-              only once a real image is provided. */}
-          <Card className="p-6 sm:p-8">
-            <div className="mb-5 flex items-center gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                <User className="h-7 w-7" aria-hidden="true" />
+              PR #150 added this section; PR #151 gives it a stronger,
+              more personal visual treatment (gradient wash, accent border,
+              a richer avatar ring) per Product Owner feedback that it felt
+              plain. No photo placeholder -- add one only once a real image
+              is provided. */}
+          <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 via-white to-cyan-50/40 p-6 shadow-md sm:p-8">
+            <div className="mb-6 flex items-center gap-5">
+              <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md ring-4 ring-white">
+                <User className="h-8 w-8" aria-hidden="true" />
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                  Founder &amp; Author
-                </p>
-                <h2 className="text-lg font-semibold text-slate-900">Vikash Choudhary</h2>
+                <p className="text-xs font-bold uppercase tracking-wide text-blue-600">Founder &amp; Author</p>
+                <h2 className="text-xl font-bold text-slate-900">Vikash Choudhary</h2>
                 <p className="text-sm text-slate-500">Senior IBM i (AS/400) Consultant</p>
               </div>
             </div>
-            <div className="space-y-3 text-sm text-slate-700 leading-relaxed">
+            <div className="space-y-4 text-sm text-slate-700 leading-relaxed">
               <p>Hi, I&apos;m Vikash Choudhary, the founder of iRPGenie.com.</p>
               <p>
                 I work as a Senior IBM&nbsp;i (AS/400) Consultant and have been passionate about
@@ -122,7 +126,7 @@ export default function ContactPage() {
               </p>
               <p>Thank you for visiting and being part of this growing community. Happy learning!</p>
             </div>
-          </Card>
+          </div>
 
           {/* -- Safety note -------------------------------------------------- */}
           <Card className="flex items-start gap-3 border-amber-100 bg-amber-50 p-6">

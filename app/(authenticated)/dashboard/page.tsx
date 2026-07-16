@@ -8,6 +8,7 @@ import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
+import { PublicBetaNotice } from '@/components/public-beta-notice'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
 // so a production visitor's real session (not a build-time snapshot) decides
@@ -106,6 +107,8 @@ export default async function DashboardPage() {
           </div>
         )}
       </div>
+
+      <PublicBetaNotice compact />
 
       <Card className="border-l-4 border-l-blue-600">
         {pathComplete ? (

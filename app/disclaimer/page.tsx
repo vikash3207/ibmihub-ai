@@ -33,6 +33,12 @@ export default function DisclaimerPage() {
         next&rdquo; rather than hidden. Features may change or be temporarily unavailable during
         this period.
       </p>
+      <p>
+        Lesson coverage will keep evolving during beta -- today&apos;s lessons focus on
+        beginner-friendly IBM&nbsp;i fundamentals, and deeper, professional-grade RPGLE, SQL, and
+        operations content is actively being added over time. See the homepage for a look at
+        what&apos;s coming next.
+      </p>
 
       <h2>AI Tutor may make mistakes</h2>
       <p>

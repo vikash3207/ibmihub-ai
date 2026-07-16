@@ -16,6 +16,11 @@ import {
   LifeBuoy,
   MessageCircle,
   Layers,
+  ArrowLeftRight,
+  Lock,
+  History,
+  Bug,
+  Gauge,
 } from 'lucide-react'
 import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
 import { getPublishedLessons, type Lesson } from '@/lib/lessons'
@@ -23,6 +28,7 @@ import { getTopicForLesson } from '@/lib/topics'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
+import { PublicBetaNotice } from '@/components/public-beta-notice'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -174,6 +180,32 @@ function buildCurriculumHighlights(lessons: Lesson[]) {
   return CURRICULUM_BUCKETS.map((bucket) => ({ ...bucket, count: counts.get(bucket) ?? 0 }))
 }
 
+/**
+ * "What's coming next" roadmap items (PR #151) -- future-facing, no dates.
+ * Each item gets one of the accent groups the Product Owner suggested
+ * (blue/indigo for RPGLE/learning, teal/cyan for SQL/data, amber/orange for
+ * operations, emerald for hands-on practice), reusing the same Card-based
+ * visual language as the rest of the page rather than introducing a new
+ * component just for this list.
+ */
+const ROADMAP_ACCENTS = {
+  indigo: { bg: 'bg-indigo-50', border: 'border-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700' },
+  teal: { bg: 'bg-teal-50', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700' },
+  amber: { bg: 'bg-amber-50', border: 'border-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700' },
+  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-100', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700' },
+} as const
+
+const ROADMAP_ITEMS = [
+  { icon: Code2, label: 'Professional-grade RPGLE deep dives', accent: 'indigo' as const },
+  { icon: Database, label: 'SQLRPGLE production patterns', accent: 'teal' as const },
+  { icon: ArrowLeftRight, label: 'Native I/O vs SQL decision guides', accent: 'teal' as const },
+  { icon: Lock, label: 'Record locking and error handling scenarios', accent: 'amber' as const },
+  { icon: History, label: 'Journaling and commitment control real-world cases', accent: 'amber' as const },
+  { icon: Bug, label: 'Debugging, job logs, and MSGW troubleshooting', accent: 'amber' as const },
+  { icon: Gauge, label: 'Performance and modernization topics', accent: 'indigo' as const },
+  { icon: Terminal, label: 'More hands-on 5250-style and SQL practice labs', accent: 'emerald' as const },
+]
+
 const AUDIENCE = [
   {
     icon: GraduationCap,
@@ -298,6 +330,13 @@ export default async function LandingPage() {
       </section>
 
       <main className="flex-1">
+        {/* -- Public beta notice ------------------------------------------ */}
+        <section className="bg-slate-50 pt-10 sm:pt-12">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6">
+            <PublicBetaNotice />
+          </div>
+        </section>
+
         {/* -- Trust / credibility strip (honest MVP facts only) --------- */}
         <section className="bg-slate-50 border-b border-slate-100">
           <div className="mx-auto max-w-5xl px-4 sm:px-6 py-14 sm:py-16">
@@ -406,6 +445,60 @@ export default async function LandingPage() {
                 Explore the Learning Center
               </Link>
             </div>
+          </div>
+        </section>
+
+        {/* -- Roadmap ("What's coming next") ------------------------------
+            PR #151. Future-facing, no promised dates -- see the item text
+            below, all phrased as topics being added, never as a timeline. */}
+        <section className="relative overflow-hidden py-20 sm:py-24">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50/60" />
+          <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
+            <div className="max-w-2xl mx-auto text-center mb-12">
+              <Badge variant="ai" className="mb-4">
+                Roadmap
+              </Badge>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
+                Professional-grade content is coming next
+              </h2>
+              <p className="text-slate-600 leading-relaxed">
+                We are actively upgrading iRPGenie with deeper real-world IBM&nbsp;i, RPGLE, SQL, and
+                operations topics for working professionals.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-4">
+              {ROADMAP_ITEMS.map((item) => {
+                const accent = ROADMAP_ACCENTS[item.accent]
+                return (
+                  <div
+                    key={item.label}
+                    className={cn('flex items-center gap-3 rounded-xl border p-4', accent.bg, accent.border)}
+                  >
+                    <span
+                      className={cn(
+                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
+                        accent.iconBg,
+                        accent.iconText
+                      )}
+                    >
+                      <item.icon className="h-4 w-4" aria-hidden="true" />
+                    </span>
+                    <p className="text-sm font-medium text-slate-800">{item.label}</p>
+                  </div>
+                )
+              })}
+            </div>
+
+            {CONTACT_EMAIL && (
+              <p className="mt-8 text-center text-sm text-slate-500">
+                Have a topic suggestion? Contact us at{' '}
+                <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-blue-700 hover:underline">
+                  {CONTACT_EMAIL}
+                </a>
+                .
+              </p>
+            )}
           </div>
         </section>
 
@@ -518,13 +611,16 @@ export default async function LandingPage() {
             link. Kept intentionally short (two email cards + a link to the
             full page) rather than duplicating /contact's founder note,
             safety note, and mailto form -- that would clutter the homepage. */}
-        <section className="border-t border-slate-100 bg-slate-50 py-20 sm:py-24">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
+        <section className="relative overflow-hidden border-t border-slate-100 py-20 sm:py-24">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/70 via-slate-50 to-cyan-50/50" />
+          <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
             <div className="max-w-2xl mx-auto text-center mb-10">
               <Badge variant="neutral" className="mb-4">
                 Get in touch
               </Badge>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Contact iRPGenie</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 mb-3">
+                Contact iRPGenie
+              </h2>
               <p className="text-slate-600 leading-relaxed">
                 Have feedback, a bug to report, or a question about the platform? We&apos;d love to
                 hear from you.
@@ -533,8 +629,8 @@ export default async function LandingPage() {
 
             <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
               {SUPPORT_EMAIL && (
-                <Card className="p-6 border-t-4 border-t-blue-600">
-                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <Card className="p-6 border-t-4 border-t-blue-600 shadow-md transition-shadow hover:shadow-lg">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm">
                     <LifeBuoy className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <h3 className="font-semibold text-slate-900 mb-1">Support</h3>
@@ -549,8 +645,8 @@ export default async function LandingPage() {
               )}
 
               {CONTACT_EMAIL && (
-                <Card variant="ai" className="p-6 border-t-4 border-t-cyan-500">
-                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
+                <Card variant="ai" className="p-6 border-t-4 border-t-cyan-500 shadow-md transition-shadow hover:shadow-lg">
+                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-sm">
                     <MessageCircle className="h-5 w-5" aria-hidden="true" />
                   </div>
                   <h3 className="font-semibold text-slate-900 mb-1">General Contact</h3>
