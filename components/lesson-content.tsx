@@ -18,8 +18,13 @@ const LESSON_PROSE_CLASSES = [
   'prose-headings:font-semibold prose-headings:tracking-tight prose-headings:text-slate-900',
   // (Tailwind Typography already zeroes out the very first child's margin-top, so the
   // first heading in a lesson body doesn't need special-casing here.)
+  // The left-accent marker and known-section-block treatment for h2 continue in
+  // app/globals.css (a plain-CSS ::before marker, plus per-section-name overrides
+  // keyed off the data classes lib/markdown.ts's tagKnownHeadings() adds).
   'prose-h2:text-xl prose-h2:mt-12 prose-h2:mb-4 prose-h2:pb-2 prose-h2:border-b prose-h2:border-slate-100',
-  'prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3',
+  // h3 reads as clearly nested under its h2 via a thin left border + indent,
+  // distinct from h2's thicker colored marker bar.
+  'prose-h3:text-lg prose-h3:mt-8 prose-h3:mb-3 prose-h3:border-l-2 prose-h3:border-slate-200 prose-h3:pl-3',
 
   // Paragraphs.
   'prose-p:leading-relaxed prose-p:text-slate-700',
@@ -41,13 +46,15 @@ const LESSON_PROSE_CLASSES = [
   'prose-code:rounded prose-code:bg-slate-100 prose-code:px-1.5 prose-code:py-0.5',
   'prose-code:text-[0.85em] prose-code:font-normal prose-code:before:content-none prose-code:after:content-none',
 
-  // Fenced code blocks -- padding-top/label/table scroll continue in app/globals.css.
+  // Fenced code blocks -- padding-top/language label/accent top edge continue in app/globals.css.
   'prose-pre:overflow-x-auto prose-pre:rounded-xl prose-pre:border prose-pre:border-slate-800',
   'prose-pre:bg-slate-900 prose-pre:text-slate-100 prose-pre:shadow-sm',
 
-  // Tables -- horizontal scroll is handled in app/globals.css; this just tidies borders/spacing.
+  // Tables -- horizontal scroll and header/zebra shading are handled in app/globals.css;
+  // this just tidies borders/spacing and cell padding.
   'prose-table:text-sm prose-th:font-semibold prose-th:text-slate-700',
   'prose-thead:border-b prose-thead:border-slate-200 prose-tr:border-slate-100',
+  'prose-td:py-2.5 prose-th:py-2.5',
 
   // Horizontal rules -- subtle section breaks.
   'prose-hr:my-10 prose-hr:border-slate-100',

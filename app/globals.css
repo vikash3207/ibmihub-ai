@@ -74,3 +74,112 @@
   overflow-x: auto;
   white-space: nowrap;
 }
+
+/*
+ * PR #146 (Lesson Visual Enrichment). Additive only -- none of these rules
+ * touch the `.prose pre code`, `.prose pre::before`, or `.prose table`
+ * selectors above; every fix those apply is unaffected.
+ */
+
+/*
+ * A small left-accent marker bar on every lesson h2, giving section breaks
+ * a consistent "premium" visual anchor beyond just the existing bottom
+ * border. Deliberately a single fixed color across every lesson (not
+ * per-category) to keep this simple and robust -- category accent color
+ * lives on the lesson header card instead (see the lesson page component).
+ */
+.prose h2 {
+  position: relative;
+  padding-left: 1rem;
+}
+
+.prose h2::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.3rem;
+  height: 1.15em;
+  width: 0.25rem;
+  border-radius: 9999px;
+  background-color: rgb(37 99 235 / 0.6); /* blue-600 */
+}
+
+/*
+ * Distinct "block" treatment for the 7 known lesson-template section
+ * headings (Learning Objective, Simple Explanation, Why It Matters,
+ * Practical Example, Common Confusions, Quick Recap, Try Asking the AI
+ * Tutor). lib/markdown.ts's tagKnownHeadings() adds the matching class to
+ * each h2 only when its text is an exact match -- any other heading (or
+ * the one lesson with non-standard structure) simply keeps the generic
+ * marker above. Each rule below fully restates position/color for its
+ * `::before` marker, so it cleanly overrides the generic one instead of
+ * layering on top of it.
+ */
+.prose h2[class*='lesson-heading--'] {
+  padding: 0.5rem 0.75rem 0.5rem 1.1rem;
+  margin-left: -0.75rem;
+  border-radius: 0.5rem;
+  border-bottom: none;
+}
+
+.prose h2[class*='lesson-heading--']::before {
+  left: 0.35rem;
+  top: 0.65rem;
+  bottom: 0.65rem;
+  height: auto;
+  width: 0.25rem;
+}
+
+.prose h2.lesson-heading--objective { background-color: rgb(59 130 246 / 0.07); }
+.prose h2.lesson-heading--objective::before { background-color: rgb(59 130 246); }
+
+.prose h2.lesson-heading--explanation { background-color: rgb(100 116 139 / 0.07); }
+.prose h2.lesson-heading--explanation::before { background-color: rgb(100 116 139); }
+
+.prose h2.lesson-heading--why { background-color: rgb(245 158 11 / 0.08); }
+.prose h2.lesson-heading--why::before { background-color: rgb(245 158 11); }
+
+.prose h2.lesson-heading--example { background-color: rgb(16 185 129 / 0.07); }
+.prose h2.lesson-heading--example::before { background-color: rgb(16 185 129); }
+
+.prose h2.lesson-heading--mistake { background-color: rgb(244 63 94 / 0.07); }
+.prose h2.lesson-heading--mistake::before { background-color: rgb(244 63 94); }
+
+.prose h2.lesson-heading--summary { background-color: rgb(99 102 241 / 0.07); }
+.prose h2.lesson-heading--summary::before { background-color: rgb(99 102 241); }
+
+.prose h2.lesson-heading--ai-tutor { background-color: rgb(6 182 212 / 0.08); }
+.prose h2.lesson-heading--ai-tutor::before { background-color: rgb(6 182 212); }
+
+/*
+ * Fenced code blocks: a subtle accent top edge, plus a language-aware label
+ * when lib/markdown.ts's tagCodeBlockLanguages() recognized the fence's
+ * language (e.g. ```rpgle). Blocks with no language (or an unrecognized
+ * one it still upper-cases) keep the generic "Code" label set above.
+ */
+.prose pre {
+  border-top: 2px solid rgb(59 130 246 / 0.5);
+}
+
+.prose pre[data-lang-label]::before {
+  content: attr(data-lang-label);
+}
+
+/*
+ * Table header shading and zebra striping so tables read as learning
+ * tables rather than raw HTML. Targets tr/th directly, so it's unaffected
+ * by the `.prose table { display: block }` responsive-scroll override above.
+ */
+.prose table thead tr {
+  background-color: rgb(248 250 252);
+}
+
+.prose table tbody tr:nth-child(even) {
+  background-color: rgb(248 250 252 / 0.6);
+}
+
+.prose table th,
+.prose table td {
+  padding-left: 0.9rem;
+  padding-right: 0.9rem;
+}
