@@ -59,3 +59,19 @@ export const SITE_BETA_TAGLINE = 'Public beta'
  * planning/PUBLIC_BETA_READINESS_AUDIT.md Section 5 for the full checklist.
  */
 export const SITE_URL = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ibmihub-ai.vercel.app').replace(/\/+$/, '')
+
+// --- Trust/legal page config (PR #144) --------------------------------------
+
+/**
+ * Support/contact email shown on legal pages and in the footer. Deliberately
+ * left unset until a real, monitored inbox exists on a confirmed domain --
+ * inventing a plausible-looking address here would risk publishing a
+ * contact method nobody reads (see planning/PUBLIC_BETA_READINESS_AUDIT.md
+ * Section 4). Every page that reads this constant already handles the
+ * `null` case with a "contact details coming before wider launch" fallback,
+ * so setting a real address here is the only change needed once one exists.
+ */
+export const SUPPORT_EMAIL: string | null = null
+
+/** Shown as "Last updated: {date}" on each legal page -- bump when that page's copy changes. */
+export const LEGAL_PAGES_LAST_UPDATED = 'July 16, 2026'
