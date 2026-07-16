@@ -17,6 +17,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Practice Questions',
   description: 'Check your understanding of beginner IBM i topics with short practice questions.',
+  alternates: { canonical: '/practice' },
 }
 
 const INTRO_NOTICE =

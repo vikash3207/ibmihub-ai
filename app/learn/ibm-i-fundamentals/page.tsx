@@ -14,6 +14,7 @@ export const metadata: Metadata = {
   title: IBM_I_FUNDAMENTALS_PATH_NAME,
   description:
     'The ordered lesson list for the IBM i Fundamentals learning path. The first lesson is free to preview without an account.',
+  alternates: { canonical: '/learn/ibm-i-fundamentals' },
 }
 
 export default async function IbmIFundamentalsPage() {

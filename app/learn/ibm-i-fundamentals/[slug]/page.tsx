@@ -40,9 +40,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const lesson = await getLesson(slug)
 
+  // getLesson() only ever resolves a Published lesson (getPublishedLessonBySlug
+  // calls notFound() otherwise), so this canonical/OG metadata can never be
+  // generated for a Review Ready or Draft lesson.
   return {
     title: lesson.title,
     description: lesson.short_description,
+    alternates: { canonical: `/learn/ibm-i-fundamentals/${lesson.slug}` },
+    openGraph: {
+      title: lesson.title,
+      description: lesson.short_description,
+      url: `/learn/ibm-i-fundamentals/${lesson.slug}`,
+    },
   }
 }
 

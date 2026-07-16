@@ -1,7 +1,15 @@
 import { redirect } from 'next/navigation'
+import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { saveOnboardingResponse } from '@/lib/actions/auth'
 import { Card } from '@/components/ui/card'
+
+// Account-specific, not useful search-result content, and excluded from
+// app/sitemap.ts -- explicitly opt out of indexing.
+export const metadata: Metadata = {
+  title: 'Onboarding',
+  robots: { index: false, follow: false },
+}
 
 const OPTIONS = [
   'I am new to IBM i and want to start learning.',
