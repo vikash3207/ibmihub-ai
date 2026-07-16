@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { LifeBuoy, MessageCircle, ShieldAlert, Sparkles } from 'lucide-react'
+import { LifeBuoy, MessageCircle, ShieldAlert, User } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Card } from '@/components/ui/card'
@@ -86,16 +86,42 @@ export default function ContactPage() {
             )}
           </div>
 
-          {/* -- Founder / creator note --------------------------------------- */}
-          <Card variant="muted" className="p-6 sm:p-8">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
-              <Sparkles className="h-4 w-4" aria-hidden="true" />
+          {/* -- Founder & Author ---------------------------------------------
+              PR #150. No photo placeholder -- Product Owner asked for one
+              only once a real image is provided. */}
+          <Card className="p-6 sm:p-8">
+            <div className="mb-5 flex items-center gap-4">
+              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                <User className="h-7 w-7" aria-hidden="true" />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  Founder &amp; Author
+                </p>
+                <h2 className="text-lg font-semibold text-slate-900">Vikash Choudhary</h2>
+                <p className="text-sm text-slate-500">Senior IBM i (AS/400) Consultant</p>
+              </div>
             </div>
-            <p className="text-sm text-slate-700 leading-relaxed">
-              {SITE_NAME} is being built as an AI-powered IBM&nbsp;i learning platform for
-              developers, students, and professionals who want guided lessons, practice questions,
-              AI Tutor support, and hands-on 5250-style / SQL practice labs.
-            </p>
+            <div className="space-y-3 text-sm text-slate-700 leading-relaxed">
+              <p>Hi, I&apos;m Vikash Choudhary, the founder of iRPGenie.com.</p>
+              <p>
+                I work as a Senior IBM&nbsp;i (AS/400) Consultant and have been passionate about
+                IBM&nbsp;i technologies for many years. Throughout my career, I&apos;ve enjoyed
+                solving complex technical challenges, mentoring developers, and continuously
+                learning new technologies.
+              </p>
+              <p>
+                I created iRPGenie with a simple vision -- to build a modern, AI-powered platform
+                where anyone can learn IBM&nbsp;i, RPG, CL, SQL, and related technologies in a
+                practical, interactive, and enjoyable way.
+              </p>
+              <p>
+                Whether you&apos;re a beginner taking your first steps or an experienced
+                professional sharpening your skills, I hope iRPGenie becomes a valuable companion
+                in your learning journey.
+              </p>
+              <p>Thank you for visiting and being part of this growing community. Happy learning!</p>
+            </div>
           </Card>
 
           {/* -- Safety note -------------------------------------------------- */}
