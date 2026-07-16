@@ -28,7 +28,7 @@ export interface PracticeContextInput {
 
 export function formatPracticeContextForPrompt(input: PracticeContextInput): string {
   const lines = [
-    'The learner is currently working on this IBMiHub AI practice question:',
+    'The learner is currently working on this iRPGenie practice question:',
     `Title: ${input.questionTitle}`,
     `Question: ${input.questionText}`,
   ]

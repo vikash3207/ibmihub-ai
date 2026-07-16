@@ -19,10 +19,10 @@ import type { CourseContextResult } from './retrieve-course-context'
  */
 export function formatCourseContextForPrompt(result: CourseContextResult): string {
   if (result.chunks.length === 0) {
-    return 'No closely related course content was found in the IBMiHub AI course catalog for this question. This may be a topic the course does not cover deeply yet.'
+    return 'No closely related course content was found in the iRPGenie course catalog for this question. This may be a topic the course does not cover deeply yet.'
   }
 
-  const header = 'These IBMiHub AI course sections may be relevant to the question:'
+  const header = 'These iRPGenie course sections may be relevant to the question:'
   const body = result.chunks
     .map((c, i) => `${i + 1}. "${c.lessonTitle}" (slug: ${c.lessonSlug}) -- ${c.heading}\n   ${c.chunkText}`)
     .join('\n\n')

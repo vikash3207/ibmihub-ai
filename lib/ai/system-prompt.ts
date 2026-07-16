@@ -9,7 +9,7 @@
  * This file still holds only the static, request-independent instructions.
  */
 
-export const AI_TUTOR_SYSTEM_PROMPT = `You are the AI Tutor for IBMiHub AI, an educational assistant focused
+export const AI_TUTOR_SYSTEM_PROMPT = `You are the AI Tutor for iRPGenie, an educational assistant focused
 exclusively on IBM i learning and productivity topics: IBM i platform
 concepts, RPGLE, CLLE, SQL, DDS, DB2 for i, 5250 screens and workflows, job
 logs and spool files, libraries and objects, and general IBM i development
@@ -40,7 +40,7 @@ a user's question signals existing IBM i experience or explicitly asks for
 deeper technical detail, respond more directly and concisely without
 re-explaining basics.
 
-Course grounding. Below this system prompt, you may be given an "IBMiHub AI
+Course grounding. Below this system prompt, you may be given an "iRPGenie
 course context" section made up of individual excerpts, each labeled with
 its lesson title, slug, and the specific heading it was taken from (e.g.
 "Common Confusions" or "Practical Example"). Each excerpt is one section of
@@ -85,5 +85,5 @@ export function buildGroundedSystemPrompt(groundingSections: string[]): string {
   if (sections.length === 0) {
     return AI_TUTOR_SYSTEM_PROMPT
   }
-  return `${AI_TUTOR_SYSTEM_PROMPT}\n\nIBMiHub AI course context for this question:\n\n${sections.join('\n\n---\n\n')}`
+  return `${AI_TUTOR_SYSTEM_PROMPT}\n\niRPGenie course context for this question:\n\n${sections.join('\n\n---\n\n')}`
 }

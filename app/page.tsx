@@ -28,10 +28,13 @@ import { cn } from '@/lib/utils'
 // this page or its header could serve a stale/incorrect logged-in state.
 export const dynamic = 'force-dynamic'
 
-const HOME_TITLE = 'AI-Powered IBM i Learning Platform'
+const HOME_TITLE = 'iRPGenie — AI-powered IBM i, RPGLE & SQL learning'
 
 export const metadata: Metadata = {
-  title: HOME_TITLE,
+  // Absolute override -- bypasses the root layout's `%s | iRPGenie` template
+  // so the homepage's tab title doesn't end up with the brand name twice
+  // (HOME_TITLE already reads as a complete, self-contained title).
+  title: { absolute: HOME_TITLE },
   description: SITE_DEFAULT_DESCRIPTION,
   alternates: { canonical: '/' },
   // Next.js merges metadata shallowly per top-level key, so without this,
@@ -176,7 +179,7 @@ export default async function LandingPage() {
 
           {/* -- CSS-only product preview panel ---------------------------
               A tasteful, product-inspired mock -- not a real screenshot and
-              not fake user data. Represents genuine IBMiHub AI concepts
+              not fake user data. Represents genuine iRPGenie concepts
               (a lesson, progress, Mark Complete, the AI Tutor) using the
               same visual language as the real app. */}
           <div className="relative mt-12 sm:mt-14 mx-auto max-w-3xl">
@@ -396,11 +399,11 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* -- Audience ("Why IBMiHub AI") ---------------------------------- */}
+        {/* -- Audience ("Why iRPGenie") ---------------------------------- */}
         <section className="bg-slate-50 border-t border-slate-100 py-20 sm:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-10 text-center">
-              Why IBMiHub AI?
+              Why iRPGenie?
             </h2>
             <div className="grid sm:grid-cols-2 gap-6">
               {AUDIENCE.map((a) => (
@@ -423,7 +426,7 @@ export default async function LandingPage() {
             <p className="text-sm text-amber-900 leading-relaxed">
               <strong>A note on AI guidance:</strong> AI Tutor responses may be incorrect and should be
               validated before production use. Do not paste private source code, sensitive job logs,
-              credentials, or customer data. IBMiHub AI does not connect to real IBM&nbsp;i systems
+              credentials, or customer data. iRPGenie does not connect to real IBM&nbsp;i systems
               at this time. Read the full{' '}
               <Link href="/disclaimer" className="underline hover:text-amber-950">
                 Beta &amp; AI Disclaimer

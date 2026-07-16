@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 const OPTIONS = [
   'I am new to IBM i and want to start learning.',
   'I already work with IBM i and want to refresh or deepen my knowledge.',
-  'I am exploring what IBMiHub AI offers.',
+  'I am exploring what iRPGenie offers.',
 ] as const
 
 // Auth-gated page -- never statically cache; always compute fresh per request.
