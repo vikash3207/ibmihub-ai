@@ -46,6 +46,7 @@ export function EmbeddedAiTutorPanel() {
     setInput,
     isStreaming,
     error,
+    errorContactHref,
     requiresLogin,
     feedback,
     sources,
@@ -131,6 +132,7 @@ export function EmbeddedAiTutorPanel() {
               messages={messages}
               isStreaming={isStreaming}
               error={error}
+              errorContactHref={errorContactHref}
               feedback={feedback}
               onFeedback={handleFeedback}
               sources={sources}

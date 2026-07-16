@@ -33,6 +33,7 @@ export function AiTutorChat({ starterPrompts, initialLessonContext }: Props) {
     setInput,
     isStreaming,
     error,
+    errorContactHref,
     requiresLogin,
     feedback,
     sources,
@@ -81,6 +82,7 @@ export function AiTutorChat({ starterPrompts, initialLessonContext }: Props) {
         }}
         isStreaming={isStreaming}
         error={error}
+        errorContactHref={errorContactHref}
         limitReached={limitReached}
         feedback={feedback}
         onFeedback={handleFeedback}

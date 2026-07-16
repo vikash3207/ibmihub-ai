@@ -22,6 +22,8 @@ interface AiTutorPanelValue {
   setInput: (value: string) => void
   isStreaming: boolean
   error: string | null
+  /** Set only alongside `error` when the server included a contact link (currently just the daily-quota-exhausted message) -- see app/api/ai-tutor/route.ts. */
+  errorContactHref: string | null
   requiresLogin: boolean
   feedback: Record<string, FeedbackState>
   /** Source lesson references per assistant message id, from the RAG v2 retrieval used to ground that reply (PR #132). */
@@ -56,6 +58,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   const [input, setInput] = useState('')
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [errorContactHref, setErrorContactHref] = useState<string | null>(null)
   const [requiresLogin, setRequiresLogin] = useState(false)
   const [feedback, setFeedback] = useState<Record<string, FeedbackState>>({})
   const [sources, setSources] = useState<Record<string, AiTutorSourceRef[]>>({})
@@ -81,6 +84,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   const newChat = useCallback(() => {
     setMessages([])
     setError(null)
+    setErrorContactHref(null)
     setRequiresLogin(false)
     setFeedback({})
     setSources({})
@@ -102,6 +106,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
       }
 
       setError(null)
+      setErrorContactHref(null)
       setRequiresLogin(false)
       const userMessage: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: trimmed }
       const nextMessages = [...messages, userMessage]
@@ -130,16 +135,21 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
 
         if (!response.ok || !response.body) {
           let message = 'AI Tutor is temporarily unavailable. Please try again.'
+          let contactHref: string | null = null
           try {
             const data = await response.json()
             if (typeof data.error === 'string') {
               message = data.error
+            }
+            if (typeof data.contactHref === 'string') {
+              contactHref = data.contactHref
             }
           } catch {
             // Non-JSON error body -- keep the generic message.
           }
           setMessages((prev) => prev.filter((m) => m.id !== assistantId))
           setError(message)
+          setErrorContactHref(contactHref)
           return
         }
 
@@ -201,6 +211,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     setInput,
     isStreaming,
     error,
+    errorContactHref,
     requiresLogin,
     feedback,
     sources,
