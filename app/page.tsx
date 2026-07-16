@@ -13,9 +13,13 @@ import {
   Code2,
   Terminal,
   Database,
+  LifeBuoy,
+  MessageCircle,
+  Layers,
 } from 'lucide-react'
-import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION } from '@/lib/config'
-import { getPublishedLessons } from '@/lib/lessons'
+import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
+import { getPublishedLessons, type Lesson } from '@/lib/lessons'
+import { getTopicForLesson } from '@/lib/topics'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
@@ -107,6 +111,69 @@ function buildStats(publishedLessonCount: number) {
   ]
 }
 
+/**
+ * Compact, high-level curriculum groupings for the homepage (PR #150) --
+ * replaces a previous section that listed every single published lesson
+ * title in a long grid, which Product Owner feedback flagged as noisy.
+ * Each bucket covers a fixed set of lib/topics.ts topic ids (the same
+ * topic taxonomy the Learning Center's own filters use), so this stays a
+ * display-only summary rather than a second, competing categorization
+ * system. Every one of the 19 TOPIC_FILTERS entries belongs to exactly
+ * one bucket below.
+ */
+const CURRICULUM_BUCKETS = [
+  {
+    icon: GraduationCap,
+    title: 'Foundations',
+    body: 'What IBM i is, 5250 navigation, libraries, objects, and the IFS.',
+    topicIds: ['foundations', 'commands', 'libraries-objects-ifs'],
+  },
+  {
+    icon: Code2,
+    title: 'RPGLE & CLLE',
+    body: 'RPGLE fundamentals through file I/O, CLLE, and advanced ILE concepts.',
+    topicIds: ['rpgle', 'file-io', 'clle', 'rpgle-ile'],
+  },
+  {
+    icon: Database,
+    title: 'SQL & Db2 for i',
+    body: 'Db2 for i, DDS, and SQL embedded directly in RPGLE.',
+    topicIds: ['db2-dds', 'sqlrpgle'],
+  },
+  {
+    icon: Layers,
+    title: 'Screens & Reports',
+    body: 'Display files, subfiles, and printer file reports.',
+    topicIds: ['display-files', 'subfiles', 'printer-files'],
+  },
+  {
+    icon: Award,
+    title: 'Operations & Career',
+    body: 'Debugging, operations, security, journaling, and interview readiness.',
+    topicIds: ['debugging', 'operations', 'security', 'journaling', 'integration', 'mini-projects', 'interview'],
+  },
+]
+
+function buildCurriculumHighlights(lessons: Lesson[]) {
+  const bucketByTopicId = new Map<string, (typeof CURRICULUM_BUCKETS)[number]>()
+  for (const bucket of CURRICULUM_BUCKETS) {
+    for (const topicId of bucket.topicIds) {
+      bucketByTopicId.set(topicId, bucket)
+    }
+  }
+
+  const counts = new Map<(typeof CURRICULUM_BUCKETS)[number], number>()
+  for (const lesson of lessons) {
+    const topic = getTopicForLesson(lesson)
+    const bucket = topic ? bucketByTopicId.get(topic.id) : undefined
+    if (bucket) {
+      counts.set(bucket, (counts.get(bucket) ?? 0) + 1)
+    }
+  }
+
+  return CURRICULUM_BUCKETS.map((bucket) => ({ ...bucket, count: counts.get(bucket) ?? 0 }))
+}
+
 const AUDIENCE = [
   {
     icon: GraduationCap,
@@ -132,6 +199,7 @@ export default async function LandingPage() {
   ] = await Promise.all([supabase.auth.getUser(), getPublishedLessons()])
 
   const STATS = buildStats(publishedLessons.length)
+  const CURRICULUM_HIGHLIGHTS = buildCurriculumHighlights(publishedLessons)
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -304,33 +372,40 @@ export default async function LandingPage() {
 
         {/* -- IBM i Fundamentals highlight -------------------------------- */}
         <section className="border-t border-slate-100 bg-slate-50 py-20 sm:py-24">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6 grid gap-10 sm:grid-cols-2 sm:items-center">
-            <div>
+          <div className="mx-auto max-w-5xl px-4 sm:px-6">
+            <div className="max-w-2xl mx-auto text-center mb-12">
               <Badge variant="neutral" className="mb-4">
                 Learning path
               </Badge>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-4">IBM i Fundamentals</h2>
-              <p className="text-slate-600 leading-relaxed mb-6">
-                A complete, {publishedLessons.length}-lesson path from what the platform is to
-                a basic development workflow -- covering libraries and objects, the 5250 interface,
-                RPGLE, CLLE, Db2 for i, and job logs. Lesson&nbsp;1 is free to preview without an account.
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">IBM i Fundamentals</h2>
+              <p className="text-slate-600 leading-relaxed">
+                A complete, {publishedLessons.length}-lesson path from what the platform is to a
+                basic development workflow. Lesson&nbsp;1 is free to preview without an account.
               </p>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {CURRICULUM_HIGHLIGHTS.map((bucket) => (
+                <Card key={bucket.title} className="p-6">
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <bucket.icon className="h-5 w-5" aria-hidden="true" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900">{bucket.title}</h3>
+                  </div>
+                  <p className="text-sm text-slate-600 leading-relaxed mb-3">{bucket.body}</p>
+                  <p className="text-xs font-medium text-slate-400">
+                    {bucket.count} lesson{bucket.count === 1 ? '' : 's'}
+                  </p>
+                </Card>
+              ))}
+            </div>
+
+            <div className="mt-10 text-center">
               <Link href="/learn" className={buttonVariants({ variant: 'secondary' })}>
                 Explore the Learning Center
               </Link>
             </div>
-            <Card variant="muted" className="p-6">
-              <ol className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm text-slate-700">
-                {publishedLessons.map((lesson) => (
-                  <li key={lesson.slug} className="flex items-center gap-3">
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-slate-500 shadow-sm">
-                      {lesson.lesson_order}
-                    </span>
-                    <span className="truncate">{lesson.title}</span>
-                  </li>
-                ))}
-              </ol>
-            </Card>
           </div>
         </section>
 
@@ -434,6 +509,68 @@ export default async function LandingPage() {
               for more detail.
             </p>
           </Card>
+        </section>
+
+        {/* -- Contact ------------------------------------------------------
+            Homepage teaser for the dedicated /contact page (PR #150) --
+            Product Owner feedback was that Contact felt too buried/subtle,
+            so it gets its own highlighted section here, not just a footer
+            link. Kept intentionally short (two email cards + a link to the
+            full page) rather than duplicating /contact's founder note,
+            safety note, and mailto form -- that would clutter the homepage. */}
+        <section className="border-t border-slate-100 bg-slate-50 py-20 sm:py-24">
+          <div className="mx-auto max-w-5xl px-4 sm:px-6">
+            <div className="max-w-2xl mx-auto text-center mb-10">
+              <Badge variant="neutral" className="mb-4">
+                Get in touch
+              </Badge>
+              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Contact iRPGenie</h2>
+              <p className="text-slate-600 leading-relaxed">
+                Have feedback, a bug to report, or a question about the platform? We&apos;d love to
+                hear from you.
+              </p>
+            </div>
+
+            <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
+              {SUPPORT_EMAIL && (
+                <Card className="p-6 border-t-4 border-t-blue-600">
+                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <LifeBuoy className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-1">Support</h3>
+                  <p className="text-sm text-slate-500 mb-3">Login help, bugs, and technical issues.</p>
+                  <a
+                    href={`mailto:${SUPPORT_EMAIL}`}
+                    className="text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline break-all"
+                  >
+                    {SUPPORT_EMAIL}
+                  </a>
+                </Card>
+              )}
+
+              {CONTACT_EMAIL && (
+                <Card variant="ai" className="p-6 border-t-4 border-t-cyan-500">
+                  <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-100 text-cyan-700">
+                    <MessageCircle className="h-5 w-5" aria-hidden="true" />
+                  </div>
+                  <h3 className="font-semibold text-slate-900 mb-1">General Contact</h3>
+                  <p className="text-sm text-slate-500 mb-3">Feedback, suggestions, and collaboration.</p>
+                  <a
+                    href={`mailto:${CONTACT_EMAIL}`}
+                    className="text-sm font-semibold text-cyan-800 hover:text-cyan-950 hover:underline break-all"
+                  >
+                    {CONTACT_EMAIL}
+                  </a>
+                </Card>
+              )}
+            </div>
+
+            <div className="mt-8 text-center">
+              <Link href="/contact" className={buttonVariants({ variant: 'secondary' })}>
+                Visit the Contact page
+              </Link>
+            </div>
+          </div>
         </section>
 
         {/* -- Final CTA --------------------------------------------------- */}
