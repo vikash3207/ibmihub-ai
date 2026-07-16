@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import type { Metadata } from 'next'
 import {
   BookOpen,
   Sparkles,
@@ -11,7 +12,7 @@ import {
   GraduationCap,
   Code2,
 } from 'lucide-react'
-import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
+import { PRIMARY_CTA_LABEL, SITE_NAME, SITE_DEFAULT_DESCRIPTION } from '@/lib/config'
 import { getPublishedLessons } from '@/lib/lessons'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
@@ -23,6 +24,26 @@ import { cn } from '@/lib/utils'
 // Renders SiteHeader, which reads the auth session -- never statically cache
 // this page or its header could serve a stale/incorrect logged-in state.
 export const dynamic = 'force-dynamic'
+
+const HOME_TITLE = 'AI-Powered IBM i Learning Platform'
+
+export const metadata: Metadata = {
+  title: HOME_TITLE,
+  description: SITE_DEFAULT_DESCRIPTION,
+  alternates: { canonical: '/' },
+  // Next.js merges metadata shallowly per top-level key, so without this,
+  // og:title/twitter:title would silently fall back to the root layout's
+  // more generic default instead of this page's own, more specific title.
+  openGraph: {
+    title: HOME_TITLE,
+    description: SITE_DEFAULT_DESCRIPTION,
+    url: '/',
+  },
+  twitter: {
+    title: HOME_TITLE,
+    description: SITE_DEFAULT_DESCRIPTION,
+  },
+}
 
 const FEATURES = [
   {

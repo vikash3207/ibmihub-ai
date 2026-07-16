@@ -14,9 +14,12 @@ import { buttonVariants } from '@/components/ui/button'
 // what renders here.
 export const dynamic = 'force-dynamic'
 
+// Account-specific content and excluded from app/sitemap.ts -- explicitly
+// opt out of indexing rather than relying only on robots.txt.
 export const metadata: Metadata = {
   title: 'Dashboard',
   description: 'Your IBM i Fundamentals progress and next lesson.',
+  robots: { index: false, follow: false },
 }
 
 /** Approved onboarding-aware Start Learning copy (Spec 005 DASH-FR-010). */

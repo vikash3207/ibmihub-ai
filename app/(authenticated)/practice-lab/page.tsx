@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Practice Lab',
   description: 'A guided 5250-style command simulator and ACS-style SQL console for hands-on IBM i practice.',
+  alternates: { canonical: '/practice-lab' },
 }
 
 export default async function PracticeLabPage() {

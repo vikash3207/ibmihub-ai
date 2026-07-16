@@ -1,6 +1,14 @@
+import type { Metadata } from 'next'
 import { resetPassword } from '@/lib/actions/auth'
 import { AuthCard } from '@/components/auth-card'
 import { buttonVariants } from '@/components/ui/button'
+
+// Not useful search-result content, and excluded from app/sitemap.ts --
+// explicitly opt out of indexing rather than relying only on robots.txt.
+export const metadata: Metadata = {
+  title: 'Reset Password',
+  robots: { index: false, follow: false },
+}
 
 interface Props {
   searchParams: Promise<{ error?: string }>

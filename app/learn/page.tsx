@@ -10,6 +10,7 @@ export const metadata: Metadata = {
   title: 'Learning Center',
   description:
     'Start the IBM i Fundamentals learning path -- structured, original lessons for beginners and working IBM i developers.',
+  alternates: { canonical: '/learn' },
 }
 
 export default async function LearnPage() {

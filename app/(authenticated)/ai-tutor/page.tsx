@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'AI Tutor',
   description: 'Ask IBM i learning questions and get educational guidance.',
+  alternates: { canonical: '/ai-tutor' },
 }
 
 const STARTER_PROMPTS = [
