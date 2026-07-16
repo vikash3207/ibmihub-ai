@@ -5,6 +5,7 @@ import { getPublishedLessonCount } from '@/lib/lessons'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
+import { PublicBetaNotice } from '@/components/public-beta-notice'
 
 export const metadata: Metadata = {
   title: 'Learning Center',
@@ -24,6 +25,11 @@ export default async function LearnPage() {
           A guided starting point for learning IBM i, one structured lesson at a time.
         </p>
       </div>
+
+      <PublicBetaNotice compact>
+        We are continuously upgrading the curriculum. Beginner-friendly lessons are available now,
+        and deeper professional-grade expansions are being added over time.
+      </PublicBetaNotice>
 
       <Card className="border-l-4 border-l-blue-600">
         <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
