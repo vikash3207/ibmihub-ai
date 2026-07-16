@@ -20,7 +20,8 @@ import { markLessonComplete } from '@/lib/actions/progress'
 import { getPracticeTopicIdForLesson } from '@/content/practice/questions'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
-import { Button, buttonVariants } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
+import { SubmitButton } from '@/components/ui/submit-button'
 
 // Reads the auth session to decide protected-lesson access, Mark Complete,
 // and completed state -- never statically cache; always compute fresh per
@@ -205,9 +206,9 @@ export default async function LessonPage({ params, searchParams }: Props) {
           ) : (
             <form>
               <input type="hidden" name="lessonId" value={lesson.id} />
-              <Button type="submit" formAction={markLessonComplete} variant="primary">
+              <SubmitButton formAction={markLessonComplete} variant="primary" pendingLabel="Marking complete...">
                 Mark Complete
-              </Button>
+              </SubmitButton>
             </form>
           )}
         </Card>
@@ -254,8 +255,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
       {practiceTopicId && (
         <Link
           href={`/practice?topic=${encodeURIComponent(practiceTopicId)}`}
-          prefetch={false}
-          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-blue-600 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-800"
+          className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-blue-600 transition-colors active:bg-blue-100/60 hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-800"
         >
           <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
           Practice this topic
@@ -276,8 +276,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
                 ? `/learn/ibm-i-fundamentals/${previousLesson.slug}?topic=${sidebarTopic.id}`
                 : `/learn/ibm-i-fundamentals/${previousLesson.slug}`
             }
-            prefetch={false}
-            className="flex min-w-0 max-w-[48%] items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
+            className="flex min-w-0 max-w-[48%] items-center gap-2 rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-600 transition-colors active:bg-blue-100/60 hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
           >
             <span aria-hidden="true">&larr;</span>
             <span className="truncate">{previousLesson.title}</span>
@@ -293,8 +292,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
                 ? `/learn/ibm-i-fundamentals/${nextLesson.slug}?topic=${sidebarTopic.id}`
                 : `/learn/ibm-i-fundamentals/${nextLesson.slug}`
             }
-            prefetch={false}
-            className="flex min-w-0 max-w-[48%] items-center justify-end gap-2 rounded-xl border border-slate-200 px-4 py-3 text-right text-sm font-medium text-slate-600 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
+            className="flex min-w-0 max-w-[48%] items-center justify-end gap-2 rounded-xl border border-slate-200 px-4 py-3 text-right text-sm font-medium text-slate-600 transition-colors active:bg-blue-100/60 hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
           >
             <span className="truncate">{nextLesson.title}</span>
             <span aria-hidden="true">&rarr;</span>

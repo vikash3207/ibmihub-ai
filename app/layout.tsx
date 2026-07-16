@@ -1,6 +1,7 @@
 import './globals.css'
 import type { Metadata } from 'next'
 import type { ReactNode } from 'react'
+import { Suspense } from 'react'
 import { Inter } from 'next/font/google'
 import {
   SITE_NAME,
@@ -12,6 +13,7 @@ import {
 import { AiTutorPanelProvider } from '@/components/ai-tutor/ai-tutor-panel-provider'
 import { EmbeddedAiTutorPanel } from '@/components/ai-tutor/embedded-ai-tutor-panel'
 import { AiTutorContentShift } from '@/components/ai-tutor/ai-tutor-content-shift'
+import { RouteProgressBar } from '@/components/route-progress-bar'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
@@ -70,6 +72,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           both trees share (Spec 001 v1.1 AI-TUTOR-FR-024; see
           planning/EMBEDDED_AI_TUTOR_PANEL_PROPOSAL.md Section 3).
         */}
+        {/*
+          useSearchParams() inside RouteProgressBar requires a Suspense
+          boundary (Next.js App Router rule) -- fallback is null since the
+          bar renders nothing until a navigation actually starts.
+        */}
+        <Suspense fallback={null}>
+          <RouteProgressBar />
+        </Suspense>
         <AiTutorPanelProvider>
           <AiTutorContentShift>{children}</AiTutorContentShift>
           <EmbeddedAiTutorPanel />

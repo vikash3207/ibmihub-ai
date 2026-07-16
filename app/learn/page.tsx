@@ -39,11 +39,7 @@ export default async function LearnPage() {
         </p>
 
         {publishedCount > 0 ? (
-          <Link
-            href="/learn/ibm-i-fundamentals"
-            prefetch={false}
-            className={buttonVariants({ variant: 'primary' })}
-          >
+          <Link href="/learn/ibm-i-fundamentals" className={buttonVariants({ variant: 'primary' })}>
             Start Learning
           </Link>
         ) : (

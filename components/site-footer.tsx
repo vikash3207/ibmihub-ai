@@ -17,23 +17,23 @@ export function SiteFooter() {
           <span className="ml-2">AI-guided IBM i learning.</span>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
-          <Link href="/learn" className="hover:text-slate-600 transition-colors">
+          <Link href="/learn" className="hover:text-slate-600 active:opacity-70 transition-colors">
             Learning Center
           </Link>
-          <Link href="/practice-lab" prefetch={false} className="hover:text-slate-600 transition-colors">
+          <Link href="/practice-lab" className="hover:text-slate-600 active:opacity-70 transition-colors">
             Practice Lab
           </Link>
-          <Link href="/privacy" className="hover:text-slate-600 transition-colors">
+          <Link href="/privacy" className="hover:text-slate-600 active:opacity-70 transition-colors">
             Privacy
           </Link>
-          <Link href="/terms" className="hover:text-slate-600 transition-colors">
+          <Link href="/terms" className="hover:text-slate-600 active:opacity-70 transition-colors">
             Terms
           </Link>
-          <Link href="/disclaimer" className="hover:text-slate-600 transition-colors">
+          <Link href="/disclaimer" className="hover:text-slate-600 active:opacity-70 transition-colors">
             Disclaimer
           </Link>
           {SUPPORT_EMAIL ? (
-            <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-slate-600 transition-colors">
+            <a href={`mailto:${SUPPORT_EMAIL}`} className="hover:text-slate-600 active:opacity-70 transition-colors">
               Contact
             </a>
           ) : null}

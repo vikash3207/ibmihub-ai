@@ -288,7 +288,7 @@ export default async function LandingPage() {
               Want to practice hands-on? Try the 5250-style Practice Lab and ACS-style SQL Console.
             </p>
             {user ? (
-              <Link href="/practice-lab" prefetch={false} className={buttonVariants({ variant: 'secondary' })}>
+              <Link href="/practice-lab" className={buttonVariants({ variant: 'secondary' })}>
                 Try the Practice Lab
               </Link>
             ) : (
@@ -384,7 +384,7 @@ export default async function LandingPage() {
                 the IBM&nbsp;i ecosystem specifically -- not a generic programming assistant.
               </p>
               {user ? (
-                <Link href="/ai-tutor" prefetch={false} className={buttonVariants({ variant: 'ai' })}>
+                <Link href="/ai-tutor" className={buttonVariants({ variant: 'ai' })}>
                   Open AI Tutor
                 </Link>
               ) : (

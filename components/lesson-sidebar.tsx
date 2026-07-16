@@ -45,7 +45,7 @@ function LessonList({
               prefetch={false}
               aria-current={isCurrent ? 'page' : undefined}
               className={cn(
-                'flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors',
+                'flex items-start gap-2.5 rounded-lg px-2.5 py-2 text-sm transition-colors active:bg-blue-100/60',
                 isCurrent
                   ? 'bg-blue-50 text-blue-900 font-medium ring-1 ring-inset ring-blue-200'
                   : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
@@ -96,8 +96,7 @@ export function LessonSidebar({
     <nav aria-label="Lesson navigation" className="space-y-3">
       <Link
         href={learningCenterHref}
-        prefetch={false}
-        className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-slate-900"
+        className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 transition-colors hover:text-slate-900 active:opacity-70"
       >
         &larr; Learning Center
       </Link>
@@ -119,8 +118,7 @@ export function LessonSidebar({
         {previousItem ? (
           <Link
             href={hrefFor(previousItem.slug, topicId)}
-            prefetch={false}
-            className="flex-1 truncate rounded-lg border border-slate-200 px-2.5 py-1.5 font-medium text-slate-600 hover:border-blue-300 hover:text-blue-700"
+            className="flex-1 truncate rounded-lg border border-slate-200 px-2.5 py-1.5 font-medium text-slate-600 transition-colors active:bg-blue-100/60 hover:border-blue-300 hover:text-blue-700"
           >
             &larr; Previous
           </Link>
@@ -130,8 +128,7 @@ export function LessonSidebar({
         {nextItem ? (
           <Link
             href={hrefFor(nextItem.slug, topicId)}
-            prefetch={false}
-            className="flex-1 truncate rounded-lg border border-slate-200 px-2.5 py-1.5 text-right font-medium text-slate-600 hover:border-blue-300 hover:text-blue-700"
+            className="flex-1 truncate rounded-lg border border-slate-200 px-2.5 py-1.5 text-right font-medium text-slate-600 transition-colors active:bg-blue-100/60 hover:border-blue-300 hover:text-blue-700"
           >
             Next &rarr;
           </Link>

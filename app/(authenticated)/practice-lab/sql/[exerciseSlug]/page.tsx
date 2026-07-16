@@ -60,7 +60,7 @@ export default async function PracticeLabSqlExercisePage({ params }: Props) {
   return (
     <div className="space-y-6">
       <div>
-        <Link href="/practice-lab/sql" prefetch={false} className="text-sm text-slate-500 hover:text-slate-700">
+        <Link href="/practice-lab/sql" className="text-sm text-slate-500 transition-colors hover:text-slate-700 active:opacity-70">
           &larr; SQL Practice Console
         </Link>
         <div className="mb-1 mt-2 flex items-center gap-2">

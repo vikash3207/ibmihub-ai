@@ -106,11 +106,7 @@ export default async function DashboardPage() {
             <p className="text-sm text-slate-600 mb-4">
               You&apos;ve completed all available {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
             </p>
-            <Link
-              href="/learn/ibm-i-fundamentals"
-              prefetch={false}
-              className={buttonVariants({ variant: 'primary' })}
-            >
+            <Link href="/learn/ibm-i-fundamentals" className={buttonVariants({ variant: 'primary' })}>
               View All Lessons
             </Link>
           </>
@@ -121,7 +117,6 @@ export default async function DashboardPage() {
             {nextLesson && (
               <Link
                 href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
-                prefetch={false}
                 className={buttonVariants({ variant: 'primary' })}
               >
                 Start {nextLesson.title}
@@ -136,7 +131,6 @@ export default async function DashboardPage() {
                 <p className="text-sm text-slate-600 mb-4">Next up: {nextLesson.title}</p>
                 <Link
                   href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
-                  prefetch={false}
                   className={buttonVariants({ variant: 'primary' })}
                 >
                   Continue
@@ -148,7 +142,7 @@ export default async function DashboardPage() {
       </Card>
 
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Link href="/learn/ibm-i-fundamentals" prefetch={false} className="block">
+        <Link href="/learn/ibm-i-fundamentals" className="block active:scale-[0.99] transition-transform">
           <Card className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <BookOpen className="h-5 w-5" aria-hidden="true" />
@@ -160,7 +154,7 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/practice" prefetch={false} className="block">
+        <Link href="/practice" className="block active:scale-[0.99] transition-transform">
           <Card className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
@@ -172,7 +166,7 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/ai-tutor" prefetch={false} className="block">
+        <Link href="/ai-tutor" className="block active:scale-[0.99] transition-transform">
           <Card variant="ai" className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
               <Sparkles className="h-5 w-5" aria-hidden="true" />
@@ -185,7 +179,7 @@ export default async function DashboardPage() {
           </Card>
         </Link>
 
-        <Link href="/practice-lab" prefetch={false} className="block">
+        <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform">
           <Card className="h-full transition-shadow hover:shadow-md">
             <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
               <FlaskConical className="h-5 w-5" aria-hidden="true" />
