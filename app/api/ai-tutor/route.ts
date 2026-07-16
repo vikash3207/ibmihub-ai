@@ -13,6 +13,12 @@ import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
 import { retrieveCourseContext, formatCourseContextForPrompt } from '@/lib/ai/retrieve-course-context'
 import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
 import { buildSourceRefs } from '@/lib/ai/build-source-refs'
+import {
+  checkAiTutorLimits,
+  recordAiTutorUsageEvent,
+  estimateTokens,
+  type AiTutorUsageOrigin,
+} from '@/lib/ai/tutor-usage'
 import type { AiTutorSourceRef } from '@/components/ai-tutor/types'
 
 /** Spec 006-style session cap: 1 turn = 1 user-authored message. */
@@ -26,11 +32,16 @@ const SOURCES_HEADER = 'X-Ai-Tutor-Sources'
 
 type UsageStatus = 'success' | 'error' | 'rate_limited'
 
-function jsonError(message: string, status: number) {
-  return new Response(JSON.stringify({ error: message }), {
+function jsonError(message: string, status: number, extra?: Record<string, unknown>) {
+  return new Response(JSON.stringify({ error: message, ...extra }), {
     status,
     headers: { 'Content-Type': 'application/json' },
   })
+}
+
+/** The context's sourceType maps 1:1 to a usage-tracking origin; no context (a general/standalone question) is 'standalone'. */
+function originForContext(context: ParsedAiTutorContext): AiTutorUsageOrigin {
+  return context?.sourceType ?? 'standalone'
 }
 
 async function logUsage(
@@ -308,6 +319,33 @@ export async function POST(request: NextRequest) {
   const messages = parsed
   const context = parseContext(body)
   const latestUserMessage = [...messages].reverse().find((m) => m.role === 'user')?.content ?? ''
+  const origin = originForContext(context)
+
+  // Beta usage limits (PR #149) -- enforced here, before any grounding
+  // lookup or model call, so a blocked request never reaches the AI
+  // provider. Applies identically to every AI Tutor surface, since the
+  // standalone page, the embedded panel (from a lesson or a practice
+  // question), and any future caller all send their request through this
+  // one route.
+  const limitCheck = await checkAiTutorLimits(user.id, latestUserMessage)
+  if (limitCheck.blocked) {
+    after(() =>
+      recordAiTutorUsageEvent({
+        userId: user.id,
+        origin,
+        messageLength: latestUserMessage.length,
+        wasBlocked: true,
+        blockedReason: limitCheck.reason,
+        estimatedInputTokens: estimateTokens(latestUserMessage),
+      })
+    )
+    const status = limitCheck.reason === 'message_too_long' ? 400 : 429
+    return jsonError(
+      limitCheck.message,
+      status,
+      limitCheck.contactHref ? { contactHref: limitCheck.contactHref } : undefined
+    )
+  }
 
   let systemPrompt: string
   let contextLabel: string | null
@@ -337,6 +375,18 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     const kind = err instanceof TutorProviderError ? err.kind : 'provider_error'
     after(() => logUsage(supabase, user.id, statusForErrorKind(kind), null))
+    // Counts toward the daily quota even though the provider call failed --
+    // the request passed our own guardrails and was forwarded to the model,
+    // which is what "20 requests per day" means from the user's side.
+    after(() =>
+      recordAiTutorUsageEvent({
+        userId: user.id,
+        origin,
+        messageLength: latestUserMessage.length,
+        wasBlocked: false,
+        estimatedInputTokens: estimateTokens(latestUserMessage),
+      })
+    )
 
     if (kind === 'rate_limited') {
       return jsonError('AI Tutor is busy right now. Please try again in a moment.', 429)
@@ -368,10 +418,28 @@ export async function POST(request: NextRequest) {
   after(async () => {
     if (streamFailed) {
       await logUsage(supabase, user.id, statusForErrorKind(failureKind), null)
+      await recordAiTutorUsageEvent({
+        userId: user.id,
+        origin,
+        messageLength: latestUserMessage.length,
+        wasBlocked: false,
+        estimatedInputTokens: estimateTokens(latestUserMessage),
+      })
       return
     }
     const usage = await usagePromise
     await logUsage(supabase, user.id, 'success', usage)
+    await recordAiTutorUsageEvent({
+      userId: user.id,
+      origin,
+      messageLength: latestUserMessage.length,
+      wasBlocked: false,
+      model: PRIMARY_MODEL,
+      // Prefer the provider's actual reported usage; fall back to the
+      // character-based estimate only for whichever side it's missing.
+      estimatedInputTokens: usage?.inputTokens ?? estimateTokens(latestUserMessage),
+      estimatedOutputTokens: usage?.outputTokens,
+    })
   })
 
   const headers: Record<string, string> = { 'Content-Type': 'text/plain; charset=utf-8' }

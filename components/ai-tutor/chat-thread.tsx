@@ -195,6 +195,8 @@ export interface ChatMessageListProps {
   messages: ChatMessage[]
   isStreaming: boolean
   error: string | null
+  /** Set only alongside `error` for the daily-quota-exhausted message (PR #149) -- renders as a small link under the error text. */
+  errorContactHref?: string | null
   feedback: Record<string, FeedbackState>
   onFeedback: (responseId: string, isHelpful: boolean) => void
   starterPrompts?: string[]
@@ -208,6 +210,7 @@ export function ChatMessageList({
   messages,
   isStreaming,
   error,
+  errorContactHref,
   feedback,
   onFeedback,
   starterPrompts,
@@ -317,7 +320,12 @@ export function ChatMessageList({
 
       {error && (
         <div className="rounded-2xl border border-red-100 bg-red-50 px-4 py-3 text-sm text-red-800">
-          {error}
+          <p>{error}</p>
+          {errorContactHref && (
+            <a href={errorContactHref} className="mt-1.5 inline-block font-medium underline hover:text-red-900">
+              Contact us
+            </a>
+          )}
         </div>
       )}
     </div>
@@ -360,6 +368,8 @@ export function ChatComposer({ input, onInputChange, onSubmit, isStreaming, limi
       >
         {isStreaming ? 'Thinking...' : 'Ask'}
       </button>
+      {/* Display-only -- keep in sync with AI_TUTOR_DAILY_LIMIT's default in lib/ai/tutor-limits.ts (PR #149) if that default ever changes. Its own line, not next to the button, so it never crowds the narrow embedded-panel width. */}
+      <p className="text-xs text-slate-400">Beta limit: 20 AI Tutor questions/day</p>
     </form>
   )
 }
@@ -371,6 +381,8 @@ export interface ChatThreadProps {
   onSubmit: (e: React.FormEvent) => void
   isStreaming: boolean
   error: string | null
+  /** Set only alongside `error` for the daily-quota-exhausted message (PR #149). */
+  errorContactHref?: string | null
   limitReached: boolean
   feedback: Record<string, FeedbackState>
   onFeedback: (responseId: string, isHelpful: boolean) => void
@@ -397,6 +409,7 @@ export function ChatThread({
   onSubmit,
   isStreaming,
   error,
+  errorContactHref,
   limitReached,
   feedback,
   onFeedback,
@@ -423,6 +436,7 @@ export function ChatThread({
         messages={messages}
         isStreaming={isStreaming}
         error={error}
+        errorContactHref={errorContactHref}
         feedback={feedback}
         onFeedback={onFeedback}
         starterPrompts={starterPrompts}
