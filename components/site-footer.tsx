@@ -5,8 +5,8 @@ import { SITE_NAME, SUPPORT_EMAIL } from '@/lib/config'
  * Shared site footer (PR #144) -- extracted from what was previously
  * inline-only markup in app/page.tsx, so the new legal pages can reuse the
  * exact same footer instead of duplicating it. Visual style is unchanged
- * from the original; this PR only adds the Privacy/Terms/Disclaimer/
- * Contact links.
+ * from the original; PR #144 added the Privacy/Terms/Disclaimer/Contact
+ * links, PR #145 added the Practice Lab product link.
  */
 export function SiteFooter() {
   return (
@@ -19,6 +19,9 @@ export function SiteFooter() {
         <nav className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2">
           <Link href="/learn" className="hover:text-slate-600 transition-colors">
             Learning Center
+          </Link>
+          <Link href="/practice-lab" prefetch={false} className="hover:text-slate-600 transition-colors">
+            Practice Lab
           </Link>
           <Link href="/privacy" className="hover:text-slate-600 transition-colors">
             Privacy

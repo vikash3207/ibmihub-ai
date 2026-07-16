@@ -11,6 +11,8 @@ import {
   CheckCircle2,
   GraduationCap,
   Code2,
+  Terminal,
+  Database,
 } from 'lucide-react'
 import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION } from '@/lib/config'
 import { getPublishedLessons } from '@/lib/lessons'
@@ -41,6 +43,11 @@ export const metadata: Metadata = {
     url: '/',
   },
   twitter: {
+    // Next.js replaces the parent's whole `twitter` object rather than
+    // merging individual fields, so `card` has to be repeated here too --
+    // confirmed live in PR #145: without this, the root layout's intended
+    // `summary_large_image` silently reverted to Next's `summary` default.
+    card: 'summary_large_image',
     title: HOME_TITLE,
     description: SITE_DEFAULT_DESCRIPTION,
   },
@@ -66,6 +73,16 @@ const FEATURES = [
     icon: Award,
     title: 'Career-Ready IBM i Skills',
     body: 'Build practical foundations that support IBM i development, support, modernization, and long-term career growth.',
+  },
+  {
+    icon: Terminal,
+    title: '5250-Style Practice Lab',
+    body: 'Practice real IBM i commands -- WRKOBJ, DSPJOB, WRKACTJOB, and more -- in a guided, 5250-style simulator with no real system connection.',
+  },
+  {
+    icon: Database,
+    title: 'ACS-Style SQL Practice Console',
+    body: 'Write and run SQL -- SELECT, WHERE, JOIN, GROUP BY, and more -- in an ACS-style console against safe, simulated sample data.',
   },
 ]
 
@@ -127,7 +144,7 @@ export default async function LandingPage() {
           <div className="text-center">
             <Badge variant="ai" className="mb-4 border border-cyan-400/30 bg-cyan-400/10 text-cyan-300">
               <Sparkles className="h-3 w-3" aria-hidden="true" />
-              AI-powered IBM i learning
+              AI-powered IBM i learning &middot; Public Beta
             </Badge>
             <p className="mb-3 text-base sm:text-lg font-semibold text-cyan-300">
               Master IBM&nbsp;i from Zero to Expert.
@@ -265,6 +282,21 @@ export default async function LandingPage() {
               </Card>
             ))}
           </div>
+
+          <div className="mt-10 text-center">
+            <p className="text-sm text-slate-600 mb-3">
+              Want to practice hands-on? Try the 5250-style Practice Lab and ACS-style SQL Console.
+            </p>
+            {user ? (
+              <Link href="/practice-lab" prefetch={false} className={buttonVariants({ variant: 'secondary' })}>
+                Try the Practice Lab
+              </Link>
+            ) : (
+              <Link href="/auth/sign-up" className={buttonVariants({ variant: 'secondary' })}>
+                Sign up to try the Practice Lab
+              </Link>
+            )}
+          </div>
         </section>
 
         {/* -- IBM i Fundamentals highlight -------------------------------- */}
@@ -392,7 +424,11 @@ export default async function LandingPage() {
               <strong>A note on AI guidance:</strong> AI Tutor responses may be incorrect and should be
               validated before production use. Do not paste private source code, sensitive job logs,
               credentials, or customer data. IBMiHub AI does not connect to real IBM&nbsp;i systems
-              at this time.
+              at this time. Read the full{' '}
+              <Link href="/disclaimer" className="underline hover:text-amber-950">
+                Beta &amp; AI Disclaimer
+              </Link>{' '}
+              for more detail.
             </p>
           </Card>
         </section>
