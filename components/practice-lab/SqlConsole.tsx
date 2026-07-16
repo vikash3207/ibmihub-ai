@@ -3,7 +3,12 @@
 import { useState } from 'react'
 import type { PracticeLabExercise, PracticeLabSqlResultTable } from '@/lib/practice-lab/types'
 import { evaluateSql } from '@/lib/practice-lab/sql-simulator'
-import { CUSTOMER_TABLE_NAME, CUSTOMER_COLUMNS } from '@/content/practice-lab/sql-sample-schema'
+import {
+  CUSTOMER_TABLE_NAME,
+  CUSTOMER_COLUMNS,
+  ORDHDR_TABLE_NAME,
+  ORDHDR_COLUMNS,
+} from '@/content/practice-lab/sql-sample-schema'
 import { SqlEditor } from '@/components/practice-lab/SqlEditor'
 import { SqlResultGrid } from '@/components/practice-lab/SqlResultGrid'
 import { SqlMessages } from '@/components/practice-lab/SqlMessages'
@@ -42,9 +47,21 @@ export function SqlConsole({ exercise, relatedLessons }: Props) {
       setStatus('success')
       setResultTable(result.resultTable ?? null)
       const rowCount = result.resultTable?.rows.length ?? 0
-      const rowWord = rowCount === 1 ? 'row' : 'rows'
-      setMessage(`Query completed in the simulator. ${rowCount} ${rowWord} returned.`)
-      setMessageTone('success')
+
+      if (rowCount === 0) {
+        // A successful query that matches nothing is SQLCODE 100, not a
+        // failure -- shown with the same 'info' tone as a neutral status
+        // line, not 'error', so it never reads as something having gone wrong.
+        setMessage(
+          'SQLCODE 100: No rows matched the query in this simulated dataset. This is not always an error -- ' +
+            'it often just means no matching data was found.'
+        )
+        setMessageTone('info')
+      } else {
+        const rowWord = rowCount === 1 ? 'row' : 'rows'
+        setMessage(`Query completed in the simulator. ${rowCount} ${rowWord} returned.`)
+        setMessageTone('success')
+      }
     } else {
       setStatus('trying')
       setResultTable(null)
@@ -75,11 +92,19 @@ export function SqlConsole({ exercise, relatedLessons }: Props) {
         relatedLessons={relatedLessons}
       />
 
-      <div className="rounded-2xl border border-slate-100 bg-white p-4">
-        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          Sample table: {exercise.sqlCheck?.tableName ?? CUSTOMER_TABLE_NAME}
-        </p>
-        <p className="font-mono text-xs text-slate-600">{CUSTOMER_COLUMNS.join(', ')}</p>
+      <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4">
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Sample table: {CUSTOMER_TABLE_NAME}
+          </p>
+          <p className="font-mono text-xs text-slate-600">{CUSTOMER_COLUMNS.join(', ')}</p>
+        </div>
+        <div>
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+            Sample table: {ORDHDR_TABLE_NAME}
+          </p>
+          <p className="font-mono text-xs text-slate-600">{ORDHDR_COLUMNS.join(', ')}</p>
+        </div>
       </div>
 
       <div className="space-y-3">

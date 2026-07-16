@@ -13,8 +13,9 @@
  * -- command validation/dispatch logic itself lives in
  * lib/practice-lab/5250-simulator.ts, not here. PR #138 added
  * `blockedActionCommands` for the troubleshooting exercises' safety
- * messaging. PR #139 adds the SQL simulator fields -- validation logic
- * lives in lib/practice-lab/sql-simulator.ts, not here.
+ * messaging. PR #139 added the SQL simulator fields -- validation logic
+ * lives in lib/practice-lab/sql-simulator.ts, not here. PR #141 adds
+ * `knownColumns` for the invalid-table/column troubleshooting exercise.
  */
 
 export type PracticeLabType = '5250' | 'sql'
@@ -81,6 +82,8 @@ export interface PracticeLabSqlCheck {
   requiredClause?: string
   /** A concrete example shown in the targeted missing-clause message, e.g. "WHERE CITY = 'CHICAGO'". Required if requiredClause is set. */
   requiredClauseExample?: string
+  /** Opt-in column-name validation for plain (non-aliased, non-function) SELECT list entries, e.g. ['CUSTNO', 'NAME', 'CITY', 'STATUS'] -- an unrecognized column gets a targeted "Column X was not found" message instead of the generic near-miss fallback. Omit for exercises that don't need this (e.g. JOIN, where aliasing makes plain column-name checks unreliable). */
+  knownColumns?: string[]
 }
 
 export interface PracticeLabExercise {
