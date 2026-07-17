@@ -409,6 +409,58 @@ export default async function LandingPage() {
           </div>
         </section>
 
+        {/* -- Three ways to learn (PR #154 -- Deep Dives as third pillar) -- */}
+        <section className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-20">
+          <div className="max-w-2xl mx-auto text-center mb-10">
+            <Badge variant="neutral" className="mb-4">
+              Three ways to learn
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Choose your path</h2>
+            <p className="text-slate-600 leading-relaxed">
+              Whether you&apos;re starting from zero or need a deep answer on one specific topic,
+              iRPGenie has a path for you.
+            </p>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-6">
+            <Card className="p-6">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <GraduationCap className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">Foundations</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                Learn IBM&nbsp;i step-by-step with a guided, beginner-friendly lesson path.
+              </p>
+              <Link href="/learn" className="text-sm font-medium text-blue-700 hover:underline">
+                Start learning &rarr;
+              </Link>
+            </Card>
+            <Card className="p-6">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                <Award className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">Advanced</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                Build professional skills with deeper lessons later in the same guided path.
+              </p>
+              <Link href="/learn" className="text-sm font-medium text-blue-700 hover:underline">
+                Explore the path &rarr;
+              </Link>
+            </Card>
+            <Card className="p-6">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
+                <Layers className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">Deep Dives</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4">
+                Explore standalone, expert-level topic guides -- no fixed order required.
+              </p>
+              <Link href="/deep-dives" className="text-sm font-medium text-blue-700 hover:underline">
+                Browse Deep Dives &rarr;
+              </Link>
+            </Card>
+          </div>
+        </section>
+
         {/* -- IBM i Fundamentals highlight -------------------------------- */}
         <section className="border-t border-slate-100 bg-slate-50 py-20 sm:py-24">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">

@@ -23,6 +23,13 @@ import { getPublishedLessons } from '@/lib/lessons'
  * PR #144 adds the Privacy/Terms/Disclaimer pages, PR #148 adds Contact --
  * genuinely public, indexable trust/contact content, unlike the
  * auth/account-specific pages above.
+ *
+ * PR #154 adds /deep-dives (the listing page only). Individual Deep Dive
+ * detail routes are deliberately not added here -- no Deep Dive detail
+ * pages exist yet (every catalog entry is `status: 'planned'`; see
+ * planning/DEEP_DIVES_STRATEGY.md). A future PR that adds real,
+ * `published` Deep Dive detail pages should add their URLs here the same
+ * way lessonRoutes below only ever includes Published lessons.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lessons = await getPublishedLessons()
@@ -31,6 +38,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/`, changeFrequency: 'weekly', priority: 1 },
     { url: `${SITE_URL}/learn`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/learn/ibm-i-fundamentals`, changeFrequency: 'weekly', priority: 0.9 },
+    { url: `${SITE_URL}/deep-dives`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/practice`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/practice-lab`, changeFrequency: 'monthly', priority: 0.6 },
     { url: `${SITE_URL}/practice-lab/5250`, changeFrequency: 'monthly', priority: 0.5 },
