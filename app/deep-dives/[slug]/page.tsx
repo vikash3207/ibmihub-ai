@@ -49,6 +49,8 @@ export function generateStaticParams() {
 const SEO_DESCRIPTIONS: Partial<Record<string, string>> = {
   'sql-on-ibm-i':
     'Learn SQL on IBM i with practical Db2 for i examples covering schemas, tables, joins, CTEs, SQLCODE, catalog queries, constraints, indexes, views, authority, and production practices.',
+  'embedded-sql-in-rpgle':
+    'Learn embedded SQL in RPGLE on IBM i with practical SQLRPGLE examples covering host variables, indicator variables, SELECT INTO, cursor loops, SQLCODE, commitment control, dynamic SQL, and production practices.',
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
