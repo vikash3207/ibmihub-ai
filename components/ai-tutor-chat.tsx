@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { BookOpen } from 'lucide-react'
 import { useAiTutorPanel } from '@/components/ai-tutor/ai-tutor-panel-provider'
 import { ChatThread } from '@/components/ai-tutor/chat-thread'
 
@@ -62,36 +61,29 @@ export function AiTutorChat({ starterPrompts, initialLessonContext }: Props) {
   }, [initialLessonContext?.slug])
 
   const loginHref = '/auth/login?next=%2Fai-tutor'
+  const visibleContextLabel = context.sourceType !== 'general' ? contextLabel : null
 
   return (
-    <div className="space-y-4">
-      {contextLabel && context.sourceType !== 'general' && (
-        <div className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
-          <BookOpen className="h-3 w-3" aria-hidden="true" />
-          {contextLabel}
-        </div>
-      )}
-
-      <ChatThread
-        messages={messages}
-        input={input}
-        onInputChange={setInput}
-        onSubmit={(e) => {
-          e.preventDefault()
-          void submitMessage(input)
-        }}
-        isStreaming={isStreaming}
-        error={error}
-        errorContactHref={errorContactHref}
-        limitReached={limitReached}
-        feedback={feedback}
-        onFeedback={handleFeedback}
-        sources={sources}
-        starterPrompts={starterPrompts}
-        onStarterPromptClick={setInput}
-        requiresLogin={requiresLogin}
-        loginHref={loginHref}
-      />
-    </div>
+    <ChatThread
+      messages={messages}
+      input={input}
+      onInputChange={setInput}
+      onSubmit={(e) => {
+        e.preventDefault()
+        void submitMessage(input)
+      }}
+      isStreaming={isStreaming}
+      error={error}
+      errorContactHref={errorContactHref}
+      limitReached={limitReached}
+      feedback={feedback}
+      onFeedback={handleFeedback}
+      sources={sources}
+      starterPrompts={starterPrompts}
+      onStarterPromptClick={setInput}
+      requiresLogin={requiresLogin}
+      loginHref={loginHref}
+      contextLabel={visibleContextLabel}
+    />
   )
 }

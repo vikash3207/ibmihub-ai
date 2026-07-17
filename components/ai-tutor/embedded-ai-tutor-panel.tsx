@@ -2,9 +2,10 @@
 
 import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
-import { X, Sparkles, RotateCcw } from 'lucide-react'
+import { X, RotateCcw } from 'lucide-react'
 import { useAiTutorPanel } from './ai-tutor-panel-provider'
 import { ChatMessageList, ChatComposer } from './chat-thread'
+import { AiTutorHeader } from './chat-header'
 import { buttonVariants } from '@/components/ui/button'
 import Link from 'next/link'
 
@@ -84,37 +85,34 @@ export function EmbeddedAiTutorPanel() {
       aria-label="AI Tutor"
       className="fixed inset-0 z-[60] flex flex-col bg-white lg:inset-y-0 lg:left-auto lg:right-0 lg:w-[400px] lg:border-l lg:border-slate-200 lg:shadow-2xl xl:shadow-none"
     >
-      <div className="flex shrink-0 items-start justify-between gap-3 border-b border-slate-100 px-4 py-3">
-        <div className="min-w-0">
-          <p className="flex items-center gap-1.5 text-sm font-semibold text-cyan-900">
-            <Sparkles className="h-4 w-4 shrink-0" aria-hidden="true" />
-            AI Tutor
-          </p>
-          {contextLabel && <p className="mt-0.5 truncate text-xs text-slate-500">{contextLabel}</p>}
-        </div>
-        <div className="flex shrink-0 items-center gap-1">
-          {messages.length > 0 && (
+      <AiTutorHeader
+        contextLabel={contextLabel}
+        compact
+        actions={
+          <>
+            {messages.length > 0 && (
+              <button
+                type="button"
+                onClick={newChat}
+                title="Start a new chat"
+                aria-label="Start a new chat"
+                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
+              >
+                <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              </button>
+            )}
             <button
               type="button"
-              onClick={newChat}
-              title="Start a new chat"
-              aria-label="Start a new chat"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+              onClick={closePanel}
+              title="Close"
+              aria-label="Close AI Tutor"
+              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
             >
-              <RotateCcw className="h-4 w-4" aria-hidden="true" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
-          )}
-          <button
-            type="button"
-            onClick={closePanel}
-            title="Close"
-            aria-label="Close AI Tutor"
-            className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700"
-          >
-            <X className="h-4 w-4" aria-hidden="true" />
-          </button>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {requiresLogin ? (
         <div className="flex flex-1 items-center justify-center p-6">
