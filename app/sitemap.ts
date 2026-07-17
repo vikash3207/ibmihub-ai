@@ -1,6 +1,8 @@
 import type { MetadataRoute } from 'next'
 import { SITE_URL } from '@/lib/config'
 import { getPublishedLessons } from '@/lib/lessons'
+import { DEEP_DIVES } from '@/content/deep-dives/catalog'
+import { isDeepDiveAvailable } from '@/lib/deep-dives'
 
 /**
  * Generated sitemap (Spec-adjacent, PR #143 -- see
@@ -24,12 +26,13 @@ import { getPublishedLessons } from '@/lib/lessons'
  * genuinely public, indexable trust/contact content, unlike the
  * auth/account-specific pages above.
  *
- * PR #154 adds /deep-dives (the listing page only). Individual Deep Dive
- * detail routes are deliberately not added here -- no Deep Dive detail
- * pages exist yet (every catalog entry is `status: 'planned'`; see
- * planning/DEEP_DIVES_STRATEGY.md). A future PR that adds real,
- * `published` Deep Dive detail pages should add their URLs here the same
- * way lessonRoutes below only ever includes Published lessons.
+ * PR #154 added /deep-dives (the listing page only), with no detail routes
+ * since every catalog entry was `status: 'planned'`. PR #156 adds the first
+ * published Deep Dive detail page, so deepDiveRoutes below now includes
+ * every `published` DEEP_DIVES entry, filtered with isDeepDiveAvailable()
+ * -- the exact same function app/deep-dives/[slug]/page.tsx uses to decide
+ * what's linkable, so a `planned`/`review-ready` entry can never appear
+ * here, the same guarantee lessonRoutes already gives Published lessons.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const lessons = await getPublishedLessons()
@@ -56,5 +59,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...lessonRoutes]
+  const deepDiveRoutes: MetadataRoute.Sitemap = DEEP_DIVES.filter(isDeepDiveAvailable).map((deepDive) => ({
+    url: `${SITE_URL}/deep-dives/${deepDive.slug}`,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...lessonRoutes, ...deepDiveRoutes]
 }
