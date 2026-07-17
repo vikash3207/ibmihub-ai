@@ -1,25 +1,63 @@
 /**
  * Deep Dives catalog (PR #154). Every entry here is `status: 'planned'` --
  * this PR ships the framework, taxonomy, and listing page, not the
- * content itself (see planning/DEEP_DIVES_STRATEGY.md for why these 16
- * topics were chosen, and planning/DEEP_DIVE_TEMPLATE.md for the
- * structure each one will follow once written).
+ * content itself (see planning/DEEP_DIVES_STRATEGY.md for why these
+ * topics were chosen and how they're ordered, and
+ * planning/DEEP_DIVE_TEMPLATE.md for the structure each one will follow
+ * once written).
  *
- * Do not add `estimatedReadTime` to a `planned` entry -- there is no real
- * content yet to estimate a reading time from, and showing one would
- * imply content exists when it doesn't (see lib/deep-dives.ts).
+ * Order matters here: it's the Product-Owner-approved priority order for
+ * which topics get written first (see DEEP_DIVES_STRATEGY.md), not just
+ * a data listing -- keep new entries appended in priority order, and
+ * check with the Product Owner before reordering existing ones.
+ *
+ * No `difficulty` field on any entry (Product Owner clarification): Deep
+ * Dives are professional-grade by definition, so there is nothing to
+ * label. Do not add `estimatedReadTime` to a `planned` entry either --
+ * there is no real content yet to estimate a reading time from, and
+ * showing one would imply content exists when it doesn't (see
+ * lib/deep-dives.ts).
  */
 
 import type { DeepDive } from '@/lib/deep-dives'
 
 export const DEEP_DIVES: DeepDive[] = [
   {
+    slug: 'sql-on-ibm-i',
+    title: 'SQL on IBM i',
+    description:
+      'A practical overview of using SQL on IBM i -- Db2 for i basics, where SQL fits alongside native RPGLE, and how it shows up in day-to-day development work.',
+    category: 'sql-db2',
+    status: 'planned',
+    tags: ['sql', 'db2-for-i'],
+    relatedDeepDiveSlugs: ['embedded-sql-in-rpgle'],
+  },
+  {
+    slug: 'embedded-sql-in-rpgle',
+    title: 'Embedded SQL in RPGLE',
+    description:
+      'Writing embedded SQL statements directly inside RPGLE programs -- host variables, EXEC SQL blocks, and how embedded SQL differs from a stored procedure call or native I/O.',
+    category: 'sql-db2',
+    status: 'planned',
+    tags: ['sql', 'rpgle', 'embedded-sql'],
+    relatedDeepDiveSlugs: ['sql-on-ibm-i', 'sql-cursors-on-ibm-i'],
+  },
+  {
+    slug: 'sql-cursors-on-ibm-i',
+    title: 'SQL Cursors on IBM i',
+    description:
+      'Declaring, opening, and fetching from SQL cursors in RPGLE -- including scrollable cursors and reliable patterns for checking SQLCODE/SQLSTATE after each fetch.',
+    category: 'sql-db2',
+    status: 'planned',
+    tags: ['sql', 'cursors', 'sqlrpgle'],
+    relatedDeepDiveSlugs: ['embedded-sql-in-rpgle', 'sql-error-handling-with-sqlcode-and-sqlstate'],
+  },
+  {
     slug: 'stored-procedures-on-ibm-i',
     title: 'Stored Procedures on IBM i',
     description:
       'How SQL and external (RPGLE/CLLE) stored procedures work on Db2 for i, when to reach for one, and how they fit into a real application.',
     category: 'sql-db2',
-    difficulty: 'professional',
     status: 'planned',
     tags: ['sql', 'stored-procedures', 'db2-for-i'],
   },
@@ -29,10 +67,47 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'Before/after triggers on physical files: what they can and can’t safely do, common pitfalls, and how they interact with commitment control.',
     category: 'sql-db2',
-    difficulty: 'professional',
     status: 'planned',
     tags: ['sql', 'triggers', 'db2-for-i'],
     relatedDeepDiveSlugs: ['commitment-control-deep-dive'],
+  },
+  {
+    slug: 'sql-error-handling-with-sqlcode-and-sqlstate',
+    title: 'SQL Error Handling with SQLCODE and SQLSTATE',
+    description:
+      'Reading and responding to SQLCODE/SQLSTATE in SQLRPGLE -- the codes that come up most in practice, and reliable checking patterns that don’t silently swallow errors.',
+    category: 'sql-db2',
+    status: 'planned',
+    tags: ['sql', 'sqlcode', 'sqlstate', 'error-handling'],
+    relatedDeepDiveSlugs: ['sql-cursors-on-ibm-i'],
+  },
+  {
+    slug: 'native-io-vs-sql',
+    title: 'Native I/O vs SQL Decision Guide',
+    description:
+      'A practical decision guide for choosing native RPGLE file I/O versus embedded SQL for a given piece of logic -- performance, readability, and maintenance tradeoffs.',
+    category: 'rpgle',
+    status: 'planned',
+    tags: ['rpgle', 'sql', 'performance'],
+  },
+  {
+    slug: 'commitment-control-deep-dive',
+    title: 'Commitment Control with SQL and RPGLE',
+    description:
+      'Journaling-backed commitment control end to end, from both SQL and native RPGLE -- commit/rollback boundaries, isolation levels, and what happens when a job ends mid-transaction.',
+    category: 'journaling-commitment-control',
+    status: 'planned',
+    tags: ['commitment-control', 'journaling', 'transactions', 'sql'],
+    relatedDeepDiveSlugs: ['journaling-in-real-applications'],
+  },
+  {
+    slug: 'sql-performance-basics-on-ibm-i',
+    title: 'SQL Performance Basics on IBM i',
+    description:
+      'The SQL performance fundamentals every IBM i developer should know -- indexes, access plans, and the habits that keep queries fast as data grows.',
+    category: 'sql-db2',
+    status: 'planned',
+    tags: ['sql', 'performance', 'db2-for-i'],
   },
   {
     slug: 'service-programs-and-binding-directories',
@@ -40,7 +115,6 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'Building reusable *SRVPGM modules, exporting procedures with a binder source, and organizing binding directories for a real multi-program application.',
     category: 'ile-service-programs',
-    difficulty: 'professional',
     status: 'planned',
     tags: ['ile', 'service-programs', 'binding-directories'],
     relatedDeepDiveSlugs: ['activation-groups-deep-dive'],
@@ -51,32 +125,9 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'What activation groups actually control (scoping, resource cleanup, RCLACTGRP behavior), and why the wrong choice causes hard-to-diagnose production bugs.',
     category: 'ile-service-programs',
-    difficulty: 'expert',
     status: 'planned',
     tags: ['ile', 'activation-groups'],
     relatedDeepDiveSlugs: ['service-programs-and-binding-directories'],
-  },
-  {
-    slug: 'commitment-control-deep-dive',
-    title: 'Commitment Control',
-    description:
-      'Journaling-backed commitment control end to end: starting it, commit/rollback boundaries, isolation levels, and what happens when a job ends mid-transaction.',
-    category: 'journaling-commitment-control',
-    difficulty: 'professional',
-    status: 'planned',
-    tags: ['commitment-control', 'journaling', 'transactions'],
-    relatedDeepDiveSlugs: ['journaling-in-real-applications'],
-  },
-  {
-    slug: 'journaling-in-real-applications',
-    title: 'Journaling in Real Applications',
-    description:
-      'Beyond "turn on journaling": receiver management, remote journals, and using journal entries for real recovery and auditing scenarios.',
-    category: 'journaling-commitment-control',
-    difficulty: 'professional',
-    status: 'planned',
-    tags: ['journaling', 'auditing', 'recovery'],
-    relatedDeepDiveSlugs: ['commitment-control-deep-dive'],
   },
   {
     slug: 'record-locking-in-rpgle',
@@ -84,40 +135,19 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'How UPDAT/DLTE locking actually behaves under the hood, diagnosing lock waits and RNX/RNQ escapes, and designing for concurrent access without deadlocking.',
     category: 'rpgle',
-    difficulty: 'intermediate',
     status: 'planned',
     tags: ['rpgle', 'record-locking', 'concurrency'],
     relatedLessonSlugs: ['chain-for-keyed-access'],
   },
   {
-    slug: 'native-io-vs-sql',
-    title: 'Native I/O vs SQL',
+    slug: 'journaling-in-real-applications',
+    title: 'Journaling in Real Applications',
     description:
-      'A practical decision guide for choosing native RPGLE file I/O versus embedded SQL for a given piece of logic -- performance, readability, and maintenance tradeoffs.',
-    category: 'rpgle',
-    difficulty: 'intermediate',
+      'Beyond "turn on journaling": receiver management, remote journals, and using journal entries for real recovery and auditing scenarios.',
+    category: 'journaling-commitment-control',
     status: 'planned',
-    tags: ['rpgle', 'sql', 'performance'],
-  },
-  {
-    slug: 'sqlrpgle-cursor-patterns',
-    title: 'SQLRPGLE Cursor Patterns',
-    description:
-      'Reusable patterns for declaring, opening, and fetching from cursors in SQLRPGLE -- including scrollable cursors and common SQLCODE/SQLSTATE handling mistakes.',
-    category: 'sql-db2',
-    difficulty: 'professional',
-    status: 'planned',
-    tags: ['sqlrpgle', 'sql', 'cursors'],
-  },
-  {
-    slug: 'subfile-design-patterns',
-    title: 'Subfile Design Patterns',
-    description:
-      'Load-all vs. page-at-a-time subfiles, multi-record-format screens, and structuring RPGLE code so a subfile-heavy program stays maintainable.',
-    category: 'rpgle',
-    difficulty: 'professional',
-    status: 'planned',
-    tags: ['rpgle', 'subfiles', 'display-files'],
+    tags: ['journaling', 'auditing', 'recovery'],
+    relatedDeepDiveSlugs: ['commitment-control-deep-dive'],
   },
   {
     slug: 'job-log-and-msgw-troubleshooting',
@@ -125,9 +155,17 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'A practical checklist for reading a job log under pressure, diagnosing a job stuck in MSGW, and the commands that actually help you resolve it.',
     category: 'operations-troubleshooting',
-    difficulty: 'intermediate',
     status: 'planned',
     tags: ['job-logs', 'msgw', 'troubleshooting'],
+  },
+  {
+    slug: 'subfile-design-patterns',
+    title: 'Subfile Design Patterns',
+    description:
+      'Load-all vs. page-at-a-time subfiles, multi-record-format screens, and structuring RPGLE code so a subfile-heavy program stays maintainable.',
+    category: 'rpgle',
+    status: 'planned',
+    tags: ['rpgle', 'subfiles', 'display-files'],
   },
   {
     slug: 'data-queues-deep-dive',
@@ -135,7 +173,6 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'Using *DTAQ objects for inter-job communication -- keyed vs. FIFO queues, blocking receives, and where data queues fit versus a database table.',
     category: 'apis-integration',
-    difficulty: 'intermediate',
     status: 'planned',
     tags: ['data-queues', 'ipc'],
   },
@@ -145,7 +182,6 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'How subsystem descriptions, job queues, and routing entries actually control where and how a submitted job runs, with real troubleshooting scenarios.',
     category: 'operations-troubleshooting',
-    difficulty: 'professional',
     status: 'planned',
     tags: ['subsystems', 'job-queues', 'operations'],
   },
@@ -155,7 +191,6 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'Object/data authority in practice, how adopted authority (USRPRF(*OWNER)) actually propagates through a call stack, and where it commonly goes wrong.',
     category: 'security',
-    difficulty: 'professional',
     status: 'planned',
     tags: ['security', 'adopted-authority', 'authority'],
     relatedLessonSlugs: ['authorities-and-object-access-basics', 'adopted-authority-basics'],
@@ -166,7 +201,6 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'Working with the Integrated File System from RPGLE and CLLE -- stream file APIs, path handling, and common integration scenarios (CSV/JSON exchange, uploads).',
     category: 'apis-integration',
-    difficulty: 'intermediate',
     status: 'planned',
     tags: ['ifs', 'apis', 'integration'],
   },
@@ -176,7 +210,6 @@ export const DEEP_DIVES: DeepDive[] = [
     description:
       'Exposing IBM i logic to the outside world and consuming external services from IBM i -- REST basics, common gateway patterns, and where each fits.',
     category: 'apis-integration',
-    difficulty: 'professional',
     status: 'planned',
     tags: ['apis', 'integration', 'rest'],
   },

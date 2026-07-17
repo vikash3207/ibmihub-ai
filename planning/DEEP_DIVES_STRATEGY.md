@@ -23,6 +23,8 @@ Deep Dives are:
 - eventually linked contextually from related lessons (once detail pages exist)
 - written for working IBM i/RPGLE/SQL developers, not absolute beginners
 
+**Deep Dives are professional-grade by default (Product Owner clarification, PR #154 follow-up).** There is no difficulty tier to choose between -- every Deep Dive, regardless of topic, targets the same bar: a working IBM i developer who already knows the basics and wants real depth. No difficulty levels are needed, and none should be added back (no `difficulty` field exists on `DeepDive` in `lib/deep-dives.ts`, and no difficulty badge is shown on `/deep-dives`). Each topic should go deep enough for real-world IBM i developers -- that's the one bar every Deep Dive is held to, not a range of bars to pick from.
+
 ## Topic selection criteria
 
 A candidate topic is a good Deep Dive if it's **one or more** of:
@@ -34,28 +36,34 @@ A candidate topic is a good Deep Dive if it's **one or more** of:
 - **Cuts across multiple tracks.** Topics that touch RPGLE, SQL, and CL all at once (e.g. "Native I/O vs SQL", "APIs and External Integration") don't belong cleanly inside any single existing track.
 - **Has debugging/performance/security implications** worth a dedicated, practical checklist rather than a paragraph inside a broader lesson.
 
-## The initial catalog (16 topics)
+## The initial catalog (20 topics, priority order)
 
-Selected using the criteria above, covering the categories in `lib/deep-dive-categories.ts`:
+Selected using the criteria above, covering the categories in `lib/deep-dive-categories.ts`. Order is the Product-Owner-approved priority for which topics get written first (SQL-heavy topics first, since SQL on IBM i is the most immediate real-world need) -- see `content/deep-dives/catalog.ts`, where entries are kept in this same order. No Difficulty column: see the "professional-grade by default" note above.
 
-| Topic | Category | Difficulty | Why it qualifies |
+| # | Topic | Category | Why it qualifies |
 |---|---|---|---|
-| Stored Procedures on IBM i | SQL / Db2 for i | Professional | Real production topic, cuts across SQL and RPGLE |
-| Database Triggers on IBM i | SQL / Db2 for i | Professional | Commonly confusing, commitment-control interactions |
-| Service Programs and Binding Directories | ILE & Service Programs | Professional | Real production topic, interview-heavy |
-| Activation Groups | ILE & Service Programs | Expert | Commonly confusing, hard-to-diagnose production bugs |
-| Commitment Control | Journaling & Commitment Control | Professional | Real production topic, needs deeper examples |
-| Journaling in Real Applications | Journaling & Commitment Control | Professional | Needs deeper examples than a beginner lesson |
-| Record Locking in RPGLE | RPGLE | Intermediate | Commonly confusing, debugging implications |
-| Native I/O vs SQL | RPGLE | Intermediate | Cuts across tracks, real decision developers face |
-| SQLRPGLE Cursor Patterns | SQL / Db2 for i | Professional | Needs deeper examples, real production topic |
-| Subfile Design Patterns | RPGLE | Professional | Needs deeper examples, real production topic |
-| Job Log and MSGW Troubleshooting | Operations & Troubleshooting | Intermediate | Real production topic, interview-heavy |
-| Data Queues | APIs & Integration | Intermediate | Cuts across tracks, real production topic |
-| Job Queues and Subsystems | Operations & Troubleshooting | Professional | Real production topic, debugging implications |
-| Authority and Adopted Authority | Security | Professional | Commonly confusing, security implications |
-| IFS for Developers | APIs & Integration | Intermediate | Cuts across tracks, real production topic |
-| APIs and External Integration on IBM i | APIs & Integration | Professional | Cuts across tracks, modernization-relevant |
+| 1 | SQL on IBM i | SQL / Db2 for i | Foundational, real production topic, highest-priority per Product Owner |
+| 2 | Embedded SQL in RPGLE | SQL / Db2 for i | Cuts across SQL and RPGLE, real production topic |
+| 3 | SQL Cursors on IBM i | SQL / Db2 for i | Needs deeper examples, commonly confusing (scrollable cursors, fetch loops) |
+| 4 | Stored Procedures on IBM i | SQL / Db2 for i | Real production topic, cuts across SQL and RPGLE |
+| 5 | Database Triggers on IBM i | SQL / Db2 for i | Commonly confusing, commitment-control interactions |
+| 6 | SQL Error Handling with SQLCODE and SQLSTATE | SQL / Db2 for i | Commonly confusing, debugging implications, needed by every other SQL topic |
+| 7 | Native I/O vs SQL Decision Guide | RPGLE | Cuts across tracks, real decision developers face |
+| 8 | Commitment Control with SQL and RPGLE | Journaling & Commitment Control | Real production topic, needs deeper examples |
+| 9 | SQL Performance Basics on IBM i | SQL / Db2 for i | Real production topic, performance implications |
+| 10 | Service Programs and Binding Directories | ILE & Service Programs | Real production topic, interview-heavy |
+| 11 | Activation Groups | ILE & Service Programs | Commonly confusing, hard-to-diagnose production bugs |
+| 12 | Record Locking in RPGLE | RPGLE | Commonly confusing, debugging implications |
+| 13 | Journaling in Real Applications | Journaling & Commitment Control | Needs deeper examples than a beginner lesson |
+| 14 | Job Log and MSGW Troubleshooting | Operations & Troubleshooting | Real production topic, interview-heavy |
+| 15 | Subfile Design Patterns | RPGLE | Needs deeper examples, real production topic |
+| 16 | Data Queues | APIs & Integration | Cuts across tracks, real production topic |
+| 17 | Job Queues and Subsystems | Operations & Troubleshooting | Real production topic, debugging implications |
+| 18 | Authority and Adopted Authority | Security | Commonly confusing, security implications |
+| 19 | IFS for Developers | APIs & Integration | Cuts across tracks, real production topic |
+| 20 | APIs and External Integration on IBM i | APIs & Integration | Cuts across tracks, modernization-relevant |
+
+Items 1, 2, 6, and 9 (SQL on IBM i, Embedded SQL in RPGLE, SQL Error Handling with SQLCODE and SQLSTATE, SQL Performance Basics on IBM i) are new additions to the original 16-topic catalog, added per Product Owner clarification to give SQL its own dedicated on-ramp before the more specialized SQL topics (cursors, stored procedures, triggers). Three existing topics were renamed for clarity: "SQLRPGLE Cursor Patterns" → "SQL Cursors on IBM i" (new slug `sql-cursors-on-ibm-i`), "Native I/O vs SQL" → "Native I/O vs SQL Decision Guide", and "Commitment Control" → "Commitment Control with SQL and RPGLE".
 
 ## Content sequencing (not decided by this PR)
 

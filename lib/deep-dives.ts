@@ -19,8 +19,6 @@
 
 import type { DeepDiveCategoryId } from './deep-dive-categories'
 
-export type DeepDiveDifficulty = 'intermediate' | 'professional' | 'expert'
-
 /**
  * `planned` -- announced on the listing page as "Coming soon", not
  * clickable, no real content exists yet.
@@ -32,13 +30,21 @@ export type DeepDiveDifficulty = 'intermediate' | 'professional' | 'expert'
  */
 export type DeepDiveStatus = 'planned' | 'review-ready' | 'published'
 
+/**
+ * Deliberately no `difficulty` field (Product Owner clarification,
+ * PR #154 follow-up): Deep Dives are professional-grade by definition --
+ * every one of them, regardless of topic, is written for a working IBM i
+ * developer who already knows the basics. A per-topic
+ * intermediate/professional/expert label would suggest some Deep Dives
+ * are less advanced than others, which contradicts that positioning and
+ * risks confusing readers about what tier of guide they're getting.
+ */
 export interface DeepDive {
   slug: string
   title: string
   description: string
   category: DeepDiveCategoryId
   subcategory?: string
-  difficulty: DeepDiveDifficulty
   /** Minutes; omitted for `planned`/`review-ready` entries -- there is no real content yet to estimate a reading time from. */
   estimatedReadTime?: number
   status: DeepDiveStatus

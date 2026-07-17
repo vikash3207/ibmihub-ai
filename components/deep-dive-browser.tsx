@@ -2,17 +2,11 @@
 
 import { useMemo, useState } from 'react'
 import { Search, X, Clock } from 'lucide-react'
-import type { DeepDive, DeepDiveDifficulty } from '@/lib/deep-dives'
+import type { DeepDive } from '@/lib/deep-dives'
 import { DEEP_DIVE_CATEGORIES, DEEP_DIVE_ACCENT_CLASSES, getDeepDiveAccent, type DeepDiveCategoryId } from '@/lib/deep-dive-categories'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'
 import { cn } from '@/lib/utils'
-
-const DIFFICULTY_LABEL: Record<DeepDiveDifficulty, string> = {
-  intermediate: 'Intermediate',
-  professional: 'Professional',
-  expert: 'Expert',
-}
 
 function matchesQuery(deepDive: DeepDive, query: string): boolean {
   const haystack = [deepDive.title, deepDive.description, ...deepDive.tags].join(' ').toLowerCase()
@@ -150,8 +144,7 @@ function DeepDiveCard({ deepDive }: { deepDive: DeepDive }) {
         <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', accentClasses.badgeBg, accentClasses.badgeText)}>
           {categoryLabel}
         </span>
-        <Badge variant={isAvailable ? 'success' : 'neutral'}>{isAvailable ? 'Published' : 'Coming soon'}</Badge>
-        <Badge variant="neutral">{DIFFICULTY_LABEL[deepDive.difficulty]}</Badge>
+        <Badge variant={isAvailable ? 'success' : 'neutral'}>{isAvailable ? 'Available' : 'Coming soon'}</Badge>
       </div>
 
       <h3 className="font-semibold text-slate-900">{deepDive.title}</h3>
