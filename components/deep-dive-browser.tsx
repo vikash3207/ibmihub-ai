@@ -1,7 +1,8 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Search, X, Clock } from 'lucide-react'
+import Link from 'next/link'
+import { Search, X, Clock, ArrowRight } from 'lucide-react'
 import type { DeepDive } from '@/lib/deep-dives'
 import { DEEP_DIVE_CATEGORIES, DEEP_DIVE_ACCENT_CLASSES, getDeepDiveAccent, type DeepDiveCategoryId } from '@/lib/deep-dive-categories'
 import { Badge } from '@/components/ui/badge'
@@ -136,10 +137,8 @@ function DeepDiveCard({ deepDive }: { deepDive: DeepDive }) {
   const isAvailable = deepDive.status === 'published'
   const categoryLabel = DEEP_DIVE_CATEGORIES.find((c) => c.id === deepDive.category)?.label ?? deepDive.category
 
-  return (
-    <Card
-      className={cn('flex h-full flex-col p-5 border-t-4', accentClasses.topBorder, !isAvailable && 'opacity-75')}
-    >
+  const cardContent = (
+    <>
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <span className={cn('rounded-full px-2 py-0.5 text-xs font-medium', accentClasses.badgeBg, accentClasses.badgeText)}>
           {categoryLabel}
@@ -163,6 +162,34 @@ function DeepDiveCard({ deepDive }: { deepDive: DeepDive }) {
           </span>
         ))}
       </div>
-    </Card>
+
+      {isAvailable && (
+        <p className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-600">
+          Read the Deep Dive
+          <ArrowRight className="h-3 w-3" aria-hidden="true" />
+        </p>
+      )}
+    </>
+  )
+
+  // Available Deep Dives are real, clickable content; planned ones stay
+  // plain, non-interactive divs -- the same disabled-link convention
+  // components/practice-lab/exercise-list.tsx uses for "Coming next" items.
+  if (isAvailable) {
+    return (
+      <Link
+        href={`/deep-dives/${deepDive.slug}`}
+        className={cn(
+          'flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm border-t-4 transition-colors hover:border-blue-200 hover:shadow-md',
+          accentClasses.topBorder
+        )}
+      >
+        {cardContent}
+      </Link>
+    )
+  }
+
+  return (
+    <Card className={cn('flex h-full flex-col p-5 border-t-4 opacity-75', accentClasses.topBorder)}>{cardContent}</Card>
   )
 }
