@@ -14,11 +14,15 @@ interface NavLinkDef {
 const LOGGED_IN_LINKS: NavLinkDef[] = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/learn', label: 'Learning Center' },
+  { href: '/deep-dives', label: 'Deep Dives' },
   { href: '/practice', label: 'Practice' },
   { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai' },
 ]
 
-const LOGGED_OUT_LINKS: NavLinkDef[] = [{ href: '/learn', label: 'Learning Center' }]
+const LOGGED_OUT_LINKS: NavLinkDef[] = [
+  { href: '/learn', label: 'Learning Center' },
+  { href: '/deep-dives', label: 'Deep Dives' },
+]
 
 /**
  * Client-side top-nav links (PR #147 -- Navigation Responsiveness + Loading
