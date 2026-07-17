@@ -83,6 +83,10 @@ interface DeepDiveAccentClasses {
   badgeBg: string
   badgeText: string
   topBorder: string
+  /** Subtle header background wash, edge to edge behind the Deep Dive title block (PR #158). */
+  headerWash: string
+  /** Category-colored border on the category badge pill (PR #158). */
+  badgeBorder: string
 }
 
 /**
@@ -93,11 +97,53 @@ interface DeepDiveAccentClasses {
  * components/lesson-category-accent.ts (PR #146).
  */
 export const DEEP_DIVE_ACCENT_CLASSES: Record<DeepDiveAccent, DeepDiveAccentClasses> = {
-  indigo: { badgeBg: 'bg-indigo-50', badgeText: 'text-indigo-700', topBorder: 'border-t-indigo-500' },
-  teal: { badgeBg: 'bg-teal-50', badgeText: 'text-teal-700', topBorder: 'border-t-teal-500' },
-  amber: { badgeBg: 'bg-amber-50', badgeText: 'text-amber-700', topBorder: 'border-t-amber-500' },
-  rose: { badgeBg: 'bg-rose-50', badgeText: 'text-rose-700', topBorder: 'border-t-rose-500' },
-  emerald: { badgeBg: 'bg-emerald-50', badgeText: 'text-emerald-700', topBorder: 'border-t-emerald-500' },
-  orange: { badgeBg: 'bg-orange-50', badgeText: 'text-orange-700', topBorder: 'border-t-orange-500' },
-  slate: { badgeBg: 'bg-slate-100', badgeText: 'text-slate-700', topBorder: 'border-t-slate-400' },
+  indigo: {
+    badgeBg: 'bg-indigo-50',
+    badgeText: 'text-indigo-700',
+    topBorder: 'border-t-indigo-500',
+    headerWash: 'bg-gradient-to-br from-indigo-50 via-white to-white',
+    badgeBorder: 'border-indigo-200',
+  },
+  teal: {
+    badgeBg: 'bg-teal-50',
+    badgeText: 'text-teal-700',
+    topBorder: 'border-t-teal-500',
+    headerWash: 'bg-gradient-to-br from-teal-50 via-white to-white',
+    badgeBorder: 'border-teal-200',
+  },
+  amber: {
+    badgeBg: 'bg-amber-50',
+    badgeText: 'text-amber-700',
+    topBorder: 'border-t-amber-500',
+    headerWash: 'bg-gradient-to-br from-amber-50 via-white to-white',
+    badgeBorder: 'border-amber-200',
+  },
+  rose: {
+    badgeBg: 'bg-rose-50',
+    badgeText: 'text-rose-700',
+    topBorder: 'border-t-rose-500',
+    headerWash: 'bg-gradient-to-br from-rose-50 via-white to-white',
+    badgeBorder: 'border-rose-200',
+  },
+  emerald: {
+    badgeBg: 'bg-emerald-50',
+    badgeText: 'text-emerald-700',
+    topBorder: 'border-t-emerald-500',
+    headerWash: 'bg-gradient-to-br from-emerald-50 via-white to-white',
+    badgeBorder: 'border-emerald-200',
+  },
+  orange: {
+    badgeBg: 'bg-orange-50',
+    badgeText: 'text-orange-700',
+    topBorder: 'border-t-orange-500',
+    headerWash: 'bg-gradient-to-br from-orange-50 via-white to-white',
+    badgeBorder: 'border-orange-200',
+  },
+  slate: {
+    badgeBg: 'bg-slate-100',
+    badgeText: 'text-slate-700',
+    topBorder: 'border-t-slate-400',
+    headerWash: 'bg-gradient-to-br from-slate-100 via-white to-white',
+    badgeBorder: 'border-slate-300',
+  },
 }
