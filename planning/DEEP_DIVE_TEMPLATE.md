@@ -4,6 +4,8 @@
 
 This is a **template for future content PRs**, not something this PR (#154) uses to write content. No Deep Dive currently uses this template because no Deep Dive has been written yet.
 
+**Deep Dives are professional-grade by default (Product Owner clarification, PR #154 follow-up).** There is no difficulty tier to write toward -- no `difficulty` field exists on the `DeepDive` type, and none should be added. Every Deep Dive should go deep enough for a real-world IBM i developer, full stop; sections 6-8 below ("Beginner-level example" through "Real-world scenario") exist to build up to that depth within a single Deep Dive, not to sort Deep Dives into easier vs. harder tiers.
+
 ## Structure
 
 Every Deep Dive should cover these sections, in this order. Not every section needs to be long -- a section that genuinely doesn't apply to a given topic (e.g. "Security considerations" for a topic with no meaningful authority implications) can be a short paragraph explicitly saying so, rather than forced padding.
@@ -32,7 +34,7 @@ When a Deep Dive moves from `planned` to actually being written, its catalog ent
 
 - `slug` -- stable, kebab-case, never changed once published (same rule as lesson slugs).
 - `title`, `description` -- already present from the planning stage; revisit for accuracy once the content is final.
-- `category`, `difficulty` -- already present; revisit if writing the content reveals a better-fitting category.
+- `category` -- already present; revisit if writing the content reveals a better-fitting category. No `difficulty` field exists (see the professional-grade-by-default note above).
 - `tags` -- already present; add any that emerged while writing.
 - `estimatedReadTime` -- add this **only once real content exists** (`status` is `review-ready` or `published`). Never estimate a reading time for `planned` content.
 - `relatedLessonSlugs` / `relatedDeepDiveSlugs` / `relatedPracticeTopics` -- fill in based on what the finished content actually references.

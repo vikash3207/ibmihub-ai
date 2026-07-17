@@ -46,6 +46,10 @@ export default function DeepDivesPage() {
               <Sparkles className="h-4 w-4" aria-hidden="true" />
               Explore standalone topic guides — no fixed order required.
             </p>
+            <p className="mt-4 text-sm text-slate-500 leading-relaxed max-w-xl mx-auto">
+              Every Deep Dive is designed for professional-grade understanding with real-world
+              examples, production considerations, debugging notes, and interview angles.
+            </p>
           </div>
         </section>
 
