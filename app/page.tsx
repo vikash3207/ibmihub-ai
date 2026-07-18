@@ -22,13 +22,14 @@ import {
   Bug,
   Gauge,
 } from 'lucide-react'
-import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
+import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
 import { getPublishedLessons, type Lesson } from '@/lib/lessons'
 import { getTopicForLesson } from '@/lib/topics'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
+import { StructuredData } from '@/components/structured-data'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -39,6 +40,33 @@ import { cn } from '@/lib/utils'
 export const dynamic = 'force-dynamic'
 
 const HOME_TITLE = 'iRPGenie — AI-powered IBM i, RPGLE & SQL learning'
+
+/**
+ * Homepage structured data (PR #159 -- SEO crawling/indexing audit). A
+ * WebSite + Organization pair is the standard baseline for a site's own
+ * homepage -- helps Google associate the domain with the iRPGenie brand
+ * name specifically (see planning/SEO_CRAWLING_INDEXING_AUDIT.md's brand
+ * disambiguation section). Deliberately no `sameAs` social profile links
+ * (none are established yet) and no affiliation with IBM -- this product
+ * is an independent, unofficial learning resource.
+ */
+const HOME_STRUCTURED_DATA = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: 'AI-powered IBM i, RPGLE & SQL learning platform.',
+    },
+    {
+      '@type': 'WebSite',
+      name: SITE_NAME,
+      url: SITE_URL,
+      description: SITE_DEFAULT_DESCRIPTION,
+    },
+  ],
+}
 
 export const metadata: Metadata = {
   // Absolute override -- bypasses the root layout's `%s | iRPGenie` template
@@ -235,6 +263,7 @@ export default async function LandingPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <StructuredData data={HOME_STRUCTURED_DATA} />
       <SiteHeader />
 
       {/* -- Hero --------------------------------------------------------- */}

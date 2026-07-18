@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: 'Practice Lab',
   description: 'A guided 5250-style command simulator and ACS-style SQL console for hands-on IBM i practice.',
   alternates: { canonical: '/practice-lab' },
+  // Redirects any request without a session to /auth/login (see below) --
+  // there is no content here for an anonymous crawler to index. See
+  // app/robots.ts and app/sitemap.ts (PR #159 SEO audit).
+  robots: { index: false, follow: false },
 }
 
 export default async function PracticeLabPage() {

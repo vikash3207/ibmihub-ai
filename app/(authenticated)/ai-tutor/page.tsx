@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: 'AI Tutor',
   description: 'Ask IBM i learning questions and get educational guidance.',
   alternates: { canonical: '/ai-tutor' },
+  // Redirects any request without a session to /auth/login (see below) --
+  // there is no content here for an anonymous crawler to index. See
+  // app/robots.ts and app/sitemap.ts (PR #159 SEO audit).
+  robots: { index: false, follow: false },
 }
 
 const STARTER_PROMPTS = [
