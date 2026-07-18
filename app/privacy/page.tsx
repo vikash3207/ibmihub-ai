@@ -90,15 +90,43 @@ export default function PrivacyPolicyPage() {
       <p>
         Our hosting provider (Vercel) and database provider (Supabase) generate standard
         infrastructure-level logs (e.g. request timing, error rates) as part of operating the
-        service. We do not currently run any separate analytics or tracking tool on top of that --
-        if we add one during or after beta, this policy will be updated first.
+        service.
+      </p>
+
+      <h2>Analytics</h2>
+      <p>
+        {SITE_NAME} uses <strong>Google Analytics</strong> to understand how the site is used --
+        which pages get visited, roughly how many people are using the site, and which content is
+        useful -- so we can improve the learning content and overall experience. Google Analytics
+        may collect information such as the pages you visit, general device and browser
+        information, approximate location (typically city/region level, derived from IP address,
+        not precise GPS location), and basic interaction events (e.g. clicks, scrolling).
+      </p>
+      <p>
+        We do <strong>not</strong> use Google Analytics (or anything else) to collect IBM i
+        credentials, production system data, source code, job logs, or any content you type into
+        the AI Tutor, Practice Lab, or SQL Console -- analytics only ever sees which pages you
+        visit and basic technical/interaction information, never the content of what you&apos;re
+        learning or working on. We have not enabled advertising, remarketing, or cross-site ad
+        tracking features in Google Analytics, and we do not send it your name, email, or any
+        other directly identifying account information.
+      </p>
+      <p>
+        You can control or opt out of analytics tracking through your browser&apos;s cookie/privacy
+        settings, browser extensions that block analytics scripts, or Google&apos;s own tools (e.g.
+        the{' '}
+        <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">
+          Google Analytics Opt-out Browser Add-on
+        </a>
+        ).
       </p>
 
       <h2>Cookies and local storage</h2>
       <p>
         We use essential cookies for authentication and session management (via Supabase Auth) --
-        these are required for the site to know you&apos;re logged in. We do not use advertising
-        or cross-site tracking cookies.
+        these are required for the site to know you&apos;re logged in. Google Analytics also sets
+        its own cookies to distinguish visitors and sessions for the usage statistics described
+        above. We do not use advertising or cross-site ad-tracking cookies.
       </p>
 
       <h2>Third-party services we use</h2>
@@ -106,6 +134,7 @@ export default function PrivacyPolicyPage() {
         <li><strong>Supabase</strong> -- authentication and database hosting.</li>
         <li><strong>Vercel</strong> -- application hosting and deployment.</li>
         <li><strong>Anthropic</strong> -- the AI model provider behind the AI Tutor.</li>
+        <li><strong>Google Analytics</strong> -- website usage statistics, described above.</li>
       </ul>
       <p>Each provider only receives the minimum data needed to perform its role, described above.</p>
 
