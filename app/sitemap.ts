@@ -11,16 +11,19 @@ import { isDeepDiveAvailable } from '@/lib/deep-dives'
  * public-facing lesson list already uses -- so a Review Ready or Draft
  * lesson can never appear here, structurally, not by convention.
  *
- * Deliberately includes /practice, /practice-lab, /practice-lab/5250, and
- * /practice-lab/sql even though they redirect an unauthenticated visitor to
- * login: their own marketing/description content is meant to be
- * discoverable, the same way many gated products list their app's landing
- * routes in a sitemap even though the underlying feature requires an
- * account. Excludes account-specific pages (/dashboard, /onboarding),
- * auth pages, individual Practice Lab exercise routes, and all /api/*
- * routes -- those are also marked `robots: { index: false }` in their own
- * page metadata where applicable (see app/(authenticated)/dashboard/page.tsx
- * and the app/auth/* pages).
+ * Excludes /practice, /practice-lab (and its /5250, /sql sub-routes), and
+ * /ai-tutor -- PR #159's SEO audit found all of them call
+ * redirect('/auth/login?...') for any request without a session, so an
+ * anonymous crawler never sees content there, only a redirect. An earlier
+ * version of this file included them on the theory that their
+ * marketing/description content would be publicly visible; that was never
+ * actually true given the redirect-first implementation, so listing them
+ * here was telling Google to index pages that immediately bounce it
+ * elsewhere. Also excludes account-specific pages (/dashboard,
+ * /onboarding), auth pages, individual Practice Lab exercise routes, and
+ * all /api/* routes -- every one of these is also marked
+ * `robots: { index: false }` in its own page metadata and disallowed in
+ * app/robots.ts, so all three layers agree.
  *
  * PR #144 adds the Privacy/Terms/Disclaimer pages, PR #148 adds Contact --
  * genuinely public, indexable trust/contact content, unlike the
@@ -42,11 +45,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/learn`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/learn/ibm-i-fundamentals`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/deep-dives`, changeFrequency: 'weekly', priority: 0.8 },
-    { url: `${SITE_URL}/practice`, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/practice-lab`, changeFrequency: 'monthly', priority: 0.6 },
-    { url: `${SITE_URL}/practice-lab/5250`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${SITE_URL}/practice-lab/sql`, changeFrequency: 'monthly', priority: 0.5 },
-    { url: `${SITE_URL}/ai-tutor`, changeFrequency: 'monthly', priority: 0.5 },
     { url: `${SITE_URL}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/disclaimer`, changeFrequency: 'yearly', priority: 0.3 },

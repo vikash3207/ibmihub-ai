@@ -14,7 +14,8 @@ import { getLessonAccent, LESSON_ACCENT_CLASSES } from '@/components/lesson-cate
 import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
 import { SyncActiveLessonContext } from '@/components/ai-tutor/sync-active-lesson-context'
 import type { AiTutorContext } from '@/components/ai-tutor/types'
-import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
+import { StructuredData } from '@/components/structured-data'
+import { IBM_I_FUNDAMENTALS_PATH_NAME, SITE_URL } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { markLessonComplete } from '@/lib/actions/progress'
 import { getPracticeTopicIdForLesson } from '@/content/practice/questions'
@@ -37,6 +38,25 @@ interface Props {
 // same lesson lookup. getPublishedLessonBySlug() already calls notFound()
 // server-side for any non-Published or nonexistent slug.
 const getLesson = cache(async (slug: string) => getPublishedLessonBySlug(slug))
+
+/**
+ * BreadcrumbList structured data (PR #159 -- SEO crawling/indexing audit).
+ * Purely navigational metadata -- the lesson's title and slug are already
+ * public (shown even to a logged-out visitor on the "Log in to continue"
+ * card), so this carries no gated content regardless of `canRead` below.
+ */
+function buildLessonBreadcrumb(lesson: { title: string; slug: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
+      { '@type': 'ListItem', position: 2, name: 'Learning Center', item: `${SITE_URL}/learn` },
+      { '@type': 'ListItem', position: 3, name: IBM_I_FUNDAMENTALS_PATH_NAME, item: `${SITE_URL}/learn/ibm-i-fundamentals` },
+      { '@type': 'ListItem', position: 4, name: lesson.title, item: `${SITE_URL}/learn/ibm-i-fundamentals/${lesson.slug}` },
+    ],
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -135,6 +155,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
         />
       }
     >
+    <StructuredData data={buildLessonBreadcrumb(lesson)} />
     <article className={`space-y-8 rounded-2xl border-t-4 bg-white p-6 shadow-sm sm:p-8 ${accentClasses.topBorder}`}>
       <div
         className={`-mx-6 -mt-6 rounded-t-2xl border-b border-slate-100 px-6 pb-6 pt-6 sm:-mx-8 sm:-mt-8 sm:px-8 sm:pt-8 ${accentClasses.headerWash}`}

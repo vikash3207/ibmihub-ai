@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: 'SQL Practice Console',
   description: 'An ACS-style SQL practice console for learning SQL on IBM i with sample data.',
   alternates: { canonical: '/practice-lab/sql' },
+  // Redirects any request without a session to /auth/login (see below) --
+  // there is no content here for an anonymous crawler to index. See
+  // app/robots.ts and app/sitemap.ts (PR #159 SEO audit).
+  robots: { index: false, follow: false },
 }
 
 export default async function PracticeLabSqlPage() {

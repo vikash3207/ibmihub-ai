@@ -24,6 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: exercise ? `${exercise.title} -- 5250 Command Practice` : '5250 Command Practice',
     description: exercise?.summary ?? 'A guided 5250-style command practice exercise.',
+    // Redirects any request without a session to /auth/login -- there is
+    // no content here for an anonymous crawler to index (PR #159 SEO audit).
+    robots: { index: false, follow: false },
   }
 }
 

@@ -11,8 +11,10 @@ import { renderLessonMarkdown } from '@/lib/markdown'
 import { addDeepDiveHeadingAnchors, tagDeepDiveCallouts, type DeepDiveTocItem } from '@/lib/deep-dive-render'
 import { LessonContent } from '@/components/lesson-content'
 import { DeepDiveToc } from '@/components/deep-dive-toc'
+import { StructuredData } from '@/components/structured-data'
 import { DEEP_DIVE_CATEGORIES, DEEP_DIVE_ACCENT_CLASSES, getDeepDiveAccent } from '@/lib/deep-dive-categories'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
+import { SITE_NAME, SITE_URL } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -55,13 +57,40 @@ const SEO_DESCRIPTIONS: Partial<Record<string, string>> = {
     'Learn embedded SQL in RPGLE on IBM i with practical SQLRPGLE examples covering host variables, indicator variables, SELECT INTO, cursor loops, SQLCODE, commitment control, dynamic SQL, and production practices.',
 }
 
+function getSeoDescription(deepDive: DeepDive): string {
+  return SEO_DESCRIPTIONS[deepDive.slug] ?? deepDive.description
+}
+
+/**
+ * TechArticle structured data (PR #159 -- SEO crawling/indexing audit).
+ * `author` is the site's actual author, not a claim of IBM affiliation --
+ * `publisher` is iRPGenie itself, an independent, unofficial resource.
+ * `dateModified` only appears when the catalog entry actually has a
+ * `lastUpdated` value; there's nothing to report otherwise.
+ */
+function buildDeepDiveStructuredData(deepDive: DeepDive, description: string) {
+  const url = `${SITE_URL}/deep-dives/${deepDive.slug}`
+
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: `${deepDive.title} Deep Dive`,
+    description,
+    url,
+    mainEntityOfPage: url,
+    ...(deepDive.lastUpdated ? { dateModified: deepDive.lastUpdated } : {}),
+    author: { '@type': 'Person', name: 'Vikash Choudhary' },
+    publisher: { '@type': 'Organization', name: SITE_NAME, url: SITE_URL },
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const deepDive = findPublishedDeepDive(slug)
   if (!deepDive) return {}
 
   const title = `${deepDive.title} Deep Dive`
-  const description = SEO_DESCRIPTIONS[deepDive.slug] ?? deepDive.description
+  const description = getSeoDescription(deepDive)
 
   return {
     title,
@@ -109,8 +138,11 @@ export default async function DeepDivePage({ params }: Props) {
   const relatedDeepDiveSlugs = deepDive.relatedDeepDiveSlugs ?? []
   const relatedDeepDives = DEEP_DIVES.filter((d) => relatedDeepDiveSlugs.includes(d.slug))
 
+  const seoDescription = getSeoDescription(deepDive)
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <StructuredData data={buildDeepDiveStructuredData(deepDive, seoDescription)} />
       <SiteHeader />
 
       <main className="flex-1">

@@ -14,6 +14,10 @@ export const metadata: Metadata = {
   title: '5250 Command Practice',
   description: 'A guided 5250-style command practice simulator for learning IBM i commands.',
   alternates: { canonical: '/practice-lab/5250' },
+  // Redirects any request without a session to /auth/login (see below) --
+  // there is no content here for an anonymous crawler to index. See
+  // app/robots.ts and app/sitemap.ts (PR #159 SEO audit).
+  robots: { index: false, follow: false },
 }
 
 export default async function PracticeLab5250Page() {

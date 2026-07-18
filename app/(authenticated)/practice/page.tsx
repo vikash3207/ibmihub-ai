@@ -18,6 +18,10 @@ export const metadata: Metadata = {
   title: 'Practice Questions',
   description: 'Check your understanding of beginner IBM i topics with short practice questions.',
   alternates: { canonical: '/practice' },
+  // Redirects any request without a session to /auth/login (see below) --
+  // there is no content here for an anonymous crawler to index. See
+  // app/robots.ts and app/sitemap.ts (PR #159 SEO audit).
+  robots: { index: false, follow: false },
 }
 
 const INTRO_NOTICE =
