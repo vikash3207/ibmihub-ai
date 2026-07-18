@@ -75,4 +75,4 @@ export const SUPPORT_EMAIL: string | null = 'support@irpgenie.com'
 export const CONTACT_EMAIL: string | null = 'contact@irpgenie.com'
 
 /** Shown as "Last updated: {date}" on each legal page -- bump when that page's copy changes. */
-export const LEGAL_PAGES_LAST_UPDATED = 'July 17, 2026'
+export const LEGAL_PAGES_LAST_UPDATED = 'July 18, 2026'

@@ -14,6 +14,7 @@ import { AiTutorPanelProvider } from '@/components/ai-tutor/ai-tutor-panel-provi
 import { EmbeddedAiTutorPanel } from '@/components/ai-tutor/embedded-ai-tutor-panel'
 import { AiTutorContentShift } from '@/components/ai-tutor/ai-tutor-content-shift'
 import { RouteProgressBar } from '@/components/route-progress-bar'
+import { GoogleAnalyticsScripts, GoogleAnalyticsPageViews } from '@/components/analytics/google-analytics'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
@@ -79,6 +80,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         */}
         <Suspense fallback={null}>
           <RouteProgressBar />
+        </Suspense>
+        {/*
+          GoogleAnalyticsScripts renders nothing at all (no <script> tags)
+          when NEXT_PUBLIC_GA_MEASUREMENT_ID isn't set -- no separate env
+          check needed here. GoogleAnalyticsPageViews uses useSearchParams()
+          for the same App Router reason RouteProgressBar does above, so it
+          needs its own Suspense boundary too.
+        */}
+        <GoogleAnalyticsScripts />
+        <Suspense fallback={null}>
+          <GoogleAnalyticsPageViews />
         </Suspense>
         <AiTutorPanelProvider>
           <AiTutorContentShift>{children}</AiTutorContentShift>
