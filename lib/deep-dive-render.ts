@@ -33,10 +33,20 @@ function stripTags(html: string): string {
   return html.replace(/<[^>]+>/g, '')
 }
 
-/** Deep Dive headings are numbered ("1. Why SQL...") for readability in the
- * article body; the TOC reads better without repeating that numbering next
- * to its own position in the list, so it's stripped for the id/label only --
- * the heading itself, in the rendered article, is left exactly as written. */
+/**
+ * Deep Dive headings are numbered ("1. Why SQL...") in the article body.
+ * The anchor `id` is generated from the ordinal-free text so it stays
+ * stable if a section is ever renumbered (adding/removing/reordering a
+ * heading shouldn't silently break an existing external link or bookmark
+ * pointing at #why-sql-on-ibm-i-is-different). The TOC's displayed
+ * *title* is a separate concern -- PR #161 fixed a bug where it was built
+ * from this same ordinal-free text, so the sidebar showed "Where you'll
+ * actually type SQL" while the article showed "2. Where you'll actually
+ * type SQL" a few hundred pixels to the right. The TOC title now uses the
+ * heading's full original text (see addDeepDiveHeadingAnchors below) so
+ * it matches the article exactly; only the id keeps using this stripped
+ * version.
+ */
 function stripOrdinalPrefix(text: string): string {
   return text.replace(/^\d+\.\s*/, '')
 }
@@ -68,8 +78,8 @@ export function addDeepDiveHeadingAnchors(html: string): { html: string; toc: De
   const seen = new Map<string, number>()
 
   const withAnchors = html.replace(HEADING_PATTERN, (_match, level: string, inner: string) => {
-    const plainText = stripOrdinalPrefix(decodeEntities(stripTags(inner)).trim())
-    const id = slugify(plainText, seen)
+    const plainText = decodeEntities(stripTags(inner)).trim()
+    const id = slugify(stripOrdinalPrefix(plainText), seen)
     toc.push({ id, title: plainText, level: Number(level) as 2 | 3 })
     return `<h${level} id="${id}">${inner}</h${level}>`
   })

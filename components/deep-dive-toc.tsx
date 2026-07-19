@@ -10,6 +10,18 @@ interface DeepDiveTocProps {
 }
 
 /**
+ * Splits a leading "N. " ordinal off an item's title so it can be rendered
+ * in its own fixed-width slot next to the rest of the title (PR #161 --
+ * Navigator Numbering + Alignment Fix). Unnumbered headings ("Who this is
+ * for") return a null ordinal and render as plain text.
+ */
+function splitOrdinal(title: string): { ordinal: string | null; rest: string } {
+  const match = title.match(/^(\d+)\.\s*(.*)$/)
+  if (!match) return { ordinal: null, rest: title }
+  return { ordinal: match[1], rest: match[2] }
+}
+
+/**
  * "On this page" navigator for Deep Dive detail pages (PR #158). A single
  * component renders both the desktop sticky sidebar and the mobile
  * collapsible "Contents" card, sharing one active-heading tracker rather
@@ -61,23 +73,37 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
 
   function renderList() {
     return (
-      <ul className="space-y-0.5 text-sm">
-        {items.map((item) => (
-          <li key={item.id} className={item.level === 3 ? 'pl-3' : undefined}>
-            <a
-              href={`#${item.id}`}
-              onClick={closeMobilePanel}
-              className={cn(
-                'block rounded-lg px-2.5 py-1.5 leading-snug transition-colors',
-                activeId === item.id
-                  ? 'bg-blue-50 font-medium text-blue-700'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              )}
-            >
-              {item.title}
-            </a>
-          </li>
-        ))}
+      <ul className="space-y-0.5">
+        {items.map((item) => {
+          const { ordinal, rest } = splitOrdinal(item.title)
+          const isActive = activeId === item.id
+          const isSubItem = item.level === 3
+
+          return (
+            <li key={item.id} className={isSubItem ? 'ml-3 border-l border-slate-100 pl-3' : undefined}>
+              <a
+                href={`#${item.id}`}
+                onClick={closeMobilePanel}
+                className={cn(
+                  // items-start (not items-center) + the number sitting on its own
+                  // line-height keeps a wrapped title's second line flush under the
+                  // first, never under the number -- that's the whole fix for the
+                  // "wrapped lines align with the number" bug this PR addresses.
+                  'flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 leading-snug transition-colors',
+                  isSubItem ? 'text-xs' : 'text-sm',
+                  isActive
+                    ? 'bg-blue-50 font-medium text-blue-700'
+                    : isSubItem
+                      ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                )}
+              >
+                {ordinal && <span className="shrink-0 tabular-nums">{ordinal}.</span>}
+                <span>{rest}</span>
+              </a>
+            </li>
+          )
+        })}
       </ul>
     )
   }
