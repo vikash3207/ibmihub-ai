@@ -1,8 +1,9 @@
 /**
  * Logo/icon concept explorations (PR #165 -- iRPGenie Logo Concept
- * Exploration). Pure inline SVG, no new dependency, no image assets --
- * every shape is drawn with basic primitives (rect/path/circle) so it
- * stays crisp at any size, including favicon scale.
+ * Exploration; PR #166 -- Refine Selected iRPGenie Logo Direction). Pure
+ * inline SVG, no new dependency, no image assets -- every shape is drawn
+ * with basic primitives (rect/path/circle/text) so it stays crisp at any
+ * size, including favicon scale.
  *
  * Brand colors only, matching app/icon.tsx and components/site-header.tsx:
  *   BLUE  #2563eb (blue-600) -- primary badge background
@@ -13,6 +14,14 @@
  * app/internal/logo-concepts/ -- none of them replace the production
  * mark (app/icon.tsx, app/apple-icon.tsx, components/site-header.tsx)
  * unless/until the Product Owner picks one.
+ *
+ * PR #166 adds four LogoRefined* components: the Product Owner selected
+ * Concept 2 (the "i" monogram) from the original six, and asked for it
+ * refined into a primary icon, a version with a subtle technical cue, a
+ * larger "iRPG" lockup for marketing/badge use, and an ultra-simplified
+ * favicon-only version. These are additive -- LogoConceptMonogram (the
+ * original Concept 2) is left in place, unmodified, for a clean before/
+ * after comparison on the review page.
  */
 
 const BLUE = '#2563eb'
@@ -114,6 +123,78 @@ export function LogoConceptTwoTone({ size = 40, className }: LogoIconProps) {
       </g>
       <path d="M5 12 L10 16 L5 20" stroke={WHITE} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" fill="none" />
       <Spark cx={22.5} cy={16} r={4.2} fill={WHITE} />
+    </svg>
+  )
+}
+
+// ---------------------------------------------------------------------------
+// PR #166 -- refined variants of the selected direction (Concept 2: the "i"
+// monogram). See the doc comment at the top of this file for context.
+// ---------------------------------------------------------------------------
+
+/** Refined A. Primary recommended icon -- the likely final nav/favicon mark. */
+export function LogoRefinedPrimary({ size = 40, className }: LogoIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" role="img" aria-label="Refined i monogram with AI spark, primary icon" className={className}>
+      <rect width="32" height="32" rx="7" fill={BLUE} />
+      <rect x="13.75" y="14" width="4.5" height="11" rx="2.25" fill={WHITE} />
+      <Spark cx={16} cy={7.8} r={4.2} fill={CYAN} />
+    </svg>
+  )
+}
+
+/**
+ * Refined B. Stronger IBM i variant -- the same monogram plus a small,
+ * deliberately subdued terminal-cursor underscore at the base of the stem.
+ * Kept at reduced opacity so it reads as a secondary technical cue, not a
+ * second competing shape next to the spark.
+ */
+export function LogoRefinedTechnical({ size = 40, className }: LogoIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" role="img" aria-label="Refined i monogram with AI spark and terminal cursor accent" className={className}>
+      <rect width="32" height="32" rx="7" fill={BLUE} />
+      <rect x="13.75" y="14" width="4.5" height="11" rx="2.25" fill={WHITE} />
+      <Spark cx={16} cy={7.8} r={4.2} fill={CYAN} />
+      <line x1="12" y1="27" x2="20" y2="27" stroke={WHITE} strokeWidth="1.6" strokeLinecap="round" opacity="0.55" />
+    </svg>
+  )
+}
+
+/**
+ * Refined C. Large-size "iRPG" badge/lockup -- the monogram acting as the
+ * "i", followed by "RPG" in a matching bold weight. Explicitly a
+ * larger-size/secondary asset (social image, landing badge, footer badge,
+ * marketing graphic) -- the wide aspect ratio and text detail are not
+ * intended to survive a 16px favicon crop, and this component is never
+ * used for app/icon.tsx or the nav mark.
+ */
+export function LogoRefinedBadge({ size = 40, className }: LogoIconProps) {
+  const height = size
+  const width = size * 3
+  return (
+    <svg width={width} height={height} viewBox="0 0 96 32" role="img" aria-label="iRPG badge lockup, large-size marketing variant" className={className}>
+      <rect width="96" height="32" rx="7" fill={BLUE} />
+      <rect x="13.75" y="14" width="4.5" height="11" rx="2.25" fill={WHITE} />
+      <Spark cx={16} cy={7.8} r={4.2} fill={CYAN} />
+      <text x="26" y="23" fontFamily="Arial, Helvetica, sans-serif" fontWeight="700" fontSize="17" letterSpacing="0.5" fill={WHITE}>
+        RPG
+      </text>
+    </svg>
+  )
+}
+
+/**
+ * Refined D. Favicon-safe simplified variant -- the same concept reduced to
+ * the fewest possible shapes (a thicker stem, a plain filled dot instead of
+ * a 4-point spark) specifically for 16px/32px rendering, where the spark's
+ * points in the other variants can soften into a blur.
+ */
+export function LogoRefinedFavicon({ size = 32, className }: LogoIconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 32 32" role="img" aria-label="Simplified i monogram favicon variant" className={className}>
+      <rect width="32" height="32" rx="6" fill={BLUE} />
+      <rect x="13.5" y="14.5" width="5" height="10.5" rx="2.5" fill={WHITE} />
+      <circle cx="16" cy="8" r="4" fill={CYAN} />
     </svg>
   )
 }

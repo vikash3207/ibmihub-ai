@@ -8,13 +8,18 @@ import {
   LogoConceptCodeBrackets,
   LogoConceptChip,
   LogoConceptTwoTone,
+  LogoRefinedPrimary,
+  LogoRefinedTechnical,
+  LogoRefinedBadge,
+  LogoRefinedFavicon,
 } from '@/components/brand/logo-concepts'
 import { SITE_NAME } from '@/lib/config'
 
-// Temporary internal review page (PR #165) -- not linked from any nav, and
-// deliberately excluded from search indexing since it's a design review
-// artifact, not real product content. Safe to delete once the Product
-// Owner picks a direction (or decides to keep the current mark).
+// Temporary internal review page (PR #165, refined in PR #166) -- not
+// linked from any nav, and deliberately excluded from search indexing
+// since it's a design review artifact, not real product content. Safe to
+// delete once the Product Owner makes a final call (or decides to keep
+// the current mark).
 export const metadata: Metadata = {
   title: 'Logo Concept Review (Internal)',
   robots: { index: false, follow: false },
@@ -27,6 +32,17 @@ interface Concept {
   whyItWorks: string
   weakness: string
   faviconNote: string
+  recommended?: boolean
+}
+
+interface RefinedVariant {
+  Icon: ComponentType<{ size?: number; className?: string }>
+  name: string
+  description: string
+  worksBestFor: string
+  faviconSuitable: string
+  navSuitable: string
+  marketingOnly: string
   recommended?: boolean
 }
 
@@ -105,6 +121,53 @@ const CONCEPTS: Concept[] = [
   },
 ]
 
+const REFINED_VARIANTS: RefinedVariant[] = [
+  {
+    Icon: LogoRefinedPrimary,
+    name: 'A. Primary recommended icon',
+    description:
+      'The refined "i" monogram with a cyan AI spark -- clean, simple, no extra detail. This is the version most likely to become the final nav icon and favicon.',
+    worksBestFor: 'Nav bar, favicon, browser tab, app icon -- anywhere the mark needs to read instantly at a glance.',
+    faviconSuitable: 'Yes -- two simple shapes, no fine detail, holds up cleanly at 16px and 32px.',
+    navSuitable: 'Yes -- this is the primary candidate for the header icon.',
+    marketingOnly: 'No -- this is the general-purpose, all-sizes version.',
+    recommended: true,
+  },
+  {
+    Icon: LogoRefinedTechnical,
+    name: 'B. Stronger IBM i variant (technical cue)',
+    description:
+      'Same monogram and spark, plus a subtle, low-opacity terminal-cursor underscore beneath the stem, as an extra nod to command-line/IBM i work.',
+    worksBestFor:
+      'Anywhere the primary icon works, if the Product Owner wants a slightly stronger "terminal" cue without changing the overall silhouette.',
+    faviconSuitable:
+      'Mostly -- the underscore is thin and low-opacity so it doesn\'t compete with the spark, but it\'s the one detail worth double-checking on an actual rendered 16px favicon before finalizing.',
+    navSuitable: 'Yes.',
+    marketingOnly: 'No.',
+  },
+  {
+    Icon: LogoRefinedBadge,
+    name: 'C. Large-size "iRPG" badge (marketing use only)',
+    description:
+      'The monogram acting as the "i", followed by "RPG" in a matching bold weight -- answers the Product Owner\'s question about including "iRPG" text, but only as a wider badge lockup, never inside the small icon itself.',
+    worksBestFor: 'Social share image, landing page badge, marketing graphic, footer badge -- anywhere there\'s room for a wider mark.',
+    faviconSuitable: 'No -- not attempted. The aspect ratio and text detail are not designed to survive a 16px square crop.',
+    navSuitable: 'Not recommended -- too wide for the compact header icon slot next to the existing wordmark.',
+    marketingOnly: 'Yes -- this is explicitly the large-size-only variant the design guidance asked for.',
+  },
+  {
+    Icon: LogoRefinedFavicon,
+    name: 'D. Favicon-safe simplified variant',
+    description:
+      'An even further reduced version -- a thicker stem and a plain filled dot instead of a 4-point spark -- for the specific case where 16px/32px rendering needs the absolute simplest possible shapes.',
+    worksBestFor: 'The literal favicon/app-icon file itself, if the spark\'s points in the primary variant ever look soft in a real rendered favicon test.',
+    faviconSuitable: 'Yes -- this is the variant built specifically for that job.',
+    navSuitable:
+      'Acceptable, but the primary icon\'s spark is more distinctive at nav size (32-40px) where the extra detail reads fine -- this variant is a bit plainer than necessary there.',
+    marketingOnly: 'No.',
+  },
+]
+
 export default function LogoConceptsPage() {
   return (
     <div className="min-h-screen bg-slate-50 px-4 py-10 sm:px-6">
@@ -115,16 +178,23 @@ export default function LogoConceptsPage() {
           </Link>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900">Logo Concept Review</h1>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
-            Six alternative icon/logo directions for {SITE_NAME}, for internal Product Owner review only. This
-            page is not linked from the site and is excluded from search indexing (<code>robots: noindex</code>).
-            None of these have replaced the production mark -- the current header icon and favicon are unchanged.
+            Internal Product Owner review only -- not linked from the site, and excluded from search indexing
+            (<code>robots: noindex</code>). None of these have replaced the production mark -- the current header
+            icon and favicon are unchanged.
           </p>
           <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
             Every concept reuses only the existing brand colors (blue <code>#2563eb</code>, cyan{' '}
             <code>#22d3ee</code>, white) and is drawn as plain inline SVG -- no image assets, no new dependency,
             and no IBM logo/trademark styling anywhere in this set.
           </p>
+          <p className="mt-3 max-w-2xl rounded-xl border border-blue-200 bg-blue-50/60 px-4 py-3 text-sm leading-relaxed text-blue-900">
+            <strong>Decision so far:</strong> the Product Owner reviewed the original six concepts below and
+            selected <strong>Concept 2 (the &ldquo;i&rdquo; monogram + AI spark)</strong> to refine further -- see
+            the four refined variants beneath the original set.
+          </p>
         </div>
+
+        <h2 className="text-lg font-semibold text-slate-900">Original 6 concepts (for reference)</h2>
 
         <div className="grid gap-6 sm:grid-cols-2">
           {CONCEPTS.map(({ Icon, name, concept, whyItWorks, weakness, faviconNote, recommended }) => (
@@ -169,14 +239,89 @@ export default function LogoConceptsPage() {
           ))}
         </div>
 
+        <div className="rounded-2xl border border-slate-200 bg-white p-5">
+          <h2 className="text-sm font-semibold text-slate-900">Original recommendation (superseded)</h2>
+          <p className="mt-2 text-sm leading-relaxed text-slate-600">
+            This page originally recommended <strong>Concept 1 (Terminal / 5250 screen + AI spark)</strong> as the
+            strongest fit against the initial brief. The Product Owner reviewed the full set and preferred{' '}
+            <strong>Concept 2 (the &ldquo;i&rdquo; monogram)</strong> instead, for being cleaner, more modern, more
+            brandable, and working better at small sizes than the more detailed terminal/chip options -- kept here
+            for context, not as an active recommendation.
+          </p>
+        </div>
+
+        <div className="pt-4">
+          <h2 className="text-lg font-semibold text-slate-900">Refined Concept 2 variants</h2>
+          <p className="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
+            Four practical variants of the selected direction, including an exploration of the Product Owner's
+            question below about whether the icon can also contain &ldquo;iRPG&rdquo; text.
+          </p>
+        </div>
+
+        <div className="grid gap-6 sm:grid-cols-2">
+          {REFINED_VARIANTS.map(({ Icon, name, description, worksBestFor, faviconSuitable, navSuitable, marketingOnly, recommended }) => (
+            <div
+              key={name}
+              className={`rounded-2xl border bg-white p-5 shadow-sm ${recommended ? 'border-blue-300 ring-1 ring-blue-100' : 'border-slate-200'}`}
+            >
+              <div className="flex items-center gap-4">
+                <Icon size={56} />
+                <div className="flex flex-col gap-1.5">
+                  {/* Nav-size and favicon-size previews, same reasoning as the original concept grid above. */}
+                  <div className="flex items-center gap-2">
+                    <Icon size={24} />
+                    <Icon size={16} />
+                  </div>
+                  {recommended && (
+                    <span className="inline-flex w-fit items-center rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-700">
+                      Recommended
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <h3 className="mt-4 text-base font-semibold text-slate-900">{name}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-slate-600">{description}</p>
+
+              <dl className="mt-4 space-y-3 text-sm">
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-slate-500">Works best for</dt>
+                  <dd className="mt-1 leading-relaxed text-slate-600">{worksBestFor}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-emerald-700">Favicon-suitable?</dt>
+                  <dd className="mt-1 leading-relaxed text-slate-600">{faviconSuitable}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-blue-700">Header/nav-suitable?</dt>
+                  <dd className="mt-1 leading-relaxed text-slate-600">{navSuitable}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs font-semibold uppercase tracking-wide text-amber-700">Marketing/large-size only?</dt>
+                  <dd className="mt-1 leading-relaxed text-slate-600">{marketingOnly}</dd>
+                </div>
+              </dl>
+            </div>
+          ))}
+        </div>
+
         <div className="rounded-2xl border border-blue-200 bg-blue-50/60 p-5">
           <h2 className="text-sm font-semibold text-blue-900">Recommendation</h2>
           <p className="mt-2 text-sm leading-relaxed text-slate-700">
-            <strong>Concept 1 (Terminal / 5250 screen + AI spark)</strong> is the strongest overall fit: it pairs
-            the clearest "command-line / IBM i" cue in the set with the clearest "AI assistance" cue, using only
-            two bold shapes that hold up cleanly at favicon size -- the two properties the design brief weighted
-            most heavily. Concept 2 (the refined monogram) is the safest, lowest-change alternative if the Product
-            Owner prefers to stay closer to the existing mark rather than adopt a new silhouette.
+            <strong>Variant A (the primary refined icon)</strong> should be the final nav/favicon mark -- it's the
+            cleanest, simplest execution of the Product Owner's selected direction, and reads clearly at every
+            size tested. Variant B is a reasonable alternative if a slightly stronger "this is a terminal/IBM i
+            tool" cue is wanted without changing the overall silhouette; Variant D is the fallback specifically for
+            the literal favicon file if Variant A's spark ever looks soft in a real rendered 16px test.
+          </p>
+          <p className="mt-3 text-sm leading-relaxed text-slate-700">
+            <strong>On the &ldquo;iRPG&rdquo; text question: keep it out of the primary icon.</strong> At nav/favicon
+            size there isn't room for three extra letters without either shrinking the monogram+spark past the
+            point of legibility or cramming the letters small enough that they blur -- neither serves the "clean,
+            simple, favicon-safe" goal the Product Owner set as the reason for preferring Concept 2 in the first
+            place. Variant C shows that "iRPG" works well as its own, separate, larger-format badge (a genuinely
+            useful additional asset for social/marketing use) -- but it should stay a secondary asset alongside the
+            primary icon, not replace it or get squeezed into it.
           </p>
         </div>
       </div>
