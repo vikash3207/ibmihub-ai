@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import { Cpu } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { logout } from '@/lib/actions/auth'
 import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
 import { buttonVariants } from '@/components/ui/button'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { SiteNavLinks } from '@/components/site-nav-links'
+import { SiteLogoIcon } from '@/components/brand/site-logo-icon'
 
 /**
  * Shared public header. Server component only -- checks the Supabase session
@@ -23,9 +23,7 @@ export async function SiteHeader() {
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
         <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <Cpu className="h-4 w-4" aria-hidden="true" />
-          </span>
+          <SiteLogoIcon size={28} className="shrink-0" />
           {SITE_NAME}
         </Link>
         <nav className="flex items-center gap-3 sm:gap-5">

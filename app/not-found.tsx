@@ -1,17 +1,16 @@
 import Link from 'next/link'
-import { Cpu, SearchX } from 'lucide-react'
+import { SearchX } from 'lucide-react'
 import { SITE_NAME } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
+import { SiteLogoIcon } from '@/components/brand/site-logo-icon'
 
 export default function NotFound() {
   return (
     <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <Card className="w-full max-w-sm text-center p-8">
         <Link href="/" className="mb-6 inline-flex items-center gap-2 font-semibold text-slate-900">
-          <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-600 text-white">
-            <Cpu className="h-4 w-4" aria-hidden="true" />
-          </span>
+          <SiteLogoIcon size={28} className="shrink-0" />
           {SITE_NAME}
         </Link>
 
