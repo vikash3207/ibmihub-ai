@@ -80,7 +80,7 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
           const isSubItem = item.level === 3
 
           return (
-            <li key={item.id} className={isSubItem ? 'ml-3 border-l border-slate-100 pl-3' : undefined}>
+            <li key={item.id} className={isSubItem ? 'ml-3 border-l border-cyan-100 pl-3' : undefined}>
               <a
                 href={`#${item.id}`}
                 onClick={closeMobilePanel}
@@ -88,17 +88,29 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
                   // items-start (not items-center) + the number sitting on its own
                   // line-height keeps a wrapped title's second line flush under the
                   // first, never under the number -- that's the whole fix for the
-                  // "wrapped lines align with the number" bug this PR addresses.
+                  // "wrapped lines align with the number" bug PR #161 addressed; the
+                  // color/border changes below are purely additive on top of that.
+                  //
+                  // Top-level items always carry `border-l-2` (color starts
+                  // transparent) so the active/hover accent border never shifts the
+                  // text horizontally when it appears -- the 2px is reserved from
+                  // the very first render, only its color changes.
                   'flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 leading-snug transition-colors',
-                  isSubItem ? 'text-xs' : 'text-sm',
+                  isSubItem ? 'text-xs' : 'border-l-2 text-sm',
                   isActive
-                    ? 'bg-blue-50 font-medium text-blue-700'
+                    ? isSubItem
+                      ? 'bg-blue-50 font-medium text-blue-800'
+                      : 'border-blue-500 bg-blue-50 font-semibold text-blue-800'
                     : isSubItem
-                      ? 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                      ? 'text-slate-500 hover:bg-cyan-50/60 hover:text-slate-800'
+                      : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/60 hover:text-cyan-900'
                 )}
               >
-                {ordinal && <span className="shrink-0 tabular-nums">{ordinal}.</span>}
+                {ordinal && (
+                  <span className={cn('shrink-0 tabular-nums font-semibold', isActive ? 'text-blue-600' : 'text-cyan-600')}>
+                    {ordinal}.
+                  </span>
+                )}
                 <span>{rest}</span>
               </a>
             </li>
@@ -111,22 +123,27 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
   return (
     <>
       {/* Mobile / narrow screens: collapsible "Contents" card near the top of the article. */}
-      <details ref={detailsRef} className="group mb-6 rounded-2xl border border-slate-200 bg-white p-4 lg:hidden">
+      <details
+        ref={detailsRef}
+        className="group mb-6 rounded-2xl border border-cyan-100 bg-gradient-to-b from-cyan-50/70 via-white to-white p-4 shadow-sm lg:hidden"
+      >
         <summary className="flex cursor-pointer list-none items-center gap-2 text-sm font-semibold text-slate-900">
-          <List className="h-4 w-4 text-blue-600" aria-hidden="true" />
+          <List className="h-4 w-4 text-cyan-600" aria-hidden="true" />
           Contents
           <ChevronDown className="ml-auto h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
-        <div className="mt-3 max-h-72 overflow-y-auto border-t border-slate-100 pt-3">{renderList()}</div>
+        <div className="mt-3 max-h-72 overflow-y-auto border-t border-cyan-100 pt-3">{renderList()}</div>
       </details>
 
       {/* Desktop / wide screens: sticky left sidebar. */}
       <nav aria-label="On this page" className="hidden lg:sticky lg:top-24 lg:block">
-        <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-slate-400">
-          <List className="h-3.5 w-3.5" aria-hidden="true" />
-          On this page
-        </p>
-        <div className="max-h-[calc(100vh-8rem)] overflow-y-auto pr-2">{renderList()}</div>
+        <div className="rounded-2xl border border-cyan-100 bg-gradient-to-b from-cyan-50/70 via-white to-white p-4 shadow-sm">
+          <p className="mb-3 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wider text-cyan-700">
+            <List className="h-3.5 w-3.5 text-cyan-500" aria-hidden="true" />
+            On this page
+          </p>
+          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderList()}</div>
+        </div>
       </nav>
     </>
   )
