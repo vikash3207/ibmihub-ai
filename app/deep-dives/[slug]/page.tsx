@@ -57,6 +57,8 @@ const SEO_DESCRIPTIONS: Partial<Record<string, string>> = {
     'Learn embedded SQL in RPGLE on IBM i with practical SQLRPGLE examples covering host variables, indicator variables, SELECT INTO, cursor loops, SQLCODE, commitment control, dynamic SQL, and production practices.',
   'sql-cursors-on-ibm-i':
     'Learn SQL cursors on IBM i with practical SQLRPGLE examples covering DECLARE, OPEN, FETCH, CLOSE, scrollable cursors, WHERE CURRENT OF, multi-row fetch, SQLERRD(3), WITH HOLD, SQLCODE handling, and production practices.',
+  'stored-procedures-on-ibm-i':
+    'Learn stored procedures on IBM i with practical SQL and RPGLE examples covering SQL procedures, external procedures, IN/OUT/INOUT parameters, SQL PL, error handlers, result sets, RPG callers, overloading, security, and production practices.',
 }
 
 function getSeoDescription(deepDive: DeepDive): string {
