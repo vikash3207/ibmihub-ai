@@ -8,7 +8,12 @@ import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { isDeepDiveAvailable, type DeepDive } from '@/lib/deep-dives'
 import { loadDeepDiveMarkdown } from '@/lib/deep-dive-content'
 import { renderLessonMarkdown } from '@/lib/markdown'
-import { addDeepDiveHeadingAnchors, tagDeepDiveCallouts, type DeepDiveTocItem } from '@/lib/deep-dive-render'
+import {
+  addDeepDiveHeadingAnchors,
+  tagDeepDiveCallouts,
+  wrapDeepDiveTables,
+  type DeepDiveTocItem,
+} from '@/lib/deep-dive-render'
 import { LessonContent } from '@/components/lesson-content'
 import { DeepDiveToc } from '@/components/deep-dive-toc'
 import { StructuredData } from '@/components/structured-data'
@@ -127,7 +132,7 @@ export default async function DeepDivePage({ params }: Props) {
     const markdown = await loadDeepDiveMarkdown(deepDive)
     const rendered = await renderLessonMarkdown(markdown)
     const withAnchors = addDeepDiveHeadingAnchors(rendered)
-    bodyHtml = tagDeepDiveCallouts(withAnchors.html)
+    bodyHtml = wrapDeepDiveTables(tagDeepDiveCallouts(withAnchors.html))
     toc = withAnchors.toc
   } catch {
     loadError = true
