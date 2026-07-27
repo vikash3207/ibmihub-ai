@@ -237,3 +237,82 @@
   border-left-color: rgb(147 51 234 / 0.4); /* purple-600 */
   background-color: rgb(250 245 255 / 0.7); /* purple-50 */
 }
+
+/*
+ * Deep Dive table readability. lib/deep-dive-render.ts's wrapDeepDiveTables()
+ * wraps every rendered <table> in a <div class="dd-table-wrap"> -- the base
+ * `.prose table` rule above (`display: block; white-space: nowrap`) is a
+ * blunt "always scroll" fallback that was forcing ordinary 2-3 column
+ * comparison tables (e.g. "Stored procedure vs. trigger, side by side" in
+ * the Database Triggers Deep Dive) to clip their right-hand column and
+ * require horizontal scrolling even though the content would fit fine if
+ * cells were allowed to wrap. These rules restore real table layout and
+ * wrapping *inside* the wrapper, and move the scroll-fallback behavior onto
+ * the wrapper itself, so a table that still doesn't fit even with wrapping
+ * (e.g. Section 15's many-column trigger buffer field table) still scrolls
+ * within its own bounds instead of overflowing the page -- it just no
+ * longer forces that fallback on every table by default.
+ *
+ * Only ever targets tables lib/deep-dive-render.ts wrapped, so lesson pages
+ * (no `.deep-dive-article` ancestor, no `.dd-table-wrap`) are unaffected --
+ * same scoping guarantee every other rule in this block already relies on.
+ */
+.deep-dive-article .dd-table-wrap {
+  margin: 1.75rem 0;
+  overflow-x: auto;
+  border: 1px solid rgb(226 232 240); /* slate-200 */
+  border-radius: 0.75rem;
+  /* A persistently visible (rather than only-on-hover) thin scrollbar --
+     the "this can still scroll" affordance for the rare table wide enough
+     to need it, without any JS to detect overflow. */
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184) transparent; /* slate-400 thumb */
+}
+
+.deep-dive-article .dd-table-wrap::-webkit-scrollbar {
+  height: 7px;
+}
+
+.deep-dive-article .dd-table-wrap::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184); /* slate-400 */
+  border-radius: 9999px;
+}
+
+.deep-dive-article .dd-table-wrap table {
+  display: table;
+  width: 100%;
+  /* Auto (content-based) rather than fixed column widths: this content set
+     mixes narrow row-label tables (2-3 columns) with wide reference tables
+     (5+ columns), and auto-layout naturally keeps a short label column
+     narrow while giving longer prose columns the room they need, without
+     hand-tuned per-table column widths. */
+  table-layout: auto;
+  white-space: normal;
+  overflow-x: visible; /* the wrapper div above owns the scroll fallback, not the table itself */
+  border: none;
+  margin: 0;
+}
+
+.deep-dive-article .dd-table-wrap th,
+.deep-dive-article .dd-table-wrap td {
+  white-space: normal;
+  vertical-align: top;
+  overflow-wrap: break-word;
+  line-height: 1.5;
+}
+
+/* A long unbroken inline `code` value (a constant, a SQLSTATE, ...) should
+   still wrap with the rest of the cell rather than push the column wide. */
+.deep-dive-article .dd-table-wrap code {
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+@media (max-width: 640px) {
+  .deep-dive-article .dd-table-wrap th,
+  .deep-dive-article .dd-table-wrap td {
+    padding-left: 0.65rem;
+    padding-right: 0.65rem;
+    font-size: 0.8125rem;
+  }
+}

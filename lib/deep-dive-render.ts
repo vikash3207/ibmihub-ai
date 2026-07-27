@@ -116,3 +116,20 @@ export function tagDeepDiveCallouts(html: string): string {
     return className ? `<blockquote class="${className}">${inner}</blockquote>` : match
   })
 }
+
+/**
+ * Wraps every rendered `<table>` in a `<div class="dd-table-wrap">` so
+ * app/globals.css can give Deep Dive tables real table layout (wrapping,
+ * full-width columns) while still falling back to horizontal scroll on the
+ * *wrapper* -- not the table itself -- for the rare table too wide to fit
+ * even with wrapping (e.g. the trigger buffer field table). Deep Dive
+ * content only ever emits plain, non-nested `<table>` elements (GFM pipe
+ * tables via remark-gfm), so this simple non-greedy match is safe -- same
+ * assumption tagDeepDiveCallouts above already relies on for blockquotes.
+ *
+ * Scoped to this module (not lib/markdown.ts) so lesson pages, which share
+ * the same base `.prose table` rules, are completely unaffected.
+ */
+export function wrapDeepDiveTables(html: string): string {
+  return html.replace(/<table>[\s\S]*?<\/table>/g, (match) => `<div class="dd-table-wrap">${match}</div>`)
+}
