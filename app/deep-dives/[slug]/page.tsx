@@ -61,6 +61,8 @@ const SEO_DESCRIPTIONS: Partial<Record<string, string>> = {
     'Learn stored procedures on IBM i with practical SQL and RPGLE examples covering SQL procedures, external procedures, IN/OUT/INOUT parameters, SQL PL, error handlers, result sets, RPG callers, overloading, security, and production practices.',
   'database-triggers-on-ibm-i':
     'Learn database triggers on IBM i with practical SQL and RPGLE examples covering SQL triggers, system triggers, BEFORE and AFTER triggers, transition variables, transition tables, audit logging, validation, cascading, recursion, debugging, and production practices.',
+  'sql-error-handling-on-ibm-i':
+    'Learn SQL error handling on IBM i with SQLCODE, SQLSTATE, GET DIAGNOSTICS, SQLCA, ROW_COUNT, SQLRPGLE patterns, SQL PL handlers, retry logic, transaction recovery, logging, and production troubleshooting.',
 }
 
 function getSeoDescription(deepDive: DeepDive): string {
