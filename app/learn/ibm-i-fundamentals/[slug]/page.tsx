@@ -24,9 +24,10 @@ import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { SubmitButton } from '@/components/ui/submit-button'
 
-// Reads the auth session to decide protected-lesson access, Mark Complete,
-// and completed state -- never statically cache; always compute fresh per
-// request so production visitors see their real session, not a cached one.
+// Lesson content itself is public (no login required to read it) -- this
+// stays force-dynamic because it still reads the auth session per request
+// for personalization that IS login-gated: Mark Complete, the Completed
+// badge, and completed state. Never statically cache that away.
 export const dynamic = 'force-dynamic'
 
 interface Props {
@@ -41,9 +42,8 @@ const getLesson = cache(async (slug: string) => getPublishedLessonBySlug(slug))
 
 /**
  * BreadcrumbList structured data (PR #159 -- SEO crawling/indexing audit).
- * Purely navigational metadata -- the lesson's title and slug are already
- * public (shown even to a logged-out visitor on the "Log in to continue"
- * card), so this carries no gated content regardless of `canRead` below.
+ * Purely navigational metadata -- lesson content itself is public, so this
+ * carries no gated content either way.
  */
 function buildLessonBreadcrumb(lesson: { title: string; slug: string }) {
   return {
@@ -87,8 +87,6 @@ export default async function LessonPage({ params, searchParams }: Props) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isPreview = lesson.lesson_order === 1
-  const canRead = isPreview || Boolean(user)
   const practiceTopicId = getPracticeTopicIdForLesson(lesson.slug)
 
   const currentIndex = lessons.findIndex((l) => l.id === lesson.id)
@@ -123,18 +121,14 @@ export default async function LessonPage({ params, searchParams }: Props) {
     suggestedQuestion: lesson.ai_tutor_starter_question ?? undefined,
   }
 
-  const loginHref = `/auth/login?next=${encodeURIComponent(`/learn/ibm-i-fundamentals/${lesson.slug}`)}`
-
   let bodyHtml: string | null = null
   let loadError = false
 
-  if (canRead) {
-    try {
-      const markdown = await loadLessonMarkdown(lesson)
-      bodyHtml = await renderLessonMarkdown(markdown)
-    } catch {
-      loadError = true
-    }
+  try {
+    const markdown = await loadLessonMarkdown(lesson)
+    bodyHtml = await renderLessonMarkdown(markdown)
+  } catch {
+    loadError = true
   }
 
   const isCompleted = user
@@ -185,69 +179,48 @@ export default async function LessonPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      {canRead ? (
-        loadError ? (
-          <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-800">
-            This lesson could not be loaded right now. Please try again later, or{' '}
-            <Link href="/learn/ibm-i-fundamentals" prefetch={false} className="underline">
-              return to {IBM_I_FUNDAMENTALS_PATH_NAME}
-            </Link>
-            .
-          </div>
-        ) : (
-          <LessonContent html={bodyHtml ?? ''} />
-        )
+      {loadError ? (
+        <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-800">
+          This lesson could not be loaded right now. Please try again later, or{' '}
+          <Link href="/learn/ibm-i-fundamentals" prefetch={false} className="underline">
+            return to {IBM_I_FUNDAMENTALS_PATH_NAME}
+          </Link>
+          .
+        </div>
       ) : (
-        <Card className="text-center space-y-4 py-10">
-          <h2 className="text-lg font-semibold text-slate-900">Log in to continue</h2>
-          <p className="text-sm text-slate-600 max-w-sm mx-auto leading-relaxed">
-            Create a free account to read this lesson and save your progress through the IBM i
-            Fundamentals path.
-          </p>
-          <div className="flex justify-center gap-3">
-            <Link href={loginHref} className={buttonVariants({ variant: 'primary' })}>
-              Log in
-            </Link>
+        <LessonContent html={bodyHtml ?? ''} />
+      )}
+
+      {!loadError && (
+        user ? (
+          <Card className="border-l-4 border-l-emerald-500">
+            {isCompleted ? (
+              <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
+                <Check className="h-4 w-4" aria-hidden="true" /> Completed
+              </p>
+            ) : (
+              <form>
+                <input type="hidden" name="lessonId" value={lesson.id} />
+                <SubmitButton formAction={markLessonComplete} variant="primary" pendingLabel="Marking complete...">
+                  Mark Complete
+                </SubmitButton>
+              </form>
+            )}
+          </Card>
+        ) : (
+          <Card variant="muted" className="text-center space-y-3">
+            <p className="text-sm text-slate-700 leading-relaxed">
+              Like what you&apos;re reading? Create a free account to track completed lessons and
+              unlock the AI Tutor and Practice Lab.
+            </p>
             <Link
               href={`/auth/sign-up?next=${encodeURIComponent(`/learn/ibm-i-fundamentals/${lesson.slug}`)}`}
-              className={buttonVariants({ variant: 'secondary' })}
+              className={buttonVariants({ variant: 'primary' })}
             >
-              Create account
+              Create a free account
             </Link>
-          </div>
-        </Card>
-      )}
-
-      {user && canRead && !loadError && (
-        <Card className="border-l-4 border-l-emerald-500">
-          {isCompleted ? (
-            <p className="flex items-center gap-1.5 text-sm font-medium text-emerald-700">
-              <Check className="h-4 w-4" aria-hidden="true" /> Completed
-            </p>
-          ) : (
-            <form>
-              <input type="hidden" name="lessonId" value={lesson.id} />
-              <SubmitButton formAction={markLessonComplete} variant="primary" pendingLabel="Marking complete...">
-                Mark Complete
-              </SubmitButton>
-            </form>
-          )}
-        </Card>
-      )}
-
-      {isPreview && !user && canRead && (
-        <Card variant="muted" className="text-center space-y-3">
-          <p className="text-sm text-slate-700 leading-relaxed">
-            Like what you&apos;re reading? Create a free account to save your progress and unlock
-            the rest of {IBM_I_FUNDAMENTALS_PATH_NAME}.
-          </p>
-          <Link
-            href={`/auth/sign-up?next=${encodeURIComponent('/learn/ibm-i-fundamentals')}`}
-            className={buttonVariants({ variant: 'primary' })}
-          >
-            Create a free account
-          </Link>
-        </Card>
+          </Card>
+        )
       )}
 
       <SyncActiveLessonContext context={aiTutorContext} />

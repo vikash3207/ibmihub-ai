@@ -6,14 +6,14 @@ import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { getCompletedLessonIdsForUser } from '@/lib/progress'
 import { LessonBrowser } from '@/components/lesson-browser'
 
-// Reads the auth session to decide lock icons/completed badges per lesson --
-// never statically cache; always compute fresh per request.
+// Lesson content is public; this stays force-dynamic because it still reads
+// the auth session per request for personalization that IS login-gated:
+// the completed badge/progress bar below. Never statically cache that away.
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: IBM_I_FUNDAMENTALS_PATH_NAME,
-  description:
-    'The ordered lesson list for the IBM i Fundamentals learning path. The first lesson is free to preview without an account.',
+  description: 'The ordered lesson list for the IBM i Fundamentals learning path -- free to read, no account required.',
   alternates: { canonical: '/learn/ibm-i-fundamentals' },
 }
 
@@ -65,7 +65,6 @@ export default async function IbmIFundamentalsPage() {
         <LessonBrowser
           lessons={lessons}
           completedLessonIds={Array.from(completedLessonIds)}
-          isLoggedIn={Boolean(user)}
         />
       )}
     </div>
