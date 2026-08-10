@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useAiTutorPanel } from '@/components/ai-tutor/ai-tutor-panel-provider'
+import { GENERAL_CONTEXT } from '@/components/ai-tutor/types'
 import { cn } from '@/lib/utils'
 
 interface NavLinkDef {
@@ -9,6 +11,13 @@ interface NavLinkDef {
   label: string
   /** "ai" gets the cyan AI Tutor accent instead of the default slate/blue. */
   accent?: 'ai'
+  /**
+   * When set, the item opens the shared AI Tutor panel in place instead of
+   * navigating (PR #180). `href` is still required and still rendered as a
+   * real anchor, so middle-click / cmd-click / "open in new tab" keep working
+   * and the canonical /ai-tutor route stays reachable.
+   */
+  opensAiTutorPanel?: boolean
 }
 
 const LOGGED_IN_LINKS: NavLinkDef[] = [
@@ -16,7 +25,7 @@ const LOGGED_IN_LINKS: NavLinkDef[] = [
   { href: '/learn', label: 'Learning Center' },
   { href: '/deep-dives', label: 'Deep Dives' },
   { href: '/practice', label: 'Practice' },
-  { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai' },
+  { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai', opensAiTutorPanel: true },
   { href: '/contact', label: 'Contact Us' },
 ]
 
@@ -29,7 +38,7 @@ const LOGGED_IN_LINKS: NavLinkDef[] = [
 const LOGGED_OUT_LINKS: NavLinkDef[] = [
   { href: '/learn', label: 'Learning Center' },
   { href: '/deep-dives', label: 'Deep Dives' },
-  { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai' },
+  { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai', opensAiTutorPanel: true },
   { href: '/contact', label: 'Contact Us' },
 ]
 
@@ -50,6 +59,7 @@ const LOGGED_OUT_LINKS: NavLinkDef[] = [
  */
 export function SiteNavLinks({ isLoggedIn }: { isLoggedIn: boolean }) {
   const pathname = usePathname()
+  const { openPanel } = useAiTutorPanel()
   const links = isLoggedIn ? LOGGED_IN_LINKS : LOGGED_OUT_LINKS
 
   return (
@@ -60,6 +70,22 @@ export function SiteNavLinks({ isLoggedIn }: { isLoggedIn: boolean }) {
           <Link
             key={link.href}
             href={link.href}
+            onClick={
+              link.opensAiTutorPanel
+                ? (event) => {
+                    // Let the browser handle any modified click (new tab, new
+                    // window, download) and non-primary buttons -- only a
+                    // plain left click is intercepted to open the panel in
+                    // place, so the canonical /ai-tutor route stays reachable.
+                    if (event.defaultPrevented) return
+                    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
+                    event.preventDefault()
+                    // General context: the header is page-agnostic, so no
+                    // educational context is invented from the current page.
+                    openPanel(GENERAL_CONTEXT)
+                  }
+                : undefined
+            }
             aria-current={isActive ? 'page' : undefined}
             className={cn(
               'text-sm transition-colors active:opacity-70',

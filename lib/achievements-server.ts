@@ -32,7 +32,9 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { getPublishedLessons } from '@/lib/lessons'
 import { getCompletionRecordsForUser } from '@/lib/progress'
-import { evaluateAchievements } from '@/lib/achievements'
+import { evaluateAchievements, ACHIEVEMENT_BY_CODE } from '@/lib/achievements'
+import type { Lesson } from '@/lib/lessons'
+import type { LessonCompletionRecord } from '@/lib/progress'
 
 export interface StoredAchievement {
   badgeCode: string
@@ -62,12 +64,24 @@ export async function getAchievementsForUser(userId: string): Promise<StoredAchi
     return []
   }
 
-  return (data ?? []).map((row) => ({
-    badgeCode: row.badge_code as string,
-    earnedAt: row.earned_at as string,
-    lessonsCompletedAtAward: (row.lessons_completed_at_award as number | null) ?? null,
-    qualifyingTopicId: (row.qualifying_topic_id as string | null) ?? null,
-  }))
+  return (
+    (data ?? [])
+      .map((row) => ({
+        badgeCode: row.badge_code as string,
+        earnedAt: row.earned_at as string,
+        lessonsCompletedAtAward: (row.lessons_completed_at_award as number | null) ?? null,
+        qualifyingTopicId: (row.qualifying_topic_id as string | null) ?? null,
+      }))
+      // Reconcile stored rows against the authoritative registry in
+      // lib/achievements.ts (PR #180). A row whose badge_code is no longer
+      // (or never was) a known badge -- a retired code, a typo introduced by
+      // a manual SQL fix, a future code rolled back -- is ignored for every
+      // user-facing calculation. Without this, "11 of 10 badges earned" is
+      // reachable. The row is deliberately NOT deleted: this module never
+      // destroys award history, and an unknown code may simply belong to a
+      // badge that is temporarily out of the registry.
+      .filter((achievement) => ACHIEVEMENT_BY_CODE.has(achievement.badgeCode))
+  )
 }
 
 export interface ReconcileResult {
@@ -95,10 +109,24 @@ export interface ReconcileResult {
  * a backfilled badge carries the timestamp of the completion that actually
  * crossed its threshold, not the time of the backfill.
  */
-export async function reconcileAchievementsForUser(userId: string): Promise<ReconcileResult> {
+export async function reconcileAchievementsForUser(
+  userId: string,
+  /**
+   * Optional already-loaded trusted data (PR #180). The Dashboard and the
+   * gallery both fetch the published curriculum and this user's completions
+   * for their own rendering; passing them in avoids issuing the identical
+   * two queries a second time inside here. Omitting them keeps the function
+   * self-sufficient for any other caller.
+   *
+   * These are server-loaded values only -- there is no path for a browser to
+   * supply them, and eligibility is still computed here rather than trusted
+   * from a caller-supplied count.
+   */
+  preloaded?: { lessons?: Lesson[]; completions?: LessonCompletionRecord[] }
+): Promise<ReconcileResult> {
   const [lessons, completions, existing] = await Promise.all([
-    getPublishedLessons(),
-    getCompletionRecordsForUser(userId),
+    preloaded?.lessons ?? getPublishedLessons(),
+    preloaded?.completions ?? getCompletionRecordsForUser(userId),
     getAchievementsForUser(userId),
   ])
 

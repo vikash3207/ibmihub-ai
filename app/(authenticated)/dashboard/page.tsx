@@ -16,6 +16,7 @@ import {
 import { reconcileAchievementsForUser } from '@/lib/achievements-server'
 import { ACHIEVEMENTS, ACHIEVEMENT_BY_CODE } from '@/lib/achievements'
 import { AchievementMedallion } from '@/components/achievement-badge'
+import { OpenAiTutorCard } from '@/components/ai-tutor/open-ai-tutor-card'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { ProgressBar } from '@/components/ui/progress-bar'
@@ -92,12 +93,19 @@ export default async function DashboardPage() {
   // learners who qualified before achievements shipped (PR #179). It is
   // idempotent, scoped to this one authenticated user, and never runs for an
   // anonymous request -- the redirect above happens first.
-  const [lessons, completionRecords, requestHeaders, { achievements }] = await Promise.all([
+  const [lessons, completionRecords, requestHeaders] = await Promise.all([
     getPublishedLessons(),
     getCompletionRecordsForUser(user.id),
     headers(),
-    reconcileAchievementsForUser(user.id),
   ])
+
+  // Runs after the two queries above so it can reuse their results instead of
+  // re-fetching the same curriculum and completions (PR #180) -- three
+  // distinct queries for this page instead of five.
+  const { achievements } = await reconcileAchievementsForUser(user.id, {
+    lessons,
+    completions: completionRecords,
+  })
 
   // Dates are formatted server-side in the visitor's own language preference
   // -- see lib/format-date.ts for why this isn't done in a client effect.
@@ -452,8 +460,10 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
-          <Link href="/ai-tutor" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
-            <Card variant="ai" className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
+          {/* Opens the shared panel in place (PR #180) rather than
+              navigating away from the Dashboard. */}
+          <OpenAiTutorCard>
+            <Card variant="ai" className="h-full text-left transition-shadow motion-reduce:transition-none hover:shadow-md">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
                 <Sparkles className="h-5 w-5" aria-hidden="true" />
               </div>
@@ -463,7 +473,7 @@ export default async function DashboardPage() {
                 system, execute code, or analyze production code.
               </span>
             </Card>
-          </Link>
+          </OpenAiTutorCard>
 
           <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
             <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">

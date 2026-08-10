@@ -17,13 +17,14 @@ import {
 import { LessonContent } from '@/components/lesson-content'
 import { DeepDiveToc } from '@/components/deep-dive-toc'
 import { StructuredData } from '@/components/structured-data'
+import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
+import { GENERAL_CONTEXT } from '@/components/ai-tutor/types'
 import { DEEP_DIVE_CATEGORIES, DEEP_DIVE_ACCENT_CLASSES, getDeepDiveAccent } from '@/lib/deep-dive-categories'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
 import { SITE_NAME, SITE_URL } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -267,9 +268,15 @@ export default async function DeepDivePage({ params }: Props) {
                   system, execute code, or analyze production code. See the &ldquo;Ask the AI
                   Tutor&rdquo; section above for good prompts to start with.
                 </p>
-                <Link href="/ai-tutor" className={cn(buttonVariants({ variant: 'ai', size: 'sm' }), 'mt-3')}>
+                {/* Opens the shared panel in place (PR #180) so the Deep Dive
+                    stays on screen and the reading position is kept, instead
+                    of navigating away to the full-page route. General
+                    context: Deep Dives are not part of the AI Tutor's
+                    retrieval index, so no Deep-Dive-specific grounding is
+                    claimed here -- see the PR notes. */}
+                <AskAiTutorButton context={GENERAL_CONTEXT} size="sm" className="mt-3">
                   Open the AI Tutor
-                </Link>
+                </AskAiTutorButton>
               </Card>
             </article>
           </div>
