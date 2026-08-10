@@ -1,27 +1,43 @@
 import Link from 'next/link'
+import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { BookOpen, Sparkles, TrendingUp, ClipboardCheck, FlaskConical } from 'lucide-react'
+import { BookOpen, Sparkles, TrendingUp, ClipboardCheck, FlaskConical, CheckCircle2, Layers, ArrowRight, History } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
-import { getCompletedLessonIdsForUser } from '@/lib/progress'
+import { getCompletionRecordsForUser } from '@/lib/progress'
+import {
+  calculateOverallProgress,
+  calculateTopicProgress,
+  summarizeTopics,
+  selectContinueLesson,
+  getTopicLabelForLesson,
+} from '@/lib/dashboard-metrics'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { Card } from '@/components/ui/card'
+import { ProgressBar } from '@/components/ui/progress-bar'
+import { formatCompletionDate, parseAcceptLanguage } from '@/lib/format-date'
 import { buttonVariants } from '@/components/ui/button'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
+import { cn } from '@/lib/utils'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
 // so a production visitor's real session (not a build-time snapshot) decides
-// what renders here.
+// what renders here. This is also what makes the Dashboard reflect a lesson
+// completed moments ago without needing its own revalidation hook, and what
+// keeps one learner's progress out of any globally shared cache.
 export const dynamic = 'force-dynamic'
 
 // Account-specific content and excluded from app/sitemap.ts -- explicitly
 // opt out of indexing rather than relying only on robots.txt.
 export const metadata: Metadata = {
   title: 'Dashboard',
-  description: 'Your IBM i Fundamentals progress and next lesson.',
+  description: 'Your IBM i Fundamentals learning progress and next lesson.',
   robots: { index: false, follow: false },
 }
+
+/** How many recent completions to list before pointing at the full lesson list. */
+const RECENT_ACTIVITY_LIMIT = 5
 
 /**
  * Approved onboarding-aware Start Learning copy (Spec 005 DASH-FR-010).
@@ -44,6 +60,12 @@ const START_LEARNING_COPY: Record<string, string> = {
 const DEFAULT_START_LEARNING_COPY =
   'Start with the IBM i Fundamentals path to build a clear foundation in IBM i.'
 
+const TOPIC_STATUS_LABEL: Record<string, string> = {
+  'not-started': 'Not started',
+  'in-progress': 'In progress',
+  completed: 'Completed',
+}
+
 export default async function DashboardPage() {
   const supabase = await createClient()
   const {
@@ -60,149 +82,338 @@ export default async function DashboardPage() {
     .eq('id', user.id)
     .maybeSingle()
 
-  const lessons = await getPublishedLessons()
-  const completedLessonIds = await getCompletedLessonIdsForUser(user.id)
+  // `user.id` comes from the trusted server session above, never from client
+  // input. One completion query serves every metric below (ids, the Continue
+  // Learning anchor, and recent activity) rather than one request per card.
+  const [lessons, completionRecords, requestHeaders] = await Promise.all([
+    getPublishedLessons(),
+    getCompletionRecordsForUser(user.id),
+    headers(),
+  ])
 
-  const completedCount = lessons.filter((lesson) => completedLessonIds.has(lesson.id)).length
-  const pathComplete = lessons.length > 0 && completedCount === lessons.length
-  const progressPercent = lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0
+  // Dates are formatted server-side in the visitor's own language preference
+  // -- see lib/format-date.ts for why this isn't done in a client effect.
+  const locale = parseAcceptLanguage(requestHeaders.get('accept-language'))
 
-  // Lessons are already ordered by lesson_order (getPublishedLessons), so the
-  // first array match is the lowest-order Published lesson not yet completed.
-  const nextLesson = lessons.find((lesson) => !completedLessonIds.has(lesson.id)) ?? null
+  // A Set both de-duplicates ids and is what every calculation intersects
+  // against `lessons`, so a completion row for an unpublished or deleted
+  // lesson can never inflate a count.
+  const completedLessonIds = new Set(completionRecords.map((record) => record.lessonId))
+  const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]))
 
-  const welcomeMessage = pathComplete
-    ? "Great work -- you've completed the available IBM i Fundamentals lessons."
-    : completedCount === 0
-      ? "Welcome to iRPGenie. Let's start your IBM i learning journey."
-      : 'Welcome back. Continue your IBM i learning journey.'
+  const overall = calculateOverallProgress(lessons, completedLessonIds)
+  const topicProgress = calculateTopicProgress(lessons, completedLessonIds)
+  const topicSummary = summarizeTopics(topicProgress)
 
+  // Records are ordered completed_at DESC, so the first one still pointing at
+  // a currently published lesson is the newest usable anchor.
+  const mostRecentCompletedLessonId =
+    completionRecords.find((record) => lessonById.has(record.lessonId))?.lessonId ?? null
+
+  const continueLesson = selectContinueLesson(lessons, completedLessonIds, mostRecentCompletedLessonId)
+  const continueTopicLabel = continueLesson ? getTopicLabelForLesson(continueLesson) : undefined
+  const continueTopicProgress = topicProgress.find((topic) => topic.label === continueTopicLabel)
+
+  // Only genuine completion events for lessons that are still published.
+  const recentActivity = completionRecords
+    .map((record) => ({ record, lesson: lessonById.get(record.lessonId) }))
+    .filter((entry): entry is { record: (typeof completionRecords)[number]; lesson: NonNullable<typeof entry.lesson> } =>
+      Boolean(entry.lesson)
+    )
+    .slice(0, RECENT_ACTIVITY_LIMIT)
+
+  const isNewLearner = overall.completedCount === 0
   const startLearningCopy = profile?.onboarding_response
     ? (START_LEARNING_COPY[profile.onboarding_response] ?? DEFAULT_START_LEARNING_COPY)
     : DEFAULT_START_LEARNING_COPY
 
+  const welcomeMessage = overall.isCurriculumComplete
+    ? "Great work -- you've completed every currently published lesson."
+    : isNewLearner
+      ? "Welcome to iRPGenie. Let's start your IBM i learning journey."
+      : "Welcome back. Here's where you left off."
+
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Dashboard</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Learning Progress</h1>
         <p className="text-slate-600 leading-relaxed">{welcomeMessage}</p>
-
-        {lessons.length > 0 && (
-          <div className="mt-4 max-w-sm">
-            <div className="mb-1.5 flex items-center justify-between text-xs text-slate-500">
-              <span className="flex items-center gap-1">
-                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
-                IBM i Fundamentals progress
-              </span>
-              <span>
-                {completedCount} of {lessons.length} completed
-              </span>
-            </div>
-            <div className="h-2 w-full rounded-full bg-slate-100">
-              <div
-                className="h-2 rounded-full bg-blue-600 transition-[width]"
-                style={{ width: `${progressPercent}%` }}
-              />
-            </div>
-          </div>
-        )}
       </div>
 
       <PublicBetaNotice compact />
 
-      <Card className="border-l-4 border-l-blue-600">
-        {pathComplete ? (
-          <>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">Path complete</h2>
-            <p className="text-sm text-slate-600 mb-4">
-              You&apos;ve completed all available {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
+      {/* -- Learning overview ------------------------------------------- */}
+      <section aria-labelledby="overview-heading" className="space-y-3">
+        <h2 id="overview-heading" className="text-lg font-semibold text-slate-900">
+          Overview
+        </h2>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <Card>
+            <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+              Lessons completed
             </p>
-            <Link href="/learn/ibm-i-fundamentals" className={buttonVariants({ variant: 'primary' })}>
-              View All Lessons
-            </Link>
-          </>
-        ) : completedCount === 0 ? (
-          <>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">Start Learning</h2>
-            <p className="text-sm text-slate-600 mb-4">{startLearningCopy}</p>
-            {nextLesson && (
-              <Link
-                href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
-                className={buttonVariants({ variant: 'primary' })}
-              >
-                Start {nextLesson.title}
+            <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
+              {overall.completedCount}
+              <span className="text-base font-medium text-slate-400"> / {overall.totalCount}</span>
+            </p>
+            <p className="mt-1 text-xs text-slate-500">Currently published lessons</p>
+          </Card>
+
+          <Card>
+            <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <TrendingUp className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+              Curriculum progress
+            </p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">{overall.percent}%</p>
+            <ProgressBar
+              percent={overall.percent}
+              label={`${IBM_I_FUNDAMENTALS_PATH_NAME} progress: ${overall.percent}% complete`}
+              className="mt-2"
+              tone={overall.isCurriculumComplete ? 'emerald' : 'blue'}
+            />
+          </Card>
+
+          <Card>
+            <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
+              <Layers className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+              Topics started
+            </p>
+            <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
+              {topicSummary.startedCount}
+              <span className="text-base font-medium text-slate-400"> / {topicSummary.totalCount}</span>
+            </p>
+            <p className="mt-1 text-xs text-slate-500">
+              {topicSummary.completedCount > 0
+                ? `${topicSummary.completedCount} fully completed`
+                : 'At least one lesson completed'}
+            </p>
+          </Card>
+        </div>
+
+        <p className="text-xs text-slate-400">
+          Progress reflects lessons you marked complete. It measures how much of the curriculum you
+          have worked through, not a skill assessment.
+        </p>
+      </section>
+
+      {/* -- Continue learning ------------------------------------------- */}
+      <section aria-labelledby="continue-heading" className="space-y-3">
+        <h2 id="continue-heading" className="text-lg font-semibold text-slate-900">
+          {overall.isCurriculumComplete ? 'Curriculum complete' : isNewLearner ? 'Start learning' : 'Continue learning'}
+        </h2>
+
+        {overall.isCurriculumComplete ? (
+          <Card className="border-l-4 border-l-emerald-500">
+            <p className="text-sm text-slate-700 leading-relaxed">
+              You&apos;ve completed all {overall.totalCount} currently published{' '}
+              {IBM_I_FUNDAMENTALS_PATH_NAME} lessons. New lessons are added over time, and they&apos;ll
+              appear here when they are.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Link href="/deep-dives" className={buttonVariants({ variant: 'primary' })}>
+                Explore Deep Dives
               </Link>
-            )}
-          </>
+              <Link href="/practice-lab" className={buttonVariants({ variant: 'secondary' })}>
+                Open Practice Lab
+              </Link>
+              <Link href="/learn/ibm-i-fundamentals" className={buttonVariants({ variant: 'secondary' })}>
+                Review lessons
+              </Link>
+            </div>
+          </Card>
+        ) : continueLesson ? (
+          <Card className="border-l-4 border-l-blue-600">
+            {isNewLearner && <p className="mb-3 text-sm text-slate-600 leading-relaxed">{startLearningCopy}</p>}
+
+            <div className="flex items-start gap-4">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold tabular-nums text-blue-700">
+                {continueLesson.lesson_order}
+              </span>
+              <div className="min-w-0 flex-1">
+                <h3 className="font-semibold text-slate-900">{continueLesson.title}</h3>
+                {continueTopicLabel && (
+                  <p className="mt-0.5 text-xs font-medium text-blue-700">{continueTopicLabel}</p>
+                )}
+                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">
+                  {continueLesson.short_description}
+                </p>
+
+                {continueTopicProgress && continueTopicProgress.totalCount > 0 && (
+                  <div className="mt-3 max-w-xs">
+                    <p className="mb-1 text-xs text-slate-500">
+                      {continueTopicProgress.label}: {continueTopicProgress.completedCount} of{' '}
+                      {continueTopicProgress.totalCount} completed ({continueTopicProgress.percent}%)
+                    </p>
+                    <ProgressBar
+                      percent={continueTopicProgress.percent}
+                      label={`${continueTopicProgress.label} progress: ${continueTopicProgress.percent}% complete`}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <Link
+              href={`/learn/ibm-i-fundamentals/${continueLesson.slug}`}
+              className={cn(buttonVariants({ variant: 'primary' }), 'mt-4')}
+            >
+              {isNewLearner ? 'Start Learning' : 'Continue Learning'}
+              <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </Card>
         ) : (
-          <>
-            <h2 className="text-lg font-semibold text-slate-900 mb-2">Continue Learning</h2>
-            {nextLesson && (
-              <>
-                <p className="text-sm text-slate-600 mb-4">Next up: {nextLesson.title}</p>
-                <Link
-                  href={`/learn/ibm-i-fundamentals/${nextLesson.slug}`}
-                  className={buttonVariants({ variant: 'primary' })}
-                >
-                  Continue
-                </Link>
-              </>
-            )}
-          </>
+          <Card>
+            <p className="text-sm text-slate-600">
+              Lessons are still being published. Check back soon.
+            </p>
+          </Card>
         )}
-      </Card>
+      </section>
 
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <Link href="/learn/ibm-i-fundamentals" className="block active:scale-[0.99] transition-transform">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-              <BookOpen className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <span className="block font-semibold text-slate-900">Learning Center</span>
-            <span className="block text-sm text-slate-600 mt-1">
-              View all {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
-            </span>
-          </Card>
-        </Link>
+      {/* -- Progress by topic ------------------------------------------- */}
+      {topicProgress.length > 0 && (
+        <section aria-labelledby="topics-heading" className="space-y-3">
+          <h2 id="topics-heading" className="text-lg font-semibold text-slate-900">
+            Progress by topic
+          </h2>
 
-        <Link href="/practice" className="block active:scale-[0.99] transition-transform">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-              <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <span className="block font-semibold text-slate-900">Practice Questions</span>
-            <span className="block text-sm text-slate-600 mt-1">
-              Check your understanding of beginner IBM i topics with short practice questions.
-            </span>
-          </Card>
-        </Link>
+          <ul className="grid gap-3 sm:grid-cols-2">
+            {topicProgress.map((topic) => (
+              <li key={topic.id}>
+                <Link
+                  href={`/learn/ibm-i-fundamentals?topic=${topic.id}`}
+                  className="block h-full rounded-2xl border border-slate-100 bg-white p-4 shadow-sm transition-colors motion-reduce:transition-none hover:border-blue-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-medium text-slate-900">{topic.label}</span>
+                    <span
+                      className={cn(
+                        'shrink-0 rounded-full px-2 py-0.5 text-[11px] font-medium',
+                        topic.status === 'completed'
+                          ? 'bg-emerald-100 text-emerald-800'
+                          : topic.status === 'in-progress'
+                            ? 'bg-blue-50 text-blue-700'
+                            : 'bg-slate-100 text-slate-500'
+                      )}
+                    >
+                      {TOPIC_STATUS_LABEL[topic.status]}
+                    </span>
+                  </div>
 
-        <Link href="/ai-tutor" className="block active:scale-[0.99] transition-transform">
-          <Card variant="ai" className="h-full transition-shadow hover:shadow-md">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
-              <Sparkles className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <span className="block font-semibold text-slate-900">AI Tutor</span>
-            <span className="block text-sm text-slate-600 mt-1">
-              Ask IBM i questions for educational guidance. It cannot connect to a real IBM i
-              system, execute code, or analyze production code.
-            </span>
-          </Card>
-        </Link>
+                  <p className="mt-1 text-xs text-slate-500 tabular-nums">
+                    {topic.completedCount} of {topic.totalCount} lessons completed &middot; {topic.percent}%
+                  </p>
 
-        <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-              <FlaskConical className="h-5 w-5" aria-hidden="true" />
-            </div>
-            <span className="block font-semibold text-slate-900">Practice Lab</span>
-            <span className="block text-sm text-slate-600 mt-1">
-              Hands-on 5250-style command practice and an ACS-style SQL console. A guided
-              simulator -- no real IBM i system connection.
-            </span>
-          </Card>
-        </Link>
-      </div>
+                  <ProgressBar
+                    percent={topic.percent}
+                    label={`${topic.label} progress: ${topic.completedCount} of ${topic.totalCount} lessons completed`}
+                    className="mt-2"
+                    tone={topic.status === 'completed' ? 'emerald' : 'blue'}
+                  />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* -- Recent activity --------------------------------------------- */}
+      {recentActivity.length > 0 && (
+        <section aria-labelledby="recent-heading" className="space-y-3">
+          <h2 id="recent-heading" className="flex items-center gap-1.5 text-lg font-semibold text-slate-900">
+            <History className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            Recently completed
+          </h2>
+
+          <ul className="divide-y divide-slate-100 overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm">
+            {recentActivity.map(({ record, lesson }) => {
+              const topicLabel = getTopicLabelForLesson(lesson)
+              return (
+                <li key={lesson.id}>
+                  <Link
+                    href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
+                    className="flex items-center justify-between gap-3 px-4 py-3 transition-colors motion-reduce:transition-none hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-blue-600"
+                  >
+                    <span className="flex min-w-0 items-center gap-2.5">
+                      <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" aria-hidden="true" />
+                      <span className="min-w-0">
+                        <span className="block truncate text-sm font-medium text-slate-900">
+                          {lesson.title}
+                        </span>
+                        {topicLabel && <span className="block text-xs text-slate-500">{topicLabel}</span>}
+                      </span>
+                    </span>
+                    <time dateTime={record.completedAt} className="shrink-0 text-xs text-slate-400">
+                      {formatCompletionDate(record.completedAt, locale)}
+                    </time>
+                  </Link>
+                </li>
+              )
+            })}
+          </ul>
+        </section>
+      )}
+
+      {/* -- Quick links -------------------------------------------------- */}
+      <section aria-labelledby="explore-heading" className="space-y-3">
+        <h2 id="explore-heading" className="text-lg font-semibold text-slate-900">
+          Keep exploring
+        </h2>
+
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link href="/learn/ibm-i-fundamentals" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
+            <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <BookOpen className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <span className="block font-semibold text-slate-900">Learning Center</span>
+              <span className="block text-sm text-slate-600 mt-1">
+                View all {IBM_I_FUNDAMENTALS_PATH_NAME} lessons.
+              </span>
+            </Card>
+          </Link>
+
+          <Link href="/practice" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
+            <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <span className="block font-semibold text-slate-900">Practice Questions</span>
+              <span className="block text-sm text-slate-600 mt-1">
+                Check your understanding of beginner IBM i topics with short practice questions.
+              </span>
+            </Card>
+          </Link>
+
+          <Link href="/ai-tutor" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
+            <Card variant="ai" className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
+                <Sparkles className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <span className="block font-semibold text-slate-900">AI Tutor</span>
+              <span className="block text-sm text-slate-600 mt-1">
+                Ask IBM i questions for educational guidance. It cannot connect to a real IBM i
+                system, execute code, or analyze production code.
+              </span>
+            </Card>
+          </Link>
+
+          <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
+            <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <FlaskConical className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <span className="block font-semibold text-slate-900">Practice Lab</span>
+              <span className="block text-sm text-slate-600 mt-1">
+                Hands-on 5250-style command practice and an ACS-style SQL console. A guided
+                simulator -- no real IBM i system connection.
+              </span>
+            </Card>
+          </Link>
+        </div>
+      </section>
     </div>
   )
 }
