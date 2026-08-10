@@ -1,8 +1,8 @@
 'use client'
 
-import { useRef } from 'react'
+import { useId, useRef, useState } from 'react'
 import Link from 'next/link'
-import { List, ChevronDown, Check } from 'lucide-react'
+import { List, ChevronDown, ChevronRight, Check } from 'lucide-react'
 import type { Lesson } from '@/lib/lessons'
 import type { TopicFilter } from '@/lib/topics'
 import { cn } from '@/lib/utils'
@@ -31,23 +31,41 @@ interface CurriculumSidebarProps {
  *
  * One component renders both the desktop sticky sidebar and the mobile
  * collapsible "Curriculum" panel, matching the established pattern in
- * components/deep-dive-toc.tsx: shared render logic, native <details> for
- * every expand/collapse (topic sections AND the mobile panel itself), no
- * new dependency, fully keyboard/screen-reader accessible by construction.
+ * components/deep-dive-toc.tsx: shared render logic, no new dependency.
+ * The mobile panel itself is still a native <details> (its open/closed
+ * state is purely local and has nothing to sync with); the topic sections
+ * inside it are explicit <button> disclosures instead -- see the
+ * `manualExpansion` comment below for why that distinction matters.
  *
- * Each topic section's <summary> click does two things at once, on
- * purpose: it toggles that section open/closed (the browser's own default
- * behavior for a <summary> click, left completely alone -- no
- * preventDefault/stopPropagation anywhere in this component) AND selects
- * that topic as the active filter. This keeps the interaction model
- * entirely native (nothing fighting the browser's own disclosure-widget
- * semantics) and, as a side effect, means only one section is ever open at
- * a time -- selecting a new topic auto-closes whichever one was open
- * before, which is exactly the "manageable amount of content visible at
- * once" behavior the sidebar needs with 18 topics and ~290 lessons.
+ * Clicking a topic section header does two things on purpose: it selects
+ * that topic as the active filter (the same state the main list's topic
+ * chips read/write) and toggles that section's expansion. Sections are
+ * independently expandable -- more than one can be open at a time.
  */
 export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSelectTopic, completedSet }: CurriculumSidebarProps) {
   const mobilePanelRef = useRef<HTMLDetailsElement>(null)
+  const baseId = useId()
+
+  /**
+   * Section expansion is explicit React state rather than a native
+   * <details open> attribute (PR #177). The previous implementation set
+   * `open={isActive}` on a <details> while the browser ALSO toggled that
+   * same attribute natively on click, so the two could disagree -- clicking
+   * an already-active section collapsed the DOM, but `isActive` was
+   * unchanged, so React had no state change to re-render from and the
+   * chevron/content could desync. Deriving both the chevron and the
+   * lesson list from this one value makes that impossible by construction.
+   *
+   * `undefined` means "follow the active topic" -- a section auto-expands
+   * when it becomes the selected topic (including when selected from the
+   * main list's topic chips, which this component doesn't own). An explicit
+   * true/false is a user's own toggle for that section and takes precedence.
+   */
+  const [manualExpansion, setManualExpansion] = useState<Record<string, boolean>>({})
+
+  function toggleSection(topicId: string, isExpanded: boolean) {
+    setManualExpansion((prev) => ({ ...prev, [topicId]: !isExpanded }))
+  }
 
   // Declared as a stable callback rather than an inline arrow in JSX so the
   // ref is only read when a lesson is actually clicked, never during render.
@@ -55,7 +73,10 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
     mobilePanelRef.current?.removeAttribute('open')
   }
 
-  function renderSections() {
+  // `surface` namespaces the aria-controls ids: this component renders twice
+  // (desktop sidebar + mobile drawer), so an unnamespaced id would appear
+  // twice in the document and aria-controls would resolve ambiguously.
+  function renderSections(surface: 'desktop' | 'mobile') {
     return (
       <div className="space-y-1">
         <button
@@ -83,20 +104,46 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
 
         {topicGroups.map(({ topic, lessons }) => {
           const isActive = activeTopicId === topic.id
+          // Falls back to the active topic when the user hasn't toggled this
+          // section themselves, so selecting a topic anywhere (sidebar or the
+          // main list's chips) auto-expands it with a matching chevron.
+          const isExpanded = manualExpansion[topic.id] ?? isActive
+          const hasLessons = lessons.length > 0
+          const panelId = `${baseId}-${surface}-${topic.id}`
           return (
-            <details key={topic.id} open={isActive} className="rounded-lg">
-              <summary
-                onClick={() => onSelectTopic(topic.id)}
+            <div key={topic.id}>
+              <button
+                type="button"
+                // Both the chevron below and the lesson list's presence read
+                // this same `isExpanded` value, so they cannot disagree.
+                aria-expanded={isExpanded}
+                aria-controls={hasLessons ? panelId : undefined}
                 aria-current={isActive ? 'true' : undefined}
+                onClick={() => {
+                  onSelectTopic(topic.id)
+                  toggleSection(topic.id, isExpanded)
+                }}
                 className={cn(
-                  'group flex cursor-pointer list-none items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-sm transition-colors motion-reduce:transition-none',
+                  'flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors motion-reduce:transition-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600',
                   isActive ? 'bg-blue-50 font-semibold text-blue-800 ring-1 ring-inset ring-blue-200' : 'text-slate-600 hover:bg-slate-100 hover:text-slate-900'
                 )}
               >
                 <span className="flex min-w-0 items-center gap-1.5">
-                  <ChevronDown
-                    className={cn('h-3.5 w-3.5 shrink-0 transition-transform motion-reduce:transition-none group-open:rotate-180', isActive ? 'text-blue-500' : 'text-slate-400')}
+                  {/* A right-pointing chevron rotated 90deg when expanded, so
+                      collapsed reads as ">" and expanded as "v". Previously a
+                      ChevronDown carried `group-open:rotate-180`, but the
+                      `group` class sat on the <summary> while the `open`
+                      attribute lived on its parent <details> -- `group-open:`
+                      only matches when the SAME element has both, so it never
+                      applied and every chevron pointed down permanently
+                      regardless of state. */}
+                  <ChevronRight
+                    className={cn(
+                      'h-3.5 w-3.5 shrink-0 transition-transform motion-reduce:transition-none',
+                      isExpanded && 'rotate-90',
+                      isActive ? 'text-blue-500' : 'text-slate-400'
+                    )}
                     aria-hidden="true"
                   />
                   <span className="truncate">{topic.label}</span>
@@ -109,9 +156,9 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
                 >
                   {lessons.length}
                 </span>
-              </summary>
-              {lessons.length > 0 && (
-                <ol className="ml-5 mt-0.5 space-y-0.5 border-l border-slate-100 pl-2.5">
+              </button>
+              {isExpanded && hasLessons && (
+                <ol id={panelId} className="ml-5 mt-0.5 space-y-0.5 border-l border-slate-100 pl-2.5">
                   {lessons.map((lesson) => (
                     <li key={lesson.id}>
                       <Link
@@ -148,7 +195,7 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
                   ))}
                 </ol>
               )}
-            </details>
+            </div>
           )
         })}
       </div>
@@ -183,7 +230,7 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
             if ((event.target as HTMLElement).closest('a')) closeMobilePanel()
           }}
         >
-          {renderSections()}
+          {renderSections('mobile')}
         </div>
       </details>
 
@@ -194,7 +241,7 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
             <List className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
             Curriculum
           </p>
-          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderSections()}</div>
+          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderSections('desktop')}</div>
         </div>
       </nav>
     </>
