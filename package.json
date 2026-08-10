@@ -14,7 +14,8 @@
     "test:curriculum-numbering": "npx tsx scripts/curriculum-numbering-regression.ts",
     "test:dashboard-metrics": "npx tsx scripts/dashboard-metrics-regression.ts",
     "test:achievements": "npx tsx scripts/achievements-regression.ts",
-    "test:ai-tutor-context": "npx tsx scripts/ai-tutor-context-regression.ts"
+    "test:ai-tutor-context": "npx tsx scripts/ai-tutor-context-regression.ts",
+    "test:ai-tutor-product": "npx tsx scripts/ai-tutor-product-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",

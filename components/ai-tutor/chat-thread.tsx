@@ -428,8 +428,13 @@ export function ChatComposer({ input, onInputChange, onSubmit, isStreaming, limi
           <Send className="h-4 w-4" aria-hidden="true" />
         </button>
       </div>
-      {/* Display-only -- keep in sync with AI_TUTOR_DAILY_LIMIT's default in lib/ai/tutor-limits.ts (PR #149) if that default ever changes. */}
-      <p className="text-xs text-slate-400">Beta limit: 20 AI Tutor questions/day</p>
+      {/* No quota caption here by design (PR #182). The daily allowance is
+          still tracked and enforced server-side, but it is not surfaced
+          during ordinary use -- a learner only hears about it when they
+          actually reach it, via the limit-reached dialog the provider
+          renders. This also removed the "keep 20 in sync by hand" hazard
+          that lib/ai/tutor-limits.ts used to warn about: AI_TUTOR_DAILY_LIMIT
+          is now the single source of that number. */}
     </form>
   )
 }
