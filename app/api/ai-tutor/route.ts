@@ -9,6 +9,9 @@ import {
   type TutorUsage,
   type TutorErrorKind,
 } from '@/lib/ai/anthropic'
+import { DEEP_DIVES } from '@/content/deep-dives/catalog'
+import { isDeepDiveAvailable } from '@/lib/deep-dives'
+import { SITE_URL } from '@/lib/config'
 import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
 import { retrieveCourseContext, formatCourseContextForPrompt } from '@/lib/ai/retrieve-course-context'
 import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
@@ -41,7 +44,23 @@ function jsonError(message: string, status: number, extra?: Record<string, unkno
 
 /** The context's sourceType maps 1:1 to a usage-tracking origin; no context (a general/standalone question) is 'standalone'. */
 function originForContext(context: ParsedAiTutorContext): AiTutorUsageOrigin {
-  return context?.sourceType ?? 'standalone'
+  if (!context) return 'standalone'
+  switch (context.sourceType) {
+    case 'lesson':
+      return 'lesson'
+    case 'practice':
+      return 'practice'
+    case 'deep-dive':
+      // Persisted as its own origin so Deep Dive usage is distinguishable.
+      // REQUIRES migration 009 to have been applied -- see that file.
+      return 'deep-dive'
+    case 'learning-center':
+      // Deliberately NOT its own persisted origin: the brief is explicit
+      // about not expanding the database enum unnecessarily, and a question
+      // asked while browsing the catalog is a standalone question for
+      // usage-accounting purposes.
+      return 'standalone'
+  }
 }
 
 async function logUsage(
@@ -166,7 +185,28 @@ interface PracticeAiTutorContext {
   relatedLessonSlugs?: string[]
 }
 
-type ParsedAiTutorContext = LessonAiTutorContext | PracticeAiTutorContext | undefined
+/**
+ * A Deep Dive the learner is reading (PR #181). Only the slug survives
+ * parsing -- the client's title/path/section are deliberately discarded and
+ * the slug is re-resolved against content/deep-dives/catalog.ts, so a
+ * browser cannot inject a fake title or an unpublished Deep Dive.
+ */
+interface DeepDiveAiTutorContext {
+  sourceType: 'deep-dive'
+  deepDiveSlug: string
+}
+
+/** The learner is browsing the Learning Center curriculum (PR #181). Carries no client data at all. */
+interface LearningCenterAiTutorContext {
+  sourceType: 'learning-center'
+}
+
+type ParsedAiTutorContext =
+  | LessonAiTutorContext
+  | PracticeAiTutorContext
+  | DeepDiveAiTutorContext
+  | LearningCenterAiTutorContext
+  | undefined
 
 const MAX_QUESTION_TEXT_LENGTH = 2000
 const MAX_OPTION_LENGTH = 500
@@ -203,6 +243,22 @@ function parseContext(body: unknown): ParsedAiTutorContext {
       return undefined
     }
     return { sourceType: 'lesson', lessonSlug }
+  }
+
+  if (sourceType === 'deep-dive') {
+    const slug = parseSlug((raw as { deepDiveSlug?: unknown }).deepDiveSlug)
+    // Re-resolve against the canonical catalog and require it to be
+    // published. An unknown, unpublished, or spoofed slug is not an error --
+    // it degrades to general grounding, same as any other invalid context.
+    if (!slug || !DEEP_DIVES.some((d) => d.slug === slug && isDeepDiveAvailable(d))) {
+      return undefined
+    }
+    return { sourceType: 'deep-dive', deepDiveSlug: slug }
+  }
+
+  if (sourceType === 'learning-center') {
+    // Carries nothing from the client -- the type alone is the whole signal.
+    return { sourceType: 'learning-center' }
   }
 
   if (sourceType === 'practice') {
@@ -272,13 +328,50 @@ async function resolveGrounding(
 ): Promise<{ systemPrompt: string; contextLabel: string | null; sources: AiTutorSourceRef[] }> {
   const practiceSection = context?.sourceType === 'practice' ? formatPracticeContextForPrompt(context) : null
 
+  // Server-resolved from the canonical catalog, never from client input.
+  const resolvedDeepDive =
+    context?.sourceType === 'deep-dive'
+      ? (DEEP_DIVES.find((d) => d.slug === context.deepDiveSlug) ?? null)
+      : null
+
   const result = await retrieveCourseContext({
     query: latestUserMessage,
     currentLessonSlug: context?.sourceType === 'lesson' ? context.lessonSlug : undefined,
     relatedLessonSlugs: context?.sourceType === 'practice' ? context.relatedLessonSlugs : undefined,
   })
 
-  const sections = practiceSection ? [practiceSection, formatCourseContextForPrompt(result)] : [formatCourseContextForPrompt(result)]
+  /**
+   * Page-awareness sections (PR #181). These state *where the learner is*
+   * using verified canonical metadata; they are not a substitute for
+   * retrieval and deliberately tell the model it has no indexed Deep Dive
+   * body, so it cannot pass off general knowledge as page grounding. Deep
+   * Dive content indexing lands separately -- see the PR notes.
+   */
+  const pageSections: string[] = []
+  if (resolvedDeepDive) {
+    pageSections.push(
+      [
+        'CURRENT PAGE',
+        `The learner is reading the iRPGenie Deep Dive "${resolvedDeepDive.title}" (${SITE_URL}/deep-dives/${resolvedDeepDive.slug}).`,
+        `Summary: ${resolvedDeepDive.description}`,
+        'The full text of this Deep Dive is NOT available to you. If the retrieved course sections below do not cover the question, answer from general IBM i knowledge and say plainly that you are not quoting this Deep Dive. Never invent what this Deep Dive says.',
+      ].join('\n')
+    )
+  } else if (context?.sourceType === 'learning-center') {
+    pageSections.push(
+      [
+        'CURRENT PAGE',
+        'The learner is browsing the iRPGenie Learning Center.',
+        'On iRPGenie: "lessons" are the ordered IBM i Fundamentals curriculum; "Deep Dives" are iRPGenie\'s standalone professional-grade articles on a single topic; "Practice" and "Practice Lab" are the question bank and the guided 5250/SQL simulators; "AI Tutor" is you. These are iRPGenie product terms, not IBM terminology -- if the learner asks what a Deep Dive is, explain the iRPGenie feature rather than the generic English phrase.',
+      ].join('\n')
+    )
+  }
+
+  const sections = [
+    ...pageSections,
+    ...(practiceSection ? [practiceSection] : []),
+    formatCourseContextForPrompt(result),
+  ]
   const systemPrompt = buildGroundedSystemPrompt(sections)
 
   let contextLabel: string | null
@@ -286,6 +379,14 @@ async function resolveGrounding(
     contextLabel = `Using lesson context: ${result.resolvedCurrentLesson.title}`
   } else if (context?.sourceType === 'practice') {
     contextLabel = `Using practice context: ${context.questionTitle}`
+  } else if (context?.sourceType === 'deep-dive' && resolvedDeepDive) {
+    // Names the Deep Dive the learner is on, which the server verified
+    // against the catalog. Deliberately says "Reading" rather than "Using
+    // ... context": Deep Dive bodies are not in the retrieval index yet, so
+    // claiming the answer is grounded in this Deep Dive would be false.
+    contextLabel = `Reading Deep Dive: ${resolvedDeepDive.title}`
+  } else if (context?.sourceType === 'learning-center') {
+    contextLabel = 'Using Learning Center context'
   } else if (result.chunks.length > 0) {
     contextLabel = `Using course context: ${result.chunks.length} related section${result.chunks.length === 1 ? '' : 's'}`
   } else {

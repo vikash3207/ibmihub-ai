@@ -7,6 +7,7 @@ import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { Card } from '@/components/ui/card'
 import { buttonVariants } from '@/components/ui/button'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
+import { RegisterAiTutorPageContext } from '@/components/ai-tutor/register-page-context'
 
 export const metadata: Metadata = {
   title: 'Learning Center',
@@ -20,6 +21,13 @@ export default async function LearnPage() {
 
   return (
     <div className="mx-auto max-w-3xl space-y-8">
+      {/* Lets the header's AI Tutor button know the learner is browsing the
+          iRPGenie curriculum, so a question like "what is a Deep Dive?"
+          is answered about this platform's Deep Dives rather than the
+          generic English phrase (PR #181). */}
+      <RegisterAiTutorPageContext
+        context={{ sourceType: 'learning-center', title: 'iRPGenie Learning Center' }}
+      />
       <div>
         <h1 className="text-3xl font-bold text-slate-900 mb-2">Learning Center</h1>
         <p className="text-slate-600 leading-relaxed">

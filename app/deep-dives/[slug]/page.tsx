@@ -18,7 +18,8 @@ import { LessonContent } from '@/components/lesson-content'
 import { DeepDiveToc } from '@/components/deep-dive-toc'
 import { StructuredData } from '@/components/structured-data'
 import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
-import { GENERAL_CONTEXT } from '@/components/ai-tutor/types'
+import { RegisterAiTutorPageContext } from '@/components/ai-tutor/register-page-context'
+import type { AiTutorContext } from '@/components/ai-tutor/types'
 import { DEEP_DIVE_CATEGORIES, DEEP_DIVE_ACCENT_CLASSES, getDeepDiveAccent } from '@/lib/deep-dive-categories'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
 import { SITE_NAME, SITE_URL } from '@/lib/config'
@@ -154,9 +155,22 @@ export default async function DeepDivePage({ params }: Props) {
 
   const seoDescription = getSeoDescription(deepDive)
 
+  // Canonical Deep Dive context (PR #181). Only stable identifiers -- slug,
+  // title, route -- are carried; the rendered body is never sent anywhere,
+  // and the server re-resolves this slug against the catalog before trusting
+  // any of it. Registering it here is what lets the header's AI Tutor button
+  // open already grounded in this Deep Dive.
+  const aiTutorContext: Extract<AiTutorContext, { sourceType: 'deep-dive' }> = {
+    sourceType: 'deep-dive',
+    deepDiveSlug: deepDive.slug,
+    deepDiveTitle: deepDive.title,
+    deepDivePath: `/deep-dives/${deepDive.slug}`,
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <StructuredData data={buildDeepDiveStructuredData(deepDive, seoDescription)} />
+      <RegisterAiTutorPageContext context={aiTutorContext} />
       <SiteHeader />
 
       <main className="flex-1">
@@ -274,7 +288,7 @@ export default async function DeepDivePage({ params }: Props) {
                     context: Deep Dives are not part of the AI Tutor's
                     retrieval index, so no Deep-Dive-specific grounding is
                     claimed here -- see the PR notes. */}
-                <AskAiTutorButton context={GENERAL_CONTEXT} size="sm" className="mt-3">
+                <AskAiTutorButton context={aiTutorContext} size="sm" className="mt-3">
                   Open the AI Tutor
                 </AskAiTutorButton>
               </Card>

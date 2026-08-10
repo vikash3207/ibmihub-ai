@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useCallback, useContext, useState, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
 import { submitAiTutorFeedback } from '@/lib/actions/ai-tutor-feedback'
 import { GENERAL_CONTEXT, getContextLabel, type AiTutorContext, type AiTutorSourceRef } from './types'
 import type { ChatMessage, FeedbackState } from './chat-thread'
@@ -29,9 +29,22 @@ interface AiTutorPanelValue {
   /** Source lesson references per assistant message id, from the RAG v2 retrieval used to ground that reply (PR #132). */
   sources: Record<string, AiTutorSourceRef[]>
   limitReached: boolean
-  /** Opens the panel, optionally seeding/replacing the active context (does not clear the conversation). */
+  /**
+   * Opens the panel. With an explicit context, that context is used. With
+   * NO argument, the context registered by the current page is used (PR
+   * #181) -- this is what lets the header/mobile AI Tutor trigger know which
+   * lesson or Deep Dive the learner is reading without every call site
+   * reconstructing it. Falls back to general when no page has registered one.
+   * Does not clear the conversation.
+   */
   openPanel: (context?: AiTutorContext) => void
   closePanel: () => void
+  /**
+   * Registers the current page's canonical context (PR #181). Called by
+   * RegisterAiTutorPageContext, which also clears it on unmount so a stale
+   * lesson/Deep Dive context can never leak onto the next page.
+   */
+  registerPageContext: (context: AiTutorContext | null) => void
   /** Updates the active context without opening/closing the panel or clearing the conversation. */
   updateContext: (context: AiTutorContext) => void
   /** Clears the conversation -- the only way history is cleared while the tab stays open (Spec 001 v1.1 AI-TUTOR-FR-024). */
@@ -62,14 +75,36 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   const [requiresLogin, setRequiresLogin] = useState(false)
   const [feedback, setFeedback] = useState<Record<string, FeedbackState>>({})
   const [sources, setSources] = useState<Record<string, AiTutorSourceRef[]>>({})
+  /**
+   * The context the *current page* has registered (PR #181). A ref, not
+   * state: nothing renders from it directly, and keeping it out of state
+   * means registering/clearing it never triggers a re-render of the whole
+   * subtree the provider wraps.
+   */
+  const pageContextRef = useRef<AiTutorContext | null>(null)
 
   const userTurnCount = messages.filter((m) => m.role === 'user').length
   const limitReached = userTurnCount >= MAX_USER_TURNS
 
+  const registerPageContext = useCallback((next: AiTutorContext | null) => {
+    pageContextRef.current = next
+  }, [])
+
   const openPanel = useCallback((nextContext?: AiTutorContext) => {
-    if (nextContext) {
-      setContext(nextContext)
-      setContextLabel(getContextLabel(nextContext))
+    // An explicit context always wins (the lesson/Practice CTAs). With no
+    // argument -- the header and mobile nav -- fall back to whatever the
+    // current page registered, so the Tutor opens knowing what the learner
+    // is reading rather than in general mode. Only read at open time, so a
+    // page that unmounted has already cleared itself.
+    const resolved = nextContext ?? pageContextRef.current
+    if (resolved) {
+      setContext(resolved)
+      setContextLabel(getContextLabel(resolved))
+    } else {
+      // No explicit context and no registered page context: general mode.
+      // Reset rather than keeping whatever the last page left behind.
+      setContext(GENERAL_CONTEXT)
+      setContextLabel(null)
     }
     setIsOpen(true)
   }, [])
@@ -217,6 +252,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     sources,
     limitReached,
     openPanel,
+    registerPageContext,
     closePanel,
     updateContext,
     newChat,
