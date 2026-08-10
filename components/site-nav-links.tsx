@@ -3,7 +3,6 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAiTutorPanel } from '@/components/ai-tutor/ai-tutor-panel-provider'
-import { GENERAL_CONTEXT } from '@/components/ai-tutor/types'
 import { cn } from '@/lib/utils'
 
 interface NavLinkDef {
@@ -80,9 +79,9 @@ export function SiteNavLinks({ isLoggedIn }: { isLoggedIn: boolean }) {
                     if (event.defaultPrevented) return
                     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return
                     event.preventDefault()
-                    // General context: the header is page-agnostic, so no
-                    // educational context is invented from the current page.
-                    openPanel(GENERAL_CONTEXT)
+                    // No explicit context: the provider resolves whatever the current
+                    // page registered (PR #181), so the Tutor opens knowing the lesson or Deep Dive being read.
+                    openPanel()
                   }
                 : undefined
             }

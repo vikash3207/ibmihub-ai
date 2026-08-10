@@ -38,6 +38,26 @@ export type AiTutorContext =
       relatedLessonSlugs: string[]
     }
   | {
+      /**
+       * The learner is reading a published Deep Dive (PR #181). Only stable
+       * identifiers travel over the wire -- the server re-resolves the slug
+       * against content/deep-dives/catalog.ts and ignores anything it cannot
+       * verify, so `title` here is for the client-side label only and is
+       * never trusted as grounding.
+       */
+      sourceType: 'deep-dive'
+      deepDiveSlug: string
+      deepDiveTitle: string
+      deepDivePath: string
+      /** Heading anchor of the section currently in view, when known. Reserved for section-aware retrieval (see PR notes). */
+      sectionId?: string
+    }
+  | {
+      /** The learner is browsing the Learning Center curriculum (PR #181). */
+      sourceType: 'learning-center'
+      title: string
+    }
+  | {
       sourceType: 'general'
     }
 
@@ -50,6 +70,10 @@ export function getContextLabel(context: AiTutorContext): string | null {
       return `Using lesson context: ${context.lessonTitle}`
     case 'practice':
       return `Using practice context: ${context.questionTitle}`
+    case 'deep-dive':
+      return `Using Deep Dive context: ${context.deepDiveTitle}`
+    case 'learning-center':
+      return `Using Learning Center context`
     case 'general':
       return null
   }
@@ -62,6 +86,10 @@ export function getContextKey(context: AiTutorContext): string {
       return `lesson:${context.lessonSlug}`
     case 'practice':
       return `practice:${context.questionId}:${context.revealed}`
+    case 'deep-dive':
+      return `deep-dive:${context.deepDiveSlug}:${context.sectionId ?? ''}`
+    case 'learning-center':
+      return 'learning-center'
     case 'general':
       return 'general'
   }

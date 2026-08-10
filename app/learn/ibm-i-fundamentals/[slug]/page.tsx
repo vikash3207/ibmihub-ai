@@ -12,7 +12,7 @@ import { getTopicById, getTopicForLesson } from '@/lib/topics'
 import { getMasterCategoryLabel } from '@/lib/master-categories'
 import { getLessonAccent, LESSON_ACCENT_CLASSES } from '@/components/lesson-category-accent'
 import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
-import { SyncActiveLessonContext } from '@/components/ai-tutor/sync-active-lesson-context'
+import { RegisterAiTutorPageContext } from '@/components/ai-tutor/register-page-context'
 import type { AiTutorContext } from '@/components/ai-tutor/types'
 import { StructuredData } from '@/components/structured-data'
 import { IBM_I_FUNDAMENTALS_PATH_NAME, SITE_URL } from '@/lib/config'
@@ -223,7 +223,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
         )
       )}
 
-      <SyncActiveLessonContext context={aiTutorContext} />
+      <RegisterAiTutorPageContext context={aiTutorContext} />
 
       <Card variant="ai">
         <p className="flex items-center gap-1.5 text-sm font-medium text-cyan-900">

@@ -13,7 +13,8 @@
     "test:deep-dive-toc": "npx tsx scripts/deep-dive-toc-regression.ts",
     "test:curriculum-numbering": "npx tsx scripts/curriculum-numbering-regression.ts",
     "test:dashboard-metrics": "npx tsx scripts/dashboard-metrics-regression.ts",
-    "test:achievements": "npx tsx scripts/achievements-regression.ts"
+    "test:achievements": "npx tsx scripts/achievements-regression.ts",
+    "test:ai-tutor-context": "npx tsx scripts/ai-tutor-context-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
