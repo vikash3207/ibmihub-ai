@@ -26,7 +26,7 @@ export async function SiteHeader() {
           <SiteLogoIcon size={28} className="shrink-0" />
           {SITE_NAME}
         </Link>
-        <nav className="flex items-center gap-3 sm:gap-5">
+        <nav className="flex flex-wrap items-center justify-end gap-3 sm:gap-5">
           <SiteNavLinks isLoggedIn={Boolean(user)} />
           {user ? (
             <form>

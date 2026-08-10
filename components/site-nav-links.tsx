@@ -17,11 +17,20 @@ const LOGGED_IN_LINKS: NavLinkDef[] = [
   { href: '/deep-dives', label: 'Deep Dives' },
   { href: '/practice', label: 'Practice' },
   { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai' },
+  { href: '/contact', label: 'Contact Us' },
 ]
 
+// AI Tutor links straight to the real, already-protected /ai-tutor route
+// for signed-out visitors too -- that page's own `if (!user) redirect(...)`
+// (app/(authenticated)/ai-tutor/page.tsx) is what sends them to login with
+// `?next=%2Fai-tutor` already attached, so a signed-in visitor lands on AI
+// Tutor directly and a signed-out one is returned there after logging in.
+// No second auth check or redirect is introduced here.
 const LOGGED_OUT_LINKS: NavLinkDef[] = [
   { href: '/learn', label: 'Learning Center' },
   { href: '/deep-dives', label: 'Deep Dives' },
+  { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai' },
+  { href: '/contact', label: 'Contact Us' },
 ]
 
 /**
