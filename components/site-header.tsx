@@ -42,7 +42,7 @@ export async function SiteHeader() {
               >
                 Log in
               </Link>
-              <Link href="/auth/sign-up" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
+              <Link href="/learn" className={buttonVariants({ variant: 'primary', size: 'sm' })}>
                 {PRIMARY_CTA_LABEL}
               </Link>
             </>

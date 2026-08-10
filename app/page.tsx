@@ -140,7 +140,7 @@ function buildStats(publishedLessonCount: number) {
       accent: 'blue' as const,
     },
     { icon: Route, value: '1', label: 'Guided fundamentals path', accent: 'blue' as const },
-    { icon: Unlock, value: 'Free', label: 'First lesson preview', accent: 'blue' as const },
+    { icon: Unlock, value: 'Free', label: 'Every lesson, no login', accent: 'blue' as const },
     { icon: Sparkles, value: 'AI', label: 'Tutor for IBM i concepts', accent: 'cyan' as const },
   ]
 }
@@ -291,18 +291,18 @@ export default async function LandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link href="/auth/sign-up" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
+              <Link href="/learn" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
                 {PRIMARY_CTA_LABEL}
               </Link>
               <Link
                 href="/learn/ibm-i-fundamentals/what-is-ibm-i"
                 className={buttonVariants({ variant: 'outline-light', size: 'lg' })}
               >
-                Preview the first lesson &rarr;
+                Start reading Lesson 1 &rarr;
               </Link>
             </div>
             <p className="mt-5 text-xs text-slate-400">
-              No credit card required &middot; Free first lesson &middot; Built for IBM&nbsp;i professionals
+              No credit card required &middot; Every lesson free to read &middot; Built for IBM&nbsp;i professionals
             </p>
           </div>
 
@@ -500,7 +500,7 @@ export default async function LandingPage() {
               <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">IBM i Fundamentals</h2>
               <p className="text-slate-600 leading-relaxed">
                 A complete, {publishedLessons.length}-lesson path from what the platform is to a
-                basic development workflow. Lesson&nbsp;1 is free to preview without an account.
+                basic development workflow -- every lesson is free to read, no account required.
               </p>
             </div>
 
@@ -758,9 +758,10 @@ export default async function LandingPage() {
               Start learning IBM&nbsp;i today.
             </h2>
             <p className="text-slate-300 mb-8">
-              Free to preview. Create an account to save your progress and unlock the AI Tutor.
+              Every lesson is free to read, no account required. Create one anytime to save your
+              progress and unlock the AI Tutor and Practice Lab.
             </p>
-            <Link href="/auth/sign-up" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
+            <Link href="/learn" className={buttonVariants({ variant: 'primary', size: 'lg' })}>
               {PRIMARY_CTA_LABEL}
             </Link>
           </div>

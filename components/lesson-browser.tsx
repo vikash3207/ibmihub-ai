@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
-import { Lock, Check, Search, X } from 'lucide-react'
+import { Check, Search, X } from 'lucide-react'
 import type { Lesson } from '@/lib/lessons'
 import { TOPIC_FILTERS } from '@/lib/topics'
 import { getMasterCategoryCounts, getMasterCategoryLabel } from '@/lib/master-categories'
@@ -18,10 +18,9 @@ function matchesQuery(lesson: Lesson, query: string): boolean {
 interface LessonBrowserProps {
   lessons: Lesson[]
   completedLessonIds: string[]
-  isLoggedIn: boolean
 }
 
-export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: LessonBrowserProps) {
+export function LessonBrowser({ lessons, completedLessonIds }: LessonBrowserProps) {
   // Reads the ?topic= query param once, on mount, so a link like
   // /learn/ibm-i-fundamentals?topic=sqlrpgle (e.g. from a lesson sidebar's
   // "back to Learning Center" link) reopens with that filter pre-applied.
@@ -188,7 +187,6 @@ export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: Lesso
                     lesson={lesson}
                     activeTopic={activeTopic}
                     isCompleted={completedSet.has(lesson.id)}
-                    isLoggedIn={isLoggedIn}
                   />
                 ))}
               </ol>
@@ -203,7 +201,6 @@ export function LessonBrowser({ lessons, completedLessonIds, isLoggedIn }: Lesso
               lesson={lesson}
               activeTopic={activeTopic}
               isCompleted={completedSet.has(lesson.id)}
-              isLoggedIn={isLoggedIn}
             />
           ))}
         </ol>
@@ -216,16 +213,11 @@ function LessonRow({
   lesson,
   activeTopic,
   isCompleted,
-  isLoggedIn,
 }: {
   lesson: Lesson
   activeTopic: { id: string } | undefined
   isCompleted: boolean
-  isLoggedIn: boolean
 }) {
-  const isPreview = lesson.lesson_order === 1
-  const isLocked = !isPreview && !isLoggedIn
-
   const lessonHref = activeTopic
     ? `/learn/ibm-i-fundamentals/${lesson.slug}?topic=${activeTopic.id}`
     : `/learn/ibm-i-fundamentals/${lesson.slug}`
@@ -248,13 +240,6 @@ function LessonRow({
         <span className="flex-1">
           <span className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-slate-900">{lesson.title}</span>
-            {isPreview && <Badge variant="success">Free preview</Badge>}
-            {isLocked && (
-              <Badge variant="locked">
-                <Lock className="h-3 w-3" aria-hidden="true" />
-                Log in to access
-              </Badge>
-            )}
             {isCompleted && (
               <Badge variant="success">
                 <Check className="h-3 w-3" aria-hidden="true" />
