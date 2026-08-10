@@ -11,7 +11,8 @@
     "validate:env": "npx tsx scripts/validate-env.ts",
     "test:rag": "npx tsx scripts/rag-regression.ts",
     "test:deep-dive-toc": "npx tsx scripts/deep-dive-toc-regression.ts",
-    "test:curriculum-numbering": "npx tsx scripts/curriculum-numbering-regression.ts"
+    "test:curriculum-numbering": "npx tsx scripts/curriculum-numbering-regression.ts",
+    "test:dashboard-metrics": "npx tsx scripts/dashboard-metrics-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
