@@ -339,6 +339,61 @@ section('12. Migration enforces the security + idempotency guarantees')
 }
 
 // ---------------------------------------------------------------------------
+section('13. Unknown / obsolete stored badge codes (PR #180 hardening)')
+
+{
+  // Mirrors the filter lib/achievements-server.ts applies to stored rows.
+  const knownCodes = new Set(ACHIEVEMENTS.map((a) => a.code))
+  const storedRows = [
+    { badgeCode: 'first_step' },
+    { badgeCode: 'learning_momentum' },
+    { badgeCode: 'retired_badge_v1' }, // no longer in the registry
+    { badgeCode: 'typo_cdoe' }, // hand-written SQL fix gone wrong
+    { badgeCode: 'future_badge_rolled_back' },
+  ]
+  const reconciled = storedRows.filter((row) => knownCodes.has(row.badgeCode))
+
+  check('unknown codes are dropped from user-facing lists', reconciled.length === 2, `got ${reconciled.length}`)
+  check(
+    'earned count can never exceed the number of active definitions',
+    reconciled.length <= ACHIEVEMENTS.length,
+    `${reconciled.length} of ${ACHIEVEMENTS.length}`
+  )
+  check('known codes still survive the filter', reconciled.every((r) => knownCodes.has(r.badgeCode)))
+
+  // The specific reported symptom: 11 stored rows must not render "11 of 10".
+  const inflated = [...ACHIEVEMENTS.map((a) => ({ badgeCode: a.code })), { badgeCode: 'ghost_badge' }]
+  const safeCount = inflated.filter((row) => knownCodes.has(row.badgeCode)).length
+  check(
+    'a stray extra row cannot produce "11 of 10 badges earned"',
+    safeCount === ACHIEVEMENTS.length,
+    `${safeCount} of ${ACHIEVEMENTS.length}`
+  )
+}
+
+// ---------------------------------------------------------------------------
+section('14. Migration 008 privilege hardening')
+
+{
+  const sql = readFileSync(
+    join(process.cwd(), 'supabase', 'migrations', '008_user_achievements_privilege_hardening.sql'),
+    'utf8'
+  ).toLowerCase()
+
+  check('anon has all privileges revoked', /revoke\s+all\s+privileges\s+on\s+public\.user_achievements\s+from\s+anon/.test(sql))
+  check(
+    'authenticated has insert/update/delete revoked',
+    /revoke[^;]*insert[^;]*update[^;]*delete[^;]*from\s+authenticated/.test(sql)
+  )
+  check('authenticated retains select', /grant\s+select\s+on\s+public\.user_achievements\s+to\s+authenticated/.test(sql))
+  check('service_role keeps its write path', /grant\s+select,\s*insert\s+on\s+public\.user_achievements\s+to\s+service_role/.test(sql))
+  check('RLS is (re)asserted as enabled', /enable row level security/.test(sql))
+  check('migration 007 is not modified by this file', !/create table/.test(sql))
+  check('no policy is dropped or redefined', !/drop policy|create policy/.test(sql))
+  check('verification queries are documented', /pg_policies/.test(sql) && /role_table_grants/.test(sql))
+}
+
+// ---------------------------------------------------------------------------
 
 console.log('\n' + '-'.repeat(60))
 if (failures > 0) {

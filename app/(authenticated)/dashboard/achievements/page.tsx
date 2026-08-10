@@ -37,12 +37,15 @@ export default async function AchievementsPage() {
 
   // Opening this page is one of the two places lazy backfill runs, so a
   // learner who qualified before this feature shipped is awarded here.
-  const [{ achievements }, lessons, completions, requestHeaders] = await Promise.all([
-    reconcileAchievementsForUser(user.id),
+  const [lessons, completions, requestHeaders] = await Promise.all([
     getPublishedLessons(),
     getCompletionRecordsForUser(user.id),
     headers(),
   ])
+
+  // Reuses the data already loaded above rather than re-querying it inside
+  // the reconciliation pass (PR #180).
+  const { achievements } = await reconcileAchievementsForUser(user.id, { lessons, completions })
 
   const locale = parseAcceptLanguage(requestHeaders.get('accept-language'))
   const earnedByCode = new Map(achievements.map((achievement) => [achievement.badgeCode, achievement]))
