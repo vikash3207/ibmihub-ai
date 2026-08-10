@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { headers } from 'next/headers'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { BookOpen, Sparkles, TrendingUp, ClipboardCheck, FlaskConical, CheckCircle2, Layers, ArrowRight, History } from 'lucide-react'
+import { BookOpen, Sparkles, TrendingUp, ClipboardCheck, FlaskConical, CheckCircle2, Layers, ArrowRight, History, Trophy } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { getCompletionRecordsForUser } from '@/lib/progress'
@@ -13,6 +13,9 @@ import {
   selectContinueLesson,
   getTopicLabelForLesson,
 } from '@/lib/dashboard-metrics'
+import { reconcileAchievementsForUser } from '@/lib/achievements-server'
+import { ACHIEVEMENTS, ACHIEVEMENT_BY_CODE } from '@/lib/achievements'
+import { AchievementMedallion } from '@/components/achievement-badge'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { Card } from '@/components/ui/card'
 import { ProgressBar } from '@/components/ui/progress-bar'
@@ -85,10 +88,15 @@ export default async function DashboardPage() {
   // `user.id` comes from the trusted server session above, never from client
   // input. One completion query serves every metric below (ids, the Continue
   // Learning anchor, and recent activity) rather than one request per card.
-  const [lessons, completionRecords, requestHeaders] = await Promise.all([
+  // reconcileAchievementsForUser doubles as the lazy per-user backfill for
+  // learners who qualified before achievements shipped (PR #179). It is
+  // idempotent, scoped to this one authenticated user, and never runs for an
+  // anonymous request -- the redirect above happens first.
+  const [lessons, completionRecords, requestHeaders, { achievements }] = await Promise.all([
     getPublishedLessons(),
     getCompletionRecordsForUser(user.id),
     headers(),
+    reconcileAchievementsForUser(user.id),
   ])
 
   // Dates are formatted server-side in the visitor's own language preference
@@ -318,6 +326,63 @@ export default async function DashboardPage() {
           </ul>
         </section>
       )}
+
+      {/* -- Achievements preview ---------------------------------------- */}
+      <section aria-labelledby="achievements-heading" className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="achievements-heading" className="flex items-center gap-1.5 text-lg font-semibold text-slate-900">
+            <Trophy className="h-4 w-4 text-slate-400" aria-hidden="true" />
+            Achievements
+          </h2>
+          <span className="text-sm tabular-nums text-slate-500">
+            {achievements.length} of {ACHIEVEMENTS.length} earned
+          </span>
+        </div>
+
+        {achievements.length === 0 ? (
+          <Card>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              You haven&apos;t earned a badge yet. Marking your first lesson complete earns{' '}
+              <strong>{ACHIEVEMENTS[0].name}</strong>.
+            </p>
+            <Link
+              href="/dashboard/achievements"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            >
+              View all achievements
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </Card>
+        ) : (
+          <Card>
+            <ul className="space-y-2.5">
+              {achievements.slice(0, 3).map((achievement) => {
+                const definition = ACHIEVEMENT_BY_CODE.get(achievement.badgeCode)
+                if (!definition) return null
+                return (
+                  <li key={achievement.badgeCode} className="flex items-center gap-3">
+                    <AchievementMedallion definition={definition} earned size="sm" />
+                    <span className="min-w-0 flex-1">
+                      <span className="block text-sm font-medium text-slate-900">{definition.name}</span>
+                      <span className="block text-xs text-slate-500">{definition.condition}</span>
+                    </span>
+                    <time dateTime={achievement.earnedAt} className="shrink-0 text-xs text-slate-400">
+                      {formatCompletionDate(achievement.earnedAt, locale)}
+                    </time>
+                  </li>
+                )
+              })}
+            </ul>
+            <Link
+              href="/dashboard/achievements"
+              className="mt-4 inline-flex items-center gap-1 text-sm font-medium text-blue-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            >
+              View all achievements
+              <ArrowRight className="h-3.5 w-3.5" aria-hidden="true" />
+            </Link>
+          </Card>
+        )}
+      </section>
 
       {/* -- Recent activity --------------------------------------------- */}
       {recentActivity.length > 0 && (

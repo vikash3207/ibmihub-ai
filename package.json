@@ -12,7 +12,8 @@
     "test:rag": "npx tsx scripts/rag-regression.ts",
     "test:deep-dive-toc": "npx tsx scripts/deep-dive-toc-regression.ts",
     "test:curriculum-numbering": "npx tsx scripts/curriculum-numbering-regression.ts",
-    "test:dashboard-metrics": "npx tsx scripts/dashboard-metrics-regression.ts"
+    "test:dashboard-metrics": "npx tsx scripts/dashboard-metrics-regression.ts",
+    "test:achievements": "npx tsx scripts/achievements-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
