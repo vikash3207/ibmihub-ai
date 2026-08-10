@@ -29,8 +29,8 @@ export default async function IbmIFundamentalsPage() {
     user && lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0
 
   return (
-    <div className="mx-auto max-w-3xl space-y-6">
-      <div>
+    <div className="mx-auto max-w-6xl space-y-6">
+      <div className="max-w-3xl">
         <Link href="/learn" className="text-sm text-slate-500 hover:text-slate-900">
           &larr; Learning Center
         </Link>
@@ -49,7 +49,7 @@ export default async function IbmIFundamentalsPage() {
             </div>
             <div className="h-2 w-full rounded-full bg-slate-100">
               <div
-                className="h-2 rounded-full bg-blue-600 transition-[width]"
+                className="h-2 rounded-full bg-blue-600 transition-[width] motion-reduce:transition-none"
                 style={{ width: `${progressPercent}%` }}
               />
             </div>

@@ -7,6 +7,8 @@ import { Check, Search, X } from 'lucide-react'
 import type { Lesson } from '@/lib/lessons'
 import { TOPIC_FILTERS } from '@/lib/topics'
 import { getMasterCategoryCounts, getMasterCategoryLabel } from '@/lib/master-categories'
+import { getLessonAccent, LESSON_ACCENT_CLASSES } from '@/components/lesson-category-accent'
+import { CurriculumSidebar } from '@/components/curriculum-sidebar'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
@@ -50,14 +52,31 @@ export function LessonBrowser({ lessons, completedLessonIds }: LessonBrowserProp
   const visibleCategories = useMemo(() => categoryCounts.filter((c) => c.count > 0), [categoryCounts])
   const activeCategoryLabel = categoryId ? getMasterCategoryLabel(categoryId) : undefined
 
-  const filteredLessons = useMemo(() => {
+  // Search + category are applied first, independent of which topic (if
+  // any) is currently selected -- this is the single shared source of truth
+  // both `filteredLessons` (the main list, additionally narrowed by topic)
+  // and `topicGroups` (the sidebar, grouped BY topic so every topic stays
+  // browsable regardless of which one is active) derive from. Neither one
+  // re-implements the query/category predicates independently.
+  const searchAndCategoryFilteredLessons = useMemo(() => {
     return lessons.filter((lesson) => {
-      if (activeTopic && !activeTopic.match(lesson)) return false
       if (categoryId && lesson.master_category_id !== categoryId) return false
       if (query.trim() && !matchesQuery(lesson, query)) return false
       return true
     })
-  }, [lessons, activeTopic, categoryId, query])
+  }, [lessons, categoryId, query])
+
+  const filteredLessons = useMemo(() => {
+    if (!activeTopic) return searchAndCategoryFilteredLessons
+    return searchAndCategoryFilteredLessons.filter((lesson) => activeTopic.match(lesson))
+  }, [searchAndCategoryFilteredLessons, activeTopic])
+
+  // Already in lesson_order, since `lessons` (getPublishedLessons()) is and
+  // .filter() preserves relative order -- no separate sort needed here.
+  const topicGroups = useMemo(
+    () => TOPIC_FILTERS.map((topic) => ({ topic, lessons: searchAndCategoryFilteredLessons.filter((lesson) => topic.match(lesson)) })),
+    [searchAndCategoryFilteredLessons]
+  )
 
   // When browsing a single category, group lessons by masterSubcategory so
   // related lessons are visually clustered -- otherwise (the default,
@@ -86,125 +105,135 @@ export function LessonBrowser({ lessons, completedLessonIds }: LessonBrowserProp
   }
 
   return (
-    <div className="space-y-5">
-      <div className="space-y-3">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search lessons by title, description, or tag..."
-            aria-label="Search lessons"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
-          />
-        </div>
+    <div className="lg:grid lg:grid-cols-[270px_minmax(0,1fr)] lg:items-start lg:gap-8">
+      <CurriculumSidebar
+        topicGroups={topicGroups}
+        allCount={searchAndCategoryFilteredLessons.length}
+        activeTopicId={topicId}
+        onSelectTopic={setTopicId}
+        completedSet={completedSet}
+      />
 
-        <div className="flex flex-wrap gap-2">
-          <button
-            type="button"
-            onClick={() => setTopicId(null)}
-            className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-              topicId === null ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-            )}
-          >
-            All Topics
-          </button>
-          {TOPIC_FILTERS.map((topic) => (
+      <div className="min-w-0 space-y-5">
+        <div className="space-y-3">
+          <div className="relative">
+            <Search className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" aria-hidden="true" />
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search lessons by title, description, or tag..."
+              aria-label="Search lessons"
+              className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            />
+          </div>
+
+          <div className="flex flex-wrap gap-2">
             <button
-              key={topic.id}
               type="button"
-              onClick={() => setTopicId(topic.id === topicId ? null : topic.id)}
+              onClick={() => setTopicId(null)}
               className={cn(
                 'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                topicId === topic.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                topicId === null ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               )}
             >
-              {topic.label}
+              All Topics
             </button>
-          ))}
-        </div>
-
-        <div className="flex items-center gap-2 sm:w-72">
-          <label htmlFor="category-select" className="shrink-0 text-xs font-medium text-slate-500">
-            Browse by category
-          </label>
-          <select
-            id="category-select"
-            value={categoryId ?? ''}
-            onChange={(e) => setCategoryId(e.target.value || null)}
-            className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
-          >
-            <option value="">All categories</option>
-            {visibleCategories.map((category) => (
-              <option key={category.id} value={category.id}>
-                {category.label} ({category.count})
-              </option>
+            {TOPIC_FILTERS.map((topic) => (
+              <button
+                key={topic.id}
+                type="button"
+                onClick={() => setTopicId(topic.id === topicId ? null : topic.id)}
+                className={cn(
+                  'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
+                  topicId === topic.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                )}
+              >
+                {topic.label}
+              </button>
             ))}
-          </select>
-        </div>
+          </div>
 
-        <div className="flex items-center justify-between text-xs text-slate-500">
-          <span>
-            Showing {filteredLessons.length} of {lessons.length} lessons
-          </span>
-          {hasActiveFilter && (
-            <button
-              type="button"
-              onClick={clearFilters}
-              className="inline-flex items-center gap-1 font-medium text-slate-600 hover:text-slate-900"
+          <div className="flex items-center gap-2 sm:w-72">
+            <label htmlFor="category-select" className="shrink-0 text-xs font-medium text-slate-500">
+              Browse by category
+            </label>
+            <select
+              id="category-select"
+              value={categoryId ?? ''}
+              onChange={(e) => setCategoryId(e.target.value || null)}
+              className="w-full rounded-lg border border-slate-200 bg-white py-1.5 px-2.5 text-xs text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-600"
             >
-              <X className="h-3 w-3" aria-hidden="true" />
-              Clear filters
-            </button>
-          )}
-        </div>
-      </div>
+              <option value="">All categories</option>
+              {visibleCategories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.label} ({category.count})
+                </option>
+              ))}
+            </select>
+          </div>
 
-      {filteredLessons.length === 0 ? (
-        <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 text-center text-sm text-slate-600">
-          No lessons match your search or filter.{' '}
-          <button type="button" onClick={clearFilters} className="font-medium text-blue-600 hover:underline">
-            Clear filters
-          </button>{' '}
-          to see all lessons.
+          <div className="flex items-center justify-between text-xs text-slate-500">
+            <span>
+              Showing {filteredLessons.length} of {lessons.length} lessons
+            </span>
+            {hasActiveFilter && (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="inline-flex items-center gap-1 font-medium text-slate-600 hover:text-slate-900"
+              >
+                <X className="h-3 w-3" aria-hidden="true" />
+                Clear filters
+              </button>
+            )}
+          </div>
         </div>
-      ) : groupedBySubcategory ? (
-        <div className="space-y-6">
-          {activeCategoryLabel && (
-            <h2 className="text-sm font-semibold text-slate-700">{activeCategoryLabel}</h2>
-          )}
-          {groupedBySubcategory.map((group) => (
-            <div key={group.subcategory} className="space-y-3">
-              <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
-                {group.subcategory}
-              </h3>
-              <ol className="space-y-3">
-                {group.lessons.map((lesson) => (
-                  <LessonRow
-                    key={lesson.id}
-                    lesson={lesson}
-                    activeTopic={activeTopic}
-                    isCompleted={completedSet.has(lesson.id)}
-                  />
-                ))}
-              </ol>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <ol className="space-y-3">
-          {filteredLessons.map((lesson) => (
-            <LessonRow
-              key={lesson.id}
-              lesson={lesson}
-              activeTopic={activeTopic}
-              isCompleted={completedSet.has(lesson.id)}
-            />
-          ))}
-        </ol>
-      )}
+
+        {filteredLessons.length === 0 ? (
+          <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 text-center text-sm text-slate-600">
+            No lessons match your search or filter.{' '}
+            <button type="button" onClick={clearFilters} className="font-medium text-blue-600 hover:underline">
+              Clear filters
+            </button>{' '}
+            to see all lessons.
+          </div>
+        ) : groupedBySubcategory ? (
+          <div className="space-y-6">
+            {activeCategoryLabel && (
+              <h2 className="text-sm font-semibold text-slate-700">{activeCategoryLabel}</h2>
+            )}
+            {groupedBySubcategory.map((group) => (
+              <div key={group.subcategory} className="space-y-3">
+                <h3 className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                  {group.subcategory}
+                </h3>
+                <ol className="space-y-3">
+                  {group.lessons.map((lesson) => (
+                    <LessonRow
+                      key={lesson.id}
+                      lesson={lesson}
+                      activeTopic={activeTopic}
+                      isCompleted={completedSet.has(lesson.id)}
+                    />
+                  ))}
+                </ol>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <ol className="space-y-3">
+            {filteredLessons.map((lesson) => (
+              <LessonRow
+                key={lesson.id}
+                lesson={lesson}
+                activeTopic={activeTopic}
+                isCompleted={completedSet.has(lesson.id)}
+              />
+            ))}
+          </ol>
+        )}
+      </div>
     </div>
   )
 }
@@ -222,22 +251,36 @@ function LessonRow({
     ? `/learn/ibm-i-fundamentals/${lesson.slug}?topic=${activeTopic.id}`
     : `/learn/ibm-i-fundamentals/${lesson.slug}`
 
+  const accent = getLessonAccent(lesson.master_category_id)
+  const accentClasses = LESSON_ACCENT_CLASSES[accent]
+  const categoryLabel = getMasterCategoryLabel(lesson.master_category_id)
+
   return (
     <li>
       <Link
         href={lessonHref}
         prefetch={false}
-        className="flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all"
+        className={cn(
+          // `border` (all sides, 1px) must come BEFORE `border-t-4`/the accent
+          // top-border color below -- tailwind-merge resolves conflicting
+          // Tailwind utilities by keeping whichever one appears LAST in this
+          // list for a given side, so the more specific top-edge overrides
+          // need to be listed after the general shorthand, not before it.
+          'flex items-start gap-4 rounded-2xl border border-slate-100 bg-white p-5 shadow-sm transition-colors motion-reduce:transition-none',
+          'hover:border-blue-300 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2',
+          'border-t-4',
+          accentClasses.topBorder
+        )}
       >
         <span
           className={cn(
-            'flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
-            isCompleted ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-100 text-slate-700'
+            'flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-semibold',
+            isCompleted ? 'bg-emerald-100 text-emerald-800' : cn(accentClasses.badgeBg, accentClasses.badgeText)
           )}
         >
           {isCompleted ? <Check className="h-4 w-4" aria-hidden="true" /> : lesson.lesson_order}
         </span>
-        <span className="flex-1">
+        <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2 flex-wrap">
             <span className="font-semibold text-slate-900">{lesson.title}</span>
             {isCompleted && (
@@ -248,6 +291,18 @@ function LessonRow({
             )}
           </span>
           <span className="block text-sm text-slate-600 mt-1">{lesson.short_description}</span>
+          {categoryLabel && (
+            <span
+              className={cn(
+                'mt-2 inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium',
+                accentClasses.badgeBg,
+                accentClasses.badgeText,
+                accentClasses.badgeBorder
+              )}
+            >
+              {categoryLabel}
+            </span>
+          )}
         </span>
       </Link>
     </li>
