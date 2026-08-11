@@ -3,6 +3,8 @@ import { SITE_URL } from '@/lib/config'
 import { getPublishedLessons } from '@/lib/lessons'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { isDeepDiveAvailable } from '@/lib/deep-dives'
+import { INSIGHTS } from '@/content/insights/catalog'
+import { isInsightAvailable } from '@/lib/insights'
 
 /**
  * Generated sitemap (Spec-adjacent, PR #143 -- see
@@ -45,6 +47,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/learn`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/learn/ibm-i-fundamentals`, changeFrequency: 'weekly', priority: 0.9 },
     { url: `${SITE_URL}/deep-dives`, changeFrequency: 'weekly', priority: 0.8 },
+    { url: `${SITE_URL}/insights`, changeFrequency: 'weekly', priority: 0.8 },
     { url: `${SITE_URL}/privacy`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/terms`, changeFrequency: 'yearly', priority: 0.3 },
     { url: `${SITE_URL}/disclaimer`, changeFrequency: 'yearly', priority: 0.3 },
@@ -63,5 +66,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.7,
   }))
 
-  return [...staticRoutes, ...lessonRoutes, ...deepDiveRoutes]
+  const insightRoutes: MetadataRoute.Sitemap = INSIGHTS.filter(isInsightAvailable).map((insight) => ({
+    url: `${SITE_URL}/insights/${insight.slug}`,
+    changeFrequency: 'monthly',
+    priority: 0.7,
+  }))
+
+  return [...staticRoutes, ...lessonRoutes, ...deepDiveRoutes, ...insightRoutes]
 }

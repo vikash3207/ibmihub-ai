@@ -21,6 +21,9 @@ const nextConfig = {
     // loadDeepDiveMarkdown) reads content/deep-dives/*.md at request time
     // the same way the lesson route reads content/lessons/*.md above.
     '/deep-dives/[slug]': ['./content/deep-dives/*.md'],
+    // The Insight detail route (lib/insight-content.ts's loadInsightMarkdown)
+    // reads content/insights/*.md at request time the same way.
+    '/insights/[slug]': ['./content/insights/*.md'],
   },
 
   webpack(config) {

@@ -17,6 +17,7 @@ const PRODUCT_LINKS = [
   { href: '/', label: 'Home' },
   { href: '/learn', label: 'Learning Center' },
   { href: '/deep-dives', label: 'Deep Dives' },
+  { href: '/insights', label: 'IBM i Insights' },
   { href: '/practice', label: 'Practice' },
   { href: '/ai-tutor', label: 'AI Tutor' },
   { href: '/practice-lab', label: 'Practice Lab' },

@@ -26,7 +26,7 @@ export default function robots(): MetadataRoute.Robots {
   return {
     rules: {
       userAgent: '*',
-      allow: ['/', '/learn', '/deep-dives', '/privacy', '/terms', '/disclaimer', '/contact'],
+      allow: ['/', '/learn', '/deep-dives', '/insights', '/privacy', '/terms', '/disclaimer', '/contact'],
       disallow: ['/auth/', '/api/', '/dashboard', '/onboarding', '/practice', '/practice-lab', '/ai-tutor'],
     },
     sitemap: `${SITE_URL}/sitemap.xml`,
