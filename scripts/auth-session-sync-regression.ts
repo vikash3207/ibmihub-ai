@@ -27,7 +27,7 @@ import {
 } from '../lib/auth-signal'
 import { isSignOutTransition, resolveRequiresLogin } from '../lib/ai-tutor/auth-sync'
 import { postAuthDestinationFor } from '../lib/auth-destination'
-import { PASSWORD_UPDATED_MESSAGE, PASSWORD_UPDATE_FAILED_MESSAGE } from '../lib/auth-messages'
+import { PASSWORD_UPDATED_MESSAGE, PASSWORD_RESET_FAILURE_MESSAGES } from '../lib/auth-messages'
 
 let failures = 0
 let passed = 0
@@ -54,6 +54,7 @@ const header = read('components', 'site-header.tsx')
 const rootLayout = read('app', 'layout.tsx')
 const authActions = read('lib', 'actions', 'auth.ts')
 const resetPage = read('app', 'auth', 'reset-password', 'page.tsx')
+const resetForm = read('components', 'auth', 'reset-password-form.tsx')
 const signal = read('lib', 'auth-signal.ts')
 
 /**
@@ -252,18 +253,13 @@ section('Password reset messaging (executed)')
 // ---------------------------------------------------------------------------
 
 check('success copy is the required wording', PASSWORD_UPDATED_MESSAGE === 'Your password has been updated successfully.')
-check(
-  'the failure message never contains the success wording',
-  !PASSWORD_UPDATE_FAILED_MESSAGE.includes(PASSWORD_UPDATED_MESSAGE)
-)
-check(
-  'the failure message never claims success',
-  !/\bsuccess/i.test(PASSWORD_UPDATE_FAILED_MESSAGE)
-)
-check(
-  'the failure message covers expired and reused links',
-  /expired/i.test(PASSWORD_UPDATE_FAILED_MESSAGE) && /already been used/i.test(PASSWORD_UPDATE_FAILED_MESSAGE)
-)
+
+// Deeper password-recovery coverage lives in test:auth-recovery (PR #187).
+// What matters here is only that no failure path can borrow success wording.
+for (const [failure, message] of Object.entries(PASSWORD_RESET_FAILURE_MESSAGES)) {
+  check(`the ${failure} message never claims success`, !/success/i.test(message))
+  check(`the ${failure} message is not the success copy`, message !== PASSWORD_UPDATED_MESSAGE)
+}
 
 // ---------------------------------------------------------------------------
 section('Wiring (source assertions -- React/Next behaviour cannot be run here)')
@@ -297,18 +293,17 @@ check(
 )
 
 // Password reset wiring.
-check('a failed update redirects with the safe message', /PASSWORD_UPDATE_FAILED_MESSAGE/.test(authActions))
-check('a failed update never redirects to the success state', !/error[\s\S]{0,200}status=success/.test(authActions))
-check('a successful update redirects to the success state', authActions.includes('/auth/reset-password?status=success'))
-check('the raw Supabase error is not shown to the user', !/error:\s*error\.message/.test(authActions))
+check('a failed update never returns the success status', !/status: 'success'[\s\S]{0,80}error/.test(authActions))
+check('a successful update returns a server-built success state', /status: 'success'/.test(authActions))
+check('the raw Supabase error is not shown to the user', !/message:\s*error\.message/.test(authActions))
 check('the password is never placed in a URL', !/encodeURIComponent\(password\)/.test(authActions))
-check('the success screen is gated on the success status', /status === 'success'/.test(resetPage))
-check('the success screen announces itself accessibly', /role="status"/.test(resetPage))
-check('the success screen offers a continuation action', resetPage.includes('Continue to iRPGenie'))
-check('the continuation link is not built from a search param', !/href=\{`?\$?\{?(next|redirect)/.test(resetPage))
+check('the success state is no longer reachable from a query parameter', !/status === 'success'/.test(resetPage))
+check('the success screen announces itself accessibly', /role="status"/.test(resetForm))
+check('the success screen offers a continuation action', resetForm.includes('Continue to iRPGenie'))
+check('the continuation link is not built from a search param', !/href=\{`?\$?\{?(next|redirect)/.test(resetForm))
 check(
   'duplicate submission is prevented by the pending-aware button',
-  /<SubmitButton formAction=\{resetPassword\}/.test(resetPage)
+  /<SubmitButton/.test(resetForm)
 )
 check('an expired link offers a way to request a new one', resetPage.includes('/auth/forgot-password'))
 
