@@ -25,6 +25,65 @@ export const TURNSTILE_SITE_KEY = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? 
 
 export const TURNSTILE_CONFIGURED = TURNSTILE_SITE_KEY.length > 0
 
+/**
+ * Master switch for CAPTCHA enforcement.
+ *
+ * Deliberately NOT prefixed with NEXT_PUBLIC_: enforcement is a server
+ * decision, and a client-readable flag could be edited in devtools. In the
+ * browser bundle this reads as undefined and therefore returns false, so
+ * client code must never call it to decide anything that matters -- the Auth
+ * pages are Server Components and pass the server-evaluated boolean down to
+ * the widget as a prop, purely to decide whether to render it.
+ *
+ * Opt-in by design. Anything other than the exact string 'true' -- absent,
+ * empty, 'false', '1', 'yes' -- leaves authentication exactly as it behaved
+ * before PR #183. That default is what makes a deploy without Cloudflare and
+ * Supabase configuration a no-op instead of an outage.
+ */
+export function isTurnstileEnforcementEnabled(): boolean {
+  return process.env.TURNSTILE_ENFORCEMENT_ENABLED === 'true'
+}
+
+export type CaptchaDecision =
+  | { allow: true; captchaToken?: string }
+  | { allow: false; message: string; reason: 'unconfigured' | 'missing-token' }
+
+/**
+ * The single place that decides whether an Auth call may proceed.
+ *
+ * Pure and fully parameterised so every combination can be exercised by the
+ * regression suite rather than merely inspected. The rule is:
+ *
+ *   enforcement off  -> allow, and send NO captchaToken at all
+ *   enforcement on, no site key -> block (fail closed; misconfiguration)
+ *   enforcement on, no token    -> block (fail closed)
+ *   enforcement on, token       -> allow, forwarding the token to Supabase
+ *
+ * Note what this is not: a universal fail-open fallback. Once enforcement is
+ * switched on, missing configuration blocks rather than degrades. The
+ * permissive branch exists only for the explicitly-not-enabled state.
+ */
+export function evaluateCaptcha(params: {
+  enforcementEnabled: boolean
+  siteKeyConfigured: boolean
+  token: string | undefined
+}): CaptchaDecision {
+  if (!params.enforcementEnabled) {
+    // Pre-PR #183 behaviour, restored exactly: no widget, no token, no gate.
+    return { allow: true }
+  }
+
+  if (!params.siteKeyConfigured) {
+    return { allow: false, message: TURNSTILE_UNAVAILABLE_MESSAGE, reason: 'unconfigured' }
+  }
+
+  if (!params.token) {
+    return { allow: false, message: TURNSTILE_FAILURE_MESSAGE, reason: 'missing-token' }
+  }
+
+  return { allow: true, captchaToken: params.token }
+}
+
 /** Name of the hidden form field carrying the token from widget to Server Action. */
 export const TURNSTILE_FIELD_NAME = 'captchaToken'
 

@@ -3,6 +3,7 @@ import type { Metadata } from 'next'
 import { login } from '@/lib/actions/auth'
 import { AuthCard } from '@/components/auth-card'
 import { CaptchaProtectedSubmit } from '@/components/auth/captcha-protected-submit'
+import { isTurnstileEnforcementEnabled } from '@/lib/turnstile'
 
 // Not useful search-result content, and excluded from app/sitemap.ts --
 // explicitly opt out of indexing rather than relying only on robots.txt.
@@ -62,7 +63,11 @@ export default async function LoginPage({ searchParams }: Props) {
           />
         </div>
 
-        <CaptchaProtectedSubmit formAction={login} pendingLabel="Signing in...">
+        <CaptchaProtectedSubmit
+          formAction={login}
+          pendingLabel="Signing in..."
+          captchaEnabled={isTurnstileEnforcementEnabled()}
+        >
           Log In
         </CaptchaProtectedSubmit>
       </form>

@@ -10,6 +10,16 @@ interface CaptchaProtectedSubmitProps {
   formAction: (formData: FormData) => void | Promise<void>
   children: React.ReactNode
   pendingLabel?: string
+  /**
+   * Server-evaluated value of TURNSTILE_ENFORCEMENT_ENABLED, passed down by
+   * the (Server Component) Auth page.
+   *
+   * Presentation only. Forging this to false in devtools removes the widget
+   * from the user's own screen and changes nothing else: the Server Action
+   * re-reads the flag from the server environment and will still refuse a
+   * tokenless submission when enforcement is on.
+   */
+  captchaEnabled: boolean
 }
 
 /**
@@ -29,8 +39,24 @@ interface CaptchaProtectedSubmitProps {
  * Cloudflare using the secret key. A user who re-enables the button in
  * devtools still cannot create an account.
  */
-export function CaptchaProtectedSubmit({ formAction, children, pendingLabel }: CaptchaProtectedSubmitProps) {
+export function CaptchaProtectedSubmit({
+  formAction,
+  children,
+  pendingLabel,
+  captchaEnabled,
+}: CaptchaProtectedSubmitProps) {
   const [token, setToken] = useState<string | null>(null)
+
+  // Enforcement off: exactly the button this form had before PR #183. No
+  // widget, no third-party script, no extra condition on submitting. A
+  // deploy without Cloudflare configured must be a no-op, not an outage.
+  if (!captchaEnabled) {
+    return (
+      <SubmitButton formAction={formAction} variant="primary" className="w-full" pendingLabel={pendingLabel}>
+        {children}
+      </SubmitButton>
+    )
+  }
 
   return (
     <div className="space-y-4">
