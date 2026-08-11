@@ -3,7 +3,17 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
-import { PASSWORD_UPDATE_FAILED_MESSAGE } from '@/lib/auth-messages'
+import { SITE_URL } from '@/lib/config'
+import { RESET_PASSWORD_PATH } from '@/lib/auth-redirect'
+import { postAuthDestinationFor } from '@/lib/auth-destination'
+import type { ResetPasswordState } from '@/lib/auth-reset-state'
+import {
+  MIN_PASSWORD_LENGTH,
+  PASSWORD_RESET_FAILURE_MESSAGES,
+  PASSWORD_UPDATED_MESSAGE,
+  classifyPasswordResetError,
+  type PasswordResetFailure,
+} from '@/lib/auth-messages'
 import {
   TURNSTILE_CONFIGURED,
   INVALID_EMAIL_MESSAGE,
@@ -204,8 +214,13 @@ export async function forgotPassword(formData: FormData) {
     return { error: captcha.message }
   }
 
+  // Points at the PKCE callback, NOT at the reset form (PR #187). Sending
+  // recovery links straight to the form meant the one-time code was never
+  // exchanged, so no session existed and updateUser() failed on a fresh
+  // link. SITE_URL is used rather than a bare env read so a missing
+  // NEXT_PUBLIC_SITE_URL cannot produce a relative, unusable redirect.
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/reset-password`,
+    redirectTo: `${SITE_URL}/auth/callback?next=${encodeURIComponent(RESET_PASSWORD_PATH)}`,
     ...captchaOption(captcha),
   })
 
@@ -221,29 +236,60 @@ export async function forgotPassword(formData: FormData) {
   }
 }
 
-export async function resetPassword(formData: FormData) {
+function resetFailure(failure: PasswordResetFailure): ResetPasswordState {
+  return { status: 'error', message: PASSWORD_RESET_FAILURE_MESSAGES[failure], failure }
+}
+
+export async function resetPassword(
+  _previousState: ResetPasswordState,
+  formData: FormData
+): Promise<ResetPasswordState> {
   const supabase = await createClient()
-  const password = formData.get('password') as string
+  const password = formData.get('password')
+
+  if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
+    // Reported accurately as a password problem. Previously every failure
+    // claimed the link had expired, which sent people back to their inbox
+    // for a link that was working perfectly well.
+    return resetFailure('password-too-short')
+  }
+
+  // The recovery session established by /auth/callback is the authority on
+  // whether this update is allowed. Checking it here only makes the failure
+  // category accurate -- Supabase rejects the update regardless, and no
+  // client-supplied value takes part in the decision.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return resetFailure('no-recovery-session')
+  }
 
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) {
-    // The password itself is never logged, never put in a URL, and never
-    // held in state -- only the reason the update failed is recorded.
+    // Only the reason is recorded. The password, the recovery code and the
+    // session tokens are never logged, never placed in a URL, and never
+    // returned to the client.
     console.error('Password update error:', error.message)
-    // Previously this returned { error } which the page never read, so an
-    // expired or reused link failed silently. Redirecting is what makes the
-    // existing error block on the page actually render.
-    redirect(`/auth/reset-password?error=${encodeURIComponent(PASSWORD_UPDATE_FAILED_MESSAGE)}`)
+    return resetFailure(classifyPasswordResetError(error.message))
   }
 
-  revalidatePath('/', 'layout')
+  // Same onboarding rule this flow has always applied -- now attached to the
+  // Continue button rather than to an immediate redirect, so the learner
+  // actually sees that the password changed.
+  const { data: profile } = await supabase
+    .from('user_profiles')
+    .select('onboarding_response, onboarding_skipped')
+    .eq('id', user.id)
+    .maybeSingle()
 
-  // Success is now confirmed on screen rather than by a silent redirect to
-  // onboarding or home. The onboarding decision is unchanged -- it is just
-  // applied to the Continue button instead of to an immediate jump, so the
-  // learner actually sees that the password changed.
-  redirect('/auth/reset-password?status=success')
+  return {
+    status: 'success',
+    message: PASSWORD_UPDATED_MESSAGE,
+    destination: postAuthDestinationFor(profile),
+  }
 }
 
 export async function saveOnboardingResponse(
