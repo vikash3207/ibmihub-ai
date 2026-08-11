@@ -203,6 +203,13 @@ function simulateCallback(params: {
 
   const clearRecoveryMarker = () => jar.delete(RECOVERY_COOKIE_NAME)
 
+  // Mirrors app/auth/callback/route.ts: cleared unconditionally the instant
+  // a recovery-destined request begins, before either a failure redirect or
+  // a fresh success writes the new recovery marker. This is what stops a
+  // still-live success marker from a PREVIOUS completed reset shadowing a
+  // brand-new, genuinely valid recovery session.
+  if (isRecovery) jar.delete(SUCCESS_COOKIE_NAME)
+
   if (!params.code) {
     if (isRecovery) clearRecoveryMarker()
     return { location: failureUrl, exchangeCalls, jar, markerWritten: false }
@@ -467,6 +474,89 @@ check('a missing marker is invalid', !hasValidRecoveryMarker(undefined, 'user-1'
 check('a marker with no session is invalid', !hasValidRecoveryMarker(recoveryMarkerFor('user-1'), null))
 check('a marker with an empty user id is invalid', !hasValidRecoveryMarker('', ''))
 check('a matching marker is valid', hasValidRecoveryMarker(recoveryMarkerFor('user-1'), 'user-1'))
+
+// ---------------------------------------------------------------------------
+section('A stale success marker cannot shadow a fresh recovery flow (simulated)')
+// ---------------------------------------------------------------------------
+
+// PR #192 follow-up. The success marker's own ~2-minute lifetime meant a
+// learner who completed one reset and then, moments later, requested and
+// opened a SECOND genuinely valid link would have that fresh link's own
+// callback succeed -- yet the page would show "Password updated
+// successfully" again (the stale marker, checked ahead of the recovery-flow
+// gate) instead of the new password form the fresh link actually earned.
+// app/auth/callback/route.ts now clears the success marker unconditionally
+// the instant a recovery-destined request begins, before either a failure
+// redirect or a fresh success write -- covering both halves below.
+
+{
+  // 1. Reopening the CONSUMED email link (the one already used to succeed)
+  //    must clear the success marker it left behind and show the
+  //    invalid-link screen, not linger on the old confirmation.
+  const jar = freshRecovery()
+  const succeeded = simulateResetPassword({ password: 'a-good-password', sessionUserId: 'user-1', jar })
+  check('the first link succeeds', succeeded.status === 'success')
+  check('leaving a success marker behind', jar.has(SUCCESS_COOKIE_NAME))
+
+  const replay = simulateCallback({
+    code: 'already-used',
+    next: RESET_PASSWORD_PATH,
+    exchangeSucceeds: false,
+    jar,
+  })
+  check('replaying the consumed link fails, as Supabase already rejects a used code', replay.location.includes(RECOVERY_ERROR_CODE))
+  check('reopening the consumed link clears the success marker', !jar.has(SUCCESS_COOKIE_NAME))
+
+  const page = simulateResetPage({ jar, sessionUserId: 'user-1' })
+  check('and displays the invalid-link screen', page.rendersInvalidLink)
+  check('not a lingering success screen', !page.rendersSuccess)
+  check('and not the password form either', !page.rendersForm)
+}
+
+{
+  // 2. A genuinely fresh, valid recovery link must override a stale success
+  //    marker left over from an earlier, unrelated completed reset, and
+  //    show the password form -- not the old confirmation.
+  const jar = makeJar({ [SUCCESS_COOKIE_NAME]: successMarkerFor('user-1') })
+  check('a stale success marker starts present', jar.has(SUCCESS_COOKIE_NAME))
+
+  const fresh = simulateCallback({
+    code: 'brand-new-code',
+    next: RESET_PASSWORD_PATH,
+    exchangeSucceeds: true,
+    exchangedUserId: 'user-1',
+    jar,
+  })
+  check('the fresh link exchanges successfully', fresh.exchangeCalls === 1)
+  check('and writes a new recovery marker', fresh.markerWritten)
+  check('the stale success marker is gone before that write lands', !jar.has(SUCCESS_COOKIE_NAME))
+
+  const page = simulateResetPage({ jar, sessionUserId: 'user-1' })
+  check('the fresh link displays the password form', page.rendersForm)
+  check('not the stale success screen', !page.rendersSuccess)
+}
+
+{
+  // 3. The immediate post-update render is unaffected by this change --
+  //    clearing at the START of the NEXT callback must not somehow erase
+  //    the marker THIS update just wrote.
+  const jar = freshRecovery()
+  const update = simulateResetPassword({ password: 'a-good-password', sessionUserId: 'user-1', jar })
+  check('the update still succeeds', update.status === 'success')
+  const page = simulateResetPage({ jar, sessionUserId: 'user-1' })
+  check('the immediate post-update render still displays success', page.rendersSuccess)
+  check('not the invalid-link screen', !page.rendersInvalidLink)
+}
+
+{
+  // 4. Whatever its state, the success marker never authorises an update --
+  //    unchanged by this fix, reasserted here in the same scenario.
+  const jar = makeJar({ [SUCCESS_COOKIE_NAME]: successMarkerFor('user-1') })
+  const attempt = simulateResetPassword({ password: 'a-good-password', sessionUserId: 'user-1', jar })
+  check('a success marker alone remains unusable for authorising an update', attempt.status === 'error')
+  check('reported as a recovery problem', attempt.failure === 'no-recovery-session')
+  check('updateUser is never reached', attempt.updateCalls === 0)
+}
 
 // ---------------------------------------------------------------------------
 section('Success marker (executed + simulated)')
@@ -1115,6 +1205,25 @@ check('the provider detail shown on the page is sanitized first', /sanitizeProvi
 
 check('the marker is written in exactly one place', (callback.match(/cookieStore\.set\(RECOVERY_COOKIE_NAME/g) ?? []).length === 1)
 check('nothing but the callback writes the marker', !/cookies\(\)[\s\S]*?\.set\(RECOVERY_COOKIE_NAME/.test(resetPage))
+
+// PR #192 follow-up: the success marker is cleared unconditionally as soon
+// as a recovery-destined request begins, ahead of both the failure helper
+// and the fresh recovery-marker write.
+check('the callback imports the success-marker cookie name', /SUCCESS_COOKIE_NAME/.test(callback))
+check(
+  'the success marker is cleared as soon as a recovery request is recognised',
+  /if \(isRecovery\) \{\s*cookieStore\.delete\(SUCCESS_COOKIE_NAME\)/.test(callback)
+)
+check(
+  'that clear happens before the fail() helper is even defined',
+  callback.indexOf('cookieStore.delete(SUCCESS_COOKIE_NAME)') < callback.indexOf('const fail = ')
+)
+check(
+  'and before the fresh recovery marker is written on success',
+  callback.indexOf('cookieStore.delete(SUCCESS_COOKIE_NAME)') <
+    callback.indexOf('cookieStore.set(RECOVERY_COOKIE_NAME')
+)
+check('the success marker is cleared in exactly one place in the callback', (callback.match(/cookieStore\.delete\(SUCCESS_COOKIE_NAME\)/g) ?? []).length === 1)
 check(
   'the action consumes the recovery marker before returning success',
   authActions.indexOf('consumeRecoveryMarker()') < authActions.indexOf("status: 'success',")

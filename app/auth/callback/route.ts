@@ -8,6 +8,7 @@ import {
   recoveryCookieOptions,
   recoveryMarkerFor,
 } from '@/lib/auth-recovery-state'
+import { SUCCESS_COOKIE_NAME } from '@/lib/auth-success-state'
 import {
   classifyArrival,
   sanitizeProviderCode,
@@ -45,6 +46,27 @@ export async function GET(request: NextRequest) {
    */
   const clearRecoveryMarker = () => {
     cookieStore.delete(RECOVERY_COOKIE_NAME)
+  }
+
+  // Cleared the instant a recovery-destined request BEGINS, before any
+  // exchange is attempted -- not only on failure (PR #192 follow-up). This
+  // one call site covers both requirements at once:
+  //
+  //   - a failing callback must not leave a stale success marker sitting
+  //     next to the invalid-link screen it is about to show;
+  //   - a genuinely fresh, valid recovery link must not have its own
+  //     brand-new session shadowed by a still-live success marker from a
+  //     PREVIOUS completed reset. Without this, requesting and using a
+  //     second link within the first marker's ~2-minute window made
+  //     app/auth/reset-password/page.tsx's success-marker check (which runs
+  //     ahead of the recovery-flow one) show "Password updated
+  //     successfully" again instead of the password form the fresh link
+  //     earned -- even though nothing about THIS link had succeeded yet.
+  //
+  // Placed before the new recovery marker is written on success below, so
+  // that write is never shadowed by this leftover from an earlier flow.
+  if (isRecovery) {
+    cookieStore.delete(SUCCESS_COOKIE_NAME)
   }
 
   /**
