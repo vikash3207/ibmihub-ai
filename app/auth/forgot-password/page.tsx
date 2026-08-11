@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { forgotPassword } from '@/lib/actions/auth'
 import { AuthCard } from '@/components/auth-card'
-import { buttonVariants } from '@/components/ui/button'
+import { CaptchaProtectedSubmit } from '@/components/auth/captcha-protected-submit'
 
 // Not useful search-result content, and excluded from app/sitemap.ts --
 // explicitly opt out of indexing rather than relying only on robots.txt.
@@ -12,17 +12,23 @@ export const metadata: Metadata = {
 }
 
 interface Props {
-  searchParams: Promise<{ message?: string }>
+  searchParams: Promise<{ message?: string; error?: string }>
 }
 
 export default async function ForgotPasswordPage({ searchParams }: Props) {
-  const { message } = await searchParams
+  const { message, error } = await searchParams
 
   return (
     <AuthCard title="Reset your password" subtitle="Enter your email address and we'll send you a reset link.">
       {message && (
         <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
           {message}
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+          {error}
         </div>
       )}
 
@@ -41,17 +47,24 @@ export default async function ForgotPasswordPage({ searchParams }: Props) {
           />
         </div>
 
-        <button
+        <CaptchaProtectedSubmit
           formAction={async (formData) => {
             'use server'
-            const { message } = await forgotPassword(formData)
+            const result = await forgotPassword(formData)
             const { redirect } = await import('next/navigation')
-            redirect(`/auth/forgot-password?message=${encodeURIComponent(message)}`)
+            // forgotPassword now returns either a validation/captcha error or
+            // the deliberately non-specific success message (which is shown
+            // whether or not the address is registered).
+            redirect(
+              result.error
+                ? `/auth/forgot-password?error=${encodeURIComponent(result.error)}`
+                : `/auth/forgot-password?message=${encodeURIComponent(result.message ?? '')}`
+            )
           }}
-          className={buttonVariants({ variant: 'primary', className: 'w-full' })}
+          pendingLabel="Sending..."
         >
           Send Reset Link
-        </button>
+        </CaptchaProtectedSubmit>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
