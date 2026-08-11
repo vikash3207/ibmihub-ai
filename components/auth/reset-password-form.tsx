@@ -5,11 +5,12 @@ import { useFormState } from 'react-dom'
 import { resetPassword } from '@/lib/actions/auth'
 import { RESET_PASSWORD_INITIAL_STATE } from '@/lib/auth-reset-state'
 import { MIN_PASSWORD_LENGTH } from '@/lib/auth-messages'
-import { buttonVariants } from '@/components/ui/button'
 import { SubmitButton } from '@/components/ui/submit-button'
+import { ResetSuccessContent } from '@/components/auth/reset-success-content'
 
 /**
- * Password-reset form and its outcome (PR #187).
+ * Password-reset form and its outcome (PR #187, success path reworked in
+ * PR #192).
  *
  * The success screen is driven by the value the Server Action RETURNED, not
  * by a query parameter. PR #186 redirected to `?status=success`, which meant
@@ -18,6 +19,15 @@ import { SubmitButton } from '@/components/ui/submit-button'
  * re-checks the Supabase recovery session server-side on every submission,
  * and Supabase rejects the update if it is not there.
  *
+ * This client-rendered branch is instant feedback, not the lasting state.
+ * Next.js refreshes the page's own Server Component tree right after this
+ * action resolves, and app/auth/reset-password/page.tsx independently
+ * reaches the same conclusion from its own server-issued success marker
+ * (lib/auth-success-state.ts) -- which is what stops that refresh from
+ * clobbering this with the invalid-link branch, the bug PR #192 fixes.
+ * Rendering the identical ResetSuccessContent here means whichever one wins
+ * the race, the learner sees the same thing.
+ *
  * useFormState rather than useActionState because this repo is on React
  * 18.3.1; it is the same server-authoritative pattern under the earlier name.
  */
@@ -25,28 +35,7 @@ export function ResetPasswordForm() {
   const [state, formAction] = useFormState(resetPassword, RESET_PASSWORD_INITIAL_STATE)
 
   if (state.status === 'success') {
-    return (
-      <>
-        {/* Stays put until the learner chooses to move on -- not a toast.
-            role="status" announces it without stealing focus. */}
-        <div
-          role="status"
-          className="mb-6 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700"
-        >
-          {state.message}
-        </div>
-
-        {/* Resolved server-side from the learner's onboarding state and
-            typed as a literal union of internal paths, so it can never be
-            steered by anything in the URL. */}
-        <Link
-          href={state.destination}
-          className={buttonVariants({ variant: 'primary', className: 'w-full' })}
-        >
-          Continue to iRPGenie
-        </Link>
-      </>
-    )
+    return <ResetSuccessContent destination={state.destination} />
   }
 
   return (

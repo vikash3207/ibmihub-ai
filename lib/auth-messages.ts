@@ -8,8 +8,12 @@
  * the success wording.
  */
 
-/** Shown after supabase.auth.updateUser({ password }) actually succeeded. */
-export const PASSWORD_UPDATED_MESSAGE = 'Your password has been updated successfully.'
+/** Heading shown after supabase.auth.updateUser({ password }) actually succeeded (PR #192). */
+export const PASSWORD_UPDATED_TITLE = 'Password updated successfully'
+
+/** Body copy shown alongside PASSWORD_UPDATED_TITLE. */
+export const PASSWORD_UPDATED_MESSAGE =
+  'Your password has been changed. You can now continue to iRPGenie using your new password.'
 
 /**
  * Why a password update failed.
