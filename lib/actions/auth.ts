@@ -1,6 +1,7 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
+import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SITE_URL } from '@/lib/config'
@@ -12,8 +13,13 @@ import {
   PASSWORD_RESET_FAILURE_MESSAGES,
   PASSWORD_UPDATED_MESSAGE,
   classifyPasswordResetError,
+  safeAuthErrorCode,
   type PasswordResetFailure,
 } from '@/lib/auth-messages'
+import {
+  RECOVERY_COOKIE_NAME,
+  hasValidRecoveryMarker,
+} from '@/lib/auth-recovery-state'
 import {
   TURNSTILE_CONFIGURED,
   INVALID_EMAIL_MESSAGE,
@@ -227,7 +233,7 @@ export async function forgotPassword(formData: FormData) {
   // Return a non-specific message to avoid revealing if an email is registered
   if (error) {
     // Log internally but don't expose specifics to the user
-    console.error('Password reset error:', error.message)
+    console.error('Password reset email failed:', safeAuthErrorCode(error))
   }
 
   return {
@@ -245,36 +251,58 @@ export async function resetPassword(
   formData: FormData
 ): Promise<ResetPasswordState> {
   const supabase = await createClient()
+  const cookieStore = await cookies()
   const password = formData.get('password')
 
+  /** Single-use by design: a used link must not reopen a working form. */
+  const consumeRecoveryMarker = () => {
+    cookieStore.delete(RECOVERY_COOKIE_NAME)
+  }
+
   if (typeof password !== 'string' || password.length < MIN_PASSWORD_LENGTH) {
-    // Reported accurately as a password problem. Previously every failure
-    // claimed the link had expired, which sent people back to their inbox
-    // for a link that was working perfectly well.
+    // Reported accurately as a password problem, and the marker is KEPT so
+    // the learner can simply correct it. Previously every failure claimed
+    // the link had expired, sending people back to their inbox for a link
+    // that was working perfectly well.
     return resetFailure('password-too-short')
   }
 
-  // The recovery session established by /auth/callback is the authority on
-  // whether this update is allowed. Checking it here only makes the failure
-  // category accurate -- Supabase rejects the update regardless, and no
-  // client-supplied value takes part in the decision.
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  if (!user) {
+  // Both halves are required, re-checked here rather than trusted from the
+  // page. getUser() alone proves only that SOME session exists -- an
+  // ordinary signed-in visitor has one, and so does someone whose recovery
+  // callback failed. The marker is what says this is a recovery flow, and
+  // only /auth/callback can write it.
+  const isRecoveryFlow = hasValidRecoveryMarker(cookieStore.get(RECOVERY_COOKIE_NAME)?.value, user?.id)
+
+  if (!user || !isRecoveryFlow) {
+    consumeRecoveryMarker()
     return resetFailure('no-recovery-session')
   }
 
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) {
-    // Only the reason is recorded. The password, the recovery code and the
-    // session tokens are never logged, never placed in a URL, and never
-    // returned to the client.
-    console.error('Password update error:', error.message)
-    return resetFailure(classifyPasswordResetError(error.message))
+    const failure = classifyPasswordResetError(error)
+    // Fixed label plus the stable code only. The password, the recovery
+    // code, the session tokens and Supabase's raw message are never logged,
+    // never placed in a URL, and never returned to the client.
+    console.error('Password update failed:', safeAuthErrorCode(error), failure)
+
+    // A dead session cannot be retried, so the marker goes. A recoverable
+    // problem keeps it so the learner can try again on the same link.
+    if (failure === 'no-recovery-session') {
+      consumeRecoveryMarker()
+    }
+    return resetFailure(failure)
   }
+
+  // Consumed on success: reopening the same link now finds no marker and is
+  // shown the invalid-link page rather than another usable form.
+  consumeRecoveryMarker()
 
   // Same onboarding rule this flow has always applied -- now attached to the
   // Continue button rather than to an immediate redirect, so the learner

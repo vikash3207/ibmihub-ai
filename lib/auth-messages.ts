@@ -40,35 +40,73 @@ export const PASSWORD_RESET_FAILURE_MESSAGES: Record<PasswordResetFailure, strin
 }
 
 /**
- * Maps a raw Supabase error to a category.
+ * The shape actually needed to classify a Supabase auth failure.
  *
- * Matches on the message because @supabase/auth-js does not expose a stable
- * typed code for every one of these. Anything unrecognised falls through to
- * `unknown` rather than being guessed at.
+ * Both fields matter. `code` is the stable identifier for most API errors,
+ * but some client-side errors carry no code at all -- AuthSessionMissingError
+ * is constructed with `code: undefined` and is identifiable only by `name`.
+ * Classifying on either is what makes this robust; classifying on prose was
+ * the previous mistake, since Supabase can reword a message at any release.
  */
-export function classifyPasswordResetError(rawMessage: string): PasswordResetFailure {
-  const lower = rawMessage.toLowerCase()
+export interface ClassifiableAuthError {
+  code?: string | undefined
+  name?: string | undefined
+}
 
-  if (
-    lower.includes('auth session missing') ||
-    lower.includes('session_not_found') ||
-    lower.includes('session from session_id claim in jwt does not exist') ||
-    lower.includes('invalid claim') ||
-    lower.includes('jwt expired') ||
-    lower.includes('not authenticated')
-  ) {
+/** Stable ErrorCode values from @supabase/auth-js that mean "no usable session". */
+const NO_SESSION_CODES = new Set([
+  'session_not_found',
+  'session_expired',
+  'refresh_token_not_found',
+  'refresh_token_already_used',
+  'bad_jwt',
+  'invalid_jwt',
+  'user_not_found',
+  'no_authorization',
+])
+
+/** Error class names for the same condition, used where no code is set. */
+const NO_SESSION_NAMES = new Set([
+  'AuthSessionMissingError',
+  'AuthInvalidJwtError',
+  'AuthInvalidTokenResponseError',
+])
+
+/**
+ * Maps a Supabase auth error to a category using its stable code or class
+ * name -- never its message text.
+ *
+ * Anything unrecognised becomes `unknown` rather than being guessed at, so a
+ * new Supabase error code degrades to a safe generic message instead of
+ * being mislabelled as an expired link.
+ */
+export function classifyPasswordResetError(error: ClassifiableAuthError | null | undefined): PasswordResetFailure {
+  const code = typeof error?.code === 'string' ? error.code : undefined
+  const name = typeof error?.name === 'string' ? error.name : undefined
+
+  if ((code && NO_SESSION_CODES.has(code)) || (name && NO_SESSION_NAMES.has(name))) {
     return 'no-recovery-session'
   }
 
-  if (lower.includes('should be different') || lower.includes('same as the old')) {
+  if (code === 'same_password') {
     return 'password-unchanged'
   }
 
-  if (lower.includes('password') && (lower.includes('at least') || lower.includes('short') || lower.includes('weak'))) {
+  if (code === 'weak_password' || name === 'AuthWeakPasswordError') {
     return 'password-too-short'
   }
 
   return 'unknown'
+}
+
+/**
+ * What is safe to put in a log line: the stable identifiers only, never the
+ * message, which can quote session internals.
+ */
+export function safeAuthErrorCode(error: ClassifiableAuthError | null | undefined): string {
+  const code = typeof error?.code === 'string' && error.code.length > 0 ? error.code : null
+  const name = typeof error?.name === 'string' && error.name.length > 0 ? error.name : null
+  return code ?? name ?? 'unspecified'
 }
 
 /**
