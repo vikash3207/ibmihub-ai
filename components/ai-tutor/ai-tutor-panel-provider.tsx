@@ -1,7 +1,23 @@
 'use client'
 
-import { createContext, useCallback, useContext, useRef, useState, type ReactNode } from 'react'
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from 'react'
 import { submitAiTutorFeedback } from '@/lib/actions/ai-tutor-feedback'
+import {
+  getAuthSignal,
+  getServerAuthSignal,
+  subscribeAuthSignal,
+  type AuthSignal,
+} from '@/lib/auth-signal'
+import { isSignOutTransition, resolveRequiresLogin } from '@/lib/ai-tutor/auth-sync'
 import { GENERAL_CONTEXT, getContextLabel, type AiTutorContext, type AiTutorSourceRef } from './types'
 import type { ChatMessage, FeedbackState } from './chat-thread'
 import { LimitReachedDialog } from './limit-reached-dialog'
@@ -76,7 +92,11 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [errorContactHref, setErrorContactHref] = useState<string | null>(null)
-  const [requiresLogin, setRequiresLogin] = useState(false)
+  /**
+   * Raw flag from a 401 on /api/ai-tutor. Never read directly by the UI --
+   * `requiresLogin` below is the derived, auth-aware value.
+   */
+  const [requiresLoginAfter401, setRequiresLoginAfter401] = useState(false)
   const [feedback, setFeedback] = useState<Record<string, FeedbackState>>({})
   const [sources, setSources] = useState<Record<string, AiTutorSourceRef[]>>({})
   /** Whether the daily-allowance dialog is showing (PR #182). Distinct from `error`: it is not an inline failure message but a deliberate, dismissable state. */
@@ -88,6 +108,54 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
    * subtree the provider wraps.
    */
   const pageContextRef = useRef<AiTutorContext | null>(null)
+
+  /**
+   * The server's authentication verdict, published by SiteHeader (PR #186).
+   * Read through useSyncExternalStore so it is available during render --
+   * which is what lets the login prompt disappear in the very same render
+   * that flips the header to "Log out", with no effect and no flicker.
+   */
+  const authSignal = useSyncExternalStore(subscribeAuthSignal, getAuthSignal, getServerAuthSignal)
+
+  /**
+   * Derived, not stored. A 401 flag left over from before login is stale the
+   * instant the server says the visitor is signed in, so it is resolved away
+   * here rather than cleared by an effect -- which also means it stays
+   * correct if this provider ever remounts.
+   */
+  const requiresLogin = resolveRequiresLogin(authSignal, requiresLoginAfter401)
+
+  const previousAuthSignalRef = useRef<AuthSignal>('unknown')
+
+  useEffect(() => {
+    // Whatever the header already reported is the starting point, not a
+    // change -- recorded before subscribing so mounting can never look like
+    // a sign-out.
+    previousAuthSignalRef.current = getAuthSignal()
+
+    return subscribeAuthSignal(() => {
+      const next = getAuthSignal()
+      const previous = previousAuthSignalRef.current
+      previousAuthSignalRef.current = next
+
+      // Only a genuine sign-out discards the conversation. Signing IN keeps
+      // it, and a plain navigation between signed-out pages never reaches
+      // here because the store does not notify on an unchanged value.
+      //
+      // Discarding on sign-out is deliberate: on a shared machine the next
+      // person must not find the previous learner's questions sitting in an
+      // already-open panel.
+      if (isSignOutTransition(previous, next)) {
+        setMessages([])
+        setError(null)
+        setErrorContactHref(null)
+        setRequiresLoginAfter401(false)
+        setFeedback({})
+        setSources({})
+        setLimitReachedOpen(false)
+      }
+    })
+  }, [])
 
   const userTurnCount = messages.filter((m) => m.role === 'user').length
   const limitReached = userTurnCount >= MAX_USER_TURNS
@@ -128,7 +196,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     setMessages([])
     setError(null)
     setErrorContactHref(null)
-    setRequiresLogin(false)
+    setRequiresLoginAfter401(false)
     setFeedback({})
     setSources({})
   }, [])
@@ -150,7 +218,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
 
       setError(null)
       setErrorContactHref(null)
-      setRequiresLogin(false)
+      setRequiresLoginAfter401(false)
       const userMessage: ChatMessage = { id: crypto.randomUUID(), role: 'user', content: trimmed }
       const nextMessages = [...messages, userMessage]
       setMessages(nextMessages)
@@ -172,7 +240,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
 
         if (response.status === 401) {
           setMessages((prev) => prev.filter((m) => m.id !== assistantId))
-          setRequiresLogin(true)
+          setRequiresLoginAfter401(true)
           return
         }
 
