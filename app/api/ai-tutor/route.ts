@@ -13,6 +13,7 @@ import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { isDeepDiveAvailable } from '@/lib/deep-dives'
 import { SITE_URL } from '@/lib/config'
 import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
+import { buildProductFactsSection } from '@/lib/ai/product-facts'
 import { retrieveCourseContext, formatCourseContextForPrompt } from '@/lib/ai/retrieve-course-context'
 import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
 import { buildSourceRefs } from '@/lib/ai/build-source-refs'
@@ -35,8 +36,32 @@ const SOURCES_HEADER = 'X-Ai-Tutor-Sources'
 
 type UsageStatus = 'success' | 'error' | 'rate_limited'
 
-function jsonError(message: string, status: number, extra?: Record<string, unknown>) {
-  return new Response(JSON.stringify({ error: message, ...extra }), {
+/**
+ * Machine-readable error codes (PR #182). Previously the client had only a
+ * status code and a prose message to work with, and 429 was shared by the
+ * daily-quota block and the short cooldown -- so it could not tell "you are
+ * out of questions for today" from "you clicked twice too fast" without
+ * string-matching. The client now switches on `code`; prose stays purely
+ * for display and can be reworded freely.
+ */
+export type AiTutorErrorCode =
+  | 'daily_limit'
+  | 'cooldown'
+  | 'message_too_long'
+  | 'unauthenticated'
+  | 'invalid_request'
+  | 'provider_error'
+  | 'server_error'
+
+function jsonError(
+  message: string,
+  status: number,
+  code: AiTutorErrorCode,
+  extra?: Record<string, unknown>
+) {
+  // Never include database/provider internals here -- `message` is always a
+  // curated, user-facing string chosen at the call site.
+  return new Response(JSON.stringify({ error: message, code, ...extra }), {
     status,
     headers: { 'Content-Type': 'application/json' },
   })
@@ -94,7 +119,7 @@ function statusForErrorKind(kind: TutorErrorKind): UsageStatus {
  */
 function parseMessages(body: unknown): TutorMessage[] | Response {
   if (typeof body !== 'object' || body === null || !Array.isArray((body as { messages?: unknown }).messages)) {
-    return jsonError('Invalid request.', 400)
+    return jsonError('Invalid request.', 400, 'invalid_request')
   }
 
   const rawMessages = (body as { messages: unknown[] }).messages
@@ -106,22 +131,23 @@ function parseMessages(body: unknown): TutorMessage[] | Response {
       item === null ||
       typeof (item as { content?: unknown }).content !== 'string'
     ) {
-      return jsonError('Invalid request.', 400)
+      return jsonError('Invalid request.', 400, 'invalid_request')
     }
 
     const role = (item as { role?: unknown }).role
     const content = (item as { content: string }).content
 
     if (role !== 'user' && role !== 'assistant') {
-      return jsonError('Invalid request.', 400)
+      return jsonError('Invalid request.', 400, 'invalid_request')
     }
     if (content.length === 0) {
-      return jsonError('Invalid request.', 400)
+      return jsonError('Invalid request.', 400, 'invalid_request')
     }
     if (content.length > MAX_MESSAGE_LENGTH) {
       return jsonError(
         `Messages must be ${MAX_MESSAGE_LENGTH} characters or fewer. Please shorten your question.`,
-        400
+        400,
+        'message_too_long'
       )
     }
 
@@ -131,13 +157,14 @@ function parseMessages(body: unknown): TutorMessage[] | Response {
   const userTurnCount = messages.filter((m) => m.role === 'user').length
 
   if (userTurnCount === 0) {
-    return jsonError('Invalid request.', 400)
+    return jsonError('Invalid request.', 400, 'invalid_request')
   }
 
   if (userTurnCount > MAX_USER_TURNS) {
     return jsonError(
       "You've reached the message limit for this session. Please refresh the page to start a new conversation.",
-      400
+      400,
+      'invalid_request'
     )
   }
 
@@ -367,7 +394,15 @@ async function resolveGrounding(
     )
   }
 
+  // Priority order (PR #182): trusted platform facts FIRST, then verified
+  // current-page context, then whatever retrieval found. Product questions
+  // ("who founded this?", "is it free?") must be answerable from the facts
+  // block regardless of which lesson or Deep Dive is open, and retrieved
+  // content must never be able to redefine the founder, quota, pricing, or
+  // affiliation. Costs a few hundred tokens per request and no extra model
+  // call -- there is deliberately no classifier step.
   const sections = [
+    buildProductFactsSection(),
     ...pageSections,
     ...(practiceSection ? [practiceSection] : []),
     formatCourseContextForPrompt(result),
@@ -403,14 +438,14 @@ export async function POST(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    return jsonError('You must be logged in to use the AI Tutor.', 401)
+    return jsonError('You must be logged in to use the AI Tutor.', 401, 'unauthenticated')
   }
 
   let body: unknown
   try {
     body = await request.json()
   } catch {
-    return jsonError('Invalid request.', 400)
+    return jsonError('Invalid request.', 400, 'invalid_request')
   }
 
   const parsed = parseMessages(body)
@@ -440,10 +475,15 @@ export async function POST(request: NextRequest) {
         estimatedInputTokens: estimateTokens(latestUserMessage),
       })
     )
+    // `reason` is already exactly the discriminator the client needs, so it
+    // doubles as the error code -- this is what lets the UI show the
+    // limit-reached dialog for `daily_limit` while treating `cooldown` as an
+    // ordinary transient message, even though both are HTTP 429.
     const status = limitCheck.reason === 'message_too_long' ? 400 : 429
     return jsonError(
       limitCheck.message,
       status,
+      limitCheck.reason,
       limitCheck.contactHref ? { contactHref: limitCheck.contactHref } : undefined
     )
   }
@@ -490,9 +530,9 @@ export async function POST(request: NextRequest) {
     )
 
     if (kind === 'rate_limited') {
-      return jsonError('AI Tutor is busy right now. Please try again in a moment.', 429)
+      return jsonError('AI Tutor is busy right now. Please try again in a moment.', 429, 'provider_error')
     }
-    return jsonError('AI Tutor is temporarily unavailable. Please try again.', 502)
+    return jsonError('AI Tutor is temporarily unavailable. Please try again.', 502, 'provider_error')
   }
 
   const encoder = new TextEncoder()

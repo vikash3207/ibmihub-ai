@@ -6,10 +6,15 @@
  * something non-numeric.
  *
  * Server-only by design: enforcement must never depend on a value the
- * client could see or influence. See components/ai-tutor/chat-thread.tsx
- * for the (separately hardcoded, display-only) "Beta limit" caption --
- * keep that text in sync with AI_TUTOR_DAILY_LIMIT's default below if it
- * ever changes.
+ * client could see or influence.
+ *
+ * AI_TUTOR_DAILY_LIMIT is now the ONLY place the daily allowance is
+ * written down (PR #182). The old display-only "Beta limit: 20 ..."
+ * caption in components/ai-tutor/chat-thread.tsx duplicated the number and
+ * had to be hand-synced; it has been removed, and lib/ai/product-facts.ts
+ * reads this constant rather than restating it, so the AI Tutor's own
+ * answer to "how many questions do I get?" cannot drift from what is
+ * actually enforced.
  */
 import 'server-only'
 

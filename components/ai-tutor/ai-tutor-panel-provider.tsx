@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useRef, useState, type ReactNod
 import { submitAiTutorFeedback } from '@/lib/actions/ai-tutor-feedback'
 import { GENERAL_CONTEXT, getContextLabel, type AiTutorContext, type AiTutorSourceRef } from './types'
 import type { ChatMessage, FeedbackState } from './chat-thread'
+import { LimitReachedDialog } from './limit-reached-dialog'
 
 /** Must match app/api/ai-tutor/route.ts. */
 const MAX_USER_TURNS = 20
@@ -29,6 +30,9 @@ interface AiTutorPanelValue {
   /** Source lesson references per assistant message id, from the RAG v2 retrieval used to ground that reply (PR #132). */
   sources: Record<string, AiTutorSourceRef[]>
   limitReached: boolean
+  /** True once the server has reported the daily allowance is exhausted (PR #182). */
+  limitReachedOpen: boolean
+  dismissLimitReached: () => void
   /**
    * Opens the panel. With an explicit context, that context is used. With
    * NO argument, the context registered by the current page is used (PR
@@ -75,6 +79,8 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   const [requiresLogin, setRequiresLogin] = useState(false)
   const [feedback, setFeedback] = useState<Record<string, FeedbackState>>({})
   const [sources, setSources] = useState<Record<string, AiTutorSourceRef[]>>({})
+  /** Whether the daily-allowance dialog is showing (PR #182). Distinct from `error`: it is not an inline failure message but a deliberate, dismissable state. */
+  const [limitReachedOpen, setLimitReachedOpen] = useState(false)
   /**
    * The context the *current page* has registered (PR #181). A ref, not
    * state: nothing renders from it directly, and keeping it out of state
@@ -110,6 +116,8 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const closePanel = useCallback(() => setIsOpen(false), [])
+
+  const dismissLimitReached = useCallback(() => setLimitReachedOpen(false), [])
 
   const updateContext = useCallback((nextContext: AiTutorContext) => {
     setContext(nextContext)
@@ -171,6 +179,7 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
         if (!response.ok || !response.body) {
           let message = 'AI Tutor is temporarily unavailable. Please try again.'
           let contactHref: string | null = null
+          let code: string | null = null
           try {
             const data = await response.json()
             if (typeof data.error === 'string') {
@@ -179,10 +188,24 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
             if (typeof data.contactHref === 'string') {
               contactHref = data.contactHref
             }
+            if (typeof data.code === 'string') {
+              code = data.code
+            }
           } catch {
             // Non-JSON error body -- keep the generic message.
           }
           setMessages((prev) => prev.filter((m) => m.id !== assistantId))
+
+          // The daily allowance is the one failure that gets its own
+          // dialog (PR #182). Switching on the typed `code` -- not the
+          // status, which 429 shares with the cooldown, and not the prose,
+          // which is display-only -- is what makes that deterministic.
+          // The conversation is deliberately left intact behind the dialog.
+          if (code === 'daily_limit') {
+            setLimitReachedOpen(true)
+            return
+          }
+
           setError(message)
           setErrorContactHref(contactHref)
           return
@@ -251,6 +274,8 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     feedback,
     sources,
     limitReached,
+    limitReachedOpen,
+    dismissLimitReached,
     openPanel,
     registerPageContext,
     closePanel,
@@ -260,7 +285,14 @@ export function AiTutorPanelProvider({ children }: { children: ReactNode }) {
     handleFeedback,
   }
 
-  return <AiTutorPanelContext.Provider value={value}>{children}</AiTutorPanelContext.Provider>
+  return (
+    <AiTutorPanelContext.Provider value={value}>
+      {children}
+      {/* Rendered once here so every Tutor surface -- side panel, full-page
+          /ai-tutor, mobile -- shares one dialog instance (PR #182). */}
+      <LimitReachedDialog />
+    </AiTutorPanelContext.Provider>
+  )
 }
 
 export function useAiTutorPanel(): AiTutorPanelValue {
