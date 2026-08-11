@@ -39,6 +39,14 @@ import {
 } from '../lib/auth-messages'
 import { postAuthDestinationFor } from '../lib/auth-destination'
 import {
+  RECOVERY_FAILURE_REASONS,
+  classifyArrival,
+  isRecoveryFailureReason,
+  recoveryReferenceLabel,
+  sanitizeProviderCode,
+  type RecoveryFailureReason,
+} from '../lib/auth-recovery-diagnostics'
+import {
   isSignedOutOnlyRoute,
   normalizePathname,
   shouldRedirectAuthenticatedVisitor,
@@ -74,6 +82,7 @@ const callback = read('app', 'auth', 'callback', 'route.ts')
 const resetPage = read('app', 'auth', 'reset-password', 'page.tsx')
 const resetForm = read('components', 'auth', 'reset-password-form.tsx')
 const proxy = read('proxy.ts')
+const fragmentNotice = read('components', 'auth', 'recovery-fragment-notice.tsx')
 
 // ---------------------------------------------------------------------------
 section('Recovery links target the PKCE callback (source)')
@@ -417,6 +426,187 @@ check('the marker cookie is SameSite=Lax', cookieOptions.sameSite === 'lax')
 check('the marker cookie expires quickly', cookieOptions.maxAge <= 15 * 60)
 
 // ---------------------------------------------------------------------------
+section('Link arrival shapes (executed)')
+// ---------------------------------------------------------------------------
+
+// The gap that kept production broken: only ?code was understood. A link
+// arriving as ?token_hash=&type=recovery -- what Supabase sends when the
+// email template uses TokenHash, and what its own SSR guidance recommends --
+// fell straight through to "this reset link is not valid".
+
+{
+  const arrival = classifyArrival({ code: 'abc', tokenHash: null, type: null, error: null, errorCode: null })
+  check('a ?code link is classified as a code exchange', arrival.kind === 'code')
+}
+
+{
+  const arrival = classifyArrival({ code: null, tokenHash: 'hash', type: 'recovery', error: null, errorCode: null })
+  check('a ?token_hash link is classified as a verification', arrival.kind === 'token-hash')
+  check('and keeps its recovery type', arrival.kind === 'token-hash' && arrival.type === 'recovery')
+}
+
+{
+  const arrival = classifyArrival({ code: null, tokenHash: 'hash', type: null, error: null, errorCode: null })
+  check(
+    'a token_hash with no type defaults to recovery',
+    arrival.kind === 'token-hash' && arrival.type === 'recovery'
+  )
+}
+
+{
+  const arrival = classifyArrival({ code: null, tokenHash: 'hash', type: 'nonsense', error: null, errorCode: null })
+  check(
+    'an unknown type is not honoured verbatim',
+    arrival.kind === 'token-hash' && arrival.type === 'recovery'
+  )
+}
+
+{
+  const arrival = classifyArrival({ code: null, tokenHash: null, type: null, error: null, errorCode: 'otp_expired' })
+  check("Supabase's own refusal wins over everything else", arrival.kind === 'provider-error')
+  check('and its stable code is carried through', arrival.kind === 'provider-error' && arrival.providerCode === 'otp_expired')
+}
+
+{
+  const arrival = classifyArrival({ code: 'abc', tokenHash: 'hash', type: 'recovery', error: 'access_denied', errorCode: null })
+  check('a refusal is reported even when other params are present', arrival.kind === 'provider-error')
+}
+
+{
+  const arrival = classifyArrival({ code: null, tokenHash: null, type: null, error: null, errorCode: null })
+  check('an empty query string is classified as nothing arriving', arrival.kind === 'nothing')
+}
+
+// Anything rendered from a URL is allowlisted first.
+check('a normal provider code survives', sanitizeProviderCode('otp_expired') === 'otp_expired')
+check('an empty code is dropped', sanitizeProviderCode('') === null)
+check('a null code is dropped', sanitizeProviderCode(null) === null)
+check('a code with spaces is dropped', sanitizeProviderCode('otp expired') === null)
+check('a code with markup is dropped', sanitizeProviderCode('<b>x</b>') === null)
+check('a code with punctuation is dropped', sanitizeProviderCode('otp-expired!') === null)
+check('an over-long code is dropped', sanitizeProviderCode('a'.repeat(100)) === null)
+
+check('a known reason is recognised', isRecoveryFailureReason('exchange_failed'))
+check('an unknown reason is rejected', !isRecoveryFailureReason('made_up'))
+check('a non-string reason is rejected', !isRecoveryFailureReason(42))
+check('every declared reason validates', RECOVERY_FAILURE_REASONS.every(isRecoveryFailureReason))
+
+check('a reference combines reason and provider code', recoveryReferenceLabel('provider_denied', 'otp_expired') === 'provider_denied/otp_expired')
+check('a reference works without a provider code', recoveryReferenceLabel('no_credentials', null) === 'no_credentials')
+check('no reason means no reference is shown', recoveryReferenceLabel(null, 'otp_expired') === null)
+
+// ---------------------------------------------------------------------------
+section('Callback failure branches (simulated)')
+// ---------------------------------------------------------------------------
+
+/**
+ * Mirrors the branch order in app/auth/callback/route.ts, reporting which
+ * reason each arrival produces and how many verification calls were made.
+ */
+function simulateCallbackDiagnostics(params: {
+  code?: string | null
+  tokenHash?: string | null
+  type?: string | null
+  error?: string | null
+  errorCode?: string | null
+  verificationSucceeds?: boolean
+  verificationErrorCode?: string
+  sessionUserId?: string | null
+}) {
+  let exchangeCalls = 0
+  let verifyOtpCalls = 0
+
+  const arrival = classifyArrival({
+    code: params.code ?? null,
+    tokenHash: params.tokenHash ?? null,
+    type: params.type ?? null,
+    error: params.error ?? null,
+    errorCode: params.errorCode ?? null,
+  })
+
+  if (arrival.kind === 'provider-error') {
+    return { reason: 'provider_denied' as RecoveryFailureReason, providerCode: arrival.providerCode, exchangeCalls, verifyOtpCalls }
+  }
+  if (arrival.kind === 'nothing') {
+    return { reason: 'no_credentials' as RecoveryFailureReason, providerCode: null, exchangeCalls, verifyOtpCalls }
+  }
+
+  if (arrival.kind === 'code') exchangeCalls += 1
+  else verifyOtpCalls += 1
+
+  if (params.verificationSucceeds === false) {
+    return {
+      reason: (arrival.kind === 'code' ? 'exchange_failed' : 'verification_failed') as RecoveryFailureReason,
+      providerCode: params.verificationErrorCode ?? null,
+      exchangeCalls,
+      verifyOtpCalls,
+    }
+  }
+
+  if (!params.sessionUserId) {
+    return { reason: 'no_session' as RecoveryFailureReason, providerCode: null, exchangeCalls, verifyOtpCalls }
+  }
+
+  return { reason: null, providerCode: null, exchangeCalls, verifyOtpCalls }
+}
+
+{
+  const r = simulateCallbackDiagnostics({ code: 'c', verificationSucceeds: true, sessionUserId: 'user-1' })
+  check('a working ?code link succeeds', r.reason === null)
+  check('and exchanges exactly once', r.exchangeCalls === 1)
+  check('without also calling verifyOtp', r.verifyOtpCalls === 0)
+}
+
+{
+  const r = simulateCallbackDiagnostics({ tokenHash: 'h', type: 'recovery', verificationSucceeds: true, sessionUserId: 'user-1' })
+  check('a working ?token_hash link succeeds', r.reason === null)
+  check('and verifies exactly once', r.verifyOtpCalls === 1)
+  check('without also exchanging a code', r.exchangeCalls === 0)
+}
+
+{
+  const r = simulateCallbackDiagnostics({})
+  check('an empty callback reports no_credentials', r.reason === 'no_credentials')
+  check('and attempts no verification at all', r.exchangeCalls === 0 && r.verifyOtpCalls === 0)
+}
+
+{
+  const r = simulateCallbackDiagnostics({ errorCode: 'otp_expired' })
+  check('an expired link reports provider_denied', r.reason === 'provider_denied')
+  check('and carries the stable provider code', r.providerCode === 'otp_expired')
+  check('and attempts no verification', r.exchangeCalls === 0 && r.verifyOtpCalls === 0)
+}
+
+{
+  const r = simulateCallbackDiagnostics({ code: 'c', verificationSucceeds: false, verificationErrorCode: 'validation_failed' })
+  check('a failed exchange reports exchange_failed', r.reason === 'exchange_failed')
+  check('and still only tried once', r.exchangeCalls === 1)
+}
+
+{
+  const r = simulateCallbackDiagnostics({ tokenHash: 'h', verificationSucceeds: false, verificationErrorCode: 'otp_expired' })
+  check('a failed verification reports verification_failed', r.reason === 'verification_failed')
+  check('and is distinguishable from a code exchange failure', r.reason !== 'exchange_failed')
+}
+
+{
+  const r = simulateCallbackDiagnostics({ code: 'c', verificationSucceeds: true, sessionUserId: null })
+  check('verification without a session reports no_session', r.reason === 'no_session')
+}
+
+// Each failure must be distinguishable -- that is the whole point.
+check(
+  'every branch produces a distinct reason',
+  new Set([
+    simulateCallbackDiagnostics({}).reason,
+    simulateCallbackDiagnostics({ errorCode: 'otp_expired' }).reason,
+    simulateCallbackDiagnostics({ code: 'c', verificationSucceeds: false }).reason,
+    simulateCallbackDiagnostics({ tokenHash: 'h', verificationSucceeds: false }).reason,
+    simulateCallbackDiagnostics({ code: 'c', verificationSucceeds: true, sessionUserId: null }).reason,
+  ]).size === 5
+)
+
+// ---------------------------------------------------------------------------
 section('Proxy route policy (executed)')
 // ---------------------------------------------------------------------------
 
@@ -718,8 +908,15 @@ section('Success-state integrity (source + executed)')
 
 // The PR #186 hole: ?status=success rendered the success screen to anyone.
 check('the reset page compares no status parameter', !/status\s*===/.test(resetPage))
-check('the reset page destructures no query value', !/await searchParams/.test(resetPage))
-check('the reset page reads no searchParams at all', !/searchParams/.test(resetPage))
+// The page now reads searchParams, but ONLY to display an opaque reference.
+// What matters is that nothing from the URL reaches the gate.
+check(
+  'the gate is computed from the cookie and the session alone',
+  /const isRecoveryFlow = hasValidRecoveryMarker\(cookieStore\.get\(RECOVERY_COOKIE_NAME\)\?\.value, user\?\.id\)/.test(resetPage)
+)
+check('no query value takes part in the gate', !/isRecoveryFlow[\s\S]{0,120}(reason|detail|searchParams)/.test(resetPage))
+check('the query values feed only the displayed reference', /recoveryReferenceLabel\(reason,/.test(resetPage))
+check('the page shell never renders the success copy', !resetPage.includes(PASSWORD_UPDATED_MESSAGE))
 check('the success wording is not present in the page shell', !resetPage.includes(PASSWORD_UPDATED_MESSAGE))
 check(
   'success is rendered only from returned action state',
@@ -749,10 +946,42 @@ check('the proxy no longer matches auth routes by prefix', !/startsWith\(r\)/.te
 check('the proxy no longer carries its own route list', !/PUBLIC_AUTH_ROUTES/.test(proxy))
 check('session-cookie propagation on redirect is preserved', /redirectPreservingSession\(/.test(proxy))
 check('updateSession still runs on every request', /await updateSession\(request\)/.test(proxy))
+check('the callback understands token_hash links', /verifyOtp\(\{ token_hash/.test(callback))
+check('the callback still understands code links', /exchangeCodeForSession\(/.test(callback))
+check('exactly one verification is attempted per request', /arrival\.kind === 'code'\s*\?\s*await supabase\.auth\.exchangeCodeForSession/.test(callback))
+check('the callback reports Supabase refusals separately', callback.includes("'provider_denied'"))
+check('the callback reports a missing credential separately', callback.includes("'no_credentials'"))
+check('the failure URL carries an opaque reason', /URLSearchParams\(\{ error: RECOVERY_ERROR_CODE, reason \}\)/.test(callback))
+check('the reason is never free text from an error', !/reason[^\n]*error\.message/.test(callback))
+check('the callback never logs a raw Supabase message', !/console\.[a-z]+\([^)]*error\.message/.test(callback))
+check('the callback never logs the code or token hash', !/console\.[a-z]+\([^)]*(code|tokenHash)/.test(callback))
+
+check('the fragment notice never renders token contents', !/\{hash\}|access_token\s*\+/.test(fragmentNotice))
+check('the fragment notice never transmits anything', !/fetch\(|sendBeacon/.test(fragmentNotice))
+check('the fragment notice never stores anything', !/localStorage|sessionStorage|document\.cookie/.test(fragmentNotice))
+check('the fragment notice does not try to establish a session', !/setSession|signIn/.test(fragmentNotice))
+check('the fragment notice renders nothing when there is no fragment', /kind === 'none'\) return null|'unknown' \|\| kind === 'none'/.test(fragmentNotice))
+
+check('the reference shown on the page is allowlisted first', /isRecoveryFailureReason\(/.test(resetPage))
+check('the provider detail shown on the page is sanitized first', /sanitizeProviderCode\(/.test(resetPage))
+
 check('the marker is written in exactly one place', (callback.match(/cookieStore\.set\(RECOVERY_COOKIE_NAME/g) ?? []).length === 1)
 check('nothing but the callback writes the marker', !/cookies\(\)[\s\S]*?\.set\(RECOVERY_COOKIE_NAME/.test(resetPage))
 check('the action consumes the marker on success', /consumeRecoveryMarker\(\)[\s\S]{0,400}status: 'success'/.test(authActions))
-check('the callback clears the marker when the exchange fails', /if \(isRecovery\) clearRecoveryMarker\(\)/.test(callback))
+// Every recovery failure funnels through fail(), which clears the marker
+// before redirecting -- so no branch can forget to.
+check(
+  'every recovery failure clears the marker',
+  /clearRecoveryMarker\(\)[\s\S]{0,200}RECOVERY_ERROR_CODE/.test(callback)
+)
+// Four call sites cover five reasons: exchange_failed and
+// verification_failed share one, chosen by which shape arrived.
+check('every failure funnels through the one helper', (callback.match(/return fail\(/g) ?? []).length === 4)
+check(
+  'and every declared reason is actually reachable from it',
+  RECOVERY_FAILURE_REASONS.every((reason) => callback.includes(`'${reason}'`))
+)
+check('the marker is only written after verification succeeded', callback.indexOf('cookieStore.set(RECOVERY_COOKIE_NAME') > callback.indexOf('if (error) {'))
 check(
   'the action re-checks both signals itself rather than trusting the page',
   /getUser\(\)[\s\S]{0,600}hasValidRecoveryMarker\([\s\S]{0,300}no-recovery-session/.test(authActions)
