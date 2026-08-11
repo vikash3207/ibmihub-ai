@@ -55,8 +55,16 @@ alter table public.user_profiles
 -- re-issuing an identical grant is a harmless no-op but adds nothing.
 
 -- ---------------------------------------------------------------------------
--- VERIFICATION -- run these manually in the Supabase SQL editor after
--- applying, and confirm each expected result.
+-- VERIFICATION -- two different methods, because they check different
+-- things. The Supabase SQL Editor runs as an elevated Postgres role with no
+-- JWT/session context, so `auth.uid()` there is NULL and a query run there
+-- can never genuinely exercise the `auth.uid() = id` RLS policy as a real
+-- signed-in user would experience it. Ownership enforcement is therefore
+-- verified through the application/API instead, never the SQL Editor, and
+-- never with the service-role key, which bypasses RLS entirely and so could
+-- not demonstrate it either.
+--
+-- PART 1 -- structural checks, run manually in the Supabase SQL editor:
 --
 -- a) The three columns exist and are nullable:
 --      select column_name, is_nullable, data_type
@@ -70,14 +78,35 @@ alter table public.user_profiles
 --      from pg_class
 --      where oid = 'public.user_profiles'::regclass;
 --
--- c) A signed-in browser session (anon key, NOT service role) can update
---    only its own row's new columns, and no other user's row:
---      update user_profiles set first_name = 'Test' where id = auth.uid();
---          -> succeeds, exactly one row.
---      update user_profiles set first_name = 'Test' where id <> auth.uid();
---          -> affects zero rows (RLS), even though no error is raised.
+-- c) The length constraints exist:
+--      select conname, pg_get_constraintdef(oid)
+--      from pg_constraint
+--      where conrelid = 'public.user_profiles'::regclass
+--        and conname like 'user_profiles_%_length';
 --
--- d) The length constraints reject an oversized value:
---      update user_profiles set first_name = repeat('a', 61) where id = auth.uid();
---          -> must fail with a check-constraint violation.
+-- d) The length constraints actually reject an oversized value (this part
+--    only needs a value, not a session, so the SQL Editor's own role is
+--    fine for it -- the check constraint fires regardless of who is
+--    writing):
+--      update user_profiles set first_name = repeat('a', 61)
+--      where id = (select id from user_profiles limit 1);
+--          -> must fail with a check-constraint violation, and must not
+--             have modified the row (roll back or confirm afterward).
+--
+-- PART 2 -- ownership, verified through an authenticated application/API
+-- session using the anon key, NOT the SQL Editor and NOT the service-role
+-- key:
+--
+-- e) Sign in as a real user (via the running app, or a REST call to
+--    PostgREST authenticated with that user's own access token) and update
+--    that user's own row:
+--      update user_profiles set first_name = 'Test' where id = auth.uid();
+--          -> succeeds, exactly one row -- auth.uid() now resolves to that
+--             session's real user id, unlike in the SQL Editor.
+--
+-- f) With that same authenticated session, attempt another user's row:
+--      update user_profiles set first_name = 'Test' where id <> auth.uid();
+--          -> affects zero rows (RLS), even though no error is raised --
+--             confirm by re-selecting the target row and seeing it
+--             unchanged, not just by the absence of an error.
 -- ---------------------------------------------------------------------------

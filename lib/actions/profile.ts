@@ -81,7 +81,15 @@ export async function updateProfile(
     return { status: 'error', message }
   }
 
-  const { error } = await supabase
+  // .select('id').maybeSingle() matters here: a plain .update() with no
+  // .select() returns no error and no data when it matches zero rows (e.g.
+  // the trigger-created row is somehow missing), which would otherwise let
+  // "Profile updated" be shown even though nothing was actually written.
+  // Requiring a returned row id is what catches that. This never widens who
+  // can be updated -- .eq('id', user.id) is unchanged, still scoped to the
+  // verified session user and still enforced independently by RLS -- it
+  // only stops a no-op update from being reported as a success.
+  const { data: updated, error } = await supabase
     .from('user_profiles')
     .update({
       first_name: firstName,
@@ -89,11 +97,15 @@ export async function updateProfile(
       contact_number: contactNumber,
     })
     .eq('id', user.id)
+    .select('id')
+    .maybeSingle()
 
-  if (error) {
-    // Only the stable error code, never the raw message -- consistent with
-    // how lib/actions/auth.ts logs Supabase failures elsewhere in this repo.
-    console.error('Profile update failed:', error.code ?? 'unspecified')
+  if (error || !updated) {
+    // Only a stable, non-sensitive code, never the raw message -- consistent
+    // with how lib/actions/auth.ts logs Supabase failures elsewhere in this
+    // repo. 'no_row_updated' is our own label for the no-error/no-row case,
+    // not anything Supabase returned.
+    console.error('Profile update failed:', error?.code ?? 'no_row_updated')
     return { status: 'error', message: 'We could not save your profile. Please try again.' }
   }
 

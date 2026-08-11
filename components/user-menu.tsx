@@ -18,14 +18,20 @@ interface UserMenuProps {
  * enhancement).
  *
  * DESIGN CHOICE -- disclosure, not an ARIA `menu` widget. A `role="menu"`
- * with `role="menuitem"` children commits to the full APG menu keyboard
- * contract (arrow-key roving focus, Home/End, type-ahead); implementing
- * `role="menu"` without that is a known accessibility anti-pattern that
- * confuses screen-reader users expecting menu semantics. This is instead a
- * plain disclosure: a toggle button revealing ordinary, natively focusable
- * content (a `<Link>` and a submit `<button>`), which is fully keyboard-
- * operable via standard Tab/Enter/Space with no extra ARIA role required --
- * the same pattern many production account menus use.
+ * with `role="menuitem"` children (and, previously, `aria-haspopup="true"`
+ * on the trigger, which ARIA reserves for exactly that combination) commits
+ * to the full APG menu keyboard contract (arrow-key roving focus, Home/End,
+ * type-ahead); implementing that without arrow-key support is a known
+ * accessibility anti-pattern that leads assistive technology to expect
+ * menu/menuitem semantics this panel does not provide. This is instead a
+ * plain disclosure: a toggle button (`aria-expanded` + `aria-controls` only,
+ * no `aria-haspopup`) revealing ordinary, natively focusable content (a
+ * `<Link>` and a submit `<button>`), which is fully keyboard-operable via
+ * standard Tab/Enter/Space with no extra ARIA role required -- the same
+ * pattern many production account menus use. The revealed panel itself
+ * carries no `role` and therefore no `aria-label` either: a label on a
+ * plain `<div>` with no supporting role is not exposed to the accessibility
+ * tree in any meaningful way.
  *
  * Renders beside the existing standalone Logout control in SiteHeader,
  * which is left untouched -- this adds a second way to log out rather than
@@ -77,7 +83,6 @@ export function UserMenu({ email, firstName, lastName }: UserMenuProps) {
         ref={triggerRef}
         type="button"
         onClick={() => setIsOpen((open) => !open)}
-        aria-haspopup="true"
         aria-expanded={isOpen}
         aria-controls={panelId}
         aria-label={name ? `Account menu for ${name}` : `Account menu for ${email}`}
@@ -89,7 +94,6 @@ export function UserMenu({ email, firstName, lastName }: UserMenuProps) {
       {isOpen && (
         <div
           id={panelId}
-          aria-label="Account"
           className="absolute right-0 z-50 mt-2 w-64 rounded-xl border border-slate-100 bg-white p-2 shadow-lg"
         >
           <div className="border-b border-slate-100 px-3 py-2">
@@ -107,14 +111,18 @@ export function UserMenu({ email, firstName, lastName }: UserMenuProps) {
             </Link>
 
             {/* Second, independent way to log out -- calls the same logout()
-                Server Action as SiteHeader's own standalone button. */}
+                Server Action as SiteHeader's own standalone button.
+                Deliberately no onClick to close the panel here: doing so
+                risked unmounting this button (and its enclosing form)
+                during the very click meant to submit it. logout() redirects
+                on success, which removes the panel anyway, so there is
+                nothing for a manual close to add. */}
             <form>
               <SubmitButton
                 formAction={logout}
                 variant="ghost"
                 className="w-full justify-start px-3 py-2 text-sm hover:bg-slate-50"
                 pendingLabel="Logging out..."
-                onClick={closePanel}
               >
                 Logout
               </SubmitButton>
