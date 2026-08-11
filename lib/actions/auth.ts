@@ -5,7 +5,7 @@ import { cookies } from 'next/headers'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import { SITE_URL } from '@/lib/config'
-import { RESET_PASSWORD_PATH } from '@/lib/auth-redirect'
+import { RESET_PASSWORD_PATH, safeInternalPath } from '@/lib/auth-redirect'
 import { postAuthDestinationFor } from '@/lib/auth-destination'
 import type { ResetPasswordState } from '@/lib/auth-reset-state'
 import {
@@ -20,6 +20,11 @@ import {
   RECOVERY_COOKIE_NAME,
   hasValidRecoveryMarker,
 } from '@/lib/auth-recovery-state'
+import {
+  SUCCESS_COOKIE_NAME,
+  successCookieOptions,
+  successMarkerFor,
+} from '@/lib/auth-success-state'
 import {
   TURNSTILE_CONFIGURED,
   INVALID_EMAIL_MESSAGE,
@@ -304,6 +309,16 @@ export async function resetPassword(
   // shown the invalid-link page rather than another usable form.
   consumeRecoveryMarker()
 
+  // The fix for PR #192: Next.js refreshes this route's Server Component
+  // tree right after this action returns (standard behaviour for any Server
+  // Action bound to a form). By then the recovery marker above is already
+  // gone, so without this second marker the page's gate had nothing left to
+  // reach the success branch with and fell through to the invalid-link one
+  // -- replacing the confirmation with "This reset link is not valid" even
+  // though the password HAD changed. This marker gives that re-render an
+  // independent, equally server-authoritative way to know it succeeded.
+  cookieStore.set(SUCCESS_COOKIE_NAME, successMarkerFor(user.id), successCookieOptions())
+
   // Same onboarding rule this flow has always applied -- now attached to the
   // Continue button rather than to an immediate redirect, so the learner
   // actually sees that the password changed.
@@ -318,6 +333,26 @@ export async function resetPassword(
     message: PASSWORD_UPDATED_MESSAGE,
     destination: postAuthDestinationFor(profile),
   }
+}
+
+/**
+ * Leaves the password-reset success screen (PR #192).
+ *
+ * The only place the success marker is ever cleared by an explicit action
+ * rather than by its own short TTL -- reaching the destination is exactly
+ * the moment it has served its purpose. Grants nothing on its own: it does
+ * not touch the recovery marker, does not call updateUser, and does not
+ * establish or extend any session.
+ */
+export async function continueAfterPasswordReset(formData: FormData) {
+  const cookieStore = await cookies()
+  cookieStore.delete(SUCCESS_COOKIE_NAME)
+
+  // Not user input in practice -- always one of the literal PostAuthDestination
+  // values rendered into the hidden field -- but validated anyway, the same
+  // defensive posture every other redirect target in this file gets.
+  const destination = safeInternalPath(formData.get('destination') as string | null, '/')
+  redirect(destination)
 }
 
 export async function saveOnboardingResponse(

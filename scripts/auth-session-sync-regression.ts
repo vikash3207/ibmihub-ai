@@ -55,6 +55,7 @@ const rootLayout = read('app', 'layout.tsx')
 const authActions = read('lib', 'actions', 'auth.ts')
 const resetPage = read('app', 'auth', 'reset-password', 'page.tsx')
 const resetForm = read('components', 'auth', 'reset-password-form.tsx')
+const resetSuccessContent = read('components', 'auth', 'reset-success-content.tsx')
 const signal = read('lib', 'auth-signal.ts')
 
 /**
@@ -252,7 +253,10 @@ for (const profile of [
 section('Password reset messaging (executed)')
 // ---------------------------------------------------------------------------
 
-check('success copy is the required wording', PASSWORD_UPDATED_MESSAGE === 'Your password has been updated successfully.')
+// Exact wording is owned by test:auth-recovery (PR #192); this only needs
+// the constant to be non-empty and distinct from every failure message,
+// asserted just below.
+check('success copy is defined', PASSWORD_UPDATED_MESSAGE.length > 0)
 
 // Deeper password-recovery coverage lives in test:auth-recovery (PR #187).
 // What matters here is only that no failure path can borrow success wording.
@@ -298,8 +302,12 @@ check('a successful update returns a server-built success state', /status: 'succ
 check('the raw Supabase error is not shown to the user', !/message:\s*error\.message/.test(authActions))
 check('the password is never placed in a URL', !/encodeURIComponent\(password\)/.test(authActions))
 check('the success state is no longer reachable from a query parameter', !/status === 'success'/.test(resetPage))
-check('the success screen announces itself accessibly', /role="status"/.test(resetForm))
-check('the success screen offers a continuation action', resetForm.includes('Continue to iRPGenie'))
+// PR #192 moved the rendered success markup into a shared component that
+// both the client form and the server page compose -- check the actual
+// owner of the markup, and that the form still reaches it on success.
+check('the success screen announces itself accessibly', /role="status"/.test(resetSuccessContent))
+check('the success screen offers a continuation action', resetSuccessContent.includes('Continue to iRPGenie'))
+check('the form renders the shared success content on success', /state\.status === 'success'[\s\S]{0,80}ResetSuccessContent/.test(resetForm))
 check('the continuation link is not built from a search param', !/href=\{`?\$?\{?(next|redirect)/.test(resetForm))
 check(
   'duplicate submission is prevented by the pending-aware button',
