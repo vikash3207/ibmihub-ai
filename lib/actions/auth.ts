@@ -5,17 +5,18 @@ import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
 import {
   TURNSTILE_CONFIGURED,
-  TURNSTILE_FAILURE_MESSAGE,
-  TURNSTILE_UNAVAILABLE_MESSAGE,
   INVALID_EMAIL_MESSAGE,
+  evaluateCaptcha,
+  isTurnstileEnforcementEnabled,
   isValidEmailFormat,
   normalizeEmail,
   readTurnstileToken,
+  type CaptchaDecision,
 } from '@/lib/turnstile'
 
 /**
  * Turnstile gate applied to every Auth call that Supabase can require a
- * captcha for (PR #183).
+ * captcha for (PR #183, reworked by the PR #183 hotfix).
  *
  * Verified against the installed @supabase/auth-js@2.110.0 type
  * definitions, not assumed: `signUp`, `signInWithPassword`, and
@@ -25,18 +26,37 @@ import {
  * `updateUser` (the set-a-new-password step) takes no captchaToken and is
  * therefore deliberately NOT gated.
  *
- * Fails closed on purpose: a missing site key blocks the action rather than
- * quietly creating an unprotected account. Returns null when the request may
- * proceed, or a user-safe message when it may not.
+ * The flag is re-read here from the server environment on every call. It is
+ * never taken from a prop, a hidden field, or anything else the browser can
+ * influence, so a user cannot turn enforcement off from devtools -- the most
+ * they can do is remove the token, which blocks them.
  */
-function checkTurnstile(formData: FormData): string | null {
-  if (!TURNSTILE_CONFIGURED) {
-    // Deployment problem, not a user problem -- log without leaking config.
-    console.error('Turnstile is not configured (NEXT_PUBLIC_TURNSTILE_SITE_KEY missing); blocking auth action.')
-    return TURNSTILE_UNAVAILABLE_MESSAGE
+function captchaGate(formData: FormData): CaptchaDecision {
+  const decision = evaluateCaptcha({
+    enforcementEnabled: isTurnstileEnforcementEnabled(),
+    siteKeyConfigured: TURNSTILE_CONFIGURED,
+    // Never logged, never put in a URL.
+    token: readTurnstileToken(formData),
+  })
+
+  if (!decision.allow && decision.reason === 'unconfigured') {
+    // Operator error, not user error: enforcement was switched on without a
+    // site key. Log it without echoing any configuration value.
+    console.error(
+      'TURNSTILE_ENFORCEMENT_ENABLED is true but NEXT_PUBLIC_TURNSTILE_SITE_KEY is missing; blocking auth action.'
+    )
   }
-  // Never log the token itself.
-  return readTurnstileToken(formData) ? null : TURNSTILE_FAILURE_MESSAGE
+
+  return decision
+}
+
+/**
+ * `{ captchaToken }` when a token was accepted, otherwise `{}` so the key is
+ * absent from the Supabase call entirely -- byte-for-byte the pre-PR #183
+ * request shape while enforcement is off.
+ */
+function captchaOption(decision: CaptchaDecision): { captchaToken?: string } {
+  return decision.allow && decision.captchaToken ? { captchaToken: decision.captchaToken } : {}
 }
 
 /** Map a raw Supabase sign-up error to a safe, generic message for display. */
@@ -74,9 +94,9 @@ export async function signUp(formData: FormData) {
     redirect(signUpUrl(INVALID_EMAIL_MESSAGE))
   }
 
-  const captchaError = checkTurnstile(formData)
-  if (captchaError) {
-    redirect(signUpUrl(captchaError))
+  const captcha = captchaGate(formData)
+  if (!captcha.allow) {
+    redirect(signUpUrl(captcha.message))
   }
 
   const { error } = await supabase.auth.signUp({
@@ -86,7 +106,8 @@ export async function signUp(formData: FormData) {
       emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/callback?next=/onboarding&after=${encodeURIComponent(next)}`,
       // Supabase performs the real siteverify call against Cloudflare using
       // the secret key held in its dashboard. That is the enforcement point.
-      captchaToken: readTurnstileToken(formData),
+      // Omitted entirely while enforcement is off.
+      ...captchaOption(captcha),
     },
   })
 
@@ -115,16 +136,20 @@ export async function login(formData: FormData) {
     `/auth/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(message)}`
 
   // Gated because signInWithPassword accepts captchaToken, so Supabase will
-  // require one for logins too once CAPTCHA is enabled project-wide.
-  const captchaError = checkTurnstile(formData)
-  if (captchaError) {
-    redirect(loginUrl(captchaError))
+  // require one for logins too once CAPTCHA is enabled project-wide. While
+  // enforcement is off this is a pass-through and login behaves as before.
+  const captcha = captchaGate(formData)
+  if (!captcha.allow) {
+    redirect(loginUrl(captcha.message))
   }
+
+  const captchaOptions = captchaOption(captcha)
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
-    options: { captchaToken: readTurnstileToken(formData) },
+    // `options` is omitted, not sent empty, when enforcement is off.
+    ...(captchaOptions.captchaToken ? { options: captchaOptions } : {}),
   })
 
   if (error) {
@@ -173,14 +198,14 @@ export async function forgotPassword(formData: FormData) {
 
   // Gated: resetPasswordForEmail accepts captchaToken, so Supabase will
   // require one here too once CAPTCHA is enabled.
-  const captchaError = checkTurnstile(formData)
-  if (captchaError) {
-    return { error: captchaError }
+  const captcha = captchaGate(formData)
+  if (!captcha.allow) {
+    return { error: captcha.message }
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/auth/reset-password`,
-    captchaToken: readTurnstileToken(formData),
+    ...captchaOption(captcha),
   })
 
   // Return a non-specific message to avoid revealing if an email is registered

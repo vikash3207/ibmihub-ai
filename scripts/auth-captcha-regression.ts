@@ -22,7 +22,11 @@ import { readFileSync } from 'fs'
 import { join } from 'path'
 import {
   TURNSTILE_FIELD_NAME,
+  TURNSTILE_FAILURE_MESSAGE,
+  TURNSTILE_UNAVAILABLE_MESSAGE,
   INVALID_EMAIL_MESSAGE,
+  evaluateCaptcha,
+  isTurnstileEnforcementEnabled,
   isValidEmailFormat,
   normalizeEmail,
   readTurnstileToken,
@@ -55,6 +59,8 @@ const signUpPage = read('app', 'auth', 'sign-up', 'page.tsx')
 const loginPage = read('app', 'auth', 'login', 'page.tsx')
 const forgotPage = read('app', 'auth', 'forgot-password', 'page.tsx')
 const envExample = read('.env.local.example')
+
+const allSource = [turnstileLib, authActions, widget, submit, signUpPage, loginPage, forgotPage].join('\n')
 
 // ---------------------------------------------------------------------------
 section('Email format validation (executed, not inspected)')
@@ -125,10 +131,117 @@ check('absurdly long token yields undefined', readTurnstileToken(formWith('x'.re
 check('a plausible token is returned trimmed', readTurnstileToken(formWith('  abc.def  ')) === 'abc.def')
 
 // ---------------------------------------------------------------------------
+section('Feature flag: disabled or absent must not disable authentication')
+// ---------------------------------------------------------------------------
+
+// The regression this suite exists to prevent: PR #183 shipped with a missing
+// site key meaning "block", which took production login down. Absent or false
+// must mean "behave exactly as before", for every flow.
+
+for (const value of [undefined, '', 'false', 'FALSE', '0', '1', 'yes', 'True', ' true '] as const) {
+  const original = process.env.TURNSTILE_ENFORCEMENT_ENABLED
+  if (value === undefined) delete process.env.TURNSTILE_ENFORCEMENT_ENABLED
+  else process.env.TURNSTILE_ENFORCEMENT_ENABLED = value
+  check(
+    `flag ${value === undefined ? '(absent)' : JSON.stringify(value)} does not enable enforcement`,
+    !isTurnstileEnforcementEnabled()
+  )
+  if (original === undefined) delete process.env.TURNSTILE_ENFORCEMENT_ENABLED
+  else process.env.TURNSTILE_ENFORCEMENT_ENABLED = original
+}
+
+{
+  const original = process.env.TURNSTILE_ENFORCEMENT_ENABLED
+  process.env.TURNSTILE_ENFORCEMENT_ENABLED = 'true'
+  check("only the exact string 'true' enables enforcement", isTurnstileEnforcementEnabled())
+  if (original === undefined) delete process.env.TURNSTILE_ENFORCEMENT_ENABLED
+  else process.env.TURNSTILE_ENFORCEMENT_ENABLED = original
+}
+
+// Every flow shares one decision function, so covering the matrix here covers
+// sign-up, login and password reset alike.
+for (const siteKeyConfigured of [false, true]) {
+  for (const token of [undefined, 'a-token']) {
+    const decision = evaluateCaptcha({ enforcementEnabled: false, siteKeyConfigured, token })
+    const label = `enforcement off (site key ${siteKeyConfigured ? 'set' : 'missing'}, token ${token ? 'present' : 'absent'})`
+    check(`${label}: auth proceeds`, decision.allow)
+    check(
+      `${label}: no captchaToken is sent to Supabase`,
+      decision.allow && decision.captchaToken === undefined
+    )
+  }
+}
+
+// The specific production failure: no site key, no token, no flag -> allowed.
+check(
+  'the exact outage condition (no flag, no site key, no token) now allows login',
+  evaluateCaptcha({ enforcementEnabled: false, siteKeyConfigured: false, token: undefined }).allow
+)
+
+// ---------------------------------------------------------------------------
+section('Feature flag: enabled must fail closed')
+// ---------------------------------------------------------------------------
+
+const enabledNoKey = evaluateCaptcha({ enforcementEnabled: true, siteKeyConfigured: false, token: 'a-token' })
+check('enabled + missing site key blocks', !enabledNoKey.allow)
+check(
+  'enabled + missing site key reports a misconfiguration',
+  !enabledNoKey.allow && enabledNoKey.reason === 'unconfigured'
+)
+check(
+  'enabled + missing site key shows the unavailable message',
+  !enabledNoKey.allow && enabledNoKey.message === TURNSTILE_UNAVAILABLE_MESSAGE
+)
+
+const enabledNoToken = evaluateCaptcha({ enforcementEnabled: true, siteKeyConfigured: true, token: undefined })
+check('enabled + missing token blocks the Supabase call', !enabledNoToken.allow)
+check(
+  'enabled + missing token shows the retryable failure message',
+  !enabledNoToken.allow && enabledNoToken.message === TURNSTILE_FAILURE_MESSAGE
+)
+
+const enabledWithToken = evaluateCaptcha({ enforcementEnabled: true, siteKeyConfigured: true, token: 'a-token' })
+check('enabled + valid token proceeds', enabledWithToken.allow)
+check(
+  'enabled + valid token forwards that exact token to Supabase',
+  enabledWithToken.allow && enabledWithToken.captchaToken === 'a-token'
+)
+
+// A blocked decision must never leak a token back to the caller.
+check(
+  'blocked decisions carry no token',
+  !('captchaToken' in enabledNoToken) && !('captchaToken' in enabledNoKey)
+)
+
+// ---------------------------------------------------------------------------
 section('Server-side enforcement is the security boundary')
 // ---------------------------------------------------------------------------
 
 check("auth actions module is server-only ('use server')", /^'use server'/m.test(authActions))
+
+// Client-side manipulation must not override enforcement. The flag is never
+// NEXT_PUBLIC_, so it cannot be read or forged in the browser, and the Server
+// Action re-reads it from the environment rather than from the request.
+check(
+  'the enforcement flag is not exposed to the browser',
+  !/NEXT_PUBLIC_TURNSTILE_ENFORCEMENT/.test(allSource)
+)
+check(
+  'the Server Action evaluates the flag itself, not from form input',
+  /enforcementEnabled:\s*isTurnstileEnforcementEnabled\(\)/.test(authActions)
+)
+check(
+  'no enforcement decision is read out of the submitted form',
+  !/formData\.get\(\s*['"](captchaEnabled|enforcement|turnstileEnabled)/i.test(authActions)
+)
+check(
+  'the client prop is documented as presentation-only',
+  /Presentation only/i.test(submit)
+)
+check(
+  'enforcement-off renders the plain submit button with no widget',
+  /if \(!captchaEnabled\)[\s\S]{0,400}<SubmitButton/.test(submit)
+)
 
 // The core of the brief's safety requirement: every Auth call that Supabase
 // can demand a captcha for must already send one, so switching CAPTCHA on in
@@ -136,12 +249,21 @@ check("auth actions module is server-only ('use server')", /^'use server'/m.test
 for (const call of ['signUp', 'signInWithPassword', 'resetPasswordForEmail'] as const) {
   const idx = authActions.indexOf(`auth.${call}(`)
   check(`${call} is present`, idx > -1)
-  // Look only at the call expression that follows, not the whole file.
-  const slice = idx > -1 ? authActions.slice(idx, idx + 500) : ''
-  check(`${call} forwards captchaToken to Supabase`, /captchaToken:\s*readTurnstileToken\(formData\)/.test(slice))
+  // Window spans the gate above the call and the call itself, since login
+  // builds its options object just before invoking Supabase.
+  const slice = idx > -1 ? authActions.slice(Math.max(0, idx - 500), idx + 500) : ''
+  check(`${call} is preceded by the captcha gate`, /captchaGate\(formData\)/.test(slice))
+  check(`${call} forwards the token via captchaOption`, /captchaOption/.test(slice))
 }
 
-const captchaGuardCount = (authActions.match(/checkTurnstile\(formData\)/g) ?? []).length
+// The helper omits the key entirely rather than sending captchaToken:
+// undefined, so a disabled deployment sends the pre-PR #183 request shape.
+check(
+  'captchaOption returns {} when no token was accepted',
+  /return decision\.allow && decision\.captchaToken \? \{ captchaToken: decision\.captchaToken \} : \{\}/.test(authActions)
+)
+
+const captchaGuardCount = (authActions.match(/captchaGate\(formData\)/g) ?? []).length
 check('all three affected flows call the captcha guard', captchaGuardCount === 3, `found ${captchaGuardCount}`)
 
 // updateUser takes no captchaToken in @supabase/auth-js -- gating it would
@@ -155,8 +277,8 @@ check(
 
 // Fail closed: a deployment with no site key must refuse, not silently allow.
 check(
-  'missing configuration blocks the action rather than bypassing it',
-  /if \(!TURNSTILE_CONFIGURED\)[\s\S]{0,300}return TURNSTILE_UNAVAILABLE_MESSAGE/.test(authActions)
+  'the gate is fed the real site-key state, not a client value',
+  /siteKeyConfigured:\s*TURNSTILE_CONFIGURED/.test(authActions)
 )
 check(
   'signUp validates email format before calling Supabase',
@@ -168,8 +290,6 @@ check('INVALID_EMAIL_MESSAGE is user-facing plain text', INVALID_EMAIL_MESSAGE =
 // ---------------------------------------------------------------------------
 section('Secret handling')
 // ---------------------------------------------------------------------------
-
-const allSource = [turnstileLib, authActions, widget, submit, signUpPage, loginPage, forgotPage].join('\n')
 
 check(
   'no NEXT_PUBLIC_ variable named like a secret',
