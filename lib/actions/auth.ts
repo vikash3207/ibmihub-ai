@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/lib/supabase/server'
+import { PASSWORD_UPDATE_FAILED_MESSAGE } from '@/lib/auth-messages'
 import {
   TURNSTILE_CONFIGURED,
   INVALID_EMAIL_MESSAGE,
@@ -227,26 +228,22 @@ export async function resetPassword(formData: FormData) {
   const { error } = await supabase.auth.updateUser({ password })
 
   if (error) {
-    return { error: error.message }
+    // The password itself is never logged, never put in a URL, and never
+    // held in state -- only the reason the update failed is recorded.
+    console.error('Password update error:', error.message)
+    // Previously this returned { error } which the page never read, so an
+    // expired or reused link failed silently. Redirecting is what makes the
+    // existing error block on the page actually render.
+    redirect(`/auth/reset-password?error=${encodeURIComponent(PASSWORD_UPDATE_FAILED_MESSAGE)}`)
   }
 
   revalidatePath('/', 'layout')
 
-  // If onboarding not yet answered, send to onboarding first
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  const { data: profile } = await supabase
-    .from('user_profiles')
-    .select('onboarding_response, onboarding_skipped')
-    .eq('id', user?.id ?? '')
-    .maybeSingle()
-
-  const needsOnboarding =
-    !profile?.onboarding_response && !profile?.onboarding_skipped
-
-  redirect(needsOnboarding ? '/onboarding' : '/')
+  // Success is now confirmed on screen rather than by a silent redirect to
+  // onboarding or home. The onboarding decision is unchanged -- it is just
+  // applied to the Continue button instead of to an immediate jump, so the
+  // learner actually sees that the password changed.
+  redirect('/auth/reset-password?status=success')
 }
 
 export async function saveOnboardingResponse(

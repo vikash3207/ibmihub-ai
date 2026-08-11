@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { SiteNavLinks } from '@/components/site-nav-links'
 import { SiteLogoIcon } from '@/components/brand/site-logo-icon'
+import { AuthStateBroadcaster } from '@/components/auth/auth-state-broadcaster'
 
 /**
  * Shared public header. Server component only -- checks the Supabase session
@@ -21,6 +22,11 @@ export async function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
+      {/* Renders nothing. Shares the session check this header already
+          performed with the AI Tutor provider in the root layout, so the
+          Tutor stops showing "Log in" the moment this header starts showing
+          "Log out" -- no refresh, no extra request (PR #186). */}
+      <AuthStateBroadcaster isAuthenticated={Boolean(user)} />
       <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
         <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
           <SiteLogoIcon size={28} className="shrink-0" />

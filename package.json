@@ -16,7 +16,8 @@
     "test:achievements": "npx tsx scripts/achievements-regression.ts",
     "test:ai-tutor-context": "npx tsx scripts/ai-tutor-context-regression.ts",
     "test:ai-tutor-product": "npx tsx scripts/ai-tutor-product-regression.ts",
-    "test:auth-captcha": "npx tsx scripts/auth-captcha-regression.ts"
+    "test:auth-captcha": "npx tsx scripts/auth-captcha-regression.ts",
+    "test:auth-session-sync": "npx tsx scripts/auth-session-sync-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
