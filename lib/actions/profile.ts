@@ -20,6 +20,7 @@ import {
   CONTACT_TOO_LONG_MESSAGE,
   MAX_CONTACT_LENGTH,
   NAME_TOO_LONG_MESSAGE,
+  buildProfileUpsertPayload,
   isValidContactNumber,
   isValidName,
   normalizeContactNumber,
@@ -40,9 +41,10 @@ export type UpdateProfileState =
 export const UPDATE_PROFILE_INITIAL_STATE: UpdateProfileState = { status: 'idle' }
 
 /**
- * Updates the signed-in user's own basic profile fields.
+ * Updates the signed-in user's own basic profile fields, creating the row
+ * first if it doesn't exist yet (see the upsert() below).
  *
- * SECURITY: the row updated is always `.eq('id', user.id)`, where `user`
+ * SECURITY: the row written is always keyed on `user.id`, where `user`
  * comes from `supabase.auth.getUser()` -- a verified round trip to Supabase,
  * not a value read from the form or any other client-supplied input. There
  * is no id field in the form at all, so there is nothing for a client to
@@ -81,31 +83,50 @@ export async function updateProfile(
     return { status: 'error', message }
   }
 
-  // .select('id').maybeSingle() matters here: a plain .update() with no
-  // .select() returns no error and no data when it matches zero rows (e.g.
-  // the trigger-created row is somehow missing), which would otherwise let
-  // "Profile updated" be shown even though nothing was actually written.
-  // Requiring a returned row id is what catches that. This never widens who
-  // can be updated -- .eq('id', user.id) is unchanged, still scoped to the
-  // verified session user and still enforced independently by RLS -- it
-  // only stops a no-op update from being reported as a success.
-  const { data: updated, error } = await supabase
-    .from('user_profiles')
-    .update({
-      first_name: firstName,
-      last_name: lastName,
-      contact_number: contactNumber,
-    })
-    .eq('id', user.id)
-    .select('id')
-    .maybeSingle()
+  // upsert(), not update(): a plain .update() matches zero rows -- silently,
+  // no error -- when this user has no user_profiles row yet. That's supposed
+  // to be impossible (001's handle_new_user() trigger inserts one for every
+  // new signup), but production has at least one account where it's false
+  // (root cause of the Save changes crash this fixed -- see below), so the
+  // action needs to handle "row doesn't exist yet" as a normal case, not an
+  // assumption. upsert() with an explicit onConflict on the primary key
+  // performs an insert when the row is missing and an update when it
+  // exists, in one round trip. RLS still fully governs both branches: 001's
+  // insert policy (`with check auth.uid() = id`) and update policy (`using
+  // auth.uid() = id with check auth.uid() = id`) both must pass, and `id` is
+  // always `user.id` from the verified getUser() call above -- never read
+  // from the form, so there is nothing here a client could use to write to
+  // another user's row. On the update branch, only the three columns listed
+  // below are touched -- onboarding_response/onboarding_skipped on an
+  // existing row are left exactly as they were.
+  //
+  // The whole call is also wrapped in try/catch: a thrown exception here
+  // (a malformed/non-JSON error response from PostgREST, a network hiccup)
+  // must never propagate out of a Server Action and crash the whole page
+  // with Next's generic error boundary -- it has to degrade to the same
+  // ordinary form-error state as a normal Supabase `error` result.
+  let updated: { id: string } | null = null
+  let errorCode = 'no_row_returned'
 
-  if (error || !updated) {
-    // Only a stable, non-sensitive code, never the raw message -- consistent
-    // with how lib/actions/auth.ts logs Supabase failures elsewhere in this
-    // repo. 'no_row_updated' is our own label for the no-error/no-row case,
-    // not anything Supabase returned.
-    console.error('Profile update failed:', error?.code ?? 'no_row_updated')
+  try {
+    const { data, error } = await supabase
+      .from('user_profiles')
+      .upsert(buildProfileUpsertPayload(user.id, firstName, lastName, contactNumber), { onConflict: 'id' })
+      .select('id')
+      .maybeSingle()
+
+    updated = data
+    if (error) errorCode = error.code
+  } catch (caughtError) {
+    // Only a stable, non-sensitive label is logged, never the raw error --
+    // consistent with how lib/actions/auth.ts logs Supabase failures
+    // elsewhere in this repo.
+    console.error('Profile update threw:', caughtError instanceof Error ? caughtError.message : 'unknown')
+    errorCode = 'unexpected_exception'
+  }
+
+  if (!updated) {
+    console.error('Profile update failed:', errorCode)
     return { status: 'error', message: 'We could not save your profile. Please try again.' }
   }
 

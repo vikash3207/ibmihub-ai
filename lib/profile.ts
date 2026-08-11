@@ -100,3 +100,27 @@ export function avatarInitial({ firstName, lastName, email }: ProfileIdentity & 
   // present), kept only so the function has no unsafe empty-string return.
   return '?'
 }
+
+export interface ProfileUpsertPayload {
+  id: string
+  first_name: string | null
+  last_name: string | null
+  contact_number: string | null
+}
+
+/**
+ * Builds the exact row lib/actions/profile.ts upserts into user_profiles.
+ * Pulled out as its own pure function (Hotfix: Profile Save Server Error)
+ * so the one invariant that matters most for that action's security --
+ * `id` is always the verified session's own user id, never anything a form
+ * could supply -- is directly unit-testable, rather than only checkable by
+ * reading the Server Action's source text.
+ */
+export function buildProfileUpsertPayload(
+  userId: string,
+  firstName: string | null,
+  lastName: string | null,
+  contactNumber: string | null
+): ProfileUpsertPayload {
+  return { id: userId, first_name: firstName, last_name: lastName, contact_number: contactNumber }
+}
