@@ -39,6 +39,11 @@ import {
 } from '../lib/auth-messages'
 import { postAuthDestinationFor } from '../lib/auth-destination'
 import {
+  isSignedOutOnlyRoute,
+  normalizePathname,
+  shouldRedirectAuthenticatedVisitor,
+} from '../lib/auth-route-policy'
+import {
   RECOVERY_COOKIE_NAME,
   hasValidRecoveryMarker,
   recoveryCookieOptions,
@@ -68,6 +73,7 @@ const authActions = read('lib', 'actions', 'auth.ts')
 const callback = read('app', 'auth', 'callback', 'route.ts')
 const resetPage = read('app', 'auth', 'reset-password', 'page.tsx')
 const resetForm = read('components', 'auth', 'reset-password-form.tsx')
+const proxy = read('proxy.ts')
 
 // ---------------------------------------------------------------------------
 section('Recovery links target the PKCE callback (source)')
@@ -411,6 +417,232 @@ check('the marker cookie is SameSite=Lax', cookieOptions.sameSite === 'lax')
 check('the marker cookie expires quickly', cookieOptions.maxAge <= 15 * 60)
 
 // ---------------------------------------------------------------------------
+section('Proxy route policy (executed)')
+// ---------------------------------------------------------------------------
+
+// The PR #188 bug: /auth/callback and /auth/reset-password were in the same
+// redirect-if-authenticated list as the login page, so a successful recovery
+// exchange authenticated the visitor and the proxy then bounced them off the
+// very page the exchange existed to reach.
+
+check(
+  'an authenticated visitor is still redirected off the login page',
+  shouldRedirectAuthenticatedVisitor('/auth/login', true)
+)
+check(
+  'an authenticated visitor is still redirected off the signup page',
+  shouldRedirectAuthenticatedVisitor('/auth/sign-up', true)
+)
+check(
+  'an authenticated visitor is still redirected off forgot-password',
+  shouldRedirectAuthenticatedVisitor('/auth/forgot-password', true)
+)
+
+check(
+  'an authenticated visitor is NOT redirected off the callback',
+  !shouldRedirectAuthenticatedVisitor('/auth/callback', true)
+)
+check(
+  'an authenticated visitor is NOT redirected off the reset page',
+  !shouldRedirectAuthenticatedVisitor('/auth/reset-password', true)
+)
+
+check('a signed-out visitor is never redirected off login', !shouldRedirectAuthenticatedVisitor('/auth/login', false))
+check('a signed-out visitor is never redirected off the reset page', !shouldRedirectAuthenticatedVisitor('/auth/reset-password', false))
+
+// Exact matching, not startsWith(): sibling paths must not inherit the
+// redirect just because they share a prefix.
+for (const pathname of [
+  '/auth/login-help',
+  '/auth/sign-up-complete',
+  '/auth/forgot-password-sent',
+  '/auth/reset-password-confirmed',
+  '/auth/callback-debug',
+]) {
+  check(`${pathname} does not inherit the redirect by prefix`, !shouldRedirectAuthenticatedVisitor(pathname, true))
+}
+
+check('a trailing slash is treated as the same route', shouldRedirectAuthenticatedVisitor('/auth/login/', true))
+check('the callback with a trailing slash is still exempt', !shouldRedirectAuthenticatedVisitor('/auth/callback/', true))
+check('normalizePathname leaves the root alone', normalizePathname('/') === '/')
+check('normalizePathname strips one trailing slash', normalizePathname('/auth/login/') === '/auth/login')
+check('normalizePathname tolerates an empty value', normalizePathname('') === '/')
+
+check('protected routes are not proxy-gated', !shouldRedirectAuthenticatedVisitor('/dashboard', true))
+check('public content is not proxy-gated', !shouldRedirectAuthenticatedVisitor('/learn/lesson-1', true))
+check('the reset page is not in the signed-out-only list', !isSignedOutOnlyRoute('/auth/reset-password'))
+check('the callback is not in the signed-out-only list', !isSignedOutOnlyRoute('/auth/callback'))
+
+// ---------------------------------------------------------------------------
+section('Complete recovery request sequence (simulated)')
+// ---------------------------------------------------------------------------
+
+/**
+ * Walks the whole browser journey with one cookie jar: proxy, callback,
+ * proxy again, reset page, then the Server Action.
+ *
+ * This is the sequence that failed in production. Every hop that could
+ * divert it is included, which is the point -- the previous suites tested
+ * the callback and the page in isolation and both passed while the flow
+ * was broken end to end.
+ */
+function walkRecoveryJourney(options: { alreadySignedInAs?: string } = {}) {
+  const userId = 'user-1'
+  const jar = makeJar()
+  const trace: string[] = []
+
+  // Session state as the browser would experience it: signed in only once
+  // the exchange has written session cookies (or if they already were).
+  let sessionUserId: string | null = options.alreadySignedInAs ?? null
+
+  // Hop 1: the emailed link hits /auth/callback.
+  const proxyBlockedCallback = shouldRedirectAuthenticatedVisitor('/auth/callback', Boolean(sessionUserId))
+  trace.push(proxyBlockedCallback ? 'callback-blocked' : 'callback-allowed')
+
+  if (proxyBlockedCallback) {
+    return { trace, jar, sessionUserId, formRendered: false, exchangeCalls: 0, markerWritten: false }
+  }
+
+  const callbackResult = simulateCallback({
+    code: 'pkce-code',
+    next: RESET_PASSWORD_PATH,
+    exchangeSucceeds: true,
+    exchangedUserId: userId,
+    jar,
+  })
+  // A successful exchange writes the Supabase session cookies too.
+  sessionUserId = userId
+  trace.push('exchanged')
+
+  // Hop 2: the browser follows the redirect, now carrying both cookies.
+  const proxyBlockedReset = shouldRedirectAuthenticatedVisitor(RESET_PASSWORD_PATH, Boolean(sessionUserId))
+  trace.push(proxyBlockedReset ? 'reset-blocked' : 'reset-allowed')
+
+  if (proxyBlockedReset) {
+    return {
+      trace,
+      jar,
+      sessionUserId,
+      formRendered: false,
+      exchangeCalls: callbackResult.exchangeCalls,
+      markerWritten: callbackResult.markerWritten,
+    }
+  }
+
+  // Hop 3: the page's own gate.
+  const page = simulateResetPage({ jar, sessionUserId })
+  trace.push(page.rendersForm ? 'form-rendered' : 'form-refused')
+
+  return {
+    trace,
+    jar,
+    sessionUserId,
+    formRendered: page.rendersForm,
+    exchangeCalls: callbackResult.exchangeCalls,
+    redirectLocation: callbackResult.location,
+    markerWritten: callbackResult.markerWritten,
+  }
+}
+
+{
+  const journey = walkRecoveryJourney()
+
+  // 1-2. Signed-out user reaches the callback and the code is exchanged once.
+  check('the callback is reached, not diverted', journey.trace.includes('callback-allowed'))
+  check('the code is exchanged exactly once', journey.exchangeCalls === 1)
+
+  // 3. Session and marker cookies exist.
+  check('a session exists after the exchange', journey.sessionUserId === 'user-1')
+  check('the recovery marker is written', journey.markerWritten)
+  check('the marker is present in the jar', journey.jar.has(RECOVERY_COOKIE_NAME))
+
+  // 4-5. The redirect lands on the reset page and the proxy lets it through.
+  check('the callback redirects to the reset page', journey.redirectLocation?.endsWith(RESET_PASSWORD_PATH) === true)
+  check('the proxy does NOT redirect that request away', journey.trace.includes('reset-allowed'))
+  check('the journey never bounced to home', !journey.trace.includes('reset-blocked'))
+
+  // 6-7. The page sees both signals and renders the form.
+  check('the reset form renders', journey.formRendered)
+
+  // 8. A successful update consumes the marker.
+  const update = simulateResetPassword({
+    password: 'a-good-password',
+    sessionUserId: journey.sessionUserId,
+    jar: journey.jar,
+  })
+  check('the password update succeeds', update.status === 'success')
+  check('success consumes the marker', !journey.jar.has(RECOVERY_COOKIE_NAME))
+
+  // 9. Reopening the route renders nothing, even though the session is live.
+  check(
+    'reopening the route does not render the form',
+    !simulateResetPage({ jar: journey.jar, sessionUserId: journey.sessionUserId }).rendersForm
+  )
+  check(
+    'and the proxy is not what stops it -- the gate is',
+    !shouldRedirectAuthenticatedVisitor(RESET_PASSWORD_PATH, true)
+  )
+}
+
+{
+  // The other half of the proxy bug: an existing session must not stop the
+  // callback from processing a genuine code.
+  const journey = walkRecoveryJourney({ alreadySignedInAs: 'user-1' })
+  check('an existing session does not block the callback', journey.trace.includes('callback-allowed'))
+  check('the code is still exchanged exactly once', journey.exchangeCalls === 1)
+  check('the reset form still renders', journey.formRendered)
+}
+
+{
+  // Regression guard: with the old policy every hop was diverted. Proving
+  // the old behaviour would have failed is what stops it creeping back.
+  const oldPolicyRoutes = ['/auth/login', '/auth/sign-up', '/auth/forgot-password', '/auth/reset-password', '/auth/callback']
+  const oldPolicyWouldRedirect = (pathname: string, isAuthenticated: boolean) =>
+    isAuthenticated && oldPolicyRoutes.some((r) => pathname.startsWith(r))
+
+  check(
+    'the old policy would have blocked the reset page (the reported bug)',
+    oldPolicyWouldRedirect(RESET_PASSWORD_PATH, true)
+  )
+  check(
+    'the old policy would have blocked the callback for a signed-in user',
+    oldPolicyWouldRedirect('/auth/callback', true)
+  )
+  check('the current policy blocks neither', !shouldRedirectAuthenticatedVisitor(RESET_PASSWORD_PATH, true) && !shouldRedirectAuthenticatedVisitor('/auth/callback', true))
+}
+
+{
+  // A normally signed-in visitor still cannot open the form: the proxy no
+  // longer diverts them, so the page's gate is what refuses -- which is
+  // exactly where the decision belongs.
+  const jar = makeJar()
+  check(
+    'the proxy lets an ordinary signed-in visitor reach the page',
+    !shouldRedirectAuthenticatedVisitor(RESET_PASSWORD_PATH, true)
+  )
+  check(
+    'and the page refuses them for want of a marker',
+    !simulateResetPage({ jar, sessionUserId: 'user-1' }).rendersForm
+  )
+  const attempt = simulateResetPassword({ password: 'a-good-password', sessionUserId: 'user-1', jar })
+  check('and the action refuses too', attempt.status === 'error')
+  check('without calling updateUser', attempt.updateCalls === 0)
+}
+
+{
+  // A failed callback clears a stale marker even though the proxy now lets
+  // the request through.
+  const jar = makeJar({ [RECOVERY_COOKIE_NAME]: recoveryMarkerFor('user-1') })
+  const failed = simulateCallback({ code: 'expired', next: RESET_PASSWORD_PATH, exchangeSucceeds: false, jar })
+  check('a failed callback still clears the stale marker', !failed.jar.has(RECOVERY_COOKIE_NAME))
+  check(
+    'so the reset page refuses despite a live session',
+    !simulateResetPage({ jar, sessionUserId: 'user-1' }).rendersForm
+  )
+  check('the failure lands on the recovery-specific error', failed.location.includes(RECOVERY_ERROR_CODE))
+}
+
+// ---------------------------------------------------------------------------
 section('Failure classification by stable code or name (executed)')
 // ---------------------------------------------------------------------------
 
@@ -512,6 +744,11 @@ check('the marker is never read in client code', !resetForm.includes('RECOVERY_C
 check('the page requires the marker as well as the session', /hasValidRecoveryMarker\(/.test(resetPage))
 check('the page refuses when either signal is missing', /if \(!user \|\| !isRecoveryFlow\)/.test(resetPage))
 check('the action requires the marker as well as the session', /hasValidRecoveryMarker\(/.test(authActions))
+check('the proxy uses the shared route policy', /shouldRedirectAuthenticatedVisitor\(/.test(proxy))
+check('the proxy no longer matches auth routes by prefix', !/startsWith\(r\)/.test(proxy))
+check('the proxy no longer carries its own route list', !/PUBLIC_AUTH_ROUTES/.test(proxy))
+check('session-cookie propagation on redirect is preserved', /redirectPreservingSession\(/.test(proxy))
+check('updateSession still runs on every request', /await updateSession\(request\)/.test(proxy))
 check('the marker is written in exactly one place', (callback.match(/cookieStore\.set\(RECOVERY_COOKIE_NAME/g) ?? []).length === 1)
 check('nothing but the callback writes the marker', !/cookies\(\)[\s\S]*?\.set\(RECOVERY_COOKIE_NAME/.test(resetPage))
 check('the action consumes the marker on success', /consumeRecoveryMarker\(\)[\s\S]{0,400}status: 'success'/.test(authActions))

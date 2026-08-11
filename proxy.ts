@@ -4,15 +4,7 @@
 
 import { type NextRequest, NextResponse } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
-
-/** Routes that are always public (no redirect even if logged in) */
-const PUBLIC_AUTH_ROUTES = [
-  '/auth/login',
-  '/auth/sign-up',
-  '/auth/forgot-password',
-  '/auth/reset-password',
-  '/auth/callback',
-]
+import { shouldRedirectAuthenticatedVisitor } from '@/lib/auth-route-policy'
 
 /**
  * Any redirect issued by this middleware must carry over the cookies
@@ -51,8 +43,17 @@ export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
   const { supabaseResponse, user } = await updateSession(request)
 
-  // Authenticated user hitting a sign-up/login page -> redirect home
-  if (user && PUBLIC_AUTH_ROUTES.some((r) => pathname.startsWith(r))) {
+  // Authenticated user hitting a login/signup entry page -> redirect home.
+  //
+  // /auth/callback and /auth/reset-password are deliberately excluded (PR
+  // #188): the callback must be allowed to exchange its one-time code even
+  // when a session already exists, and the reset page is reached precisely
+  // because that exchange just authenticated the visitor. Whether the reset
+  // form may actually be shown is decided by that page's own session +
+  // recovery-marker gate, not here. See lib/auth-route-policy.ts.
+  if (shouldRedirectAuthenticatedVisitor(pathname, Boolean(user))) {
+    // Still routed through redirectPreservingSession so any refreshed
+    // Supabase cookies survive -- unchanged from before.
     return redirectPreservingSession(new URL('/', request.url), supabaseResponse)
   }
 
