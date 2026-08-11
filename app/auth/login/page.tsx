@@ -2,7 +2,7 @@ import Link from 'next/link'
 import type { Metadata } from 'next'
 import { login } from '@/lib/actions/auth'
 import { AuthCard } from '@/components/auth-card'
-import { buttonVariants } from '@/components/ui/button'
+import { CaptchaProtectedSubmit } from '@/components/auth/captcha-protected-submit'
 
 // Not useful search-result content, and excluded from app/sitemap.ts --
 // explicitly opt out of indexing rather than relying only on robots.txt.
@@ -62,9 +62,9 @@ export default async function LoginPage({ searchParams }: Props) {
           />
         </div>
 
-        <button formAction={login} className={buttonVariants({ variant: 'primary', className: 'w-full' })}>
+        <CaptchaProtectedSubmit formAction={login} pendingLabel="Signing in...">
           Log In
-        </button>
+        </CaptchaProtectedSubmit>
       </form>
 
       <p className="mt-6 text-center text-sm text-slate-500">
