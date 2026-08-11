@@ -4,6 +4,12 @@ import { cookies } from 'next/headers'
 import { createClient } from '@/lib/supabase/server'
 import { RECOVERY_COOKIE_NAME, hasValidRecoveryMarker } from '@/lib/auth-recovery-state'
 import { RECOVERY_LINK_INVALID_MESSAGE } from '@/lib/auth-messages'
+import {
+  isRecoveryFailureReason,
+  recoveryReferenceLabel,
+  sanitizeProviderCode,
+} from '@/lib/auth-recovery-diagnostics'
+import { RecoveryFragmentNotice } from '@/components/auth/recovery-fragment-notice'
 import { AuthCard } from '@/components/auth-card'
 import { ResetPasswordForm } from '@/components/auth/reset-password-form'
 
@@ -17,7 +23,11 @@ export const metadata: Metadata = {
 // Reads the recovery session on every request -- must never be cached.
 export const dynamic = 'force-dynamic'
 
-export default async function ResetPasswordPage() {
+interface Props {
+  searchParams: Promise<{ reason?: string; detail?: string }>
+}
+
+export default async function ResetPasswordPage({ searchParams }: Props) {
   // Two independent server-side signals are required, and no query parameter
   // takes part in either. `?status=success` is not read at all, so the
   // success screen cannot be conjured from the URL.
@@ -32,6 +42,13 @@ export default async function ResetPasswordPage() {
   const {
     data: { user },
   } = await supabase.auth.getUser()
+
+  // Read only to display an opaque reference token. Neither value can grant
+  // anything -- both are validated against a fixed allowlist first, and the
+  // gate below ignores them entirely.
+  const { reason: rawReason, detail: rawDetail } = await searchParams
+  const reason = isRecoveryFailureReason(rawReason) ? rawReason : null
+  const reference = recoveryReferenceLabel(reason, sanitizeProviderCode(rawDetail))
 
   const cookieStore = await cookies()
   const isRecoveryFlow = hasValidRecoveryMarker(cookieStore.get(RECOVERY_COOKIE_NAME)?.value, user?.id)
@@ -56,6 +73,12 @@ export default async function ResetPasswordPage() {
             Request a new reset link
           </Link>
         </p>
+
+        {/* Short opaque tokens, shown so the cause can be identified without
+            server logs. They name a branch and nothing more -- no code,
+            token, cookie, email or Supabase message. */}
+        {reference && <p className="mt-4 text-center text-xs text-slate-400">Reference: {reference}</p>}
+        <RecoveryFragmentNotice />
       </AuthCard>
     )
   }
