@@ -6,6 +6,15 @@
  * regression.ts can import and assert on them directly without needing to
  * import a Next.js page module (which pulls in next/navigation and a
  * request context) into a standalone tsx script.
+ *
+ * `datePublished`/`dateModified` below (and `openGraph.publishedTime`/
+ * `modifiedTime` in app/insights/[slug]/page.tsx's generateMetadata()) are
+ * metadata only -- injected into a <script type="application/ld+json"> tag
+ * and <meta> tags respectively, read by search engines and social-preview
+ * crawlers, never rendered as visible text on the page (IBM i Insights
+ * Attribution Cleanup and Date Display Removal: the reader-facing page
+ * itself shows no publication date, by design -- see that page's own
+ * comment at its metadata row).
  */
 import { SITE_NAME, SITE_URL } from './config'
 import type { Insight } from './insights'

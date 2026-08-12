@@ -5,15 +5,6 @@ import { INSIGHT_CATEGORIES, INSIGHT_ACCENT_CLASSES, getInsightAccent } from '@/
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
-function formatPublishedDate(isoDate: string): string {
-  return new Date(`${isoDate}T00:00:00Z`).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
-}
-
 interface InsightCardProps {
   insight: Insight
   /** Larger hero-style treatment for the listing page's lead card and the homepage showcase. */
@@ -61,15 +52,18 @@ export function InsightCard({ insight, featured = false }: InsightCardProps) {
       <h3 className={cn('font-bold text-slate-900', featured ? 'text-2xl sm:text-3xl' : 'text-lg')}>{insight.title}</h3>
       <p className={cn('mt-3 leading-relaxed text-slate-600', featured ? 'text-base' : 'text-sm')}>{insight.description}</p>
 
-      <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-500">
-        <time dateTime={insight.publishedAt}>{formatPublishedDate(insight.publishedAt)}</time>
-        <span className="inline-flex items-center gap-1">
+      {/* Deliberately no publication date here (IBM i Insights Attribution
+          Cleanup and Date Display Removal) -- Insight cards read as
+          evergreen, not time-stamped. publishedAt still exists on the
+          Insight record for catalog validation, sitemap lastModified, and
+          sorting; it's just never rendered as visible page content.
+          Reading time and tags now share one row instead of reading time
+          sitting alone above a second row of tags. */}
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
           <Clock className="h-3.5 w-3.5" aria-hidden="true" />
           {insight.readingTimeMinutes} min read
         </span>
-      </div>
-
-      <div className="mt-3 flex flex-wrap gap-2">
         {insight.tags.slice(0, featured ? 6 : 3).map((tag) => (
           <span key={tag} className="rounded-full bg-slate-100 px-2 py-0.5 text-xs text-slate-500">
             {tag}
