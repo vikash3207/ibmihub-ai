@@ -21,7 +21,6 @@ import {
   History,
   Bug,
   Gauge,
-  Lightbulb,
 } from 'lucide-react'
 import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
 import { getPublishedLessons, type Lesson } from '@/lib/lessons'
@@ -31,13 +30,10 @@ import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
 import { StructuredData } from '@/components/structured-data'
-import { InsightCard } from '@/components/insight-card'
 import { buttonVariants } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
-import { INSIGHTS } from '@/content/insights/catalog'
-import { getFeaturedInsight } from '@/lib/insights'
 
 // Renders SiteHeader, which reads the auth session -- never statically cache
 // this page or its header could serve a stale/incorrect logged-in state.
@@ -264,7 +260,6 @@ export default async function LandingPage() {
 
   const STATS = buildStats(publishedLessons.length)
   const CURRICULUM_HIGHLIGHTS = buildCurriculumHighlights(publishedLessons)
-  const featuredInsight = getFeaturedInsight(INSIGHTS)
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -494,40 +489,6 @@ export default async function LandingPage() {
             </Card>
           </div>
         </section>
-
-        {/* -- Explore IBM i Insights (PR #194) -----------------------------
-             A separate editorial/discovery section, not a fourth entry in
-             "Three ways to learn" above -- Insights are practical, timely
-             articles, distinct from the guided lesson path and the Deep
-             Dive reference guides, so this gets its own section rather
-             than changing the meaning or count of the section above it. */}
-        {featuredInsight && (
-          <section className="border-t border-slate-100 bg-gradient-to-br from-sky-50/70 via-white to-cyan-50/40 py-16 sm:py-20">
-            <div className="mx-auto max-w-5xl px-4 sm:px-6">
-              <div className="max-w-2xl mx-auto text-center mb-10">
-                <Badge variant="neutral" className="mb-4">
-                  <Lightbulb className="h-3 w-3" aria-hidden="true" />
-                  IBM i Insights
-                </Badge>
-                <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Explore IBM i Insights</h2>
-                <p className="text-slate-600 leading-relaxed">
-                  Practical ideas, modern techniques, and emerging trends -- focused articles for working IBM&nbsp;i
-                  developers, technical leads, and architects.
-                </p>
-              </div>
-
-              <div className="mx-auto max-w-2xl">
-                <InsightCard insight={featuredInsight} featured />
-              </div>
-
-              <div className="mt-8 text-center">
-                <Link href="/insights" className={buttonVariants({ variant: 'secondary' })}>
-                  Browse IBM i Insights
-                </Link>
-              </div>
-            </div>
-          </section>
-        )}
 
         {/* -- IBM i Fundamentals highlight -------------------------------- */}
         <section className="border-t border-slate-100 bg-slate-50 py-20 sm:py-24">

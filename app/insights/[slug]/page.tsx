@@ -11,7 +11,6 @@ import { renderLessonMarkdown } from '@/lib/markdown'
 import { addDeepDiveHeadingAnchors, tagDeepDiveCallouts, wrapDeepDiveTables, type DeepDiveTocItem } from '@/lib/deep-dive-render'
 import { LessonContent } from '@/components/lesson-content'
 import { DeepDiveToc } from '@/components/deep-dive-toc'
-import { InsightArchitectureDiagram } from '@/components/insights/architecture-diagram'
 import { StructuredData } from '@/components/structured-data'
 import { INSIGHT_CATEGORIES, INSIGHT_ACCENT_CLASSES, getInsightAccent } from '@/lib/insight-categories'
 import { buildInsightStructuredData, buildBreadcrumbStructuredData } from '@/lib/insight-structured-data'
@@ -44,11 +43,6 @@ function findPublishedInsight(slug: string): Insight | undefined {
 export function generateStaticParams() {
   return INSIGHTS.filter(isInsightAvailable).map((insight) => ({ slug: insight.slug }))
 }
-
-/** Splits the rendered body at the diagram marker so InsightArchitectureDiagram (a real
- *  React component, not markdown) can render inline within the "Architecture and request
- *  flow" section without touching the markdown-safety guarantees in lib/markdown.ts. */
-const DIAGRAM_MARKER = '<p>[[ARCHITECTURE-DIAGRAM]]</p>'
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
@@ -91,9 +85,7 @@ export default async function InsightPage({ params }: Props) {
   const accentClasses = INSIGHT_ACCENT_CLASSES[accent]
   const categoryLabel = INSIGHT_CATEGORIES.find((c) => c.id === insight.category)?.label ?? insight.category
 
-  let bodyBeforeDiagram = ''
-  let bodyAfterDiagram = ''
-  let hasDiagramSlot = false
+  let bodyHtml = ''
   let toc: DeepDiveTocItem[] = []
   let loadError = false
 
@@ -101,17 +93,8 @@ export default async function InsightPage({ params }: Props) {
     const markdown = await loadInsightMarkdown(insight)
     const rendered = await renderLessonMarkdown(markdown)
     const withAnchors = addDeepDiveHeadingAnchors(rendered)
-    const fullHtml = wrapDeepDiveTables(tagDeepDiveCallouts(withAnchors.html))
+    bodyHtml = wrapDeepDiveTables(tagDeepDiveCallouts(withAnchors.html))
     toc = withAnchors.toc
-
-    if (fullHtml.includes(DIAGRAM_MARKER)) {
-      const [before, after] = fullHtml.split(DIAGRAM_MARKER)
-      bodyBeforeDiagram = before
-      bodyAfterDiagram = after
-      hasDiagramSlot = true
-    } else {
-      bodyBeforeDiagram = fullHtml
-    }
   } catch {
     loadError = true
   }
@@ -194,13 +177,7 @@ export default async function InsightPage({ params }: Props) {
                 // (app/globals.css) rather than duplicating it; `insight-article` is Insights'
                 // own hook for any future insight-only styling, kept separate from the start.
                 <div className="insight-article deep-dive-article">
-                  <LessonContent html={bodyBeforeDiagram} />
-                  {hasDiagramSlot && (
-                    <>
-                      <InsightArchitectureDiagram />
-                      <LessonContent html={bodyAfterDiagram} />
-                    </>
-                  )}
+                  <LessonContent html={bodyHtml} />
                 </div>
               )}
 

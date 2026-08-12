@@ -1,11 +1,9 @@
+import Link from 'next/link'
 import type { Metadata } from 'next'
-import { Lightbulb, Rocket, TrendingUp, Wrench } from 'lucide-react'
+import { Lightbulb, PenTool, Rocket, TrendingUp, Wrench } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
-import { InsightCard } from '@/components/insight-card'
 import { Card } from '@/components/ui/card'
-import { INSIGHTS } from '@/content/insights/catalog'
-import { getPublishedInsights, getFeaturedInsight } from '@/lib/insights'
 
 export const metadata: Metadata = {
   title: 'IBM i Insights — Practical Ideas, Modern Techniques & Emerging Trends',
@@ -33,21 +31,30 @@ const POSITIONING_POINTS = [
 ]
 
 /**
- * IBM i Insights listing page (PR #194 -- Launch IBM i Insights). A third,
- * separate public content type alongside the linear IBM i Fundamentals path
- * and the non-linear Deep Dive reference guides -- not a fourth "way to
- * learn" and not a Deep Dive subcategory (see lib/insights.ts and
- * content/insights/catalog.ts, both fully independent of the Deep Dive
- * catalog/types). Public, no login required, no search/filter yet (the
- * product decision is to add that once there are roughly 6-8 articles), and
- * no "coming soon" placeholder cards -- only real, published Insights ever
- * render here.
+ * IBM i Insights listing page. A third, separate public content type
+ * alongside the linear IBM i Fundamentals path and the non-linear Deep Dive
+ * reference guides -- not a fourth "way to learn" and not a Deep Dive
+ * subcategory (see lib/insights.ts and content/insights/catalog.ts, both
+ * fully independent of the Deep Dive catalog/types). Public, no login
+ * required.
+ *
+ * Deliberately publishes zero articles right now (see content/insights/
+ * catalog.ts) -- the Product Owner wants to review this section's design on
+ * its own before any individual Insight is researched, reviewed, and
+ * approved. This page has to look intentional and complete with an empty
+ * catalog, not like a broken or half-built feature, so the copy below
+ * explains what the section is for without claiming any article exists yet,
+ * and without promising when one will. No search/filter UI either -- that's
+ * deferred until there's enough real content for it to do anything.
+ *
+ * Deliberately does not import INSIGHTS/getPublishedInsights() at all: with
+ * nothing published, there is nothing here that could leak an unpublished
+ * entry, structurally, not by convention. The first published Insight
+ * should replace the empty-state block below with a real listing (e.g. an
+ * InsightCard grid over getPublishedInsights(INSIGHTS)) -- see that block's
+ * own comment.
  */
 export default function InsightsPage() {
-  const publishedInsights = getPublishedInsights(INSIGHTS)
-  const featuredInsight = getFeaturedInsight(INSIGHTS)
-  const otherInsights = publishedInsights.filter((insight) => insight.slug !== featuredInsight?.slug)
-
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <SiteHeader />
@@ -64,9 +71,10 @@ export default function InsightsPage() {
               Practical ideas, modern techniques, and emerging trends.
             </p>
             <p className="mt-4 text-sm text-slate-500 leading-relaxed max-w-xl mx-auto">
-              Insights are short-form, timely articles -- different from the guided IBM&nbsp;i Fundamentals lesson
-              path and different from the comprehensive Deep Dive reference guides. Read one when you want a focused,
-              outcome-oriented answer to &ldquo;how would I actually do this?&rdquo;
+              This section will hold focused, practical IBM&nbsp;i guidance -- modernization ideas, useful platform
+              capabilities, emerging techniques, and expert walkthroughs. IBM&nbsp;i Insights are independent
+              editorial articles, not curriculum lessons and not Deep Dive reference guides -- each one stands on
+              its own.
             </p>
           </div>
         </section>
@@ -84,23 +92,30 @@ export default function InsightsPage() {
             ))}
           </div>
 
-          {featuredInsight && (
-            <div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">Latest Insight</p>
-              <InsightCard insight={featuredInsight} featured />
+          {/* Empty state -- deliberately no article cards, no sample/placeholder
+              content, and no publication-date or cadence claims. Replace this
+              block with the real listing (e.g. an InsightCard grid over
+              getPublishedInsights(INSIGHTS)) the first time an Insight is
+              approved and published. */}
+          <div className="mx-auto max-w-xl rounded-2xl border border-sky-100 bg-gradient-to-b from-sky-50/70 via-white to-white p-8 text-center shadow-sm sm:p-10">
+            <span className="mx-auto mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100 text-sky-700">
+              <PenTool className="h-6 w-6" aria-hidden="true" />
+            </span>
+            <h2 className="text-xl font-semibold text-slate-900 mb-2">Insights are being prepared</h2>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Each IBM&nbsp;i Insight is researched, written, and technically reviewed on its own before it&apos;s
+              published here, so this section stays genuinely useful rather than filled with filler. The first one
+              will appear on this page once it&apos;s ready.
+            </p>
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium">
+              <Link href="/deep-dives" className="text-sky-700 hover:underline">
+                Browse Deep Dives &rarr;
+              </Link>
+              <Link href="/learn" className="text-sky-700 hover:underline">
+                Explore the Learning Center &rarr;
+              </Link>
             </div>
-          )}
-
-          {otherInsights.length > 0 && (
-            <div>
-              <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-500">More Insights</p>
-              <div className="grid gap-4 sm:grid-cols-2">
-                {otherInsights.map((insight) => (
-                  <InsightCard key={insight.slug} insight={insight} />
-                ))}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </main>
 
