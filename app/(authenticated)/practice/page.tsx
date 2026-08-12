@@ -1,12 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { ClipboardCheck, FlaskConical } from 'lucide-react'
+import { ArrowRight, ClipboardCheck, FlaskConical } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { PRACTICE_QUESTIONS, PRACTICE_TOPICS } from '@/content/practice/questions'
 import { PracticeBrowser } from '@/components/practice-browser'
-import { Card } from '@/components/ui/card'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
 // so a production visitor's real session (not a build-time snapshot) decides
@@ -33,6 +32,16 @@ interface Props {
   searchParams: Promise<{ topic?: string }>
 }
 
+/**
+ * Practice landing page (visually upgraded -- Site-wide Navigation and
+ * Section Landing Page Visual Upgrade). app/(authenticated)/layout.tsx
+ * wraps every authenticated page (including Onboarding, which this PR must
+ * not touch) in a padded `max-w-3xl` <main>, so this hero is a contained,
+ * rounded gradient card rather than the edge-to-edge <SectionHero> other
+ * upgraded pages use -- same constraint and reasoning as app/learn/page.tsx.
+ * INTRO_NOTICE's wording, PracticeBrowser's props/behavior, and the auth
+ * redirect are all byte-for-byte unchanged.
+ */
 export default async function PracticePage({ searchParams }: Props) {
   const supabase = await createClient()
   const {
@@ -54,37 +63,41 @@ export default async function PracticePage({ searchParams }: Props) {
 
   return (
     <div className="space-y-8">
-      <div>
-        <div className="mb-2 flex items-center gap-2">
-          <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-            <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <h1 className="text-3xl font-bold text-slate-900">Practice Questions</h1>
-        </div>
-        <p className="text-slate-600 leading-relaxed">
-          Short, beginner-friendly questions across the IBM i Fundamentals path. Pick a topic, answer or
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 px-6 py-10 sm:px-10 sm:py-12">
+        <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+          <ClipboardCheck className="h-3 w-3" aria-hidden="true" />
+          Low-pressure, no-score practice
+        </span>
+        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3">Practice Questions</h1>
+        <p className="text-slate-600 leading-relaxed max-w-xl">
+          Short, beginner-friendly questions across the IBM&nbsp;i Fundamentals path. Pick a topic, answer or
           reveal a question, and see a short explanation with lessons to revisit.
         </p>
       </div>
 
-      <div className="rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600 leading-relaxed">
+      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-sm text-slate-700 leading-relaxed">
         {INTRO_NOTICE}
       </div>
 
-      <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform">
-        <Card className="transition-shadow hover:shadow-md">
-          <div className="flex items-center gap-3">
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-              <FlaskConical className="h-5 w-5" aria-hidden="true" />
+      <Link
+        href="/practice-lab"
+        className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+      >
+        <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+            <FlaskConical className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <div className="flex-1">
+            <span className="block font-semibold">Try the Practice Lab</span>
+            <span className="mt-0.5 block text-sm text-slate-300">
+              Hands-on 5250-style command practice and an ACS-style SQL console.
             </span>
-            <div>
-              <span className="block font-semibold text-slate-900">Try the Practice Lab</span>
-              <span className="block text-sm text-slate-600 mt-0.5">
-                Hands-on 5250-style command practice and an ACS-style SQL console.
-              </span>
-            </div>
           </div>
-        </Card>
+          <ArrowRight
+            className="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+            aria-hidden="true"
+          />
+        </div>
       </Link>
 
       <PracticeBrowser

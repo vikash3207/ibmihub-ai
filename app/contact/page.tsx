@@ -27,7 +27,7 @@ export default function ContactPage() {
 
       <main className="flex-1">
         {/* -- Hero --------------------------------------------------------- */}
-        <section className="bg-slate-50 border-b border-slate-100 py-16 sm:py-20">
+        <section className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 py-16 sm:py-20">
           <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-4">
               Contact {SITE_NAME}

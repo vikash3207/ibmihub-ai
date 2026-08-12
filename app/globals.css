@@ -318,14 +318,22 @@
 }
 
 /*
- * IBM i Insights hero entrance (visual-polish pass). A single, one-time
- * fade/rise on page load -- not a Tailwind utility because it needs a named
- * @keyframes, and not a continuous/looping effect, so it can't cause the
- * "distracting motion" a hover-only transition avoids by construction.
- * Only opacity/transform are animated (both compositor-only), so this
- * cannot trigger layout or cause a layout shift. Disabled entirely under
- * prefers-reduced-motion, matching every other motion-reduce: rule already
- * used throughout this codebase.
+ * Section hero entrance (IBM i Insights visual-polish pass; generalized for
+ * the Site-wide Navigation and Section Landing Page Visual Upgrade). A
+ * single, one-time fade/rise on page load -- not a Tailwind utility because
+ * it needs a named @keyframes, and not a continuous/looping effect, so it
+ * can't cause the "distracting motion" a hover-only transition avoids by
+ * construction. Only opacity/transform are animated (both compositor-only),
+ * so this cannot trigger layout or cause a layout shift. Disabled entirely
+ * under prefers-reduced-motion, matching every other motion-reduce: rule
+ * already used throughout this codebase.
+ *
+ * `.insights-hero-enter` is app/insights/page.tsx's own class name (that
+ * page is intentionally untouched by the nav/section visual upgrade --
+ * still owns its literal className). `.section-hero-enter` is the same
+ * animation under components/section-hero.tsx's reusable name, used by
+ * every other upgraded section hero. Both point at the same keyframes so
+ * there's exactly one animation definition, not two copies.
  */
 @keyframes insights-hero-in {
   from {
@@ -338,12 +346,14 @@
   }
 }
 
-.insights-hero-enter {
+.insights-hero-enter,
+.section-hero-enter {
   animation: insights-hero-in 0.7s ease-out both;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .insights-hero-enter {
+  .insights-hero-enter,
+  .section-hero-enter {
     animation: none;
   }
 }

@@ -165,9 +165,11 @@ export default async function DashboardPage() {
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card>
+          <Card className="border-t-4 border-t-blue-500">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <CheckCircle2 className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
               Lessons completed
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
@@ -177,9 +179,11 @@ export default async function DashboardPage() {
             <p className="mt-1 text-xs text-slate-500">Currently published lessons</p>
           </Card>
 
-          <Card>
+          <Card className="border-t-4 border-t-indigo-500">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <TrendingUp className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+                <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
               Curriculum progress
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">{overall.percent}%</p>
@@ -191,9 +195,11 @@ export default async function DashboardPage() {
             />
           </Card>
 
-          <Card>
+          <Card className="border-t-4 border-t-violet-500">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <Layers className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-violet-600">
+                <Layers className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
               Topics started
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
@@ -221,7 +227,7 @@ export default async function DashboardPage() {
         </h2>
 
         {overall.isCurriculumComplete ? (
-          <Card className="border-l-4 border-l-emerald-500">
+          <Card className="relative overflow-hidden border-t-4 border-t-emerald-500 bg-gradient-to-b from-emerald-50/60 via-white to-white">
             <p className="text-sm text-slate-700 leading-relaxed">
               You&apos;ve completed all {overall.totalCount} currently published{' '}
               {IBM_I_FUNDAMENTALS_PATH_NAME} lessons. New lessons are added over time, and they&apos;ll
@@ -240,11 +246,11 @@ export default async function DashboardPage() {
             </div>
           </Card>
         ) : continueLesson ? (
-          <Card className="border-l-4 border-l-blue-600">
+          <Card className="relative overflow-hidden border-t-4 border-t-blue-500 bg-gradient-to-b from-blue-50/60 via-white to-white">
             {isNewLearner && <p className="mb-3 text-sm text-slate-600 leading-relaxed">{startLearningCopy}</p>}
 
             <div className="flex items-start gap-4">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-semibold tabular-nums text-blue-700">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 text-sm font-semibold tabular-nums text-white shadow-sm">
                 {continueLesson.lesson_order}
               </span>
               <div className="min-w-0 flex-1">
@@ -436,8 +442,11 @@ export default async function DashboardPage() {
         </h2>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Link href="/learn/ibm-i-fundamentals" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
-            <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
+          <Link
+            href="/learn/ibm-i-fundamentals"
+            className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+          >
+            <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
                 <BookOpen className="h-5 w-5" aria-hidden="true" />
               </div>
@@ -448,9 +457,12 @@ export default async function DashboardPage() {
             </Card>
           </Link>
 
-          <Link href="/practice" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
-            <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <Link
+            href="/practice"
+            className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+          >
+            <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
                 <ClipboardCheck className="h-5 w-5" aria-hidden="true" />
               </div>
               <span className="block font-semibold text-slate-900">Practice Questions</span>
@@ -461,9 +473,10 @@ export default async function DashboardPage() {
           </Link>
 
           {/* Opens the shared panel in place (PR #180) rather than
-              navigating away from the Dashboard. */}
+              navigating away from the Dashboard. OpenAiTutorCard already
+              supplies its own focus-visible ring -- see that component. */}
           <OpenAiTutorCard>
-            <Card variant="ai" className="h-full text-left transition-shadow motion-reduce:transition-none hover:shadow-md">
+            <Card variant="ai" className="group h-full text-left transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0">
               <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-100 text-cyan-700">
                 <Sparkles className="h-5 w-5" aria-hidden="true" />
               </div>
@@ -475,9 +488,12 @@ export default async function DashboardPage() {
             </Card>
           </OpenAiTutorCard>
 
-          <Link href="/practice-lab" className="block active:scale-[0.99] transition-transform motion-reduce:transition-none">
-            <Card className="h-full transition-shadow motion-reduce:transition-none hover:shadow-md">
-              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <Link
+            href="/practice-lab"
+            className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+          >
+            <Card className="h-full transition-all duration-200 group-hover:-translate-y-0.5 group-hover:shadow-md motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+              <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-teal-50 text-teal-600">
                 <FlaskConical className="h-5 w-5" aria-hidden="true" />
               </div>
               <span className="block font-semibold text-slate-900">Practice Lab</span>

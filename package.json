@@ -20,7 +20,8 @@
     "test:auth-session-sync": "npx tsx scripts/auth-session-sync-regression.ts",
     "test:auth-recovery": "npx tsx scripts/auth-recovery-regression.ts",
     "test:user-profile": "npx tsx scripts/user-profile-regression.ts",
-    "test:insights": "npx tsx scripts/insights-regression.ts"
+    "test:insights": "npx tsx scripts/insights-regression.ts",
+    "test:site-navigation": "npx tsx scripts/site-navigation-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",

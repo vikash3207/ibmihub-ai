@@ -156,12 +156,22 @@ section('5. Provider resolves page context on a bare openPanel()')
 section('6. Header trigger uses page context, not a hard-coded general one')
 
 {
-  const nav = readFileSync(join(process.cwd(), 'components', 'site-nav-links.tsx'), 'utf8')
+  // The click-interception logic (Site-wide Navigation and Section Landing
+  // Page Visual Upgrade) now lives in lib/nav-links.ts, a plain module both
+  // components/site-nav-links.tsx (desktop pill nav) and
+  // components/site-mobile-nav.tsx (mobile panel) import from -- checking
+  // that shared source is what actually matters here, not either
+  // component's own file, which now just calls the shared function.
+  const navLinks = readFileSync(join(process.cwd(), 'lib', 'nav-links.ts'), 'utf8')
+  const navComponent = readFileSync(join(process.cwd(), 'components', 'site-nav-links.tsx'), 'utf8')
+  const mobileNavComponent = readFileSync(join(process.cwd(), 'components', 'site-mobile-nav.tsx'), 'utf8')
 
-  check('header opens with no explicit context', /openPanel\(\)/.test(nav))
-  check('header no longer forces GENERAL_CONTEXT', !/openPanel\(GENERAL_CONTEXT\)/.test(nav))
-  check('modified clicks still fall through to the real route', /metaKey \|\| event\.ctrlKey/.test(nav))
-  check('the canonical /ai-tutor href is preserved', /href: '\/ai-tutor'/.test(nav))
+  check('header opens with no explicit context', /openPanel\(\)/.test(navLinks))
+  check('header no longer forces GENERAL_CONTEXT', !/openPanel\(GENERAL_CONTEXT\)/.test(navLinks))
+  check('modified clicks still fall through to the real route', /metaKey \|\| event\.ctrlKey/.test(navLinks))
+  check('the canonical /ai-tutor href is preserved', /href: '\/ai-tutor'/.test(navLinks))
+  check('the desktop nav component uses the shared handler, not a second copy', navComponent.includes('handleAiTutorNavClick'))
+  check('the mobile nav component uses the same shared handler', mobileNavComponent.includes('handleAiTutorNavClick'))
 }
 
 // ---------------------------------------------------------------------------
