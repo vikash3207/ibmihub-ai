@@ -302,11 +302,18 @@ async function main() {
     const browserSrc = readRepoFile('components/deep-dive-browser.tsx')
     check('DeepDiveBrowser still derives "Available"/"Coming soon" from deepDive.status, not new logic', browserSrc.includes("deepDive.status === 'published'"))
 
+    // These two checks used to assert the Insights catalog was still empty
+    // and untouched by *this* (site-wide nav visual upgrade) PR -- true at
+    // the time, but PR #199 is the one that legitimately publishes the
+    // first Insight. Detailed coverage of that catalog/listing/detail-route
+    // behavior now lives in scripts/insights-regression.ts; this section
+    // just confirms the nav-upgrade-era untouched-behavior checks around it
+    // (Deep Dives, Practice, auth gating, etc.) still hold.
     const insightsPageSrc = readRepoFile('app/insights/page.tsx')
-    check('IBM i Insights listing page is untouched by this PR (still the empty-state page, no article import)', !insightsPageSrc.includes("from '@/content/insights/catalog'"))
+    check('IBM i Insights listing page now imports the (no longer empty) Insights catalog', insightsPageSrc.includes("from '@/content/insights/catalog'"))
 
     const catalogSrc = readRepoFile('content/insights/catalog.ts')
-    check('the Insights catalog is still empty', /INSIGHTS: Insight\[\] = \[\]/.test(catalogSrc))
+    check('the Insights catalog now publishes at least one Insight', /INSIGHTS: Insight\[\] = \[\s*\{/.test(catalogSrc))
 
     const practiceSrc = readRepoFile('app/(authenticated)/practice/page.tsx')
     check("Practice still redirects an unauthenticated visitor to /auth/login?next=%2Fpractice", practiceSrc.includes("redirect('/auth/login?next=%2Fpractice')"))

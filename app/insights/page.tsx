@@ -5,6 +5,9 @@ import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
+import { InsightCard } from '@/components/insight-card'
+import { INSIGHTS } from '@/content/insights/catalog'
+import { getPublishedInsights } from '@/lib/insights'
 import { cn } from '@/lib/utils'
 
 const INSIGHTS_TITLE = 'IBM i Insights — Practical Ideas, Modern Techniques & Emerging Trends'
@@ -78,21 +81,15 @@ const POSITIONING_POINTS = [
  * fully independent of the Deep Dive catalog/types). Public, no login
  * required.
  *
- * Deliberately publishes zero articles right now (see content/insights/
- * catalog.ts) -- the Product Owner wants to review this section's design on
- * its own before any individual Insight is researched, reviewed, and
- * approved. This page has to look intentional and complete with an empty
- * catalog, not like a broken or half-built feature, so the copy below
- * explains what the section is for without claiming any article exists yet,
- * and without promising when one will. No search/filter UI either -- that's
- * deferred until there's enough real content for it to do anything.
- *
- * Deliberately does not import INSIGHTS/getPublishedInsights() at all: with
- * nothing published, there is nothing here that could leak an unpublished
- * entry, structurally, not by convention. The first published Insight
- * should replace the empty-state block below with a real listing (e.g. an
- * InsightCard grid over getPublishedInsights(INSIGHTS)) -- see that block's
- * own comment.
+ * Originally launched with zero published articles (see git history) so the
+ * Product Owner could review this section's design on its own first. Now
+ * renders a real InsightCard grid over getPublishedInsights(INSIGHTS) (PR
+ * #199, the first published Insight) -- but the catalog-empty path below is
+ * deliberately still there and still correct: if every Insight were ever
+ * unpublished again, this page would fall back to the same polished empty
+ * state rather than rendering a broken or half-built-looking page. No
+ * search/filter UI yet -- still deferred until there's enough content for
+ * it to do anything.
  *
  * Visual design note: the hero deliberately reuses app/page.tsx's dark
  * hero language (bg-slate-950 + blurred glow blobs + the same Badge/button
@@ -103,6 +100,9 @@ const POSITIONING_POINTS = [
  * `aria-hidden` and CSS-only -- no images, no animation library.
  */
 export default function InsightsPage() {
+  const publishedInsights = getPublishedInsights(INSIGHTS)
+  const [featuredInsight, ...restInsights] = publishedInsights
+
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <SiteHeader />
@@ -219,41 +219,54 @@ export default function InsightsPage() {
         </div>
 
         <div className="mx-auto max-w-5xl px-4 sm:px-6 py-14 sm:py-20">
-          {/* Empty state -- deliberately no article cards, no sample/placeholder
-              content, and no publication-date or cadence claims. Replace this
-              block with the real listing (e.g. an InsightCard grid over
-              getPublishedInsights(INSIGHTS)) the first time an Insight is
-              approved and published. */}
-          <div className="relative mx-auto max-w-xl overflow-hidden rounded-2xl border border-sky-100 bg-gradient-to-b from-sky-50/80 via-white to-white p-8 text-center shadow-sm sm:p-10">
-            <div
-              className="pointer-events-none absolute -top-16 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-sky-200/30 blur-[90px]"
-              aria-hidden="true"
-            />
-            <span className="relative mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-md">
-              <PenTool className="h-7 w-7" aria-hidden="true" />
-            </span>
-            <h2 className="relative text-xl font-bold text-slate-900 mb-2">Insights are being prepared</h2>
-            <p className="relative text-sm text-slate-600 leading-relaxed">
-              Each IBM&nbsp;i Insight is researched, written, and reviewed before publication, so every article that
-              appears here is clear, accurate, and genuinely useful.
-            </p>
-            <div className="relative mt-7 flex flex-wrap items-center justify-center gap-3">
-              <Link href="/deep-dives" className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'group/link')}>
-                Browse Deep Dives
-                <ArrowRight
-                  className="h-3.5 w-3.5 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
-                  aria-hidden="true"
-                />
-              </Link>
-              <Link href="/learn" className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'group/link')}>
-                Explore the Learning Center
-                <ArrowRight
-                  className="h-3.5 w-3.5 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
-                  aria-hidden="true"
-                />
-              </Link>
+          {publishedInsights.length === 0 ? (
+            // Empty state -- deliberately no article cards, no sample/placeholder
+            // content, and no publication-date or cadence claims. Kept as the
+            // fallback for a fully-unpublished catalog (see this page's own
+            // header comment), not the normal path anymore now that PR #199
+            // published the first Insight.
+            <div className="relative mx-auto max-w-xl overflow-hidden rounded-2xl border border-sky-100 bg-gradient-to-b from-sky-50/80 via-white to-white p-8 text-center shadow-sm sm:p-10">
+              <div
+                className="pointer-events-none absolute -top-16 left-1/2 h-56 w-56 -translate-x-1/2 rounded-full bg-sky-200/30 blur-[90px]"
+                aria-hidden="true"
+              />
+              <span className="relative mx-auto mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white shadow-md">
+                <PenTool className="h-7 w-7" aria-hidden="true" />
+              </span>
+              <h2 className="relative text-xl font-bold text-slate-900 mb-2">Insights are being prepared</h2>
+              <p className="relative text-sm text-slate-600 leading-relaxed">
+                Each IBM&nbsp;i Insight is researched, written, and reviewed before publication, so every article that
+                appears here is clear, accurate, and genuinely useful.
+              </p>
+              <div className="relative mt-7 flex flex-wrap items-center justify-center gap-3">
+                <Link href="/deep-dives" className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'group/link')}>
+                  Browse Deep Dives
+                  <ArrowRight
+                    className="h-3.5 w-3.5 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
+                    aria-hidden="true"
+                  />
+                </Link>
+                <Link href="/learn" className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'group/link')}>
+                  Explore the Learning Center
+                  <ArrowRight
+                    className="h-3.5 w-3.5 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
+                    aria-hidden="true"
+                  />
+                </Link>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-6">
+              {featuredInsight && <InsightCard insight={featuredInsight} featured />}
+              {restInsights.length > 0 && (
+                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+                  {restInsights.map((insight) => (
+                    <InsightCard key={insight.slug} insight={insight} />
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </main>
 

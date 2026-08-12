@@ -14,6 +14,8 @@ import { DeepDiveToc } from '@/components/deep-dive-toc'
 import { StructuredData } from '@/components/structured-data'
 import { INSIGHT_CATEGORIES, INSIGHT_ACCENT_CLASSES, getInsightAccent } from '@/lib/insight-categories'
 import { buildInsightStructuredData, buildBreadcrumbStructuredData } from '@/lib/insight-structured-data'
+import { splitInsightHtmlOnFigureMarkers } from '@/lib/insight-render'
+import { INSIGHT_FIGURE_REGISTRY } from '@/components/insights/mcp-figures'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { isDeepDiveAvailable } from '@/lib/deep-dives'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
@@ -34,6 +36,19 @@ interface Props {
  * HTML string transforms, and DeepDiveToc renders generic {id,title,level}
  * items -- rather than forking that logic. Public, static, no auth
  * dependency, same as Deep Dives.
+ *
+ * Figures (PR #199): an Insight's body can embed original diagrams by
+ * placing `[[FIGURE:name]]` on its own paragraph in the Markdown source --
+ * see lib/insight-render.ts for why this exists (renderLessonMarkdown()
+ * never enables allowDangerousHtml, so a raw component can't be embedded
+ * directly in the Markdown). splitInsightHtmlOnFigureMarkers() runs on the
+ * already fully-rendered/anchored/classified HTML, so heading ids and the
+ * TOC stay correct regardless of where a figure falls; each string segment
+ * still renders through <LessonContent> unchanged, and each figure name is
+ * looked up in INSIGHT_FIGURE_REGISTRY[insight.slug] -- a real, hand-written
+ * component, never anything derived from file content. An Insight with no
+ * figure markers (or an unrecognized one) still renders fine: the split is
+ * a no-op and an unmatched name is just skipped.
  */
 function findPublishedInsight(slug: string): Insight | undefined {
   const insight = INSIGHTS.find((i) => i.slug === slug)
@@ -187,7 +202,13 @@ export default async function InsightPage({ params }: Props) {
                 // (app/globals.css) rather than duplicating it; `insight-article` is Insights'
                 // own hook for any future insight-only styling, kept separate from the start.
                 <div className="insight-article deep-dive-article">
-                  <LessonContent html={bodyHtml} />
+                  {splitInsightHtmlOnFigureMarkers(bodyHtml).map((segment, i) => {
+                    if (segment.type === 'html') {
+                      return <LessonContent key={i} html={segment.html} />
+                    }
+                    const Figure = INSIGHT_FIGURE_REGISTRY[insight.slug]?.[segment.name]
+                    return Figure ? <Figure key={i} /> : null
+                  })}
                 </div>
               )}
 
