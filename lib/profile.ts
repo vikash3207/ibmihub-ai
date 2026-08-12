@@ -2,7 +2,11 @@
  * Pure validation and display logic for the basic user profile enhancement.
  *
  * Kept separate from lib/actions/profile.ts (which is 'use server' and may
- * only export async Server Actions) so this can be imported by both the
+ * only export async Server Actions -- Next.js rejects the whole module at
+ * evaluation time if it exports anything else, including a type-only export
+ * transpiled to nothing at runtime, or a plain object/const like
+ * UPDATE_PROFILE_INITIAL_STATE below; see that file's header comment for the
+ * production incident this caused) so this can be imported by both the
  * action and the regression suite, and so avatar-initial derivation can be
  * shared between the server-rendered header and anywhere else that needs it
  * without duplicating the fallback chain.
@@ -124,3 +128,31 @@ export function buildProfileUpsertPayload(
 ): ProfileUpsertPayload {
   return { id: userId, first_name: firstName, last_name: lastName, contact_number: contactNumber }
 }
+
+/**
+ * updateProfile()'s Server Action state shape (Hotfix: Profile Save Server
+ * Error -- "use server" export violation). Lives here, not in
+ * lib/actions/profile.ts, because a 'use server' file may only export async
+ * functions at runtime -- a type export erases cleanly, but
+ * UPDATE_PROFILE_INITIAL_STATE is a real runtime object, and Next.js rejects
+ * the entire module during evaluation the moment it sees one ("A 'use
+ * server' file can only export async functions, found object."). That
+ * rejection happened before updateProfile() ever started running, so no
+ * Supabase call was ever made and no try/catch inside it could have caught
+ * it -- this move is the actual fix for that specific production crash. The
+ * defensive upsert/try-catch work already in lib/actions/profile.ts remains
+ * -- it addresses the separate missing-user_profiles-row edge case, not
+ * this one.
+ */
+export type UpdateProfileState =
+  | { status: 'idle' }
+  | { status: 'error'; message: string }
+  | {
+      status: 'success'
+      message: string
+      firstName: string | null
+      lastName: string | null
+      contactNumber: string | null
+    }
+
+export const UPDATE_PROFILE_INITIAL_STATE: UpdateProfileState = { status: 'idle' }

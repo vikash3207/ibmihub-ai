@@ -11,6 +11,24 @@
  * this change cannot regress any of that by construction: nothing here
  * imports or calls anything auth-flow-specific beyond createClient() and
  * getUser(), both read-only with respect to session state.
+ *
+ * CONFIRMED PRODUCTION INCIDENT (Hotfix: Profile Save Server Error): this
+ * module used to also export `UpdateProfileState` (a type) and
+ * `UPDATE_PROFILE_INITIAL_STATE` (a plain object) alongside updateProfile().
+ * A 'use server' file may only export async functions at runtime -- Next.js
+ * rejects the whole module during evaluation otherwise, with exactly the
+ * error Vercel logged: `Error: A "use server" file can only export async
+ * functions, found object.` That rejection happens before updateProfile()
+ * ever starts running: Supabase is never contacted, and no try/catch inside
+ * the function could have caught it, because the function's body never
+ * executed. Both non-function exports now live in lib/profile.ts (an
+ * ordinary module with no export restrictions) instead. The only runtime
+ * export from this file is updateProfile() itself; GENERIC_FAILURE and
+ * logUnexpectedFailure() below are non-exported and don't trigger this
+ * restriction (Next.js only rejects module-level *exports* that aren't
+ * async functions -- not local/non-exported constants or helpers, since
+ * only exported bindings from a 'use server' module go through Next's
+ * Server Reference transform).
  */
 
 import { revalidatePath } from 'next/cache'
@@ -25,20 +43,8 @@ import {
   isValidName,
   normalizeContactNumber,
   normalizeName,
+  type UpdateProfileState,
 } from '@/lib/profile'
-
-export type UpdateProfileState =
-  | { status: 'idle' }
-  | { status: 'error'; message: string }
-  | {
-      status: 'success'
-      message: string
-      firstName: string | null
-      lastName: string | null
-      contactNumber: string | null
-    }
-
-export const UPDATE_PROFILE_INITIAL_STATE: UpdateProfileState = { status: 'idle' }
 
 /**
  * Updates the signed-in user's own basic profile fields, creating the row
@@ -114,14 +120,17 @@ export async function updateProfile(
   }
 
   // upsert(), not update(): a plain .update() silently matches zero rows --
-  // no error -- when this user has no user_profiles row yet. That edge case
-  // (a missing row) is a confirmed, real failure mode of the old .update();
-  // whether it was specifically what threw the exception that crashed the
-  // page in production is NOT confirmed -- Vercel logs were not available
-  // to inspect the actual exception. upsert() fixes the missing-row edge
-  // case directly (insert when absent, update when present, one round
-  // trip); the try/catch below is a separate, independent fix that stops
-  // *any* unexpected Supabase exception -- whatever its cause -- from ever
+  // no error -- when this user has no user_profiles row yet, which is a
+  // confirmed, real gap in the old .update() (RLS still lets it happen for
+  // an account whose row genuinely doesn't exist). This is a SEPARATE fix
+  // from the module-export crash documented in this file's header comment
+  // above -- that crash happened before updateProfile() ever started
+  // running, so it was never caused by, and is not fixed by, anything in
+  // this function's body. upsert() fixes the missing-row edge case directly
+  // (insert when absent, update when present, one round trip); the
+  // try/catch below is an independent defensive measure so *any* unexpected
+  // Supabase exception raised once the function is actually executing --
+  // whatever its cause -- degrades to a normal form error instead of
   // reaching the caller unhandled. RLS still fully governs both upsert
   // branches: 001's insert policy (`with check auth.uid() = id`) and update
   // policy (`using auth.uid() = id with check auth.uid() = id`) both must

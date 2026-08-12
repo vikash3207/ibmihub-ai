@@ -1,8 +1,8 @@
 'use client'
 
 import { useFormState } from 'react-dom'
-import { updateProfile, UPDATE_PROFILE_INITIAL_STATE } from '@/lib/actions/profile'
-import { MAX_CONTACT_LENGTH, MAX_NAME_LENGTH } from '@/lib/profile'
+import { updateProfile } from '@/lib/actions/profile'
+import { MAX_CONTACT_LENGTH, MAX_NAME_LENGTH, UPDATE_PROFILE_INITIAL_STATE } from '@/lib/profile'
 import { SubmitButton } from '@/components/ui/submit-button'
 
 interface ProfileFormProps {

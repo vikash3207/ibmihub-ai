@@ -54,6 +54,7 @@ const read = (...parts: string[]) => readFileSync(join(process.cwd(), ...parts),
 
 const migration = read('supabase', 'migrations', '010_user_profile_identity.sql')
 const backfillMigration = read('supabase', 'migrations', '011_backfill_missing_user_profiles.sql')
+const profileLib = read('lib', 'profile.ts')
 const profileAction = read('lib', 'actions', 'profile.ts')
 const profilePage = read('app', '(authenticated)', 'profile', 'page.tsx')
 const profileForm = read('components', 'profile-form.tsx')
@@ -202,6 +203,48 @@ check(
   profileAction.indexOf('isValidContactNumber') < profileAction.indexOf(".from('user_profiles')")
 )
 check('the header is refreshed after a successful save', /revalidatePath\('\/', 'layout'\)/.test(profileAction))
+
+// ---------------------------------------------------------------------------
+section('Hotfix: "use server" export violation -- the confirmed production crash (source)')
+// ---------------------------------------------------------------------------
+
+// CONFIRMED root cause (Vercel error: `A "use server" file can only export
+// async functions, found object.`): lib/actions/profile.ts used to also
+// export UpdateProfileState (a type) and UPDATE_PROFILE_INITIAL_STATE (a
+// plain object) alongside updateProfile(). Next.js rejects a 'use server'
+// module at evaluation time the moment it sees a non-async-function export,
+// which happens before updateProfile() ever runs -- Supabase was never
+// contacted, and nothing inside the function's try/catch could have caught
+// it. These checks assert the module now exports exactly one thing: the
+// async Server Action itself.
+{
+  const exportLines = profileAction.match(/^export .+$/gm) ?? []
+  check('the module has exactly one top-level export', exportLines.length === 1, `found ${exportLines.length}: ${exportLines.join(' | ')}`)
+  check(
+    'that sole export is the async updateProfile Server Action',
+    exportLines[0]?.startsWith('export async function updateProfile') ?? false,
+    exportLines[0]
+  )
+}
+check('there is no exported runtime object, constant, or class anywhere in the file', !/^export (const|class) /m.test(profileAction))
+check('there is no exported non-async function anywhere in the file', !/^export function /m.test(profileAction))
+check('UpdateProfileState is no longer defined/exported from this file', !/export type UpdateProfileState/.test(profileAction))
+check('UPDATE_PROFILE_INITIAL_STATE is no longer defined/exported from this file', !/export const UPDATE_PROFILE_INITIAL_STATE/.test(profileAction))
+check(
+  'UpdateProfileState is instead imported (type-only, erases at runtime) from lib/profile',
+  /type UpdateProfileState,?[\s\S]{0,20}\} from '@\/lib\/profile'/.test(profileAction)
+)
+check('lib/profile.ts is where UpdateProfileState now lives', /export type UpdateProfileState/.test(profileLib))
+check('lib/profile.ts is where UPDATE_PROFILE_INITIAL_STATE now lives', /export const UPDATE_PROFILE_INITIAL_STATE/.test(profileLib))
+check(
+  'the form imports UPDATE_PROFILE_INITIAL_STATE from lib/profile, not the Server Action module',
+  /UPDATE_PROFILE_INITIAL_STATE[\s\S]{0,10}\} from '@\/lib\/profile'/.test(profileForm)
+)
+check(
+  'the form does not import UPDATE_PROFILE_INITIAL_STATE from lib/actions/profile',
+  !/UPDATE_PROFILE_INITIAL_STATE[\s\S]{0,120}from '@\/lib\/actions\/profile'/.test(profileForm)
+)
+check("the form still imports updateProfile itself from lib/actions/profile", /import \{ updateProfile \} from '@\/lib\/actions\/profile'/.test(profileForm))
 
 // ---------------------------------------------------------------------------
 section('Hotfix: Profile Save Server Error -- logging never leaks raw error detail (source)')
