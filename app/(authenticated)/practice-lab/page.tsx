@@ -67,7 +67,7 @@ export default async function PracticeLabPage() {
         </span>
         <h1 className="relative text-3xl sm:text-4xl font-bold tracking-tight text-white mb-3">Practice Lab</h1>
         <p className="relative text-slate-300 leading-relaxed max-w-xl">
-          Practice IBM&nbsp;i skills hands-on with guided, simulated exercises -- a 5250-style command
+          Practice IBM&nbsp;i skills hands-on with guided, simulated exercises — a 5250-style command
           practice environment and an ACS-style SQL console, both built for learning.
         </p>
       </div>
@@ -100,7 +100,7 @@ export default async function PracticeLabPage() {
             <span className="block font-semibold text-slate-900">5250 Command Practice</span>
             <span className="block text-sm text-slate-600 mt-1 leading-relaxed">
               Practice common IBM i commands in a guided 5250-style simulator. No real system
-              connection -- a safe learning environment with predefined exercises.
+              connection — a safe learning environment with predefined exercises.
             </span>
             <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-700">
               Start practicing
@@ -136,7 +136,7 @@ export default async function PracticeLabPage() {
             </div>
             <span className="block font-semibold text-slate-900">SQL Practice Console</span>
             <span className="block text-sm text-slate-600 mt-1 leading-relaxed">
-              Practice SQL using an ACS-style learning console. Sample data only -- safe,
+              Practice SQL using an ACS-style learning console. Sample data only — safe,
               simulated exercises, not a connection to a real database.
             </span>
             <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-700">

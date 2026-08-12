@@ -2,9 +2,11 @@
  * Per-section hero/card theme configuration (Site-wide Navigation and
  * Section Landing Page Visual Upgrade). Full, static Tailwind class
  * strings only -- never string-interpolated (e.g. `bg-${color}-600/20`) --
- * so Tailwind's JIT scanner (which only greps ./app, ./components,
- * ./pages -- see tailwind.config.ts) can see them and generate the
- * corresponding CSS at build time. Same pattern as
+ * so Tailwind's JIT scanner can see them and generate the corresponding CSS
+ * at build time. tailwind.config.ts's content array must include a glob
+ * covering this file's directory (./lib) or these classes silently never
+ * get generated -- see tailwind.config.ts and
+ * scripts/tailwind-content-regression.ts. Same pattern as
  * lib/deep-dive-categories.ts's DEEP_DIVE_ACCENT_CLASSES and
  * app/insights/page.tsx's POSITIONING_POINTS.
  *
@@ -94,4 +96,12 @@ export const PRACTICE_LAB_SQL_THEME: SectionFeatureCardTheme = {
   border: 'border-blue-100',
   hoverBorder: 'hover:border-blue-300',
   accent: 'from-blue-500 to-cyan-500',
+}
+
+/** Contact: calm slate/blue wash -- matches CONTACT_ACCENT's nav coloring, deliberately quieter than Deep Dives/Practice. */
+export const CONTACT_HERO_THEME: SectionHeroTheme = {
+  variant: 'light',
+  lightWashClasses: 'bg-gradient-to-br from-slate-50 via-white to-blue-50/50',
+  badgeClasses: 'border-blue-200 bg-blue-50 text-blue-700',
+  iconChipClasses: 'bg-gradient-to-br from-slate-600 to-blue-600',
 }

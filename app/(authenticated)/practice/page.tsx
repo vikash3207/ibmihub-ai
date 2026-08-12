@@ -63,16 +63,28 @@ export default async function PracticePage({ searchParams }: Props) {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 px-6 py-10 sm:px-10 sm:py-12">
-        <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
-          <ClipboardCheck className="h-3 w-3" aria-hidden="true" />
-          Low-pressure, no-score practice
-        </span>
-        <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3">Practice Questions</h1>
-        <p className="text-slate-600 leading-relaxed max-w-xl">
-          Short, beginner-friendly questions across the IBM&nbsp;i Fundamentals path. Pick a topic, answer or
-          reveal a question, and see a short explanation with lessons to revisit.
-        </p>
+      <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 px-6 py-12 sm:px-10 sm:py-14">
+        <div
+          className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-emerald-300/25 blur-[90px]"
+          aria-hidden="true"
+        />
+        <div
+          className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-teal-300/25 blur-[90px]"
+          aria-hidden="true"
+        />
+        <div className="relative">
+          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm">
+            <ClipboardCheck className="h-6 w-6" aria-hidden="true" />
+          </div>
+          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+            Low-pressure, no-score practice
+          </span>
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3">Practice Questions</h1>
+          <p className="text-slate-600 leading-relaxed max-w-xl">
+            Short, beginner-friendly questions across the IBM&nbsp;i Fundamentals path. Pick a topic, answer or
+            reveal a question, and see a short explanation with lessons to revisit.
+          </p>
+        </div>
       </div>
 
       <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-sm text-slate-700 leading-relaxed">
@@ -83,18 +95,22 @@ export default async function PracticePage({ searchParams }: Props) {
         href="/practice-lab"
         className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
       >
-        <div className="flex items-center gap-3 rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+        <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+          <div
+            className="pointer-events-none absolute -top-10 right-0 h-32 w-32 rounded-full bg-emerald-500/20 blur-[60px]"
+            aria-hidden="true"
+          />
+          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
             <FlaskConical className="h-5 w-5" aria-hidden="true" />
           </span>
-          <div className="flex-1">
+          <div className="relative flex-1">
             <span className="block font-semibold">Try the Practice Lab</span>
             <span className="mt-0.5 block text-sm text-slate-300">
               Hands-on 5250-style command practice and an ACS-style SQL console.
             </span>
           </div>
           <ArrowRight
-            className="h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+            className="relative h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
             aria-hidden="true"
           />
         </div>

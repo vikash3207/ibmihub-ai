@@ -144,16 +144,27 @@ export default async function DashboardPage() {
     : DEFAULT_START_LEARNING_COPY
 
   const welcomeMessage = overall.isCurriculumComplete
-    ? "Great work -- you've completed every currently published lesson."
+    ? "Great work — you've completed every currently published lesson."
     : isNewLearner
       ? "Welcome to iRPGenie. Let's start your IBM i learning journey."
       : "Welcome back. Here's where you left off."
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Learning Progress</h1>
-        <p className="text-slate-600 leading-relaxed">{welcomeMessage}</p>
+      <div className="relative overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50/50 px-6 py-8 sm:px-8 sm:py-10">
+        <div
+          className="pointer-events-none absolute -top-14 -right-10 h-48 w-48 rounded-full bg-indigo-200/30 blur-[80px]"
+          aria-hidden="true"
+        />
+        <div className="relative flex items-start gap-4">
+          <span className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-sm">
+            <TrendingUp className="h-6 w-6" aria-hidden="true" />
+          </span>
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Learning Progress</h1>
+            <p className="text-slate-600 leading-relaxed">{welcomeMessage}</p>
+          </div>
+        </div>
       </div>
 
       <PublicBetaNotice compact />
@@ -165,9 +176,9 @@ export default async function DashboardPage() {
         </h2>
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="border-t-4 border-t-blue-500">
+          <Card className="border-t-4 border-t-blue-500 bg-gradient-to-b from-blue-50/50 via-white to-white transition-shadow hover:shadow-md">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-50 text-blue-600">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-100 text-blue-600">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               Lessons completed
@@ -179,9 +190,9 @@ export default async function DashboardPage() {
             <p className="mt-1 text-xs text-slate-500">Currently published lessons</p>
           </Card>
 
-          <Card className="border-t-4 border-t-indigo-500">
+          <Card className="border-t-4 border-t-indigo-500 bg-gradient-to-b from-indigo-50/50 via-white to-white transition-shadow hover:shadow-md">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-50 text-indigo-600">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
                 <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               Curriculum progress
@@ -195,9 +206,9 @@ export default async function DashboardPage() {
             />
           </Card>
 
-          <Card className="border-t-4 border-t-violet-500">
+          <Card className="border-t-4 border-t-violet-500 bg-gradient-to-b from-violet-50/50 via-white to-white transition-shadow hover:shadow-md">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-50 text-violet-600">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-100 text-violet-600">
                 <Layers className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               Topics started
@@ -499,7 +510,7 @@ export default async function DashboardPage() {
               <span className="block font-semibold text-slate-900">Practice Lab</span>
               <span className="block text-sm text-slate-600 mt-1">
                 Hands-on 5250-style command practice and an ACS-style SQL console. A guided
-                simulator -- no real IBM i system connection.
+                simulator — no real IBM i system connection.
               </span>
             </Card>
           </Link>

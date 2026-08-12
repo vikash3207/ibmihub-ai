@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
-import { LifeBuoy, MessageCircle, ShieldAlert, User } from 'lucide-react'
+import { LifeBuoy, Mail, MessageCircle, PenSquare, ShieldAlert, User } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Card } from '@/components/ui/card'
 import { ContactForm } from '@/components/contact-form'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
+import { SectionHero } from '@/components/section-hero'
+import { CONTACT_HERO_THEME } from '@/lib/section-theme'
 import { SITE_NAME, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
 
 export const metadata: Metadata = {
@@ -26,33 +28,28 @@ export default function ContactPage() {
       <SiteHeader />
 
       <main className="flex-1">
-        {/* -- Hero --------------------------------------------------------- */}
-        <section className="relative overflow-hidden border-b border-slate-100 bg-gradient-to-br from-slate-50 via-white to-blue-50/50 py-16 sm:py-20">
-          <div className="mx-auto max-w-3xl px-4 sm:px-6 text-center">
-            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-4">
-              Contact {SITE_NAME}
-            </h1>
-            <p className="text-slate-600 leading-relaxed max-w-xl mx-auto">
-              Have feedback, questions, or suggestions for improving IBM&nbsp;i, RPGLE, SQL, or
-              Practice Lab learning? We&apos;d love to hear from you.
-            </p>
-          </div>
-        </section>
+        <SectionHero
+          icon={Mail}
+          badgeLabel="We read every message"
+          title={`Contact ${SITE_NAME}`}
+          description="Have feedback, questions, or suggestions for improving IBM&nbsp;i, RPGLE, SQL, or Practice Lab learning? We'd love to hear from you."
+          theme={CONTACT_HERO_THEME}
+        />
 
-        <div className="mx-auto max-w-3xl px-4 sm:px-6 py-16 sm:py-20 space-y-12">
+        <div className="relative z-10 mx-auto max-w-3xl px-4 sm:px-6 -mt-6 sm:-mt-8 pb-16 sm:pb-20 space-y-12">
           <PublicBetaNotice compact />
 
           {/* -- Contact cards ---------------------------------------------- */}
           <div className="grid sm:grid-cols-2 gap-6">
             {SUPPORT_EMAIL && (
-              <Card className="p-6 border-t-4 border-t-blue-600 shadow-md transition-shadow hover:shadow-lg">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm">
+              <Card className="group p-6 border-t-4 border-t-blue-600 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
                   <LifeBuoy className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <h2 className="font-semibold text-slate-900 mb-1">Support</h2>
                 <a
                   href={`mailto:${SUPPORT_EMAIL}`}
-                  className="block text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline mb-3"
+                  className="block text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-1 rounded"
                 >
                   {SUPPORT_EMAIL}
                 </a>
@@ -67,14 +64,14 @@ export default function ContactPage() {
             )}
 
             {CONTACT_EMAIL && (
-              <Card variant="ai" className="p-6 border-t-4 border-t-cyan-500 shadow-md transition-shadow hover:shadow-lg">
-                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-sm">
+              <Card variant="ai" className="group p-6 border-t-4 border-t-cyan-500 shadow-md transition-all duration-300 hover:-translate-y-1 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
+                <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
                   <MessageCircle className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <h2 className="font-semibold text-slate-900 mb-1">General Contact</h2>
                 <a
                   href={`mailto:${CONTACT_EMAIL}`}
-                  className="block text-sm font-semibold text-cyan-800 hover:text-cyan-950 hover:underline mb-3"
+                  className="block text-sm font-semibold text-cyan-800 hover:text-cyan-950 hover:underline mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600 focus-visible:ring-offset-1 rounded"
                 >
                   {CONTACT_EMAIL}
                 </a>
@@ -96,7 +93,11 @@ export default function ContactPage() {
               plain. No photo placeholder -- add one only once a real image
               is provided. */}
           <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50/70 via-white to-cyan-50/40 p-6 shadow-md sm:p-8">
-            <div className="mb-6 flex items-center gap-5">
+            <div
+              className="pointer-events-none absolute -top-12 -right-12 h-40 w-40 rounded-full bg-cyan-200/30 blur-[70px]"
+              aria-hidden="true"
+            />
+            <div className="relative mb-6 flex items-center gap-5">
               <div className="relative flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-md ring-4 ring-white">
                 <User className="h-8 w-8" aria-hidden="true" />
               </div>
@@ -106,7 +107,7 @@ export default function ContactPage() {
                 <p className="text-sm text-slate-500">Senior IBM i (AS/400) Consultant</p>
               </div>
             </div>
-            <div className="space-y-4 text-sm text-slate-700 leading-relaxed">
+            <div className="relative space-y-4 text-sm text-slate-700 leading-relaxed">
               <p>Hi, I&apos;m Vikash Choudhary, the founder of iRPGenie.com.</p>
               <p>
                 I work as a Senior IBM&nbsp;i (AS/400) Consultant and have been passionate about
@@ -115,7 +116,7 @@ export default function ContactPage() {
                 learning new technologies.
               </p>
               <p>
-                I created iRPGenie with a simple vision -- to build a modern, AI-powered platform
+                I created iRPGenie with a simple vision — to build a modern, AI-powered platform
                 where anyone can learn IBM&nbsp;i, RPG, CL, SQL, and related technologies in a
                 practical, interactive, and enjoyable way.
               </p>
@@ -140,10 +141,15 @@ export default function ContactPage() {
           {/* -- Optional mailto-composing form -------------------------------- */}
           {CONTACT_EMAIL && (
             <div>
-              <h2 className="text-lg font-semibold text-slate-900 mb-1">Send a message</h2>
+              <div className="mb-1 flex items-center gap-2">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-slate-600 to-blue-600 text-white">
+                  <PenSquare className="h-4 w-4" aria-hidden="true" />
+                </span>
+                <h2 className="text-lg font-semibold text-slate-900">Send a message</h2>
+              </div>
               <p className="text-sm text-slate-500 mb-6">
                 Prefer not to copy an email address by hand? Fill this in and it opens your email
-                app with everything pre-filled -- nothing here is sent or stored by {SITE_NAME}
+                app with everything pre-filled — nothing here is sent or stored by {SITE_NAME}{' '}
                 itself.
               </p>
               <ContactForm toEmail={CONTACT_EMAIL} />

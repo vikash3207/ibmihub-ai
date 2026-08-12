@@ -91,9 +91,11 @@ interface DeepDiveAccentClasses {
 
 /**
  * Full, static Tailwind class strings per accent -- not string-interpolated
- * (e.g. `bg-${accent}-50`), so Tailwind's JIT scanner (which only greps
- * ./app, ./components, ./pages -- see tailwind.config.ts) can see them and
- * generate the corresponding CSS at build time. Same reasoning as
+ * (e.g. `bg-${accent}-50`), so Tailwind's JIT scanner can see them and
+ * generate the corresponding CSS at build time. tailwind.config.ts's content
+ * array must include a glob covering this file's directory (./lib) or these
+ * classes silently never get generated -- see tailwind.config.ts and
+ * scripts/tailwind-content-regression.ts. Same reasoning as
  * components/lesson-category-accent.ts (PR #146).
  */
 export const DEEP_DIVE_ACCENT_CLASSES: Record<DeepDiveAccent, DeepDiveAccentClasses> = {

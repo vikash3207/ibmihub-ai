@@ -88,7 +88,7 @@ export function SectionHero({ icon: Icon, badgeLabel, title, tagline, descriptio
 
       {isDark && (
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 sm:h-56 bg-gradient-to-b from-transparent via-white/70 to-white"
           aria-hidden="true"
         />
       )}

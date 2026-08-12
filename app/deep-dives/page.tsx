@@ -25,7 +25,7 @@ const PILLARS = [
   {
     icon: Layers,
     title: 'Non-linear',
-    body: 'No fixed order -- jump straight to the topic a production issue or interview needs.',
+    body: 'No fixed order — jump straight to the topic a production issue or interview needs.',
   },
   {
     icon: Wrench,
@@ -60,8 +60,8 @@ export default function DeepDivesPage() {
           icon={Sparkles}
           badgeLabel="Professional IBM i reference guides"
           title="Deep Dives"
-          tagline="Standalone topic guides -- no fixed order required."
-          description="Focused, professional-grade guides for important IBM&nbsp;i, RPGLE, SQL, CL, and operations topics -- detailed coverage of a specific concept, production scenario, or interview-heavy topic."
+          tagline="Standalone topic guides — no fixed order required."
+          description="Focused, professional-grade guides for important IBM&nbsp;i, RPGLE, SQL, CL, and operations topics — detailed coverage of a specific concept, production scenario, or interview-heavy topic."
           theme={DEEP_DIVES_HERO_THEME}
         />
 
@@ -77,7 +77,7 @@ export default function DeepDivesPage() {
           <Card variant="muted" className="p-6">
             <p className="text-sm text-slate-700 leading-relaxed">
               Unlike the IBM&nbsp;i Fundamentals path, Deep Dives don&apos;t need to be read in
-              order. Jump straight to the topic you need -- whether you&apos;re debugging a
+              order. Jump straight to the topic you need — whether you&apos;re debugging a
               production issue, prepping for an interview, or want a deeper explanation than a
               regular lesson covers. New Deep Dives are added over time; topics marked
               &ldquo;Coming soon&rdquo; are planned but not published yet.

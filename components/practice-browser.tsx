@@ -56,7 +56,20 @@ function QuestionCard({
   }
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+    <div
+      className={cn(
+        'relative overflow-hidden rounded-2xl border bg-white p-5 shadow-sm transition-all duration-300',
+        'motion-reduce:transition-none',
+        revealed ? 'border-emerald-200 shadow-md' : 'border-slate-100 hover:border-emerald-200 hover:shadow-md'
+      )}
+    >
+      <div
+        className={cn(
+          'absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-emerald-500 to-teal-500 transition-opacity duration-300',
+          revealed ? 'opacity-100' : 'opacity-0'
+        )}
+        aria-hidden="true"
+      />
       <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">{question.title}</p>
       <p className="whitespace-pre-wrap text-sm font-medium text-slate-900 mb-3">{question.question}</p>
 
@@ -75,7 +88,8 @@ function QuestionCard({
                 disabled={revealed}
                 className={cn(
                   'flex w-full items-center justify-between gap-2 rounded-xl border px-4 py-2.5 text-left text-sm transition-colors',
-                  !revealed && 'border-slate-200 hover:border-blue-300 hover:bg-blue-50/50',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1',
+                  !revealed && 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50',
                   revealed && !showState && 'border-slate-100 text-slate-500',
                   showState && isCorrect && 'border-emerald-300 bg-emerald-50 text-emerald-900',
                   showState && isSelected && !isCorrect && 'border-red-300 bg-red-50 text-red-900'
@@ -93,7 +107,7 @@ function QuestionCard({
           <button
             type="button"
             onClick={() => setRevealed(true)}
-            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:border-blue-300 hover:bg-blue-50/50"
+            className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:border-emerald-300 hover:bg-emerald-50/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1"
           >
             Reveal answer
           </button>
@@ -118,7 +132,7 @@ function QuestionCard({
                   <Link
                     href={`/learn/ibm-i-fundamentals/${slug}`}
                     prefetch={false}
-                    className="text-blue-600 hover:underline"
+                    className="text-emerald-700 hover:underline"
                   >
                     {lessonTitleBySlug[slug]}
                   </Link>
@@ -169,13 +183,15 @@ export function PracticeBrowser({ topics, questions, lessonTitleBySlug, initialT
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 rounded-2xl border border-slate-100 bg-slate-50/70 p-2">
         <button
           type="button"
           onClick={() => setSelectedTopicId(null)}
           className={cn(
-            'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-            selectedTopicId === null ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+            'rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1',
+            selectedTopicId === null
+              ? 'bg-emerald-600 text-white shadow-sm'
+              : 'bg-white text-slate-700 hover:bg-emerald-50 hover:text-emerald-700'
           )}
         >
           All Topics
@@ -186,8 +202,10 @@ export function PracticeBrowser({ topics, questions, lessonTitleBySlug, initialT
             type="button"
             onClick={() => setSelectedTopicId(topic.id === selectedTopicId ? null : topic.id)}
             className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-              selectedTopicId === topic.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              'rounded-full px-3 py-1.5 text-xs font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1',
+              selectedTopicId === topic.id
+                ? 'bg-emerald-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 hover:bg-emerald-50 hover:text-emerald-700'
             )}
           >
             {topic.label}
@@ -199,7 +217,7 @@ export function PracticeBrowser({ topics, questions, lessonTitleBySlug, initialT
         const topicQuestions = questionsByTopic.get(topic.id) ?? []
         return (
           <section key={topic.id} className="space-y-3">
-            <div>
+            <div className="border-l-2 border-emerald-200 pl-3">
               <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900">
                 {topic.label}
                 <Badge variant="neutral">{topicQuestions.length} questions</Badge>
