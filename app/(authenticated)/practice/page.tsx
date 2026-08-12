@@ -6,6 +6,8 @@ import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { PRACTICE_QUESTIONS, PRACTICE_TOPICS } from '@/content/practice/questions'
 import { PracticeBrowser } from '@/components/practice-browser'
+import { PRACTICE_HERO_THEME } from '@/lib/section-theme'
+import { cn } from '@/lib/utils'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
 // so a production visitor's real session (not a build-time snapshot) decides
@@ -39,6 +41,9 @@ interface Props {
  * not touch) in a padded `max-w-3xl` <main>, so this hero is a contained,
  * rounded gradient card rather than the edge-to-edge <SectionHero> other
  * upgraded pages use -- same constraint and reasoning as app/learn/page.tsx.
+ * Uses PRACTICE_HERO_THEME's rich emerald/teal gradient (see
+ * lib/section-theme.ts) for the same "premium despite being contained"
+ * treatment as the Learning Center hero.
  * INTRO_NOTICE's wording, PracticeBrowser's props/behavior, and the auth
  * redirect are all byte-for-byte unchanged.
  */
@@ -63,24 +68,44 @@ export default async function PracticePage({ searchParams }: Props) {
 
   return (
     <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-3xl border border-emerald-100 bg-gradient-to-br from-emerald-50 via-white to-teal-50/60 px-6 py-12 sm:px-10 sm:py-14">
+      <div
+        className={cn(
+          'relative overflow-hidden rounded-3xl border px-6 py-14 shadow-lg sm:px-10 sm:py-16',
+          PRACTICE_HERO_THEME.cardClasses
+        )}
+      >
         <div
-          className="pointer-events-none absolute -top-16 -right-10 h-56 w-56 rounded-full bg-emerald-300/25 blur-[90px]"
+          className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:22px_22px]"
           aria-hidden="true"
         />
         <div
-          className="pointer-events-none absolute -bottom-20 -left-10 h-56 w-56 rounded-full bg-teal-300/25 blur-[90px]"
+          className={cn(
+            'pointer-events-none absolute -top-16 -right-10 h-64 w-64 rounded-full blur-[100px]',
+            PRACTICE_HERO_THEME.glowClasses[0]
+          )}
           aria-hidden="true"
         />
-        <div className="relative">
-          <div className="mb-5 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-sm">
-            <ClipboardCheck className="h-6 w-6" aria-hidden="true" />
-          </div>
-          <span className="mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-medium text-emerald-700">
+        <div
+          className={cn(
+            'pointer-events-none absolute -bottom-20 -left-10 h-64 w-64 rounded-full blur-[100px]',
+            PRACTICE_HERO_THEME.glowClasses[1]
+          )}
+          aria-hidden="true"
+        />
+        <div className="relative section-hero-enter">
+          <span
+            className={cn(
+              'mb-5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-sm',
+              PRACTICE_HERO_THEME.badgeClasses
+            )}
+          >
+            <ClipboardCheck className="h-3.5 w-3.5" aria-hidden="true" />
             Low-pressure, no-score practice
           </span>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-slate-900 mb-3">Practice Questions</h1>
-          <p className="text-slate-600 leading-relaxed max-w-xl">
+          <h1 className={cn('text-3xl sm:text-4xl font-bold tracking-tight mb-3', PRACTICE_HERO_THEME.headingTextClasses)}>
+            Practice Questions
+          </h1>
+          <p className={cn('leading-relaxed max-w-xl', PRACTICE_HERO_THEME.bodyTextClasses)}>
             Short, beginner-friendly questions across the IBM&nbsp;i Fundamentals path. Pick a topic, answer or
             reveal a question, and see a short explanation with lessons to revisit.
           </p>

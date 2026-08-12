@@ -53,20 +53,44 @@ export const DEEP_DIVES_PILLAR_THEMES: SectionFeatureCardTheme[] = [
   },
 ]
 
-/** Learning Center: lighter blue-to-indigo wash -- deliberately calmer/less intense than Deep Dives or AI Tutor. */
-export const LEARN_HERO_THEME: SectionHeroTheme = {
-  variant: 'light',
-  lightWashClasses: 'bg-gradient-to-br from-blue-50 via-white to-indigo-50/60',
-  badgeClasses: 'border-blue-200 bg-blue-50 text-blue-700',
-  iconChipClasses: 'bg-gradient-to-br from-blue-500 to-indigo-500',
+/**
+ * Learning Center and Practice heroes (app/learn/page.tsx,
+ * app/(authenticated)/practice/page.tsx) can't use <SectionHero> directly --
+ * both sit inside a shared padded layout (app/learn/layout.tsx,
+ * app/(authenticated)/layout.tsx) that also wraps pages this PR must not
+ * redesign (the lesson reader, Onboarding), so their hero is a contained
+ * rounded card rather than SectionHero's edge-to-edge shell. This bundle is
+ * that card's background/badge/glow recipe -- rich and dark like the other
+ * sections' heroes, just contained instead of full-bleed. A dot-grid
+ * texture (vs. Deep Dives/Practice Lab's line grid) keeps these two visually
+ * distinct from the other dark heroes despite sharing the same formula.
+ */
+export interface ContainedHeroTheme {
+  /** Gradient background + border for the outer card. */
+  cardClasses: string
+  /** Two blurred glow-blob color classes (position/size are shared, only color varies). */
+  glowClasses: [string, string]
+  badgeClasses: string
+  headingTextClasses: string
+  bodyTextClasses: string
 }
 
-/** Practice: teal/emerald accent -- calm, low-pressure practice identity (no scores/rankings). */
-export const PRACTICE_HERO_THEME: SectionHeroTheme = {
-  variant: 'light',
-  lightWashClasses: 'bg-gradient-to-br from-emerald-50 via-white to-teal-50/60',
-  badgeClasses: 'border-emerald-200 bg-emerald-50 text-emerald-700',
-  iconChipClasses: 'bg-gradient-to-br from-emerald-500 to-teal-500',
+/** Learning Center: rich blue-to-indigo gradient -- guided-learning identity, distinct from Deep Dives' neutral-dark reference-guide look. */
+export const LEARN_HERO_THEME: ContainedHeroTheme = {
+  cardClasses: 'border-blue-900/40 bg-gradient-to-br from-blue-600 via-indigo-700 to-indigo-950',
+  glowClasses: ['bg-cyan-400/20', 'bg-indigo-400/25'],
+  badgeClasses: 'border-white/20 bg-white/10 text-blue-50',
+  headingTextClasses: 'text-white',
+  bodyTextClasses: 'text-blue-100/90',
+}
+
+/** Practice: rich emerald-to-teal gradient -- interactive practice identity, distinct from Practice Lab's neutral-dark terminal look. */
+export const PRACTICE_HERO_THEME: ContainedHeroTheme = {
+  cardClasses: 'border-emerald-900/40 bg-gradient-to-br from-emerald-600 via-teal-700 to-teal-950',
+  glowClasses: ['bg-cyan-300/20', 'bg-emerald-400/25'],
+  badgeClasses: 'border-white/20 bg-white/10 text-emerald-50',
+  headingTextClasses: 'text-white',
+  bodyTextClasses: 'text-emerald-100/90',
 }
 
 /** Practice Lab: controlled dark terminal-inspired hero -- distinct from Practice's calmer light theme. */
@@ -98,10 +122,15 @@ export const PRACTICE_LAB_SQL_THEME: SectionFeatureCardTheme = {
   accent: 'from-blue-500 to-cyan-500',
 }
 
-/** Contact: calm slate/blue wash -- matches CONTACT_ACCENT's nav coloring, deliberately quieter than Deep Dives/Practice. */
+/** Contact: slate/blue/cyan dark hero -- same <SectionHero> "dark" formula as Deep Dives/Practice Lab (Contact is standalone, so it can use the full-bleed shell directly), professional-support identity via its blue/cyan glow pairing over the shared slate-950 base. */
 export const CONTACT_HERO_THEME: SectionHeroTheme = {
-  variant: 'light',
-  lightWashClasses: 'bg-gradient-to-br from-slate-50 via-white to-blue-50/50',
-  badgeClasses: 'border-blue-200 bg-blue-50 text-blue-700',
+  variant: 'dark',
+  gridPattern: true,
+  glowClasses: [
+    '-top-24 left-1/4 h-[26rem] w-[26rem] -translate-x-1/2 bg-blue-600/20',
+    'top-0 right-0 h-[22rem] w-[22rem] bg-slate-500/15',
+    'bottom-0 left-1/3 h-72 w-72 bg-cyan-500/10',
+  ],
+  badgeClasses: 'border-blue-400/30 bg-blue-400/10 text-blue-300',
   iconChipClasses: 'bg-gradient-to-br from-slate-600 to-blue-600',
 }
