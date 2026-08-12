@@ -1,6 +1,6 @@
 /**
- * IBM i Insights category taxonomy (PR #194 -- Launch IBM i Insights).
- * Deliberately its own, small taxonomy -- not the 12-entry
+ * IBM i Insights category taxonomy. Deliberately its own, small
+ * taxonomy -- not the 12-entry
  * DeepDiveCategoryId (lib/deep-dive-categories.ts) and not the 27-entry
  * lesson MASTER_CATEGORIES. Insights are a third, separate content type
  * (practical/timely/outcome-oriented articles), not a Deep Dive subtype,

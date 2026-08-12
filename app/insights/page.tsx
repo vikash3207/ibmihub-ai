@@ -5,18 +5,36 @@ import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Card } from '@/components/ui/card'
 
+const INSIGHTS_TITLE = 'IBM i Insights — Practical Ideas, Modern Techniques & Emerging Trends'
+const INSIGHTS_DESCRIPTION =
+  'IBM i Insights: focused, practical articles on modernization ideas, useful platform capabilities, and emerging IBM i techniques for working developers, technical leads, and architects.'
+
 export const metadata: Metadata = {
-  title: 'IBM i Insights — Practical Ideas, Modern Techniques & Emerging Trends',
-  description:
-    'IBM i Insights: focused, practical articles on modernization ideas, useful platform capabilities, and emerging IBM i techniques for working developers, technical leads, and architects.',
+  title: INSIGHTS_TITLE,
+  description: INSIGHTS_DESCRIPTION,
   alternates: { canonical: '/insights' },
+  // Next.js merges metadata shallowly per top-level key (see app/page.tsx's
+  // identical note), so without explicit openGraph/twitter blocks here,
+  // both would silently fall back to the root layout's generic defaults
+  // instead of this page's own, more specific title/description.
+  openGraph: {
+    title: INSIGHTS_TITLE,
+    description: INSIGHTS_DESCRIPTION,
+    url: '/insights',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: INSIGHTS_TITLE,
+    description: INSIGHTS_DESCRIPTION,
+  },
 }
 
 const POSITIONING_POINTS = [
   {
     icon: Wrench,
     title: 'Practical',
-    body: 'Grounded in real production concerns -- not theory, not a certification checklist.',
+    body: 'Grounded in real production concerns — not theory, not a certification checklist.',
   },
   {
     icon: Rocket,
@@ -71,9 +89,9 @@ export default function InsightsPage() {
               Practical ideas, modern techniques, and emerging trends.
             </p>
             <p className="mt-4 text-sm text-slate-500 leading-relaxed max-w-xl mx-auto">
-              This section will hold focused, practical IBM&nbsp;i guidance -- modernization ideas, useful platform
+              This section will hold focused, practical IBM&nbsp;i guidance — modernization ideas, useful platform
               capabilities, emerging techniques, and expert walkthroughs. IBM&nbsp;i Insights are independent
-              editorial articles, not curriculum lessons and not Deep Dive reference guides -- each one stands on
+              editorial articles, not curriculum lessons and not Deep Dive reference guides — each one stands on
               its own.
             </p>
           </div>
@@ -104,14 +122,20 @@ export default function InsightsPage() {
             <h2 className="text-xl font-semibold text-slate-900 mb-2">Insights are being prepared</h2>
             <p className="text-sm text-slate-600 leading-relaxed">
               Each IBM&nbsp;i Insight is researched, written, and technically reviewed on its own before it&apos;s
-              published here, so this section stays genuinely useful rather than filled with filler. The first one
+              published here, so every published article is clear, accurate, and genuinely useful. The first one
               will appear on this page once it&apos;s ready.
             </p>
             <div className="mt-6 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-sm font-medium">
-              <Link href="/deep-dives" className="text-sky-700 hover:underline">
+              <Link
+                href="/deep-dives"
+                className="rounded text-sky-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+              >
                 Browse Deep Dives &rarr;
               </Link>
-              <Link href="/learn" className="text-sky-700 hover:underline">
+              <Link
+                href="/learn"
+                className="rounded text-sky-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+              >
                 Explore the Learning Center &rarr;
               </Link>
             </div>

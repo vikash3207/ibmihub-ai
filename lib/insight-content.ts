@@ -6,7 +6,7 @@ import type { Insight } from './insights'
 const INSIGHT_CONTENT_DIR = join(process.cwd(), 'content', 'insights')
 
 /**
- * Loads an Insight's Markdown body from disk (PR #194). Mirrors
+ * Loads an Insight's Markdown body from disk. Mirrors
  * lib/deep-dive-content.ts's loadDeepDiveMarkdown exactly, including the
  * same path-traversal guard: the file name is always derived from the
  * catalog's own `slug` (never from unchecked request input), basename()'d,

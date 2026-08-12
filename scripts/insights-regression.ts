@@ -262,6 +262,75 @@ async function runChecks() {
     check('the removed article-specific diagram component is no longer imported', !detailSrc.includes('architecture-diagram'))
     check('the detail route still reuses the generic Deep Dive TOC/markdown primitives (retained, reusable infrastructure)', detailSrc.includes('DeepDiveToc'))
   }
+
+  // ---------------------------------------------------------------------------
+  section('10. Documentation hygiene: no stale PR references, no leftover "Launch article" wording')
+  // ---------------------------------------------------------------------------
+
+  {
+    const insightFiles: Record<string, string> = {
+      'lib/insights.ts': readRepoFile('lib/insights.ts'),
+      'lib/insight-categories.ts': readRepoFile('lib/insight-categories.ts'),
+      'lib/insight-content.ts': readRepoFile('lib/insight-content.ts'),
+      'lib/insight-structured-data.ts': readRepoFile('lib/insight-structured-data.ts'),
+      'content/insights/catalog.ts': readRepoFile('content/insights/catalog.ts'),
+      'components/insight-card.tsx': readRepoFile('components/insight-card.tsx'),
+      'app/insights/page.tsx': readRepoFile('app/insights/page.tsx'),
+      'app/insights/[slug]/page.tsx': readRepoFile('app/insights/[slug]/page.tsx'),
+    }
+
+    // scripts/insights-regression.ts itself is deliberately excluded from this
+    // loop: this very check's own description text has to name the stale
+    // pattern it's looking for, which would make the script fail against
+    // itself if it were included -- the source files under lib/, content/,
+    // components/, and app/ are what actually needed to stay clean.
+    for (const [path, src] of Object.entries(insightFiles)) {
+      check(`${path} has no stale "PR #194" reference`, !src.includes('PR #194'))
+    }
+
+    check(
+      'components/insight-card.tsx no longer uses the "Launch article" badge label',
+      !insightFiles['components/insight-card.tsx'].includes('Launch article')
+    )
+    check(
+      'components/insight-card.tsx uses the reusable "Featured Insight" badge label instead',
+      insightFiles['components/insight-card.tsx'].includes('Featured Insight')
+    )
+  }
+
+  // ---------------------------------------------------------------------------
+  section('11. Listing-page social metadata and keyboard-focus safeguards')
+  // ---------------------------------------------------------------------------
+
+  {
+    const listingSrc = readRepoFile('app/insights/page.tsx')
+    check('the listing page declares openGraph metadata', /openGraph:\s*\{/.test(listingSrc))
+    check('the listing openGraph block has its own title', /openGraph:\s*\{[\s\S]{0,80}title:/.test(listingSrc))
+    check('the listing openGraph block has its own description', /openGraph:\s*\{[\s\S]{0,160}description:/.test(listingSrc))
+    check('the listing page declares twitter card metadata', /twitter:\s*\{/.test(listingSrc))
+    check(
+      'the listing page does not add article-specific structured data (no JSON-LD on the empty listing page)',
+      !listingSrc.includes('StructuredData')
+    )
+
+    const detailSrc = readRepoFile('app/insights/[slug]/page.tsx')
+    const cardSrc = readRepoFile('components/insight-card.tsx')
+
+    check('the listing page\'s secondary links carry focus-visible styling', (listingSrc.match(/focus-visible:ring-2/g) ?? []).length >= 2)
+    check('the retained InsightCard link carries focus-visible styling', /focus-visible:ring-2/.test(cardSrc))
+    check(
+      'the detail page\'s breadcrumb links carry focus-visible styling',
+      /Breadcrumb"[\s\S]{0,300}focus-visible:ring-2/.test(detailSrc)
+    )
+    check(
+      'the detail page\'s related-lessons links carry focus-visible styling',
+      /Related lessons[\s\S]{0,700}focus-visible:ring-2/.test(detailSrc)
+    )
+    check(
+      'the detail page\'s related-Deep-Dive links carry focus-visible styling',
+      /Related Deep Dive[\s\S]{0,700}focus-visible:ring-2/.test(detailSrc)
+    )
+  }
 }
 
 async function main() {

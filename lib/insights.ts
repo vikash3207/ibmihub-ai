@@ -1,13 +1,13 @@
 /**
- * IBM i Insights model (PR #194 -- Launch IBM i Insights).
+ * IBM i Insights model.
  *
  * Insights are a third, separate public content type alongside the linear
  * IBM i Fundamentals lesson path and the non-linear Deep Dive reference
- * guides: focused, practical, timely, outcome-oriented articles (product
- * positioning -- see planning docs for PR #194). This module is
- * intentionally the same shape as lib/deep-dives.ts -- a typed catalog read
- * from a plain committed data file (content/insights/catalog.ts) -- but is
- * fully independent of it. Insight entries never appear in DEEP_DIVES and
+ * guides: focused, practical, timely, outcome-oriented articles. This
+ * module is intentionally the same shape as lib/deep-dives.ts -- a typed
+ * catalog read from a plain committed data file (content/insights/
+ * catalog.ts) -- but is fully independent of it. Insight entries never
+ * appear in DEEP_DIVES and
  * DeepDive's type is never reused here, so the two content types can evolve
  * on their own schedules without coupling.
  *

@@ -1,6 +1,6 @@
 /**
- * TechArticle / BreadcrumbList JSON-LD builders for Insight detail pages
- * (PR #194). Pulled out of app/insights/[slug]/page.tsx into their own pure,
+ * TechArticle / BreadcrumbList JSON-LD builders for Insight detail pages.
+ * Pulled out of app/insights/[slug]/page.tsx into their own pure,
  * framework-free module -- same reasoning as lib/deep-dive-render.ts being
  * separate from app/deep-dives/[slug]/page.tsx -- so scripts/insights-
  * regression.ts can import and assert on them directly without needing to

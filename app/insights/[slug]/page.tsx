@@ -25,8 +25,8 @@ interface Props {
 }
 
 /**
- * Insight detail page (PR #194 -- Launch IBM i Insights). Structurally a
- * sibling of app/deep-dives/[slug]/page.tsx, not a variant of it: it reads
+ * Insight detail page. Structurally a sibling of
+ * app/deep-dives/[slug]/page.tsx, not a variant of it: it reads
  * from the independent INSIGHTS catalog only, and INSIGHTS never appears in
  * DEEP_DIVES or vice versa. It does reuse several genuinely generic Deep
  * Dive presentation primitives that have no DeepDive-specific coupling --
@@ -117,11 +117,17 @@ export default async function InsightPage({ params }: Props) {
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
           <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-            <Link href="/" className="hover:text-blue-600">
+            <Link
+              href="/"
+              className="rounded hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+            >
               Home
             </Link>
             <span aria-hidden="true">/</span>
-            <Link href="/insights" className="hover:text-blue-600">
+            <Link
+              href="/insights"
+              className="rounded hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+            >
               IBM i Insights
             </Link>
             <span aria-hidden="true">/</span>
@@ -167,7 +173,11 @@ export default async function InsightPage({ params }: Props) {
               {loadError ? (
                 <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-800">
                   This Insight could not be loaded right now. Please try again later, or{' '}
-                  <Link href="/insights" prefetch={false} className="underline">
+                  <Link
+                    href="/insights"
+                    prefetch={false}
+                    className="rounded underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+                  >
                     return to IBM i Insights
                   </Link>
                   .
@@ -195,7 +205,7 @@ export default async function InsightPage({ params }: Props) {
                       <li key={lesson.slug}>
                         <Link
                           href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
-                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700"
+                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
                         >
                           <span>{lesson.title}</span>
                           <span aria-hidden="true">&rarr;</span>
@@ -214,7 +224,7 @@ export default async function InsightPage({ params }: Props) {
                       <li key={related.slug}>
                         <Link
                           href={`/deep-dives/${related.slug}`}
-                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-700"
+                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
                         >
                           <span>{related.title}</span>
                           <span aria-hidden="true">&rarr;</span>

@@ -21,13 +21,13 @@ interface InsightCardProps {
 }
 
 /**
- * Card for a published Insight (PR #194 -- Launch IBM i Insights). One
- * component with a `featured` variant rather than two near-duplicate
- * components -- there's only one published Insight today, so a separate
- * "compact grid card" component would have no second caller yet; the
- * non-featured branch below is what a future /insights grid of several
- * articles will use once there are enough to need one (spec explicitly
- * defers search/filtering until ~6-8 articles exist).
+ * Card for a published Insight. One component with a `featured` variant
+ * rather than two near-duplicate components -- the same shape works for a
+ * listing page's lead card and a compact grid card, so a future /insights
+ * grid of several articles can reuse the non-featured branch below without
+ * a second component. No Insight is published yet (see content/insights/
+ * catalog.ts) -- this component is retained, unused for now, as the
+ * reusable presentation layer for whichever Insight is approved first.
  */
 export function InsightCard({ insight, featured = false }: InsightCardProps) {
   const accent = getInsightAccent(insight.category)
@@ -39,6 +39,7 @@ export function InsightCard({ insight, featured = false }: InsightCardProps) {
       href={`/insights/${insight.slug}`}
       className={cn(
         'group flex flex-col rounded-2xl border border-t-4 bg-white shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md',
+        'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2',
         accentClasses.topBorder,
         featured ? 'border-slate-100 p-6 sm:p-8' : 'border-slate-100 p-5'
       )}
@@ -54,7 +55,7 @@ export function InsightCard({ insight, featured = false }: InsightCardProps) {
         >
           {categoryLabel}
         </span>
-        {featured && <Badge variant="ai">Launch article</Badge>}
+        {featured && <Badge variant="ai">Featured Insight</Badge>}
       </div>
 
       <h3 className={cn('font-bold text-slate-900', featured ? 'text-2xl sm:text-3xl' : 'text-lg')}>{insight.title}</h3>
