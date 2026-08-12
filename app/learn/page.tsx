@@ -49,6 +49,7 @@ export default async function LearnPage() {
         icon={GraduationCap}
         badgeLabel="Guided, beginner-friendly learning"
         title="Learning Center"
+        accentWord="Center"
         description="A guided starting point for learning IBM&nbsp;i, one structured lesson at a time."
         theme={LEARN_HERO_THEME}
       />

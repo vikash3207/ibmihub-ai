@@ -169,6 +169,7 @@ export default async function DashboardPage() {
         icon={TrendingUp}
         badgeLabel="Your personal learning progress"
         title="Learning Progress"
+        accentWord="Progress"
         description={welcomeMessage}
         theme={DASHBOARD_HERO_THEME}
       />

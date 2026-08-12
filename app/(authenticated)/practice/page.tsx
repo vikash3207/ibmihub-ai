@@ -72,6 +72,7 @@ export default async function PracticePage({ searchParams }: Props) {
         icon={ClipboardCheck}
         badgeLabel="Low-pressure, no-score practice"
         title="Practice Questions"
+        accentWord="Questions"
         description="Short, beginner-friendly questions across the IBM&nbsp;i Fundamentals path. Pick a topic, answer or reveal a question, and see a short explanation with lessons to revisit."
         theme={PRACTICE_HERO_THEME}
       />

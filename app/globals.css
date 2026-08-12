@@ -357,3 +357,37 @@
     animation: none;
   }
 }
+
+/*
+ * Hero heading accent shimmer (Hero Contrast Fix). A single word/short
+ * phrase per major hero heading (see accentWord on components/section-hero.tsx
+ * and app/insights/page.tsx's own h1) renders as a blue/cyan/indigo gradient
+ * instead of plain white. The shimmer is a one-time sweep of
+ * `background-position` -- a paint-only property, so it cannot trigger
+ * layout or cause layout shift -- from `200% 0` to `0% 0`. `0% 0` is also
+ * the plain, un-animated resting position declared directly on the class,
+ * so the settled/reduced-motion state is pixel-identical to where the
+ * animation ends: the heading is fully readable whether or not the
+ * animation runs at all. `animation-iteration-count: 1` (via the shorthand)
+ * means this never loops, flashes, or keeps moving.
+ */
+@keyframes hero-accent-shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+
+.hero-title-accent {
+  background-size: 250% 100%;
+  background-position: 0% 0;
+  animation: hero-accent-shimmer 1.4s ease-out 0.3s 1 both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-title-accent {
+    animation: none;
+  }
+}

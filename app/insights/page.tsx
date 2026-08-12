@@ -108,7 +108,7 @@ export default function InsightsPage() {
       <SiteHeader />
 
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-28 sm:pb-32">
+        <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-28 sm:pb-32 min-h-[26rem] sm:min-h-[30rem]">
           {/* Faint technical grid -- pure CSS, no images */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:44px_44px]"
@@ -125,6 +125,14 @@ export default function InsightsPage() {
           />
           <div
             className="pointer-events-none absolute bottom-0 left-1/3 h-80 w-80 rounded-full bg-violet-600/15 blur-[110px]"
+            aria-hidden="true"
+          />
+          {/* Same-hue radial scrim behind the copy -- content-length-agnostic
+              contrast safety net, matching components/section-hero.tsx's
+              contrast fix (see that file's doc comment for the full
+              rationale). Not a hard rectangle: a soft ellipse falloff. */}
+          <div
+            className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_70%_65%_at_50%_38%,rgba(2,6,23,0.55)_0%,rgba(2,6,23,0.22)_55%,transparent_78%)]"
             aria-hidden="true"
           />
           {/* Small abstract IBM i-inspired glyphs -- decorative only, hidden below sm to avoid any crowding/overflow risk on narrow screens */}
@@ -150,7 +158,12 @@ export default function InsightsPage() {
               <Lightbulb className="h-3 w-3" aria-hidden="true" />
               Editorial perspectives for modern IBM i
             </Badge>
-            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-4">IBM i Insights</h1>
+            <h1 className="text-4xl sm:text-5xl font-bold tracking-tight text-white mb-4">
+              IBM i{' '}
+              <span className="hero-title-accent bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent">
+                Insights
+              </span>
+            </h1>
             <p className="text-lg font-semibold text-cyan-300 mb-5">
               Practical ideas, modern techniques, and emerging trends.
             </p>
@@ -163,8 +176,14 @@ export default function InsightsPage() {
             </p>
           </div>
 
-          {/* Smooth fade from the dark hero into the light content below, same idiom as the homepage hero */}
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-white" aria-hidden="true" />
+          {/* Fade-to-white: shorter than before, and transparent for its own
+              first half, so lightening is confined close to the literal
+              bottom edge instead of reaching up toward the copy -- same fix
+              as components/section-hero.tsx. */}
+          <div
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-40 [background:linear-gradient(to_bottom,transparent_0%,transparent_45%,white_100%)]"
+            aria-hidden="true"
+          />
         </section>
 
         {/* Positioning cards overlap the hero's fade zone (relative z-10 + negative
