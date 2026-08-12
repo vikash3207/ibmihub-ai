@@ -316,3 +316,34 @@
     font-size: 0.8125rem;
   }
 }
+
+/*
+ * IBM i Insights hero entrance (visual-polish pass). A single, one-time
+ * fade/rise on page load -- not a Tailwind utility because it needs a named
+ * @keyframes, and not a continuous/looping effect, so it can't cause the
+ * "distracting motion" a hover-only transition avoids by construction.
+ * Only opacity/transform are animated (both compositor-only), so this
+ * cannot trigger layout or cause a layout shift. Disabled entirely under
+ * prefers-reduced-motion, matching every other motion-reduce: rule already
+ * used throughout this codebase.
+ */
+@keyframes insights-hero-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.insights-hero-enter {
+  animation: insights-hero-in 0.7s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .insights-hero-enter {
+    animation: none;
+  }
+}

@@ -224,9 +224,11 @@ async function runChecks() {
     check('the page has an "IBM i Insights" heading', /IBM i Insights<\/h1>/.test(listingSrc))
     check('the page states the approved tagline', listingSrc.includes('Practical ideas, modern techniques, and emerging trends.'))
     check(
-      'the page explains Insights are independent editorial articles, not lessons or Deep Dives',
-      /not curriculum lessons and not Deep Dive reference guides/.test(listingSrc)
+      'the page explains Insights are independent editorial content, separate from lessons and Deep Dives',
+      /separate from curriculum lessons and Deep Dive reference guides/.test(listingSrc)
     )
+    check('the hero has a premium badge distinct from an article claim', listingSrc.includes('Editorial perspectives for modern IBM i'))
+    check('the hero does not add an article CTA (no "Read Insight"/"Read Article" link in the hero)', !/Read (Insight|Article)/.test(listingSrc))
     check('the page has a tasteful "being prepared" empty state', listingSrc.includes('Insights are being prepared'))
     check(
       'the empty state does not actually import or render InsightCard (a bare mention in a comment is fine)',
@@ -316,7 +318,16 @@ async function runChecks() {
     const detailSrc = readRepoFile('app/insights/[slug]/page.tsx')
     const cardSrc = readRepoFile('components/insight-card.tsx')
 
-    check('the listing page\'s secondary links carry focus-visible styling', (listingSrc.match(/focus-visible:ring-2/g) ?? []).length >= 2)
+    // The empty-state's two secondary links use buttonVariants(), which already
+    // bakes in focus-visible:ring-2 (see components/ui/button.tsx) -- that
+    // literal string lives in button.tsx's source, not repeated inline here,
+    // so "uses buttonVariants" is the correct signal for this file, the same
+    // "already supplied by shared button styles" carve-out used elsewhere.
+    check(
+      "the listing page's secondary links get focus-visible styling, either inline or via buttonVariants()",
+      (listingSrc.match(/focus-visible:ring-2/g) ?? []).length >= 2 ||
+        (listingSrc.includes('buttonVariants(') && (listingSrc.match(/href="\/(deep-dives|learn)"/g) ?? []).length >= 2)
+    )
     check('the retained InsightCard link carries focus-visible styling', /focus-visible:ring-2/.test(cardSrc))
     check(
       'the detail page\'s breadcrumb links carry focus-visible styling',
@@ -330,6 +341,38 @@ async function runChecks() {
       'the detail page\'s related-Deep-Dive links carry focus-visible styling',
       /Related Deep Dive[\s\S]{0,700}focus-visible:ring-2/.test(detailSrc)
     )
+  }
+
+  // ---------------------------------------------------------------------------
+  section('12. Hero visual-polish pass: decorative-only, reduced-motion-safe, no external assets')
+  // ---------------------------------------------------------------------------
+
+  {
+    const listingSrc = readRepoFile('app/insights/page.tsx')
+    const globalsCss = readRepoFile('app/globals.css')
+
+    check(
+      'every decorative glow/grid/glyph element is aria-hidden (never announced to assistive tech)',
+      (listingSrc.match(/pointer-events-none absolute/g) ?? []).length ===
+        (listingSrc.match(/pointer-events-none absolute[\s\S]{0,400}?aria-hidden="true"/g) ?? []).length
+    )
+    check('no external image URL or <img>/<Image> is used for hero decoration', !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/.test(listingSrc) && !listingSrc.includes('next/image'))
+    check('the hero entrance animation is CSS-only (a named class, not a JS animation library)', listingSrc.includes('insights-hero-enter'))
+    check('the hero entrance keyframes exist in globals.css', /@keyframes insights-hero-in/.test(globalsCss))
+    check(
+      'the hero entrance animation is fully disabled under prefers-reduced-motion',
+      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.insights-hero-enter\s*\{\s*animation: none;/.test(globalsCss)
+    )
+    check(
+      'card hover elevation respects prefers-reduced-motion (motion-reduce:transition-none present)',
+      listingSrc.includes('motion-reduce:transition-none')
+    )
+    check('each positioning card has its own distinct gradient accent (3 unique accent class pairs)', new Set([...listingSrc.matchAll(/accent: '([^']+)'/g)].map((m) => m[1])).size === 3)
+    check('the h1 "IBM i Insights" appears exactly once (single top-level heading)', (listingSrc.match(/<h1[^>]*>/g) ?? []).length === 1)
+    // Exactly 2 literal <h2> occurrences in source: one JSX element mapped over
+    // the 3 positioning cards (so it renders 3 times, but appears once in
+    // source) plus the empty-state's own heading -- both one level below h1.
+    check('the positioning-card and empty-state headings are h2, one level below h1 (no skipped heading level)', (listingSrc.match(/<h2[^>]*>/g) ?? []).length === 2)
   }
 }
 
