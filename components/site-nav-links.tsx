@@ -23,6 +23,7 @@ const LOGGED_IN_LINKS: NavLinkDef[] = [
   { href: '/dashboard', label: 'Dashboard' },
   { href: '/learn', label: 'Learning Center' },
   { href: '/deep-dives', label: 'Deep Dives' },
+  { href: '/insights', label: 'IBM i Insights' },
   { href: '/practice', label: 'Practice' },
   { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai', opensAiTutorPanel: true },
   { href: '/contact', label: 'Contact Us' },
@@ -37,6 +38,7 @@ const LOGGED_IN_LINKS: NavLinkDef[] = [
 const LOGGED_OUT_LINKS: NavLinkDef[] = [
   { href: '/learn', label: 'Learning Center' },
   { href: '/deep-dives', label: 'Deep Dives' },
+  { href: '/insights', label: 'IBM i Insights' },
   { href: '/ai-tutor', label: 'AI Tutor', accent: 'ai', opensAiTutorPanel: true },
   { href: '/contact', label: 'Contact Us' },
 ]
