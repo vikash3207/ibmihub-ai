@@ -25,6 +25,7 @@ import {
   MAX_CONTACT_LENGTH,
   MAX_NAME_LENGTH,
   avatarInitial,
+  buildProfileUpsertPayload,
   displayName,
   isValidContactNumber,
   isValidName,
@@ -52,6 +53,8 @@ function section(title: string) {
 const read = (...parts: string[]) => readFileSync(join(process.cwd(), ...parts), 'utf8')
 
 const migration = read('supabase', 'migrations', '010_user_profile_identity.sql')
+const backfillMigration = read('supabase', 'migrations', '011_backfill_missing_user_profiles.sql')
+const profileLib = read('lib', 'profile.ts')
 const profileAction = read('lib', 'actions', 'profile.ts')
 const profilePage = read('app', '(authenticated)', 'profile', 'page.tsx')
 const profileForm = read('components', 'profile-form.tsx')
@@ -150,16 +153,47 @@ check(
 )
 
 // ---------------------------------------------------------------------------
+section('Profile upsert payload shape (executed -- Hotfix: Profile Save Server Error)')
+// ---------------------------------------------------------------------------
+
+{
+  const payload = buildProfileUpsertPayload('user-abc-123', 'Grace', 'Hopper', '5551234567')
+  check('id is exactly the userId argument passed in', payload.id === 'user-abc-123')
+  check('first_name maps through unchanged', payload.first_name === 'Grace')
+  check('last_name maps through unchanged', payload.last_name === 'Hopper')
+  check('contact_number maps through unchanged', payload.contact_number === '5551234567')
+  check('the payload has exactly the four columns migration 010 added/uses -- nothing wider', Object.keys(payload).sort().join(',') === 'contact_number,first_name,id,last_name')
+}
+
+{
+  // The one invariant that matters most: no matter what a caller passes as
+  // the name/contact fields, `id` only ever reflects the `userId` argument --
+  // there is no code path here that could let a client-controlled value
+  // reach the `id` column this upserts into.
+  const attackerSuppliedId = 'not-my-real-user-id'
+  const payload = buildProfileUpsertPayload('real-session-user-id', attackerSuppliedId, null, null)
+  check(
+    "a value that happens to look like an id, passed as firstName, never leaks into the id field",
+    payload.id === 'real-session-user-id' && payload.first_name === attackerSuppliedId
+  )
+}
+
+{
+  const missingRowPayload = buildProfileUpsertPayload('user-no-row-yet', null, null, null)
+  check('an all-null payload (new/never-touched row) still carries a real id', missingRowPayload.id === 'user-no-row-yet')
+  check('null fields stay null, not coerced to empty strings', missingRowPayload.first_name === null && missingRowPayload.contact_number === null)
+}
+
+// ---------------------------------------------------------------------------
 section('Server Action security (source)')
 // ---------------------------------------------------------------------------
 
 check("the action module is server-only ('use server')", /^'use server'/m.test(profileAction))
+check('user comes from a real getUser() call', /user = \(await supabase\.auth\.getUser\(\)\)\.data\.user/.test(profileAction))
 check(
-  'the update is scoped to the verified session user, not a client-supplied id',
-  /\.eq\('id', user\.id\)/.test(profileAction)
+  'a session that completes normally with no user still returns the specific "log in again" message, unchanged',
+  /if \(!user\) \{[\s\S]{0,120}Your session has expired/.test(profileAction)
 )
-check('user.id comes from a real getUser() call', /const \{\s*data: \{ user \},?\s*\} = await supabase\.auth\.getUser\(\)/.test(profileAction))
-check('the action refuses when there is no session', /if \(!user\)/.test(profileAction))
 check('there is no id field read from the submitted form', !/formData\.get\(['"]id['"]\)/.test(profileAction))
 check('there is no email field read from the submitted form', !/formData\.get\(['"]email['"]\)/.test(profileAction))
 check('no service-role key is used', !/SERVICE_ROLE|service_role|createAdminClient/.test(profileAction))
@@ -168,24 +202,112 @@ check(
   'the contact number is validated before being written',
   profileAction.indexOf('isValidContactNumber') < profileAction.indexOf(".from('user_profiles')")
 )
-check('only the stable error code is logged, never the raw message', !/console\.[a-z]+\([^)]*error\.message/.test(profileAction))
 check('the header is refreshed after a successful save', /revalidatePath\('\/', 'layout'\)/.test(profileAction))
 
-// A plain .update() with no .select() returns no error and no data when it
-// matches zero rows, which would otherwise let a no-op update be reported
-// as "Profile updated." Requiring a returned row is what catches that.
-check('the update requests the updated row back', /\.select\('id'\)\.maybeSingle\(\)/.test(profileAction))
+// ---------------------------------------------------------------------------
+section('Hotfix: "use server" export violation -- the confirmed production crash (source)')
+// ---------------------------------------------------------------------------
+
+// CONFIRMED root cause (Vercel error: `A "use server" file can only export
+// async functions, found object.`): lib/actions/profile.ts used to also
+// export UpdateProfileState (a type) and UPDATE_PROFILE_INITIAL_STATE (a
+// plain object) alongside updateProfile(). Next.js rejects a 'use server'
+// module at evaluation time the moment it sees a non-async-function export,
+// which happens before updateProfile() ever runs -- Supabase was never
+// contacted, and nothing inside the function's try/catch could have caught
+// it. These checks assert the module now exports exactly one thing: the
+// async Server Action itself.
+{
+  const exportLines = profileAction.match(/^export .+$/gm) ?? []
+  check('the module has exactly one top-level export', exportLines.length === 1, `found ${exportLines.length}: ${exportLines.join(' | ')}`)
+  check(
+    'that sole export is the async updateProfile Server Action',
+    exportLines[0]?.startsWith('export async function updateProfile') ?? false,
+    exportLines[0]
+  )
+}
+check('there is no exported runtime object, constant, or class anywhere in the file', !/^export (const|class) /m.test(profileAction))
+check('there is no exported non-async function anywhere in the file', !/^export function /m.test(profileAction))
+check('UpdateProfileState is no longer defined/exported from this file', !/export type UpdateProfileState/.test(profileAction))
+check('UPDATE_PROFILE_INITIAL_STATE is no longer defined/exported from this file', !/export const UPDATE_PROFILE_INITIAL_STATE/.test(profileAction))
 check(
-  'a missing row is treated as failure alongside an explicit error',
-  /if \(error \|\| !updated\)/.test(profileAction)
+  'UpdateProfileState is instead imported (type-only, erases at runtime) from lib/profile',
+  /type UpdateProfileState,?[\s\S]{0,20}\} from '@\/lib\/profile'/.test(profileAction)
+)
+check('lib/profile.ts is where UpdateProfileState now lives', /export type UpdateProfileState/.test(profileLib))
+check('lib/profile.ts is where UPDATE_PROFILE_INITIAL_STATE now lives', /export const UPDATE_PROFILE_INITIAL_STATE/.test(profileLib))
+check(
+  'the form imports UPDATE_PROFILE_INITIAL_STATE from lib/profile, not the Server Action module',
+  /UPDATE_PROFILE_INITIAL_STATE[\s\S]{0,10}\} from '@\/lib\/profile'/.test(profileForm)
 )
 check(
-  'success is returned only after both an update AND a row are confirmed',
-  profileAction.indexOf('if (error || !updated)') < profileAction.lastIndexOf("status: 'success',")
+  'the form does not import UPDATE_PROFILE_INITIAL_STATE from lib/actions/profile',
+  !/UPDATE_PROFILE_INITIAL_STATE[\s\S]{0,120}from '@\/lib\/actions\/profile'/.test(profileForm)
+)
+check("the form still imports updateProfile itself from lib/actions/profile", /import \{ updateProfile \} from '@\/lib\/actions\/profile'/.test(profileForm))
+
+// ---------------------------------------------------------------------------
+section('Hotfix: Profile Save Server Error -- logging never leaks raw error detail (source)')
+// ---------------------------------------------------------------------------
+
+// These assert the *absence* of specific leak patterns across the whole
+// file, not just near one call site -- a prior version of this fix logged
+// `caughtError.message` in the upsert's catch block, which these are
+// written to genuinely reject (they failed against that version).
+check("error.message is never logged", !/console\.[a-z]+\([^;]*\berror\.message\b/.test(profileAction))
+check("caughtError.message is never logged", !/console\.[a-z]+\([^;]*\bcaughtError\.message\b/.test(profileAction))
+check(
+  'a caught exception is never bound to a name and passed to console -- catch blocks take no parameter at all',
+  !/catch \([a-zA-Z]+\)/.test(profileAction)
 )
 check(
-  'the row is still requested no wider than the verified session user',
-  /\.eq\('id', user\.id\)[\s\S]{0,40}\.select\('id'\)/.test(profileAction)
+  'every console.error call logs only the fixed, non-sensitive label',
+  (profileAction.match(/console\.error\(([^)]*)\)/g) ?? []).every((call) => /'unexpected_exception'/.test(call))
+)
+
+// ---------------------------------------------------------------------------
+section('Hotfix: Profile Save Server Error -- upsert + crash safety (source)')
+// ---------------------------------------------------------------------------
+
+// Confirmed: a missing user_profiles row made the OLD plain .update() fail/
+// no-op. Separately confirmed: an unhandled thrown exception is what
+// crashed the /profile page on Save. NOT confirmed: that the missing row
+// directly caused that specific exception (the production exception itself
+// was never inspected -- no Vercel log access). upsert() fixes the
+// missing-row edge case; try/catch is an independent fix that stops any
+// unexpected Supabase exception, whatever its cause, from crashing the page.
+check('the write is an upsert, not a plain update (creates the row if missing)', /\.upsert\(/.test(profileAction))
+check('there is no remaining plain .update( call on user_profiles', !/\.update\(\{/.test(profileAction))
+check('the upsert has an explicit onConflict on the primary key', /\{\s*onConflict:\s*'id'\s*\}/.test(profileAction))
+check(
+  'the upsert payload is built by the shared, unit-tested helper, not an inline object literal',
+  /buildProfileUpsertPayload\(user\.id, firstName, lastName, contactNumber\)/.test(profileAction)
+)
+check('the row is still requested back to confirm the write actually happened', /\.select\('id'\)\s*\.maybeSingle\(\)/.test(profileAction))
+check(
+  'createClient() and getUser() are wrapped in try/catch too -- not just the upsert',
+  /try \{[\s\S]{0,120}supabase = await createClient\(\)[\s\S]{0,200}getUser\(\)[\s\S]{0,120}\} catch/.test(profileAction)
+)
+check('the upsert call is wrapped in try/catch so a thrown exception cannot escape the action', /try \{[\s\S]{0,400}\.upsert\([\s\S]{0,600}\} catch/.test(profileAction))
+check(
+  'a caught exception from createClient()/getUser() returns the generic failure, not a specific/leaky message',
+  /catch \{[\s\S]{0,120}logUnexpectedFailure\(\)[\s\S]{0,60}return GENERIC_FAILURE/.test(profileAction)
+)
+check(
+  "an explicit Supabase error on the upsert is tracked as failure independently of whether a row was also returned",
+  /hasFailed = Boolean\(error\)/.test(profileAction)
+)
+check(
+  'a caught exception on the upsert also sets the same failure flag (not a separate, weaker path)',
+  /catch \{[\s\S]{0,80}hasFailed = true/.test(profileAction)
+)
+check(
+  'failure is either signal, not just a missing row -- data being non-null cannot override an explicit error',
+  /if \(hasFailed \|\| !updated\)/.test(profileAction)
+)
+check(
+  'success is returned only after the combined hasFailed/!updated check has passed',
+  profileAction.indexOf('if (hasFailed || !updated)') < profileAction.lastIndexOf("status: 'success',")
 )
 
 // ---------------------------------------------------------------------------
@@ -308,6 +430,19 @@ check(
   'the SQL Editor is explained as having no JWT/session context (why it cannot test RLS)',
   /no\s*\n?-- JWT\/session context/.test(migration) && /there is NULL/.test(migration)
 )
+
+// ---------------------------------------------------------------------------
+section('Backfill migration 011 (source -- cannot be exercised without a live database)')
+// ---------------------------------------------------------------------------
+
+check('migrations 001-010 are not edited or replaced by this file', !/add column if not exists first_name/.test(backfillMigration))
+check('this is a data backfill, not a schema change (no alter table)', !/alter table/.test(backfillMigration))
+check('no new table, column, grant, or policy is introduced', !/create table|add column|^grant |create policy/m.test(backfillMigration))
+check('the insert only targets rows with no matching user_profiles row', /left join public\.user_profiles p on p\.id = u\.id[\s\S]{0,20}where p\.id is null/.test(backfillMigration))
+check('the insert is idempotent (on conflict do nothing)', /on conflict \(id\) do nothing/.test(backfillMigration))
+check('the insert only ever writes the id column -- no name/contact data is fabricated', /insert into public\.user_profiles \(id\)/.test(backfillMigration))
+check('no service-role key is required to run this (plain SQL, no app-side execution)', !/SERVICE_ROLE|service_role_key|createAdminClient/.test(backfillMigration))
+check('a verification query is included, matching house style', /VERIFICATION/.test(backfillMigration))
 
 console.log(`\n${passed} passed, ${failures} failed`)
 process.exit(failures > 0 ? 1 : 0)
