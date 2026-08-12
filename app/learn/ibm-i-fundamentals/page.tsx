@@ -29,7 +29,7 @@ export default async function IbmIFundamentalsPage() {
     user && lessons.length > 0 ? Math.round((completedCount / lessons.length) * 100) : 0
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <div className="mx-auto w-full max-w-6xl space-y-6 px-4 py-10 sm:px-6">
       <div className="max-w-3xl">
         <Link href="/learn" className="text-sm text-slate-500 hover:text-slate-900">
           &larr; Learning Center

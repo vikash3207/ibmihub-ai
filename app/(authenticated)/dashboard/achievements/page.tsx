@@ -58,7 +58,7 @@ export default async function AchievementsPage() {
   const nextUp = ACHIEVEMENTS.filter((definition) => !earnedByCode.has(definition.code))[0]
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 px-4 py-10 sm:px-6">
       <div>
         <Link href="/dashboard" className="text-sm text-slate-500 hover:text-slate-900">
           &larr; Dashboard

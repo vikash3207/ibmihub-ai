@@ -46,7 +46,7 @@ export default async function PracticeLabPage() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 px-4 py-10 sm:px-6">
       <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 px-6 py-10 sm:px-10 sm:py-12">
         <div
           className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:36px_36px]"

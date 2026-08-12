@@ -61,7 +61,7 @@ export default async function PracticeLabSqlExercisePage({ params }: Props) {
     .map((slug) => ({ slug, title: lessonTitleBySlug[slug] }))
 
   return (
-    <div className="space-y-6">
+    <div className="mx-auto w-full max-w-3xl space-y-6 px-4 py-10 sm:px-6">
       <div>
         <Link href="/practice-lab/sql" className="text-sm text-slate-500 transition-colors hover:text-slate-700 active:opacity-70">
           &larr; SQL Practice Console

@@ -136,6 +136,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
     : false
 
   return (
+    <div className="mx-auto w-full max-w-6xl px-4 py-10 sm:px-6">
     <LessonReaderLayout
       sidebar={
         <LessonSidebar
@@ -304,5 +305,6 @@ export default async function LessonPage({ params, searchParams }: Props) {
       </nav>
     </article>
     </LessonReaderLayout>
+    </div>
   )
 }
