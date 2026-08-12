@@ -378,14 +378,21 @@ async function runChecks() {
     check('the architecture diagram never implies the AI client reaches Db2 for i directly', figuresSrc.includes('The AI client never reaches Db2 for i itself'))
     check('no figure uses an <img> tag or an external image URL', !/<img[\s>]/i.test(figuresSrc) && !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/i.test(figuresSrc))
 
-    // Every diagram is now built from real HTML text nodes rather than
-    // hand-positioned SVG <text>, so labels are selectable, translatable,
-    // and readable by assistive tech without needing a parallel <title>/
-    // <desc> transcript. No figure should need a horizontally-scrollable
-    // viewport either -- if one does, its default view renders looking cut
-    // off rather than complete (the reason the architecture figure was
-    // rebuilt away from SVG).
-    check('no figure is an inline <svg> requiring a separate text transcript', !/<svg[\s>]/i.test(figuresSrc))
+    // The architecture figure is an inline SVG on purpose: a left-to-right
+    // chain shows "A talks to B talks to C" more immediately than a stacked
+    // list. SVG <text> is not exposed to assistive tech the way HTML text
+    // is, so it owes a real title/desc transcript -- and because the
+    // drawing would scale below readable size on a phone, it must also ship
+    // an HTML equivalent for narrow widths.
+    check('the architecture SVG has an accessible title and description', /<title id="arch-title">/.test(figuresSrc) && /<desc id="arch-desc">/.test(figuresSrc))
+    check('the architecture SVG wires role="img" to its title/desc via aria-labelledby', /role="img" aria-labelledby="arch-title arch-desc"/.test(figuresSrc))
+    check('the architecture SVG scales to its container instead of forcing a fixed width', /className="w-full"/.test(figuresSrc) && !/min-w-\[/.test(figuresSrc))
+    check(
+      'the architecture figure ships both a wide (md+) and a narrow (below md) rendering of the same content',
+      /hidden md:block/.test(figuresSrc) && /md:hidden/.test(figuresSrc)
+    )
+    // No figure should need a horizontally-scrollable viewport -- a diagram
+    // whose default view is clipped reads as broken rather than scrollable.
     // Matches the JSX prop being passed (a bare `scrollable` attribute on
     // its own line, or `scrollable={...}`) rather than the word appearing
     // anywhere -- the prose in this file's own comments says "scrollable".

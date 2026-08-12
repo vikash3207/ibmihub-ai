@@ -58,14 +58,21 @@ import { InsightFigure } from './insight-figure'
 // ---------------------------------------------------------------------------
 
 /**
- * Deliberately NOT inline SVG. An earlier version was, and at the article
- * column's real width (~700px) a five-node horizontal chain could not fit,
- * so it needed its own horizontally-scrollable viewport -- which meant the
- * default view showed a diagram that looked cut off rather than complete.
- * A vertical pipeline of real HTML cards fits at every breakpoint from
- * 320px up, needs no scrolling, keeps every label at full readable size,
- * and gives each stage room for a one-line explanation that the SVG had
- * nowhere to put.
+ * Two renderings of the same architecture, chosen by breakpoint.
+ *
+ * The horizontal SVG is the primary one -- a left-to-right chain shows
+ * "A talks to B talks to C" far more immediately than a vertical list, and
+ * it has room for the request/response arrow pair and the LPAR boundary.
+ * An earlier version of it needed its own horizontally-scrollable viewport
+ * because its viewBox was far wider than the article column; this one is
+ * sized to the column instead (~760 units against a ~700px column, so it
+ * renders near 1:1 and never scrolls at md and up).
+ *
+ * Below md that same drawing would scale to roughly half size and its
+ * labels would become unreadable, so small screens get a vertical stack of
+ * real HTML cards carrying identical content. Neither is a fallback for
+ * missing information -- both name every participant, both mark where SQL
+ * is defined and where authority is enforced.
  */
 interface ArchStage {
   icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>
@@ -123,15 +130,130 @@ const ARCH_STAGES: ArchStage[] = [
   },
 ]
 
+/** One rounded node in the horizontal SVG. */
+function SvgNode({
+  x,
+  y,
+  w,
+  h,
+  title,
+  sub,
+  stroke,
+}: {
+  x: number
+  y: number
+  w: number
+  h: number
+  title: string
+  sub?: string
+  stroke: string
+}) {
+  const cx = x + w / 2
+  const cy = y + h / 2
+  return (
+    <g>
+      <rect x={x} y={y} width={w} height={h} rx={13} className={cn('fill-white', stroke)} strokeWidth={2} />
+      <text x={cx} y={sub ? cy - 2 : cy + 4} textAnchor="middle" className="fill-slate-900" style={{ fontSize: 16.5, fontWeight: 700 }}>
+        {title}
+      </text>
+      {sub && (
+        <text x={cx} y={cy + 17} textAnchor="middle" className="fill-slate-500" style={{ fontSize: 12.5 }}>
+          {sub}
+        </text>
+      )}
+    </g>
+  )
+}
+
 export function McpArchitectureFigure() {
   return (
     <InsightFigure
       number={2}
       title="End-to-end IBM i MCP architecture"
       accent="indigo"
-      caption="Read it top to bottom: each stage can only talk to the one directly below it. The AI client never reaches Db2 for i itself — it only ever speaks MCP to the server. The last two stages sit inside the IBM i partition, which is why the connected profile's authority, not the assistant's confidence, decides what actually comes back."
+      // Deliberately describes the chain rather than the drawing: this
+      // figure renders as a horizontal flow on wider screens and a vertical
+      // stack on narrow ones, so a caption that said "follow the solid
+      // arrows out and the dashed arrows back" was only true on desktop.
+      caption="Each stage can only talk to the one beside it. The AI client never reaches Db2 for i itself — it only ever speaks MCP to the server, which is the only component that knows how to reach Mapepire. SQL lives in the YAML tool catalog, and the last two stages sit inside the partition, which is why the connected profile's authority — not the assistant's confidence — decides what actually comes back. Results return along the same chain in reverse."
     >
-      <div className="insight-figure-enter px-1 sm:px-2">
+      {/* ---- Horizontal flow (md and up) ---- */}
+      <div className="insight-figure-enter hidden md:block">
+        <svg viewBox="0 0 760 345" role="img" aria-labelledby="arch-title arch-desc" className="w-full">
+          <title id="arch-title">End-to-end IBM i MCP architecture</title>
+          <desc id="arch-desc">
+            A developer or user talks to an MCP-compatible AI client. That client speaks only MCP to the IBM i MCP Server,
+            whose allowed SQL is defined by an approved YAML tool catalog. The MCP Server reaches Mapepire, a WebSocket SQL
+            gateway on port 8076, which runs inside the IBM i partition alongside Db2 for i and the QSYS2 services. The
+            connected user profile&apos;s authority is enforced inside that partition. Structured results return along the same
+            chain in reverse.
+          </desc>
+
+          <defs>
+            <marker id="arch-req" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" className="fill-indigo-500" />
+            </marker>
+            <marker id="arch-res" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+              <path d="M0,0 L10,5 L0,10 z" className="fill-slate-400" />
+            </marker>
+          </defs>
+
+          {/* IBM i partition boundary, drawn first so nodes paint above it */}
+          <rect x={492} y={96} width={262} height={205} rx={14} className="fill-indigo-50/60 stroke-indigo-300" strokeWidth={2} strokeDasharray="7 6" />
+          <text x={506} y={117} className="fill-indigo-700" style={{ fontSize: 14, fontWeight: 700 }}>
+            IBM i (LPAR)
+          </text>
+
+          {/* Approved YAML tool catalog, feeding the MCP server */}
+          <SvgNode x={310} y={14} w={170} h={58} title="Approved YAML" sub="tool catalog" stroke="stroke-violet-400" />
+          <path d="M395,72 L395,150" className="stroke-violet-400" strokeWidth={2} markerEnd="url(#arch-req)" fill="none" />
+          {/* Right-aligned to the left of its arrow: left-aligned at x=403
+              this ran into the "IBM i (LPAR)" label on the boundary box. */}
+          <text x={386} y={112} textAnchor="end" className="fill-violet-600" style={{ fontSize: 13 }}>
+            defines allowed SQL
+          </text>
+
+          {/* The chain */}
+          <SvgNode x={10} y={150} w={110} h={95} title="Developer" sub="or user" stroke="stroke-slate-300" />
+          <SvgNode x={145} y={150} w={150} h={95} title="AI client" sub="Claude · VS Code · agent" stroke="stroke-blue-400" />
+          <SvgNode x={320} y={150} w={150} h={95} title="IBM i MCP Server" sub="@ibm/ibmi-mcp-server" stroke="stroke-indigo-500" />
+          <SvgNode x={510} y={150} w={120} h={95} title="Mapepire" sub="WebSocket · 8076" stroke="stroke-cyan-500" />
+          <SvgNode x={650} y={150} w={100} h={95} title="Db2 for i" sub="+ QSYS2" stroke="stroke-emerald-500" />
+
+          {/* Request (solid, outbound) */}
+          <path d="M120,180 L145,180" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#arch-req)" fill="none" />
+          <path d="M295,180 L320,180" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#arch-req)" fill="none" />
+          <path d="M470,180 L510,180" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#arch-req)" fill="none" />
+          <path d="M630,180 L650,180" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#arch-req)" fill="none" />
+
+          {/* Response (dashed, inbound) */}
+          <path d="M650,222 L630,222" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#arch-res)" fill="none" />
+          <path d="M510,222 L470,222" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#arch-res)" fill="none" />
+          <path d="M320,222 L295,222" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#arch-res)" fill="none" />
+          <path d="M145,222 L120,222" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#arch-res)" fill="none" />
+
+          {/* Authority annotation, pointing into the partition */}
+          <text x={506} y={272} className="fill-cyan-700" style={{ fontSize: 13, fontWeight: 600 }}>
+            Connected profile&apos;s authority
+          </text>
+          <text x={506} y={290} className="fill-cyan-700" style={{ fontSize: 13, fontWeight: 600 }}>
+            is enforced in here
+          </text>
+
+          {/* Legend */}
+          <line x1={12} y1={330} x2={44} y2={330} className="stroke-indigo-500" strokeWidth={2.5} />
+          <text x={52} y={335} className="fill-slate-600" style={{ fontSize: 13.5 }}>
+            request
+          </text>
+          <line x1={128} y1={330} x2={160} y2={330} className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" />
+          <text x={166} y={335} className="fill-slate-600" style={{ fontSize: 13.5 }}>
+            response (structured rows)
+          </text>
+        </svg>
+      </div>
+
+      {/* ---- Vertical stack (below md, where the drawing above would be too small to read) ---- */}
+      <div className="insight-figure-enter px-1 md:hidden">
         {ARCH_STAGES.map((stage, i) => {
           const insideIbmI = i >= 3
           const isFirstInsideIbmI = i === 3
@@ -155,12 +277,7 @@ export function McpArchitectureFigure() {
                 )}
               >
                 <div className={cn('flex gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm ring-1', stage.ring)}>
-                  <span
-                    className={cn(
-                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm',
-                      stage.chip
-                    )}
-                  >
+                  <span className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm', stage.chip)}>
                     <stage.icon className="h-4.5 w-4.5" aria-hidden="true" />
                   </span>
                   <div className="min-w-0">
@@ -178,10 +295,7 @@ export function McpArchitectureFigure() {
 
               {i < ARCH_STAGES.length - 1 && (
                 <div
-                  className={cn(
-                    'flex justify-center',
-                    insideIbmI && 'border-x border-dashed border-indigo-300 bg-indigo-50/50'
-                  )}
+                  className={cn('flex justify-center', insideIbmI && 'border-x border-dashed border-indigo-300 bg-indigo-50/50')}
                   aria-hidden="true"
                 >
                   <span className="my-0.5 text-lg leading-none text-slate-300">&darr;</span>
