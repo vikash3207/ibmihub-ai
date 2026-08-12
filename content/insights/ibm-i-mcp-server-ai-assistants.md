@@ -18,7 +18,7 @@ It's worth resisting the framing that shows up a lot in AI coverage generally: t
 
 ## How IBM i MCP Server works
 
-At a mechanical level, the request path has four distinct participants, and none of them can skip a step or reach past the one next to it.
+At a mechanical level, a question travels through four pieces of software between the person asking and the answer — and none of them can skip a step or reach past the one next to it.
 
 [[FIGURE:architecture]]
 
@@ -29,6 +29,16 @@ Walking through one realistic question end to end makes the boundaries concrete:
 [[FIGURE:request-lifecycle]]
 
 Notice where the language model's judgment is actually load-bearing: step 1 (turning a vague question into an intent) and step 8 (turning rows into a sentence). Steps 2 through 7 are deterministic — a lookup, a parameter check, a predefined query, an authority check the operating system was already going to perform, and a typed result. That middle section is not something the model is improvising.
+
+### How the client and server actually connect
+
+Two connection styles cover most setups, and the difference matters more for governance than for functionality.
+
+**Local (`stdio`)** is the simpler one: the AI client launches the server as a child process on the same machine and talks to it over standard input and output. Nothing listens on a network port, which makes it a natural fit for a single developer experimenting on a laptop.
+
+**Remote (`http`)** runs the server as a long-lived service — by default on port 3010 — that multiple clients can reach. This is the shape you want for a shared, team-wide deployment, and it is also the shape that makes TLS termination, authentication, and request logging your responsibility rather than optional extras. The project's own documentation recommends putting a reverse proxy in front of it in production for exactly that reason.
+
+Either way, the client is configured with a small JSON block naming the server and its tool files. The important governance point is that whoever controls that configuration and the `.env` behind it controls which partition, which profile, and which tools are in play — so it belongs under the same change control as any other connection into IBM i.
 
 ### Where the tools themselves come from
 

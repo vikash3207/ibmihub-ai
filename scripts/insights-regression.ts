@@ -375,10 +375,74 @@ async function runChecks() {
     const figureWrapperSrc = readRepoFile('components/insights/insight-figure.tsx')
 
     check('every InsightFigure call passes a non-empty caption', !/caption=""/.test(figuresSrc))
-    check('the architecture SVG has an accessible title and description', figuresSrc.includes('<title id="fig1-title">') && figuresSrc.includes('<desc id="fig1-desc">'))
-    check('the architecture SVG wires role="img" to its title/desc via aria-labelledby', /role="img" aria-labelledby="fig1-title fig1-desc"/.test(figuresSrc))
-    check('the architecture diagram never implies the AI client reaches Db2 for i directly', figuresSrc.includes('The AI client never talks to Db2 for i directly'))
+    check('the architecture diagram never implies the AI client reaches Db2 for i directly', figuresSrc.includes('The AI client never reaches Db2 for i itself'))
     check('no figure uses an <img> tag or an external image URL', !/<img[\s>]/i.test(figuresSrc) && !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/i.test(figuresSrc))
+
+    // Every diagram is now built from real HTML text nodes rather than
+    // hand-positioned SVG <text>, so labels are selectable, translatable,
+    // and readable by assistive tech without needing a parallel <title>/
+    // <desc> transcript. No figure should need a horizontally-scrollable
+    // viewport either -- if one does, its default view renders looking cut
+    // off rather than complete (the reason the architecture figure was
+    // rebuilt away from SVG).
+    check('no figure is an inline <svg> requiring a separate text transcript', !/<svg[\s>]/i.test(figuresSrc))
+    // Matches the JSX prop being passed (a bare `scrollable` attribute on
+    // its own line, or `scrollable={...}`) rather than the word appearing
+    // anywhere -- the prose in this file's own comments says "scrollable".
+    check('no figure opts into the horizontally-scrollable viewport', !/^\s*scrollable(\s*=|\s*$)/m.test(figuresSrc))
+    check(
+      'the architecture figure names all five participants in the request chain',
+      ['Developer or user', 'MCP-compatible AI client', 'IBM i MCP Server', 'Mapepire', 'Db2 for i'].every((n) => figuresSrc.includes(n))
+    )
+    check('the architecture figure marks where SQL is defined and where authority is enforced', figuresSrc.includes('SQL is defined here') && figuresSrc.includes('Authority is enforced here'))
+
+    // Reader-facing "Figure N" labels must ascend in the order the reader
+    // actually meets them, which is the order of the [[FIGURE:...]] markers
+    // in the Markdown -- NOT the order the components are declared in
+    // mcp-figures.tsx. These drifted apart once already (a reader scrolled
+    // past Figure 6, then 1, 2, 4, 3, 5), so this pins them together.
+    {
+      const markdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${LAUNCH_SLUG}.md`), 'utf-8')
+      const markerOrder = [...markdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+
+      // component function name -> the `number={N}` it passes. Scoped to
+      // each component's own body by splitting on `export function` first:
+      // a single regex spanning the file would let a component that passes
+      // no `number` (McpUseCaseGrid, an unnumbered grid) swallow the next
+      // component's declaration along with its number.
+      const numberByComponent = new Map<string, number>()
+      for (const chunk of figuresSrc.split(/(?=export function )/)) {
+        const name = chunk.match(/^export function (\w+)\(/)?.[1]
+        const num = chunk.match(/number=\{(\d+)\}/)?.[1]
+        if (name && num) numberByComponent.set(name, Number(num))
+      }
+      // figure marker name -> component name, read from the registry block
+      const registryBlock = figuresSrc.slice(figuresSrc.indexOf('INSIGHT_FIGURE_REGISTRY'))
+      const componentByMarker = new Map<string, string>()
+      for (const m of registryBlock.matchAll(/'?([a-z0-9-]+)'?\s*:\s*(Mcp\w+)/g)) {
+        componentByMarker.set(m[1], m[2])
+      }
+
+      const numbersInReadingOrder = markerOrder
+        .map((marker) => numberByComponent.get(componentByMarker.get(marker) ?? ''))
+        .filter((n): n is number => typeof n === 'number')
+
+      check(
+        'every numbered figure resolves to a "Figure N" label',
+        numbersInReadingOrder.length === markerOrder.filter((m) => m !== 'use-cases').length,
+        `resolved ${numbersInReadingOrder.length} of ${markerOrder.length} markers`
+      )
+      check(
+        'figure numbers ascend in the order a reader scrolls past them',
+        numbersInReadingOrder.every((n, i) => i === 0 || n > numbersInReadingOrder[i - 1]),
+        `reading order gives: ${numbersInReadingOrder.join(', ')}`
+      )
+      check(
+        'figure numbers start at 1 and have no gaps',
+        numbersInReadingOrder.every((n, i) => n === i + 1),
+        `got: ${numbersInReadingOrder.join(', ')}`
+      )
+    }
     check('the shared figure wrapper renders a real <figure>/<figcaption> pair (semantic, not div soup)', figureWrapperSrc.includes('<figure') && figureWrapperSrc.includes('<figcaption'))
     check('the one-time diagram entrance uses the shared reduced-motion-safe class', figuresSrc.includes('insight-figure-enter'))
 

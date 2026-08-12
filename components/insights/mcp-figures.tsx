@@ -1,6 +1,10 @@
 import type { ComponentType } from 'react'
 import {
   Bot,
+  User,
+  Server,
+  Cpu,
+  CornerUpLeft,
   FileCode2,
   Database,
   ShieldCheck,
@@ -32,141 +36,175 @@ import { InsightFigure } from './insight-figure'
  * diagram structure, or captions are reproduced (see the article's own
  * Sources section for what was consulted for factual accuracy).
  *
- * Figure 1 (architecture) uses inline SVG because it genuinely needs
- * precise node-to-node connections. Figures 2-6 are semantic HTML/CSS --
- * simpler to keep accessible and to reflow cleanly on narrow screens than
- * hand-positioned SVG text would be, per the spec's own preference order.
- * Decorative-only elements are `aria-hidden`; every figure that carries
- * real meaning has real text content, never text-baked-into-an-image.
+ * Every diagram is semantic HTML/CSS rather than inline SVG. The
+ * architecture figure started as SVG -- it seemed like the case that most
+ * needed precise node-to-node arrows -- but at the article column's real
+ * width no five-node horizontal chain fit, so it required its own
+ * horizontally-scrollable viewport and its default view read as cut off.
+ * HTML reflows instead: it fits from 320px up with no scrolling, keeps
+ * every label at full size, and makes labels selectable and translatable
+ * without a parallel <title>/<desc> transcript. Decorative-only elements
+ * are `aria-hidden`; nothing meaningful is baked into an image.
+ *
+ * `number` on each <InsightFigure> is the reader-facing "Figure N" label
+ * and is assigned in the order the figures appear in the article body
+ * (see the [[FIGURE:...]] markers in the .md), NOT in the order the
+ * components happen to be declared in this file. Renumber both together
+ * if a figure ever moves.
  */
 
 // ---------------------------------------------------------------------------
-// Figure 1 -- End-to-end architecture (SVG)
+// Figure 2 -- End-to-end architecture (responsive HTML/CSS pipeline)
 // ---------------------------------------------------------------------------
 
-function SvgNode({
-  x,
-  y,
-  w,
-  h,
-  lines,
-  sub,
-  strokeClass,
-}: {
-  x: number
-  y: number
-  w: number
-  h: number
-  lines: string[]
-  sub?: string
-  strokeClass: string
-}) {
-  const centerX = x + w / 2
-  const centerY = y + h / 2
-  const lineHeight = 17
-  const totalLines = lines.length + (sub ? 1 : 0)
-  const startY = centerY - ((totalLines - 1) * lineHeight) / 2 + 5
-
-  return (
-    <g>
-      <rect x={x} y={y} width={w} height={h} rx={14} className={cn('fill-white', strokeClass)} strokeWidth={2} />
-      {lines.map((line, i) => (
-        <text key={i} x={centerX} y={startY + i * lineHeight} textAnchor="middle" className="fill-slate-900" style={{ fontSize: 13.5, fontWeight: 600 }}>
-          {line}
-        </text>
-      ))}
-      {sub && (
-        <text x={centerX} y={startY + lines.length * lineHeight} textAnchor="middle" className="fill-slate-500" style={{ fontSize: 11 }}>
-          {sub}
-        </text>
-      )}
-    </g>
-  )
+/**
+ * Deliberately NOT inline SVG. An earlier version was, and at the article
+ * column's real width (~700px) a five-node horizontal chain could not fit,
+ * so it needed its own horizontally-scrollable viewport -- which meant the
+ * default view showed a diagram that looked cut off rather than complete.
+ * A vertical pipeline of real HTML cards fits at every breakpoint from
+ * 320px up, needs no scrolling, keeps every label at full readable size,
+ * and gives each stage room for a one-line explanation that the SVG had
+ * nowhere to put.
+ */
+interface ArchStage {
+  icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>
+  name: string
+  role: string
+  detail: string
+  chip: string
+  ring: string
+  note?: string
 }
+
+const ARCH_STAGES: ArchStage[] = [
+  {
+    icon: User,
+    name: 'Developer or user',
+    role: 'Asks in plain language',
+    detail: 'No SQL, no service name, no column list required.',
+    chip: 'from-slate-500 to-slate-600',
+    ring: 'ring-slate-200',
+  },
+  {
+    icon: Bot,
+    name: 'MCP-compatible AI client',
+    role: 'Chooses a tool',
+    detail: 'Claude, VS Code Copilot, or a custom agent. Speaks only MCP — it has no database driver and no credentials.',
+    chip: 'from-blue-500 to-blue-600',
+    ring: 'ring-blue-200',
+  },
+  {
+    icon: Server,
+    name: 'IBM i MCP Server',
+    role: 'Validates and executes',
+    detail: 'A Node.js process (@ibm/ibmi-mcp-server) that can run on a laptop, in a container, or as a small service.',
+    chip: 'from-indigo-500 to-violet-600',
+    ring: 'ring-indigo-200',
+    note: 'SQL is defined here — in the YAML tool catalog, not by the model',
+  },
+  {
+    icon: Network,
+    name: 'Mapepire',
+    role: 'Carries SQL to the database',
+    detail: 'A WebSocket SQL gateway running on the partition itself, listening on port 8076 by default.',
+    chip: 'from-cyan-500 to-teal-500',
+    ring: 'ring-cyan-200',
+    note: 'Connects as a real IBM i user profile',
+  },
+  {
+    icon: Database,
+    name: 'Db2 for i + QSYS2 services',
+    role: 'Answers, under its own rules',
+    detail: 'The same object and row-level authority that governs every other connection applies to this one.',
+    chip: 'from-emerald-500 to-green-600',
+    ring: 'ring-emerald-200',
+    note: 'Authority is enforced here — not by the AI client',
+  },
+]
 
 export function McpArchitectureFigure() {
   return (
     <InsightFigure
-      number={1}
+      number={2}
       title="End-to-end IBM i MCP architecture"
       accent="indigo"
-      scrollable
-      caption="The AI client never talks to Db2 for i directly. It only ever talks to the MCP server over the MCP protocol; the MCP server is the one component that knows how to reach Mapepire, and Mapepire is the one component that knows how to reach Db2 for i and QSYS2 services. SQL lives entirely in the YAML tool catalog; the connected IBM i user profile's authority is what Mapepire and Db2 for i enforce on every call, no matter which tool asked."
+      caption="Read it top to bottom: each stage can only talk to the one directly below it. The AI client never reaches Db2 for i itself — it only ever speaks MCP to the server. The last two stages sit inside the IBM i partition, which is why the connected profile's authority, not the assistant's confidence, decides what actually comes back."
     >
-      <svg viewBox="0 0 1000 430" role="img" aria-labelledby="fig1-title fig1-desc" className="insight-figure-enter min-w-[820px]">
-        <title id="fig1-title">End-to-end IBM i MCP architecture diagram</title>
-        <desc id="fig1-desc">
-          A user talks to an MCP-compatible AI client, which talks to the IBM i MCP Server over the MCP protocol. The MCP
-          server checks an approved YAML tool catalog, then sends predefined SQL to Mapepire, which runs inside the IBM i
-          LPAR alongside Db2 for i and QSYS2 services. Db2 for i returns structured results back through the same path to
-          the AI client, which explains the result to the user. No component skips a step in this chain.
-        </desc>
-        <defs>
-          <marker id="fig1-arrow-req" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" className="fill-indigo-500" />
-          </marker>
-          <marker id="fig1-arrow-res" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0,0 L10,5 L0,10 z" className="fill-slate-400" />
-          </marker>
-        </defs>
+      <div className="insight-figure-enter px-1 sm:px-2">
+        {ARCH_STAGES.map((stage, i) => {
+          const insideIbmI = i >= 3
+          const isFirstInsideIbmI = i === 3
+          const isLastInsideIbmI = i === ARCH_STAGES.length - 1
 
-        {/* IBM i LPAR boundary */}
-        <rect x={645} y={35} width={335} height={355} rx={16} className="fill-indigo-50/40 stroke-indigo-300" strokeWidth={2} strokeDasharray="7 6" />
-        <text x={665} y={62} className="fill-indigo-700" style={{ fontSize: 12.5, fontWeight: 700 }}>
-          IBM i (LPAR)
-        </text>
+          return (
+            <div key={stage.name}>
+              {isFirstInsideIbmI && (
+                <div className="mt-1 flex items-center gap-2 rounded-t-xl border border-b-0 border-dashed border-indigo-300 bg-indigo-50/50 px-3 pt-2.5 pb-1">
+                  <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wide text-indigo-700">
+                    <Cpu className="h-3.5 w-3.5" aria-hidden="true" />
+                    Inside the IBM i partition
+                  </span>
+                </div>
+              )}
 
-        {/* Nodes */}
-        <SvgNode x={15} y={175} w={130} h={90} lines={['Developer', 'or user']} strokeClass="stroke-slate-300" />
-        <SvgNode x={185} y={155} w={190} h={130} lines={['MCP-compatible', 'AI client']} sub="Claude · VS Code · custom agent" strokeClass="stroke-blue-400" />
-        <SvgNode x={415} y={155} w={195} h={130} lines={['IBM i MCP Server']} sub="@ibm/ibmi-mcp-server" strokeClass="stroke-indigo-500" />
-        <SvgNode x={430} y={20} w={165} h={78} lines={['Approved YAML', 'tool catalog']} strokeClass="stroke-violet-400" />
-        <SvgNode x={670} y={175} w={150} h={110} lines={['Mapepire']} sub="WebSocket · port 8076" strokeClass="stroke-cyan-500" />
-        <SvgNode x={840} y={175} w={125} h={110} lines={['Db2 for i']} sub="+ QSYS2 services" strokeClass="stroke-emerald-500" />
+              <div
+                className={cn(
+                  insideIbmI && 'border-x border-dashed border-indigo-300 bg-indigo-50/50 px-3',
+                  isLastInsideIbmI && 'rounded-b-xl border-b pb-3'
+                )}
+              >
+                <div className={cn('flex gap-3 rounded-xl border border-slate-200 bg-white p-3 shadow-sm ring-1', stage.ring)}>
+                  <span
+                    className={cn(
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm',
+                      stage.chip
+                    )}
+                  >
+                    <stage.icon className="h-4.5 w-4.5" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-sm font-bold leading-tight text-slate-900">{stage.name}</p>
+                    <p className="text-xs font-semibold text-slate-500">{stage.role}</p>
+                    <p className="mt-1 text-xs leading-relaxed text-slate-600">{stage.detail}</p>
+                    {stage.note && (
+                      <p className="mt-1.5 inline-block rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 ring-1 ring-amber-200">
+                        {stage.note}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
 
-        {/* YAML catalog -> MCP server (defines SQL) */}
-        <path d="M512,98 L512,155" className="stroke-violet-400" strokeWidth={2} markerEnd="url(#fig1-arrow-req)" fill="none" />
-        <text x={522} y={130} className="fill-violet-600" style={{ fontSize: 11 }}>
-          defines allowed SQL
-        </text>
+              {i < ARCH_STAGES.length - 1 && (
+                <div
+                  className={cn(
+                    'flex justify-center',
+                    insideIbmI && 'border-x border-dashed border-indigo-300 bg-indigo-50/50'
+                  )}
+                  aria-hidden="true"
+                >
+                  <span className="my-0.5 text-lg leading-none text-slate-300">&darr;</span>
+                </div>
+              )}
+            </div>
+          )
+        })}
 
-        {/* Request row (solid, pointing right) */}
-        <path d="M145,195 L185,195" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#fig1-arrow-req)" fill="none" />
-        <path d="M375,195 L415,195" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#fig1-arrow-req)" fill="none" />
-        <path d="M610,195 L670,195" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#fig1-arrow-req)" fill="none" />
-        <path d="M820,195 L840,195" className="stroke-indigo-500" strokeWidth={2.5} markerEnd="url(#fig1-arrow-req)" fill="none" />
-
-        {/* Response row (dashed, pointing left) */}
-        <path d="M840,245 L820,245" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#fig1-arrow-res)" fill="none" />
-        <path d="M670,245 L610,245" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#fig1-arrow-res)" fill="none" />
-        <path d="M415,245 L375,245" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#fig1-arrow-res)" fill="none" />
-        <path d="M185,245 L145,245" className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" markerEnd="url(#fig1-arrow-res)" fill="none" />
-
-        {/* Authority-enforced annotation */}
-        <path d="M700,150 L700,175" className="stroke-cyan-600" strokeWidth={1.5} markerEnd="url(#fig1-arrow-req)" fill="none" />
-        <text x={655} y={130} className="fill-cyan-700" style={{ fontSize: 11.5, fontWeight: 600 }}>
-          Connected profile&apos;s
-        </text>
-        <text x={655} y={144} className="fill-cyan-700" style={{ fontSize: 11.5, fontWeight: 600 }}>
-          authority enforced here →
-        </text>
-
-        {/* Legend */}
-        <line x1={20} y1={400} x2={55} y2={400} className="stroke-indigo-500" strokeWidth={2.5} />
-        <text x={62} y={404} className="fill-slate-600" style={{ fontSize: 11.5 }}>
-          request
-        </text>
-        <line x1={140} y1={400} x2={175} y2={400} className="stroke-slate-400" strokeWidth={2} strokeDasharray="5 4" />
-        <text x={182} y={404} className="fill-slate-600" style={{ fontSize: 11.5 }}>
-          response
-        </text>
-      </svg>
+        <p className="mt-3 flex items-start gap-2 rounded-lg bg-slate-50 px-3 py-2 text-xs leading-relaxed text-slate-600 ring-1 ring-slate-200">
+          <CornerUpLeft className="mt-0.5 h-3.5 w-3.5 shrink-0 text-slate-400" aria-hidden="true" />
+          <span>
+            Structured rows return along this same chain in reverse. The assistant summarizes them at the top — that summary
+            is the one part of the round trip a language model actually wrote.
+          </span>
+        </p>
+      </div>
     </InsightFigure>
   )
 }
 
 // ---------------------------------------------------------------------------
-// Figure 2 -- One request, step by step (HTML stepper)
+// Figure 3 -- One request, step by step (HTML stepper)
 // ---------------------------------------------------------------------------
 
 interface LifecycleStep {
@@ -225,7 +263,7 @@ const LIFECYCLE_PHASES: LifecyclePhase[] = [
 export function McpRequestLifecycleFigure() {
   return (
     <InsightFigure
-      number={2}
+      number={3}
       title="One request, step by step"
       accent="cyan"
       caption="Follow one realistic question — 'Which active jobs are currently consuming the most CPU?' — through all eight stages. Interpretation and explanation are the only two places a language model's judgment is involved; everything in between is a fixed lookup, a parameter check, and a predefined SQL statement."
@@ -264,7 +302,7 @@ export function McpRequestLifecycleFigure() {
 }
 
 // ---------------------------------------------------------------------------
-// Figure 3 -- Why predefined tools are safer (two-path comparison)
+// Figure 5 -- Why predefined tools are safer (two-path comparison)
 // ---------------------------------------------------------------------------
 
 const CONTROLLED_PATH = ['User request', 'Approved MCP tool', 'Constrained parameters', 'Predefined SQL', 'Least-privilege IBM i profile', 'Permitted result']
@@ -283,7 +321,7 @@ const SECURITY_LAYERS = [
 export function McpSecurityBoundaryFigure() {
   return (
     <InsightFigure
-      number={3}
+      number={5}
       title="Why predefined tools are safer"
       accent="emerald"
       caption="Predefined tools are not automatically secure by themselves — tool design, credentials, network configuration, and the IBM i authorities behind the connection still matter. What they remove is the open-ended risk on the right: a model deciding, at runtime, exactly what SQL to run and how broad its reach should be."
@@ -350,42 +388,63 @@ export function McpSecurityBoundaryFigure() {
 // Figure 4 -- Anatomy of a YAML-defined tool (annotated code)
 // ---------------------------------------------------------------------------
 
-const YAML_EXAMPLE = `sources:
-  ibmi-dev:
-    host: \${DB2i_HOST}
-    user: \${DB2i_USER}
-    password: \${DB2i_PASS}
+/**
+ * Original iRPGenie example, composed for this article. Deliberately NOT
+ * modelled on the sample in the official repository's README: different
+ * source label, different environment-variable names (the `${...}` syntax
+ * expands whatever names you define, so these are ours), a different tool
+ * doing a different job, and parameters bound in genuinely bindable
+ * positions. The *field names* (sources/host/user/port/tools/statement/
+ * toolsets) are the schema the software requires -- those are the only
+ * part that necessarily matches, the same way any API's parameter names
+ * do. Verify the current shape against the official repository before
+ * using this as a template.
+ */
+// Lines are kept under ~40 characters on purpose: the annotated layout
+// puts this block in a roughly 340px column on desktop, and anything
+// longer made the code block itself scroll sideways. The explanations
+// that would normally be trailing `#` comments live in the numbered
+// annotation cards beside it instead, so nothing is lost.
+const YAML_EXAMPLE = `# Illustrative only -- every value is
+# a placeholder, not a real system.
+
+sources:
+  lab-partition:
+    host: \${IBMI_LAB_HOST}
+    user: \${IBMI_RO_USER}
+    password: \${IBMI_RO_PASS}
     port: 8076
-    ignore-unauthorized: true
 
 tools:
-  library_objects:
-    source: ibmi-dev
+  busiest_jobs:
+    source: lab-partition
     description: >
-      Lists objects in one library, with type and
-      size. Use when asked what a library contains.
+      Active jobs in one subsystem
+      above a CPU threshold.
     parameters:
-      - name: library_name
+      - name: subsystem
         type: string
-        description: "Library name, e.g. 'QGPL'"
+        description: "e.g. 'QINTER'"
         required: true
         maxLength: 10
-      - name: max_rows
+      - name: min_cpu_ms
         type: integer
-        description: "Max rows to return"
+        description: "Minimum CPU time"
         required: false
-        default: 25
+        default: 0
     statement: |
-      SELECT *
-      FROM TABLE(
-        QSYS2.OBJECT_STATISTICS(:library_name, '*ALL')
-      ) X
-      FETCH FIRST :max_rows ROWS ONLY
+      SELECT JOB_NAME, JOB_STATUS,
+             CPU_TIME
+      FROM TABLE(QSYS2.ACTIVE_JOB_INFO(
+        SUBSYSTEM_LIST_FILTER =>
+          :subsystem))
+      WHERE CPU_TIME > :min_cpu_ms
+      ORDER BY CPU_TIME DESC
 
 toolsets:
-  developer:
+  read-only-ops:
     tools:
-      - library_objects`
+      - busiest_jobs`
 
 interface YamlAnnotation {
   match: string
@@ -393,14 +452,16 @@ interface YamlAnnotation {
   note: string
 }
 
+// Order matters: annotateYaml() walks the source with a moving cursor, so
+// these must be listed in the order their `match` text first appears.
 const YAML_ANNOTATIONS: YamlAnnotation[] = [
-  { match: 'sources:', label: 'Connection reference', note: 'Where and how to reach one IBM i system. Credentials come from environment variables, never hardcoded.' },
-  { match: 'library_objects:', label: 'Tool name', note: "The identifier an AI client sees and calls — it should read like a function name, not a query." },
-  { match: 'description: >', label: 'Human-readable description', note: 'Sent directly to the language model. A clear description is what helps the client pick this tool for the right question — vague descriptions lead to the wrong tool being chosen.' },
-  { match: 'parameters:', label: 'Accepted parameters', note: 'Every input is named, typed, and constrained. There is no way for a caller to supply arbitrary SQL here.' },
-  { match: 'statement: |', label: 'Predefined SQL statement', note: 'Written once by a human reviewer. Parameters are bound in, never concatenated as text.' },
-  { match: 'toolsets:', label: 'Toolset grouping', note: 'Related tools load together (e.g. all "developer" tools), so a team can expose a curated subset rather than everything at once.' },
-  { match: '${DB2i_HOST}', label: 'Environment-variable reference', note: 'Placeholder syntax — the real host/user/password live outside this file, in the deployment environment.' },
+  { match: 'sources:', label: 'Connection reference', note: 'Where and how to reach one IBM i system. A file can define several, so one tool catalog can span a dev box and a test box.' },
+  { match: '${IBMI_LAB_HOST}', label: 'Environment-variable reference', note: 'The real host, profile, and password live outside this file — in the deployment environment, not in version control. The names here are yours to choose.' },
+  { match: 'busiest_jobs:', label: 'Tool name', note: 'The identifier an AI client sees and calls. Read it like a function name: specific enough that picking the wrong one is obvious.' },
+  { match: 'description: >', label: 'Human-readable description', note: 'Sent straight to the language model, and the main signal it uses to decide when this tool fits the question. Vague wording here is what causes the wrong tool to be chosen.' },
+  { match: 'parameters:', label: 'Accepted parameters', note: 'Every input is named, typed, and constrained. Note what is absent: there is no parameter a caller could use to supply SQL of their own.' },
+  { match: 'statement: |', label: 'Predefined SQL statement', note: 'Written once by a human, reviewed like any other code. The :named parameters are bound by the engine, never pasted together as text — so a hostile value stays a value.' },
+  { match: 'toolsets:', label: 'Toolset grouping', note: 'Related tools load together, so a team can expose one curated group to one audience instead of everything to everyone.' },
 ]
 
 /**
@@ -436,8 +497,18 @@ export function McpYamlToolFigure() {
       accent="violet"
       caption="An original, harmless, read-only example — not copied from any external source. Every value shown is a placeholder; verify the exact YAML shape against the current official IBM i MCP Server repository before using it, since field names and options do evolve."
     >
-      <div className="insight-figure-enter grid gap-5 px-2 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)] sm:px-2">
-        <pre className="insight-figure-scroll overflow-x-auto rounded-xl border border-slate-800 bg-slate-900 p-4 text-xs leading-relaxed text-slate-100 sm:text-[13px]">
+      {/* px-0 on mobile and a slightly tighter code font give the block the
+          ~30px it needed to stop scrolling at 375px. It still scrolls at
+          320px -- YAML's meaningful indentation can't fit that width at a
+          readable size, and a horizontally-scrollable code block is the
+          existing site-wide convention (see .prose pre in globals.css). */}
+      {/* Side-by-side only from xl, not lg. Between 1024 and 1279 the TOC
+          sidebar takes 240px off the article column, leaving the code side
+          of a two-column split ~307px -- 4px too narrow for this block, so
+          it scrolled. Stacking until xl gives the code the full column
+          there and keeps the split for widths that can actually hold it. */}
+      <div className="insight-figure-enter grid gap-5 px-0 sm:px-2 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+        <pre className="insight-figure-scroll overflow-x-auto rounded-xl border border-slate-800 bg-slate-900 p-3 text-[11px] leading-relaxed text-slate-100 sm:p-4 sm:text-[13px]">
           <code>
             {segments.map((seg, i) =>
               seg.index !== undefined ? (
@@ -570,7 +641,7 @@ export function McpUseCaseGrid() {
 }
 
 // ---------------------------------------------------------------------------
-// Figure 5 -- Practical adoption path (4 stages)
+// Figure 6 -- Practical adoption path (4 stages)
 // ---------------------------------------------------------------------------
 
 interface AdoptionStage {
@@ -605,7 +676,7 @@ const ADOPTION_STAGES: AdoptionStage[] = [
 export function McpAdoptionPathFigure() {
   return (
     <InsightFigure
-      number={5}
+      number={6}
       title="A practical adoption path"
       accent="blue"
       caption="Production write operations are not the starting point. Each stage builds on the trust and logging established in the one before it — a team can stay comfortably at Stage 1 or 2 indefinitely if that is all a given system needs."
@@ -627,8 +698,13 @@ export function McpAdoptionPathFigure() {
                 </li>
               ))}
             </ul>
+            {/* The connector sits just inside the card's right edge rather
+                than hanging off it (-right-3): an absolutely-positioned
+                element outside the bounds made the grid horizontally
+                scrollable at desktop widths. The "Stage N" labels already
+                carry the sequence, so this is pure reinforcement. */}
             {i < ADOPTION_STAGES.length - 1 && (
-              <span className="pointer-events-none absolute -right-3 top-1/2 hidden -translate-y-1/2 text-blue-300 lg:block" aria-hidden="true">
+              <span className="pointer-events-none absolute right-1 top-1/2 hidden -translate-y-1/2 text-blue-300 lg:block" aria-hidden="true">
                 →
               </span>
             )}
@@ -640,7 +716,7 @@ export function McpAdoptionPathFigure() {
 }
 
 // ---------------------------------------------------------------------------
-// Figure 6 (optional) -- Traditional vs. MCP-assisted workflow
+// Figure 1 -- Traditional vs. MCP-assisted workflow (opens the article)
 // ---------------------------------------------------------------------------
 
 const TRADITIONAL_STEPS = ['Open ACS or a 5250 session', 'Remember the right QSYS2 service', 'Compose the SQL by hand', 'Inspect the returned rows', 'Interpret the result']
@@ -649,7 +725,7 @@ const MCP_STEPS = ['Ask a focused question', 'An approved tool is selected', 'Pr
 export function McpWorkflowComparisonFigure() {
   return (
     <InsightFigure
-      number={6}
+      number={1}
       title="Traditional workflow vs. MCP-assisted workflow"
       accent="amber"
       caption="MCP shortens the distance between a question and an answer — it does not remove the last step. A technical user still validates the result before it drives any real decision, the same way they would double-check a query they wrote by hand."
