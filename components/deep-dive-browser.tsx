@@ -65,7 +65,7 @@ export function DeepDiveBrowser({ deepDives }: DeepDiveBrowserProps) {
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search Deep Dives by topic or tag..."
             aria-label="Search Deep Dives"
-            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600"
+            className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 transition-shadow focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
           />
         </div>
 
@@ -74,8 +74,9 @@ export function DeepDiveBrowser({ deepDives }: DeepDiveBrowserProps) {
             type="button"
             onClick={() => setCategoryId(null)}
             className={cn(
-              'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-              categoryId === null ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+              'rounded-full px-3 py-1.5 text-xs font-medium transition-colors active:scale-[0.97]',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-1',
+              categoryId === null ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700'
             )}
           >
             All Categories
@@ -86,8 +87,9 @@ export function DeepDiveBrowser({ deepDives }: DeepDiveBrowserProps) {
               type="button"
               onClick={() => setCategoryId(category.id === categoryId ? null : category.id)}
               className={cn(
-                'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                categoryId === category.id ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                'rounded-full px-3 py-1.5 text-xs font-medium transition-colors active:scale-[0.97]',
+                'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-1',
+                categoryId === category.id ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-indigo-50 hover:text-indigo-700'
               )}
             >
               {category.label}
@@ -103,7 +105,7 @@ export function DeepDiveBrowser({ deepDives }: DeepDiveBrowserProps) {
             <button
               type="button"
               onClick={clearFilters}
-              className="inline-flex items-center gap-1 font-medium text-slate-600 hover:text-slate-900"
+              className="inline-flex items-center gap-1 rounded font-medium text-slate-600 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
             >
               <X className="h-3 w-3" aria-hidden="true" />
               Clear filters
@@ -115,7 +117,11 @@ export function DeepDiveBrowser({ deepDives }: DeepDiveBrowserProps) {
       {filtered.length === 0 ? (
         <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 text-center text-sm text-slate-600">
           No Deep Dives match your search or filter.{' '}
-          <button type="button" onClick={clearFilters} className="font-medium text-blue-600 hover:underline">
+          <button
+            type="button"
+            onClick={clearFilters}
+            className="rounded font-medium text-indigo-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600"
+          >
             Clear filters
           </button>{' '}
           to see all Deep Dives.
@@ -180,7 +186,9 @@ function DeepDiveCard({ deepDive }: { deepDive: DeepDive }) {
       <Link
         href={`/deep-dives/${deepDive.slug}`}
         className={cn(
-          'flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm border-t-4 transition-colors hover:border-blue-200 hover:shadow-md',
+          'flex h-full flex-col rounded-2xl border border-slate-100 bg-white p-5 shadow-sm border-t-4 transition-all duration-200',
+          'hover:-translate-y-0.5 hover:border-indigo-200 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2',
           accentClasses.topBorder
         )}
       >

@@ -191,7 +191,11 @@ async function runChecks() {
   // ---------------------------------------------------------------------------
 
   {
-    const navSrc = readRepoFile('components/site-nav-links.tsx')
+    // The nav link data (Site-wide Navigation and Section Landing Page
+    // Visual Upgrade) now lives in lib/nav-links.ts, a plain module
+    // components/site-nav-links.tsx imports from -- see that file's header
+    // comment for why the data had to move out of the 'use client' component.
+    const navSrc = readRepoFile('lib/nav-links.ts')
     const navInsightLinks = navSrc.match(/href:\s*'\/insights'/g) ?? []
     check('nav links include /insights for logged-in and logged-out link sets', navInsightLinks.length >= 2, `found ${navInsightLinks.length}`)
     check("nav label reads 'IBM i Insights'", navSrc.includes("label: 'IBM i Insights'"))
@@ -360,8 +364,18 @@ async function runChecks() {
     check('the hero entrance animation is CSS-only (a named class, not a JS animation library)', listingSrc.includes('insights-hero-enter'))
     check('the hero entrance keyframes exist in globals.css', /@keyframes insights-hero-in/.test(globalsCss))
     check(
+      // .insights-hero-enter is now grouped with the reusable .section-hero-enter
+      // (Site-wide Navigation and Section Landing Page Visual Upgrade) inside the
+      // same reduced-motion override, so this checks the *content* of the
+      // `@media (prefers-reduced-motion: reduce) { ... }` block for both the
+      // selector and `animation: none`, rather than requiring one exact
+      // single-selector layout.
       'the hero entrance animation is fully disabled under prefers-reduced-motion',
-      /@media \(prefers-reduced-motion: reduce\)\s*\{\s*\.insights-hero-enter\s*\{\s*animation: none;/.test(globalsCss)
+      (() => {
+        const match = globalsCss.match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/)
+        const block = match?.[1] ?? ''
+        return block.includes('.insights-hero-enter') && /animation:\s*none/.test(block)
+      })()
     )
     check(
       'card hover elevation respects prefers-reduced-motion (motion-reduce:transition-none present)',

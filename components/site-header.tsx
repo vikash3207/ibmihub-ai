@@ -5,6 +5,7 @@ import { PRIMARY_CTA_LABEL, SITE_NAME } from '@/lib/config'
 import { buttonVariants } from '@/components/ui/button'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { SiteNavLinks } from '@/components/site-nav-links'
+import { MobileNav } from '@/components/site-mobile-nav'
 import { SiteLogoIcon } from '@/components/brand/site-logo-icon'
 import { AuthStateBroadcaster } from '@/components/auth/auth-state-broadcaster'
 import { UserMenu } from '@/components/user-menu'
@@ -18,6 +19,18 @@ import { UserMenu } from '@/components/user-menu'
  * the account-menu avatar and dropdown. Still exactly one getUser() call --
  * the profile lookup is a separate, ordinary row select, not a second
  * session check.
+ *
+ * Responsive nav (Site-wide Navigation and Section Landing Page Visual
+ * Upgrade): the full seven-item pill row (<SiteNavLinks>) only has room
+ * from `lg:` (1024px) up alongside the logo and account controls without
+ * wrapping into an untidy second line -- confirmed by screenshot audit at
+ * 320/375/768/1024/1440px, not just estimated. Below `lg:`, <MobileNav>'s
+ * hamburger trigger takes over; both render the exact same link data from
+ * components/site-nav-links.tsx, so there is one source of truth for
+ * destinations and for the AI Tutor click-interception behavior, not two
+ * copies that could drift. `relative` on the header itself (not the inner
+ * max-w container) is what lets MobileNav's dropdown panel span the full
+ * viewport width via `inset-x-0` instead of just the content column.
  */
 export async function SiteHeader() {
   const supabase = await createClient()
@@ -30,19 +43,21 @@ export async function SiteHeader() {
     : { data: null }
 
   return (
-    <header className="sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
+    <header className="relative sticky top-0 z-50 bg-white/90 backdrop-blur border-b border-slate-100">
       {/* Renders nothing. Shares the session check this header already
           performed with the AI Tutor provider in the root layout, so the
           Tutor stops showing "Log in" the moment this header starts showing
           "Log out" -- no refresh, no extra request (PR #186). */}
       <AuthStateBroadcaster isAuthenticated={Boolean(user)} />
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-y-2">
-        <Link href="/" className="flex items-center gap-2 font-semibold text-slate-900">
+      <div className="mx-auto max-w-6xl px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+        <Link href="/" className="flex shrink-0 items-center gap-2 font-semibold text-slate-900">
           <SiteLogoIcon size={28} className="shrink-0" />
           {SITE_NAME}
         </Link>
-        <nav className="flex flex-wrap items-center justify-end gap-3 sm:gap-5">
-          <SiteNavLinks isLoggedIn={Boolean(user)} />
+
+        <SiteNavLinks isLoggedIn={Boolean(user)} />
+
+        <div className="hidden lg:flex items-center gap-3">
           {user ? (
             <>
               {/* Beside, not instead of, the existing Log out control below --
@@ -63,7 +78,7 @@ export async function SiteHeader() {
             <>
               <Link
                 href="/auth/login"
-                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors active:opacity-70"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors active:opacity-70 rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
               >
                 Log in
               </Link>
@@ -72,7 +87,9 @@ export async function SiteHeader() {
               </Link>
             </>
           )}
-        </nav>
+        </div>
+
+        <MobileNav isLoggedIn={Boolean(user)} />
       </div>
     </header>
   )

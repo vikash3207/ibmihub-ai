@@ -1,10 +1,11 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
-import { Terminal, Database } from 'lucide-react'
+import { ArrowRight, Database, FlaskConical, Terminal } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
-import { Card } from '@/components/ui/card'
 import { SimulatorNotice } from '@/components/practice-lab/simulator-notice'
+import { PRACTICE_LAB_5250_THEME, PRACTICE_LAB_SQL_THEME } from '@/lib/section-theme'
+import { cn } from '@/lib/utils'
 
 // Auth-gated page -- never statically cache; always compute fresh per request.
 // Mirrors app/(authenticated)/practice/page.tsx and dashboard/ai-tutor.
@@ -20,6 +21,20 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
+/**
+ * Practice Lab landing page (visually upgraded -- Site-wide Navigation and
+ * Section Landing Page Visual Upgrade). Same layout-padding constraint as
+ * app/(authenticated)/practice/page.tsx (app/(authenticated)/layout.tsx
+ * wraps every authenticated page in a padded max-w-3xl <main>, including
+ * Onboarding, which this PR must not touch) -- this hero is a contained,
+ * rounded dark "terminal" card, not the edge-to-edge <SectionHero>.
+ * <SimulatorNotice> is rendered completely unchanged (its exact "does not
+ * connect to a real IBM i system" wording is the platform's explicit
+ * safety promise -- see that component's own doc comment). The two path
+ * cards get distinct sub-identities (5250 = amber, SQL = blue/cyan) per
+ * lib/section-theme.ts's PRACTICE_LAB_5250_THEME/PRACTICE_LAB_SQL_THEME,
+ * but their descriptive text is unchanged from before this pass.
+ */
 export default async function PracticeLabPage() {
   const supabase = await createClient()
   const {
@@ -32,10 +47,27 @@ export default async function PracticeLabPage() {
 
   return (
     <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900 mb-2">Practice Lab</h1>
-        <p className="text-slate-600 leading-relaxed">
-          Practice IBM i skills hands-on with guided, simulated exercises -- a 5250-style command
+      <div className="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950 px-6 py-10 sm:px-10 sm:py-12">
+        <div
+          className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:36px_36px]"
+          aria-hidden="true"
+        />
+        <div className="pointer-events-none absolute -top-16 left-1/4 h-64 w-64 -translate-x-1/2 rounded-full bg-emerald-600/20 blur-[100px]" aria-hidden="true" />
+        <div className="pointer-events-none absolute bottom-0 right-0 h-56 w-56 rounded-full bg-teal-500/15 blur-[90px]" aria-hidden="true" />
+        <p
+          className="pointer-events-none absolute right-6 top-6 hidden select-none font-mono text-xs tracking-wide text-emerald-200/20 sm:block"
+          aria-hidden="true"
+        >
+          &gt; RUN QRY
+        </p>
+
+        <span className="relative mb-4 inline-flex items-center gap-1.5 rounded-full border border-emerald-400/30 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+          <FlaskConical className="h-3 w-3" aria-hidden="true" />
+          Guided, simulated practice environment
+        </span>
+        <h1 className="relative text-3xl sm:text-4xl font-bold tracking-tight text-white mb-3">Practice Lab</h1>
+        <p className="relative text-slate-300 leading-relaxed max-w-xl">
+          Practice IBM&nbsp;i skills hands-on with guided, simulated exercises — a 5250-style command
           practice environment and an ACS-style SQL console, both built for learning.
         </p>
       </div>
@@ -43,30 +75,78 @@ export default async function PracticeLabPage() {
       <SimulatorNotice />
 
       <div className="grid sm:grid-cols-2 gap-4">
-        <Link href="/practice-lab/5250" className="block active:scale-[0.99] transition-transform">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+        <Link
+          href="/practice-lab/5250"
+          className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600 focus-visible:ring-offset-2"
+        >
+          <div
+            className={cn(
+              'relative h-full overflow-hidden rounded-2xl border bg-gradient-to-b p-5 shadow-sm transition-all duration-300',
+              'group-hover:-translate-y-1 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0',
+              PRACTICE_LAB_5250_THEME.border,
+              PRACTICE_LAB_5250_THEME.hoverBorder,
+              PRACTICE_LAB_5250_THEME.cardWash
+            )}
+          >
+            <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', PRACTICE_LAB_5250_THEME.accent)} aria-hidden="true" />
+            <div
+              className={cn(
+                'mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
+                PRACTICE_LAB_5250_THEME.accent
+              )}
+            >
               <Terminal className="h-5 w-5" aria-hidden="true" />
             </div>
             <span className="block font-semibold text-slate-900">5250 Command Practice</span>
             <span className="block text-sm text-slate-600 mt-1 leading-relaxed">
               Practice common IBM i commands in a guided 5250-style simulator. No real system
-              connection -- a safe learning environment with predefined exercises.
+              connection — a safe learning environment with predefined exercises.
             </span>
-          </Card>
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-amber-700">
+              Start practicing
+              <ArrowRight
+                className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                aria-hidden="true"
+              />
+            </span>
+          </div>
         </Link>
 
-        <Link href="/practice-lab/sql" className="block active:scale-[0.99] transition-transform">
-          <Card className="h-full transition-shadow hover:shadow-md">
-            <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+        <Link
+          href="/practice-lab/sql"
+          className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+        >
+          <div
+            className={cn(
+              'relative h-full overflow-hidden rounded-2xl border bg-gradient-to-b p-5 shadow-sm transition-all duration-300',
+              'group-hover:-translate-y-1 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0',
+              PRACTICE_LAB_SQL_THEME.border,
+              PRACTICE_LAB_SQL_THEME.hoverBorder,
+              PRACTICE_LAB_SQL_THEME.cardWash
+            )}
+          >
+            <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', PRACTICE_LAB_SQL_THEME.accent)} aria-hidden="true" />
+            <div
+              className={cn(
+                'mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
+                PRACTICE_LAB_SQL_THEME.accent
+              )}
+            >
               <Database className="h-5 w-5" aria-hidden="true" />
             </div>
             <span className="block font-semibold text-slate-900">SQL Practice Console</span>
             <span className="block text-sm text-slate-600 mt-1 leading-relaxed">
-              Practice SQL using an ACS-style learning console. Sample data only -- safe,
+              Practice SQL using an ACS-style learning console. Sample data only — safe,
               simulated exercises, not a connection to a real database.
             </span>
-          </Card>
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-blue-700">
+              Start practicing
+              <ArrowRight
+                className="h-3 w-3 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+                aria-hidden="true"
+              />
+            </span>
+          </div>
         </Link>
       </div>
     </div>
