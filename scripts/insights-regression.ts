@@ -5,19 +5,20 @@
  * existing scripts/deep-dive-toc-regression.ts style (check/section
  * helpers, pass/fail counter, process.exit(1) on any failure). Runs
  * entirely against real production modules under lib/ and content/insights/
- * (no mocked catalog for the "is the real catalog empty" assertions), plus
- * source-text assertions against the route/nav/footer/homepage files for
- * things that aren't otherwise unit-testable without a rendering/test-
+ * plus source-text assertions against the route/nav/footer/homepage files
+ * for things that aren't otherwise unit-testable without a rendering/test-
  * framework dependency this repo doesn't have (see scripts/rag-regression.ts's
  * header comment for the same constraint on a different feature).
  *
- * Scope note: this section intentionally publishes ZERO Insight articles
- * right now (see content/insights/catalog.ts) -- the Product Owner asked to
- * establish and visually review the /insights section on its own first.
- * Individual Insight articles are a separate, future PR. Every check below
- * reflects that: there is no "known launch slug" to test against, and
- * several checks specifically assert the *absence* of article content,
- * placeholder cards, and fabricated publication data.
+ * Scope note: this section launched with ZERO Insight articles (Product
+ * Owner review of the section's design on its own first) and PR #199
+ * published the first one, "IBM i MCP Server: The New Bridge Between AI
+ * Assistants and IBM i" (content/insights/ibm-i-mcp-server-ai-assistants.md).
+ * Sections below that used to assert an empty catalog (no article, no
+ * sitemap entry, no static route) have been updated to assert the opposite
+ * for that real entry, while keeping the *generic* logic checks (synthetic
+ * fixtures, structured-data builders, slug-resolution mechanics) unchanged
+ * -- they were never coupled to the catalog being empty.
  *
  * Usage:
  *   npm run test:insights
@@ -30,6 +31,11 @@ import { isInsightAvailable, getPublishedInsights, getFeaturedInsight, type Insi
 import { INSIGHT_CATEGORIES } from '../lib/insight-categories'
 import { buildInsightStructuredData, buildBreadcrumbStructuredData } from '../lib/insight-structured-data'
 import { SITE_URL } from '../lib/config'
+import { DEEP_DIVES } from '../content/deep-dives/catalog'
+import { splitInsightHtmlOnFigureMarkers } from '../lib/insight-render'
+import { INSIGHT_FIGURE_REGISTRY } from '../components/insights/mcp-figures'
+
+const LAUNCH_SLUG = 'ibm-i-mcp-server-ai-assistants'
 
 let failures = 0
 let passed = 0
@@ -78,16 +84,28 @@ const SYNTHETIC_INSIGHT: Insight = {
 
 async function runChecks() {
   // ---------------------------------------------------------------------------
-  section('1. The real catalog is intentionally empty -- no article, no placeholder')
+  section('1. The real catalog publishes exactly the first Insight, well-formed')
   // ---------------------------------------------------------------------------
 
-  check('content/insights/catalog.ts has zero entries', INSIGHTS.length === 0, `got ${INSIGHTS.length}`)
-  check('getPublishedInsights() on the real catalog is empty', getPublishedInsights(INSIGHTS).length === 0)
-  check('getFeaturedInsight() on the real catalog is undefined (no fake "featured" article)', getFeaturedInsight(INSIGHTS) === undefined)
+  check('content/insights/catalog.ts has exactly one entry', INSIGHTS.length === 1, `got ${INSIGHTS.length}`)
+  check('getPublishedInsights() on the real catalog returns that one entry', getPublishedInsights(INSIGHTS).length === 1)
+  check('the entry\'s slug is the expected launch slug', INSIGHTS[0]?.slug === LAUNCH_SLUG)
+  check('getFeaturedInsight() on the real catalog returns the launch article (marked featured: true)', getFeaturedInsight(INSIGHTS)?.slug === LAUNCH_SLUG)
+  check('the entry has a known InsightCategoryId', INSIGHT_CATEGORIES.some((c) => c.id === INSIGHTS[0]?.category))
+  check('the entry has at least one tag', (INSIGHTS[0]?.tags.length ?? 0) > 0)
+  check('the entry has a valid, non-future ISO publishedAt', (() => {
+    const t = new Date(`${INSIGHTS[0]?.publishedAt}T00:00:00Z`).getTime()
+    return !Number.isNaN(t) && t <= Date.now()
+  })())
+  check('the entry has a positive readingTimeMinutes', (INSIGHTS[0]?.readingTimeMinutes ?? 0) > 0)
+  check(
+    'every relatedDeepDiveSlugs entry actually exists in the Deep Dive catalog (no dangling reference)',
+    (INSIGHTS[0]?.relatedDeepDiveSlugs ?? []).every((slug) => DEEP_DIVES.some((d) => d.slug === slug))
+  )
 
   const insightsContentDir = resolve(__dirname, '..', 'content', 'insights')
   const markdownFiles = readdirSync(insightsContentDir).filter((f) => f.endsWith('.md'))
-  check('content/insights/ has no leftover article Markdown files', markdownFiles.length === 0, `found: ${markdownFiles.join(', ')}`)
+  check('content/insights/ has exactly one Markdown file, matching the catalog slug', markdownFiles.length === 1 && markdownFiles[0] === `${LAUNCH_SLUG}.md`, `found: ${markdownFiles.join(', ')}`)
 
   // ---------------------------------------------------------------------------
   section('2. Catalog entry validation logic (executed against a synthetic fixture, generically)')
@@ -126,12 +144,15 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('4. Detail-route slug resolution: everything 404s while the catalog is empty')
+  section('4. Detail-route slug resolution')
   // ---------------------------------------------------------------------------
 
   {
-    const anyRealSlug = findPublishedInsight(INSIGHTS, 'anything-at-all')
-    check('no slug resolves against the real (empty) catalog', anyRealSlug === undefined)
+    const launchSlug = findPublishedInsight(INSIGHTS, LAUNCH_SLUG)
+    check('the real launch slug resolves against the real catalog', launchSlug?.slug === LAUNCH_SLUG)
+
+    const unknownReal = findPublishedInsight(INSIGHTS, 'this-slug-does-not-exist-anywhere')
+    check('an unknown slug resolves to undefined against the real catalog too (drives notFound())', unknownReal === undefined)
 
     const unknown = findPublishedInsight([SYNTHETIC_INSIGHT], 'this-slug-does-not-exist-anywhere')
     check('an unknown slug resolves to undefined (drives notFound()), generically', unknown === undefined)
@@ -169,7 +190,7 @@ async function runChecks() {
   // live DB session, so it isn't invoked directly here; same constraint
   // scripts/rag-regression.ts documents for a different route).
   // ---------------------------------------------------------------------------
-  section('6. Sitemap references /insights, and no article slug can enter it while the catalog is empty')
+  section('6. Sitemap references /insights, and the launch article is eligible to enter it')
 
   {
     const sitemapSrc = readRepoFile('app/sitemap.ts')
@@ -178,9 +199,10 @@ async function runChecks() {
     check('sitemap.ts includes a static /insights listing route', sitemapSrc.includes('${SITE_URL}/insights`'))
     check('sitemap.ts includes an insightRoutes block in the returned array', sitemapSrc.includes('insightRoutes'))
     check(
-      'no article slug can enter the sitemap right now -- the real catalog sitemap.ts reads from is empty',
-      INSIGHTS.filter(isInsightAvailable).length === 0
+      'the launch article is published, so sitemap.ts (which filters with isInsightAvailable) will include it',
+      INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === LAUNCH_SLUG)
     )
+    check('exactly one Insight is eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 1)
 
     const robotsSrc = readRepoFile('app/robots.ts')
     check("robots.ts allows '/insights'", /allow:\s*\[[^\]]*'\/insights'/.test(robotsSrc))
@@ -204,9 +226,12 @@ async function runChecks() {
     check("footer PRODUCT_LINKS include '/insights'", footerSrc.includes("{ href: '/insights', label: 'IBM i Insights' }"))
 
     const homepageSrc = readRepoFile('app/page.tsx')
-    check('homepage no longer has a featured-Insight section (no article to feature)', !homepageSrc.includes('Explore IBM i Insights'))
-    check('homepage no longer imports InsightCard', !homepageSrc.includes('InsightCard'))
-    check('homepage no longer imports the Insights catalog', !homepageSrc.includes("from '@/content/insights/catalog'"))
+    // PR #199 published the first Insight but deliberately did not touch the
+    // homepage (out of scope -- "do not modify ... unrelated UI"), so these
+    // checks stay as they were: no featured-Insight section on the homepage.
+    check('homepage has no featured-Insight section', !homepageSrc.includes('Explore IBM i Insights'))
+    check('homepage does not import InsightCard', !homepageSrc.includes('InsightCard'))
+    check('homepage does not import the Insights catalog', !homepageSrc.includes("from '@/content/insights/catalog'"))
     check(
       'homepage still has exactly 3 Cards in "Three ways to learn" (unaffected by removing the Insights section)',
       (() => {
@@ -219,7 +244,7 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('8. /insights is a polished, honest empty-state landing page')
+  section('8. /insights is a polished landing page that now lists the real article')
   // ---------------------------------------------------------------------------
 
   {
@@ -246,28 +271,41 @@ async function runChecks() {
     )
     check('the hero has a premium badge distinct from an article claim', listingSrc.includes('Editorial perspectives for modern IBM i'))
     check('the hero does not add an article CTA (no "Read Insight"/"Read Article" link in the hero)', !/Read (Insight|Article)/.test(listingSrc))
-    check('the page has a tasteful "being prepared" empty state', listingSrc.includes('Insights are being prepared'))
+
+    check('the page now imports InsightCard', /import \{ InsightCard/.test(listingSrc))
+    check('the page now imports the Insights catalog', listingSrc.includes("from '@/content/insights/catalog'"))
+    check('the page now imports getPublishedInsights', listingSrc.includes('getPublishedInsights'))
+    check('the page renders published Insights via a featured card + grid, not a hardcoded article', /featuredInsight/.test(listingSrc) && /restInsights/.test(listingSrc))
+
     check(
-      'the empty state does not actually import or render InsightCard (a bare mention in a comment is fine)',
-      !/import \{ InsightCard/.test(listingSrc) && !/<InsightCard/.test(listingSrc)
+      'the empty state is retained as a fallback (still present in source) for a fully-unpublished catalog',
+      listingSrc.includes('Insights are being prepared')
     )
-    check('the page does not import the (currently empty) Insights catalog', !listingSrc.includes("from '@/content/insights/catalog'"))
+    check(
+      'the empty state only renders when there are zero published Insights (conditional, not the default path)',
+      /publishedInsights\.length === 0/.test(listingSrc)
+    )
+
     check('the word "Chapter" never appears anywhere on the page', !/\bChapter\b/i.test(listingSrc))
     check('the page never calls Insights "lessons"', !/\binsight lessons\b/i.test(listingSrc))
-    check('there is no fake "Coming soon" placeholder card (the Deep Dive convention this page deliberately does not reuse)', !listingSrc.includes('Coming soon'))
     check(
       'there is no publishing-frequency or specific-date promise (e.g. "every week", "monthly", "this month")',
-      !/\b(every week|weekly|monthly|this month|next month|coming soon|launching soon)\b/i.test(listingSrc)
+      !/\b(every week|weekly|monthly|this month|next month|launching soon)\b/i.test(listingSrc)
     )
+
+    // With a real Insight now published, this listing page should actually
+    // render at build time, containing that real article's title.
     check(
-      'the removed launch article is not referenced by title or slug anywhere on this page',
-      !listingSrc.includes('rpg-rest-api-integrated-web-services') &&
-        !listingSrc.includes('Integrated Web Services')
+      'the real published article renders on the listing page',
+      (() => {
+        const published = getPublishedInsights(INSIGHTS)
+        return published.length > 0 && published[0].slug === LAUNCH_SLUG
+      })()
     )
   }
 
   // ---------------------------------------------------------------------------
-  section('9. Insight detail route infrastructure is retained and still safe with zero entries')
+  section('9. Insight detail route infrastructure, and the new figure-embedding mechanism')
   // ---------------------------------------------------------------------------
 
   {
@@ -275,15 +313,172 @@ async function runChecks() {
     check('generateStaticParams() only ever includes available Insights', /INSIGHTS\.filter\(isInsightAvailable\)/.test(detailSrc))
     check('an unresolved slug calls notFound()', /if \(!insight\) \{[\s\S]{0,40}notFound\(\)/.test(detailSrc))
     check(
-      'generateStaticParams() produces zero routes right now (nothing to statically build)',
-      INSIGHTS.filter(isInsightAvailable).length === 0
+      'generateStaticParams() now produces exactly one route, for the launch article',
+      INSIGHTS.filter(isInsightAvailable).length === 1 && INSIGHTS.filter(isInsightAvailable)[0].slug === LAUNCH_SLUG
     )
-    check('the removed article-specific diagram component is no longer imported', !detailSrc.includes('architecture-diagram'))
+    check('the removed (older, unrelated) article-specific diagram component is not reintroduced', !detailSrc.includes('architecture-diagram'))
     check('the detail route still reuses the generic Deep Dive TOC/markdown primitives (retained, reusable infrastructure)', detailSrc.includes('DeepDiveToc'))
+    check('the detail route splits rendered HTML on figure markers before rendering', detailSrc.includes('splitInsightHtmlOnFigureMarkers'))
+    check('the detail route looks figures up in the per-slug registry, not a flat/global one', detailSrc.includes('INSIGHT_FIGURE_REGISTRY[insight.slug]'))
+    check('an unrecognized figure name is skipped rather than crashing the page', /Figure \? <Figure key=\{i\} \/> : null/.test(detailSrc))
   }
 
   // ---------------------------------------------------------------------------
-  section('10. Documentation hygiene: no stale PR references, no leftover "Launch article" wording')
+  section('10. Figure-embedding mechanism (lib/insight-render.ts) is correct and content stays in sync')
+  // ---------------------------------------------------------------------------
+
+  {
+    check(
+      'a figure marker on its own paragraph splits into a figure segment',
+      (() => {
+        const segments = splitInsightHtmlOnFigureMarkers('<p>before</p><p>[[FIGURE:example]]</p><p>after</p>')
+        return (
+          segments.length === 3 &&
+          segments[0].type === 'html' &&
+          segments[1].type === 'figure' &&
+          (segments[1] as { type: 'figure'; name: string }).name === 'example' &&
+          segments[2].type === 'html'
+        )
+      })()
+    )
+    check('HTML with no figure marker splits into a single html segment (no-op case)', splitInsightHtmlOnFigureMarkers('<p>just prose</p>').length === 1)
+    check('consecutive figure markers with no prose between them both survive the split', splitInsightHtmlOnFigureMarkers('<p>[[FIGURE:a]]</p><p>[[FIGURE:b]]</p>').filter((s) => s.type === 'figure').length === 2)
+
+    const launchMarkdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${LAUNCH_SLUG}.md`), 'utf-8')
+    const markersInMarkdown = [...launchMarkdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+    const registeredForLaunch = Object.keys(INSIGHT_FIGURE_REGISTRY[LAUNCH_SLUG] ?? {})
+
+    check('the launch article has at least the 5 required figures plus the optional 6th', markersInMarkdown.length >= 6, `found ${markersInMarkdown.length}`)
+    check('no duplicate figure marker names within the launch article', markersInMarkdown.length === new Set(markersInMarkdown).size)
+    check(
+      'every figure marker referenced in the launch article has a matching registry entry',
+      markersInMarkdown.every((name) => registeredForLaunch.includes(name)),
+      `missing: ${markersInMarkdown.filter((n) => !registeredForLaunch.includes(n)).join(', ')}`
+    )
+    check(
+      'the registry has no orphan entries the article never references (stays in sync both ways)',
+      registeredForLaunch.every((name) => markersInMarkdown.includes(name)),
+      `orphaned: ${registeredForLaunch.filter((n) => !markersInMarkdown.includes(n)).join(', ')}`
+    )
+
+    check('the Markdown source contains no raw HTML tags (remark-rehype never enables allowDangerousHtml, so any would just render as escaped text)', !/<(div|svg|script|iframe)[\s>]/i.test(launchMarkdown))
+    check('the Markdown source references no external image URL', !/!\[[^\]]*\]\(https?:\/\//.test(launchMarkdown))
+    check('the Markdown source does not use an <img> tag', !/<img[\s>]/i.test(launchMarkdown))
+  }
+
+  // ---------------------------------------------------------------------------
+  section('11. Diagram components: accessibility and content-integrity spot checks')
+  // ---------------------------------------------------------------------------
+
+  {
+    const figuresSrc = readRepoFile('components/insights/mcp-figures.tsx')
+    const figureWrapperSrc = readRepoFile('components/insights/insight-figure.tsx')
+
+    check('every InsightFigure call passes a non-empty caption', !/caption=""/.test(figuresSrc))
+    check('the architecture diagram never implies the AI client reaches Db2 for i directly', figuresSrc.includes('The AI client never reaches Db2 for i itself'))
+    check('no figure uses an <img> tag or an external image URL', !/<img[\s>]/i.test(figuresSrc) && !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/i.test(figuresSrc))
+
+    // The architecture figure is an inline SVG on purpose: a left-to-right
+    // chain shows "A talks to B talks to C" more immediately than a stacked
+    // list. SVG <text> is not exposed to assistive tech the way HTML text
+    // is, so it owes a real title/desc transcript -- and because the
+    // drawing would scale below readable size on a phone, it must also ship
+    // an HTML equivalent for narrow widths.
+    check('the architecture SVG has an accessible title and description', /<title id="arch-title">/.test(figuresSrc) && /<desc id="arch-desc">/.test(figuresSrc))
+    check('the architecture SVG wires role="img" to its title/desc via aria-labelledby', /role="img" aria-labelledby="arch-title arch-desc"/.test(figuresSrc))
+    check('the architecture SVG scales to its container instead of forcing a fixed width', /className="w-full"/.test(figuresSrc) && !/min-w-\[/.test(figuresSrc))
+    check(
+      'the architecture figure ships both a wide (md+) and a narrow (below md) rendering of the same content',
+      /hidden md:block/.test(figuresSrc) && /md:hidden/.test(figuresSrc)
+    )
+    // No figure should need a horizontally-scrollable viewport -- a diagram
+    // whose default view is clipped reads as broken rather than scrollable.
+    // Matches the JSX prop being passed (a bare `scrollable` attribute on
+    // its own line, or `scrollable={...}`) rather than the word appearing
+    // anywhere -- the prose in this file's own comments says "scrollable".
+    check('no figure opts into the horizontally-scrollable viewport', !/^\s*scrollable(\s*=|\s*$)/m.test(figuresSrc))
+    check(
+      'the architecture figure names all five participants in the request chain',
+      ['Developer or user', 'MCP-compatible AI client', 'IBM i MCP Server', 'Mapepire', 'Db2 for i'].every((n) => figuresSrc.includes(n))
+    )
+    check('the architecture figure marks where SQL is defined and where authority is enforced', figuresSrc.includes('SQL is defined here') && figuresSrc.includes('Authority is enforced here'))
+
+    // Reader-facing "Figure N" labels must ascend in the order the reader
+    // actually meets them, which is the order of the [[FIGURE:...]] markers
+    // in the Markdown -- NOT the order the components are declared in
+    // mcp-figures.tsx. These drifted apart once already (a reader scrolled
+    // past Figure 6, then 1, 2, 4, 3, 5), so this pins them together.
+    {
+      const markdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${LAUNCH_SLUG}.md`), 'utf-8')
+      const markerOrder = [...markdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+
+      // component function name -> the `number={N}` it passes. Scoped to
+      // each component's own body by splitting on `export function` first:
+      // a single regex spanning the file would let a component that passes
+      // no `number` (McpUseCaseGrid, an unnumbered grid) swallow the next
+      // component's declaration along with its number.
+      const numberByComponent = new Map<string, number>()
+      for (const chunk of figuresSrc.split(/(?=export function )/)) {
+        const name = chunk.match(/^export function (\w+)\(/)?.[1]
+        const num = chunk.match(/number=\{(\d+)\}/)?.[1]
+        if (name && num) numberByComponent.set(name, Number(num))
+      }
+      // figure marker name -> component name, read from the registry block
+      const registryBlock = figuresSrc.slice(figuresSrc.indexOf('INSIGHT_FIGURE_REGISTRY'))
+      const componentByMarker = new Map<string, string>()
+      for (const m of registryBlock.matchAll(/'?([a-z0-9-]+)'?\s*:\s*(Mcp\w+)/g)) {
+        componentByMarker.set(m[1], m[2])
+      }
+
+      const numbersInReadingOrder = markerOrder
+        .map((marker) => numberByComponent.get(componentByMarker.get(marker) ?? ''))
+        .filter((n): n is number => typeof n === 'number')
+
+      check(
+        'every numbered figure resolves to a "Figure N" label',
+        numbersInReadingOrder.length === markerOrder.filter((m) => m !== 'use-cases').length,
+        `resolved ${numbersInReadingOrder.length} of ${markerOrder.length} markers`
+      )
+      check(
+        'figure numbers ascend in the order a reader scrolls past them',
+        numbersInReadingOrder.every((n, i) => i === 0 || n > numbersInReadingOrder[i - 1]),
+        `reading order gives: ${numbersInReadingOrder.join(', ')}`
+      )
+      check(
+        'figure numbers start at 1 and have no gaps',
+        numbersInReadingOrder.every((n, i) => n === i + 1),
+        `got: ${numbersInReadingOrder.join(', ')}`
+      )
+    }
+    check('the shared figure wrapper renders a real <figure>/<figcaption> pair (semantic, not div soup)', figureWrapperSrc.includes('<figure') && figureWrapperSrc.includes('<figcaption'))
+    check('the one-time diagram entrance uses the shared reduced-motion-safe class', figuresSrc.includes('insight-figure-enter'))
+
+    const globalsCss = readRepoFile('app/globals.css')
+    check(
+      'the diagram entrance keyframes exist and are disabled under prefers-reduced-motion',
+      (() => {
+        const hasKeyframes = /@keyframes insight-figure-in/.test(globalsCss)
+        const match = globalsCss.match(/@media \(prefers-reduced-motion: reduce\)\s*\{([\s\S]*?)\n\}/g) ?? []
+        const disabled = match.some((block) => block.includes('.insight-figure-enter') && /animation:\s*none/.test(block))
+        return hasKeyframes && disabled
+      })()
+    )
+    check('the horizontally-scrollable figure viewport has a visible (not only-on-hover) scrollbar treatment', globalsCss.includes('.insight-figure-scroll'))
+
+    // Content-accuracy guardrails specific to this article's explicit "do not
+    // overclaim" requirements.
+    const launchMarkdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${LAUNCH_SLUG}.md`), 'utf-8')
+    check(
+      'the article never claims iRPGenie itself provides a live IBM i MCP connection',
+      !/iRPGenie (provides|offers|includes) .*(live|real).*(MCP|IBM i) connection/i.test(launchMarkdown)
+    )
+    check('the article cites the real IBM/ibmi-mcp-server GitHub repository as a source', launchMarkdown.includes('github.com/IBM/ibmi-mcp-server'))
+    check('the article includes a Sources and further reading section', /## Sources and further reading/.test(launchMarkdown))
+    check('the article\'s balanced conclusion states MCP does not replace IBM i expertise', /MCP does not replace IBM i expertise/.test(launchMarkdown))
+  }
+
+  // ---------------------------------------------------------------------------
+  section('12. Documentation hygiene: no stale PR references, no leftover "Launch article" wording')
   // ---------------------------------------------------------------------------
 
   {
@@ -292,8 +487,11 @@ async function runChecks() {
       'lib/insight-categories.ts': readRepoFile('lib/insight-categories.ts'),
       'lib/insight-content.ts': readRepoFile('lib/insight-content.ts'),
       'lib/insight-structured-data.ts': readRepoFile('lib/insight-structured-data.ts'),
+      'lib/insight-render.ts': readRepoFile('lib/insight-render.ts'),
       'content/insights/catalog.ts': readRepoFile('content/insights/catalog.ts'),
       'components/insight-card.tsx': readRepoFile('components/insight-card.tsx'),
+      'components/insights/insight-figure.tsx': readRepoFile('components/insights/insight-figure.tsx'),
+      'components/insights/mcp-figures.tsx': readRepoFile('components/insights/mcp-figures.tsx'),
       'app/insights/page.tsx': readRepoFile('app/insights/page.tsx'),
       'app/insights/[slug]/page.tsx': readRepoFile('app/insights/[slug]/page.tsx'),
     }
@@ -318,7 +516,7 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('11. Listing-page social metadata and keyboard-focus safeguards')
+  section('13. Listing-page social metadata and keyboard-focus safeguards')
   // ---------------------------------------------------------------------------
 
   {
@@ -361,7 +559,7 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('12. Hero visual-polish pass: decorative-only, reduced-motion-safe, no external assets')
+  section('14. Hero visual-polish pass: decorative-only, reduced-motion-safe, no external assets')
   // ---------------------------------------------------------------------------
 
   {

@@ -391,3 +391,55 @@
     animation: none;
   }
 }
+
+/*
+ * Insight figure scroll viewport (PR #199 -- first published Insight,
+ * components/insights/insight-figure.tsx's `scrollable` prop). Same pattern
+ * as .dd-table-wrap above (persistently visible thin scrollbar, not
+ * only-on-hover, so "this can scroll" is discoverable without JS overflow
+ * detection) -- kept as its own rule rather than reusing .dd-table-wrap
+ * since figures aren't tables and this class has no `.deep-dive-article`
+ * ancestor requirement.
+ */
+.insight-figure-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(148 163 184) transparent; /* slate-400 thumb */
+}
+
+.insight-figure-scroll::-webkit-scrollbar {
+  height: 7px;
+}
+
+.insight-figure-scroll::-webkit-scrollbar-thumb {
+  background-color: rgb(148 163 184); /* slate-400 */
+  border-radius: 9999px;
+}
+
+/*
+ * One-time diagram entry (Required Visual spec: "subtle one-time connector
+ * or node-entry motion is acceptable only when the static diagram is
+ * already completely understandable, prefers-reduced-motion is respected,
+ * and there is no continuous pulsing/glowing/moving effect"). A single
+ * fade/rise, identical in spirit to .section-hero-enter, applied to each
+ * <svg> figure's content group -- never to figcaption/prose text.
+ */
+@keyframes insight-figure-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.insight-figure-enter {
+  animation: insight-figure-in 0.6s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .insight-figure-enter {
+    animation: none;
+  }
+}
