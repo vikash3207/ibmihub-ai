@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Clock, Calendar } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { INSIGHTS } from '@/content/insights/catalog'
@@ -77,15 +77,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ...(insight.updatedAt ? { modifiedTime: insight.updatedAt } : {}),
     },
   }
-}
-
-function formatDate(isoDate: string): string {
-  return new Date(`${isoDate}T00:00:00Z`).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    timeZone: 'UTC',
-  })
 }
 
 export default async function InsightPage({ params }: Props) {
@@ -168,12 +159,16 @@ export default async function InsightPage({ params }: Props) {
                 </div>
                 <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{insight.title}</h1>
                 <p className="mt-3 text-base text-slate-600 leading-relaxed">{insight.description}</p>
-                <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
-                  <span className="inline-flex items-center gap-1.5">
-                    <Calendar className="h-3.5 w-3.5" aria-hidden="true" />
-                    <time dateTime={insight.publishedAt}>{formatDate(insight.publishedAt)}</time>
-                  </span>
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-xs text-slate-600">
+                {/* Deliberately no publication date here (IBM i Insights Attribution
+                    Cleanup and Date Display Removal) -- this section is meant to read
+                    as evergreen, not time-stamped. publishedAt still exists on the
+                    Insight record for catalog validation, sitemap lastModified, and
+                    the (non-visible) openGraph.publishedTime / JSON-LD datePublished
+                    generated elsewhere on this page -- see generateMetadata() above
+                    and lib/insight-structured-data.ts. None of those render as
+                    visible page content. */}
+                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-xs font-medium text-slate-600">
                     <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                     ~{insight.readingTimeMinutes} min read
                   </span>

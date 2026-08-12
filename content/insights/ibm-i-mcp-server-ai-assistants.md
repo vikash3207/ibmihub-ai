@@ -100,11 +100,11 @@ The real, durable opportunity isn't that AI "understands" IBM i. It's that the d
 
 ### Sources and further reading
 
-This article was researched from IBM's own repository and documentation; a community walkthrough is credited below as inspiration for the "here's what a hands-on IBM i integration article can look like" framing, not as a technical source.
+The technical claims in this article were verified against IBM's own repository and official documentation, which are the primary sources below. A community overview of the same project is also listed as a secondary reference.
 
 - [IBM/ibmi-mcp-server on GitHub](https://github.com/IBM/ibmi-mcp-server) — the official IBM i MCP Server and `ibmi` CLI source, including the `tools/` directory's ready-made YAML tool collections
 - [Mapepire](https://mapepire-ibmi.github.io/) — documentation for the WebSocket SQL gateway the MCP server connects through
 - [Model Context Protocol specification](https://modelcontextprotocol.io/) — the open protocol itself, independent of any IBM i implementation
-- *"Your RPG Is Already REST-Ready: A Walkthrough With Integrated Web Services (IWS)"* by Gaurav Singh, and the related Hashnode piece on IBM i MCP Server — credited as inspiration for tone and depth, not as a source for the technical claims above
+- ["IBM i MCP Server: Talk to IBM i in Plain English"](https://sbm-tech.hashnode.dev/ibm-i-mcp-server) by Sangamesh SBM — a secondary community overview of the same project, consulted alongside the primary sources above
 
 Available features, package names, and configuration details evolve; verify current specifics against the official repository and documentation before implementing.

@@ -478,7 +478,85 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('12. Documentation hygiene: no stale PR references, no leftover "Launch article" wording')
+  section('12. Sources attribution (IBM i Insights Attribution Cleanup and Date Display Removal)')
+  // ---------------------------------------------------------------------------
+
+  {
+    const launchMarkdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${LAUNCH_SLUG}.md`), 'utf-8')
+
+    // The IWS/wrapper-program article is about a different subject
+    // (Integrated Web Services, RPG-to-REST wrapper programs) and was
+    // mistakenly bundled into this MCP Insight's Sources alongside an
+    // unnamed "related Hashnode piece" -- neither the title, the author,
+    // nor the unrelated-subject phrase should appear here anymore.
+    check('the unrelated IWS/wrapper-program article is not cited as a source', !/Integrated Web Services|REST-Ready|Gaurav Singh/i.test(launchMarkdown))
+    check('no vague, unnamed "related Hashnode piece" reference remains', !/related Hashnode piece/i.test(launchMarkdown))
+
+    // The correct secondary source: named, linked, and on-subject.
+    check('the Hashnode MCP article is linked with its real URL', launchMarkdown.includes('https://sbm-tech.hashnode.dev/ibm-i-mcp-server'))
+    check('the Hashnode MCP article\'s title is quoted correctly', launchMarkdown.includes('IBM i MCP Server: Talk to IBM i in Plain English'))
+    check('the Hashnode article\'s author, Sangamesh SBM, is credited', launchMarkdown.includes('Sangamesh SBM'))
+    check(
+      'the Hashnode source is identified as a secondary community reference, not a primary one',
+      /Sangamesh SBM[^\n]*secondary community/.test(launchMarkdown)
+    )
+
+    // All three primary sources from the original pass are still present --
+    // this is a correction to one entry, not a rewrite of the section.
+    check('IBM/ibmi-mcp-server remains a listed source', launchMarkdown.includes('github.com/IBM/ibmi-mcp-server'))
+    check('Mapepire documentation remains a listed source', launchMarkdown.includes('mapepire-ibmi.github.io'))
+    check('the Model Context Protocol specification remains a listed source', launchMarkdown.includes('modelcontextprotocol.io'))
+
+    // No language implying iRPGenie copied/reproduced the community piece,
+    // and no reader-facing "originality audit" framing -- that kind of
+    // defensive language doesn't belong in the published article itself.
+    check('no language implies iRPGenie copied or reproduced the community article', !/\b(copied|reproduc\w+|duplicat\w+|plagiar\w+)\b/i.test(launchMarkdown))
+    check('no "originality audit" or similar defensive framing is shown to readers', !/originality (audit|review|check)/i.test(launchMarkdown))
+  }
+
+  // ---------------------------------------------------------------------------
+  section('13. No publication date is ever rendered as visible page content')
+  // ---------------------------------------------------------------------------
+
+  {
+    const detailSrc = readRepoFile('app/insights/[slug]/page.tsx')
+    const cardSrc = readRepoFile('components/insight-card.tsx')
+    const listingSrc = readRepoFile('app/insights/page.tsx')
+
+    // The detail page's visible metadata row (reading time + tags) is a
+    // small, specific block -- isolate it so these checks can't accidentally
+    // pass by looking at generateMetadata()'s non-visible openGraph fields
+    // a few lines above, which legitimately still reference publishedAt.
+    const heroBlock = detailSrc.slice(detailSrc.indexOf('<h1'), detailSrc.indexOf('{loadError'))
+    check('the detail hero has no <time> element', !/<time[\s>]/.test(heroBlock))
+    check('the detail hero renders no Calendar icon', !/Calendar/.test(heroBlock))
+    check('the detail hero calls no date-formatting function', !/formatDate\(/.test(heroBlock))
+    check('the detail hero renders no relative-date substitute label', !/\b(Recently published|New|Updated)\b/.test(heroBlock))
+    check('the detail hero still renders reading time', /min read/.test(heroBlock))
+    check('the detail hero still renders tags', /insight\.tags\.map/.test(heroBlock))
+
+    check('InsightCard has no <time> element', !/<time[\s>]/.test(cardSrc))
+    check('InsightCard imports no Calendar icon', !/\bCalendar\b/.test(cardSrc))
+    check('InsightCard has no date-formatting function', !/formatPublishedDate|formatDate/.test(cardSrc))
+    check('InsightCard renders no relative-date substitute label', !/\b(Recently published|New|Updated)\b/.test(cardSrc))
+    check('InsightCard still renders reading time', /min read/.test(cardSrc))
+    check('InsightCard still renders tags', /insight\.tags\.slice/.test(cardSrc))
+
+    check('the listing page renders no visible date (it only ever renders Insights through InsightCard)', !/<time[\s>]/.test(listingSrc) && !/formatPublishedDate|formatDate/.test(listingSrc))
+
+    // publishedAt must still exist and still be valid -- this PR removes
+    // visible rendering, not the underlying field.
+    check('Insight.publishedAt is still part of the type (internal use: validation, sorting, non-visible metadata)', readRepoFile('lib/insights.ts').includes('publishedAt: string'))
+    check('generateMetadata() still sets non-visible openGraph.publishedTime from publishedAt', /publishedTime:\s*insight\.publishedAt/.test(detailSrc))
+    check('buildInsightStructuredData() still sets non-visible JSON-LD datePublished from publishedAt', readRepoFile('lib/insight-structured-data.ts').includes('datePublished: insight.publishedAt'))
+    check(
+      'lib/insight-structured-data.ts documents that datePublished/dateModified are metadata only, never rendered visibly',
+      /metadata only/.test(readRepoFile('lib/insight-structured-data.ts'))
+    )
+  }
+
+  // ---------------------------------------------------------------------------
+  section('14. Documentation hygiene: no stale PR references, no leftover "Launch article" wording')
   // ---------------------------------------------------------------------------
 
   {
@@ -516,7 +594,7 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('13. Listing-page social metadata and keyboard-focus safeguards')
+  section('15. Listing-page social metadata and keyboard-focus safeguards')
   // ---------------------------------------------------------------------------
 
   {
@@ -559,7 +637,7 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
-  section('14. Hero visual-polish pass: decorative-only, reduced-motion-safe, no external assets')
+  section('16. Hero visual-polish pass: decorative-only, reduced-motion-safe, no external assets')
   // ---------------------------------------------------------------------------
 
   {
