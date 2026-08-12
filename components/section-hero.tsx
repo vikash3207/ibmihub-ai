@@ -58,18 +58,19 @@ interface SectionHeroProps {
  * descriptions), the section was barely taller than
  * pt + content + pb, so the fade's lighter portion crept upward into the
  * still-white/slate-300 description text, killing contrast right where
- * visitors are reading. Three independent fixes, so no single content
- * length or zoom level can reintroduce the defect:
- *  1. `min-h-*` on the dark variant guarantees the section is always tall
- *     enough that short copy can't sit near the bottom edge.
- *  2. The fade itself is shorter and its lightening is deferred to the last
- *     half of that shorter band (`transparent` until the midpoint, not from
- *     the top), so less of it is visually white at all.
- *  3. A soft, same-hue (slate-950) radial glow sits behind the copy
+ * visitors are reading. Two independent fixes (a `min-h-*` floor was tried
+ * first but produced an obviously oversized empty gap on short-copy pages,
+ * so it was dropped in favor of these):
+ *  1. Bottom padding grew from `pb-20 sm:pb-24` to `pb-24 sm:pb-28`, and the
+ *     fade itself shrank and its lightening is deferred to the last half of
+ *     that shorter band (`transparent` until the midpoint, not from the
+ *     top) -- together, meaningfully less of the section is visually white,
+ *     and what remains sits further from the copy.
+ *  2. A soft, same-hue (slate-950) radial glow sits behind the copy
  *     specifically -- not a hard-edged rectangle, just extra density in the
  *     area text actually occupies -- as a content-length-agnostic safety
- *     net (covers arbitrarily long wrapped text at narrow widths/200% zoom
- *     that the fixed min-height alone might not anticipate).
+ *     net that covers arbitrarily long wrapped text at narrow widths/200%
+ *     zoom without adding any visible empty space when copy is short.
  *
  * Server component: nothing here needs interactivity, so it stays one.
  */
@@ -104,8 +105,7 @@ export function SectionHero({
     <section
       className={cn(
         'relative overflow-hidden pt-16 sm:pt-20',
-        children ? 'pb-16 sm:pb-20' : 'pb-20 sm:pb-24',
-        isDark && 'min-h-[26rem] sm:min-h-[30rem]',
+        children ? 'pb-16 sm:pb-20' : 'pb-24 sm:pb-28',
         isDark ? 'bg-slate-950' : cn('border-b border-slate-100', theme.lightWashClasses)
       )}
     >

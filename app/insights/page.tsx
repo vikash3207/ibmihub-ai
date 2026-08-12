@@ -108,7 +108,7 @@ export default function InsightsPage() {
       <SiteHeader />
 
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-28 sm:pb-32 min-h-[26rem] sm:min-h-[30rem]">
+        <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-28 sm:pb-32">
           {/* Faint technical grid -- pure CSS, no images */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:44px_44px]"
