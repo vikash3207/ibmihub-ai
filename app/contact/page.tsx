@@ -32,6 +32,7 @@ export default function ContactPage() {
           icon={Mail}
           badgeLabel="We read every message"
           title={`Contact ${SITE_NAME}`}
+          accentWord={SITE_NAME}
           description="Have feedback, questions, or suggestions for improving IBM&nbsp;i, RPGLE, SQL, or Practice Lab learning? We'd love to hear from you."
           theme={CONTACT_HERO_THEME}
         />

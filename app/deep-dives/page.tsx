@@ -60,6 +60,7 @@ export default function DeepDivesPage() {
           icon={Sparkles}
           badgeLabel="Professional IBM i reference guides"
           title="Deep Dives"
+          accentWord="Dives"
           tagline="Standalone topic guides — no fixed order required."
           description="Focused, professional-grade guides for important IBM&nbsp;i, RPGLE, SQL, CL, and operations topics — detailed coverage of a specific concept, production scenario, or interview-heavy topic."
           theme={DEEP_DIVES_HERO_THEME}

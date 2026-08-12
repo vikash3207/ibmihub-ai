@@ -225,7 +225,20 @@ async function runChecks() {
   {
     const listingSrc = readRepoFile('app/insights/page.tsx')
 
-    check('the page has an "IBM i Insights" heading', /IBM i Insights<\/h1>/.test(listingSrc))
+    // The h1's "Insights" is wrapped in its own <span> for the gradient
+    // accent treatment (Hero Contrast Fix), so this can no longer be a
+    // literal "IBM i Insights</h1>" substring match -- strip tags and JSX
+    // whitespace expressions from the h1's inner source to verify the
+    // rendered text is still exactly "IBM i Insights".
+    const h1Match = listingSrc.match(/<h1[^>]*>([\s\S]*?)<\/h1>/)
+    const h1Text = h1Match
+      ? h1Match[1]
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/\{'\s*'\}/g, ' ')
+          .replace(/\s+/g, ' ')
+          .trim()
+      : ''
+    check('the page has an "IBM i Insights" heading', h1Text === 'IBM i Insights')
     check('the page states the approved tagline', listingSrc.includes('Practical ideas, modern techniques, and emerging trends.'))
     check(
       'the page explains Insights are independent editorial content, separate from lessons and Deep Dives',

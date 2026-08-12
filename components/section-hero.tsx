@@ -24,6 +24,13 @@ interface SectionHeroProps {
   tagline?: string
   description: string
   theme: SectionHeroTheme
+  /**
+   * If this exact substring appears in `title`, it renders as a restrained
+   * blue/cyan/indigo gradient accent instead of plain white -- see
+   * .hero-title-accent in app/globals.css. Optional and deliberately used
+   * sparingly (one word or short phrase per heading, never the paragraph).
+   */
+  accentWord?: string
   /** CTAs or other content below the description. */
   children?: ReactNode
   /** Set false to skip the one-time entrance animation (rarely needed). */
@@ -32,17 +39,38 @@ interface SectionHeroProps {
 
 /**
  * Reusable top-level section hero (Site-wide Navigation and Section Landing
- * Page Visual Upgrade; Premium Section Layout Alignment). Generalizes the
- * shell app/insights/page.tsx introduced: dark bg-slate-950 background +
- * blurred glow blobs + optional faint grid + fade-to-white, OR a lighter
- * gradient-wash variant -- with per-section copy and theme passed in as
- * props rather than hardcoded, so this stays a structural/decorative shell,
- * not a page-specific component. Always renders edge-to-edge (full-bleed);
- * every page using this component sits inside a layout that no longer
- * imposes its own max-width/padding, so the hero itself defines the page's
- * outer width -- see app/learn/layout.tsx and app/(authenticated)/layout.tsx.
- * All decorative elements are `aria-hidden` and CSS-only (no images, no
- * animation library).
+ * Page Visual Upgrade; Premium Section Layout Alignment; Hero Contrast Fix).
+ * Generalizes the shell app/insights/page.tsx introduced: dark bg-slate-950
+ * background + blurred glow blobs + optional faint grid + fade-to-white, OR
+ * a lighter gradient-wash variant -- with per-section copy and theme passed
+ * in as props rather than hardcoded, so this stays a structural/decorative
+ * shell, not a page-specific component. Always renders edge-to-edge
+ * (full-bleed); every page using this component sits inside a layout that no
+ * longer imposes its own max-width/padding, so the hero itself defines the
+ * page's outer width -- see app/learn/layout.tsx and
+ * app/(authenticated)/layout.tsx. All decorative elements are `aria-hidden`
+ * and CSS-only (no images, no animation library).
+ *
+ * Contrast fix: the dark variant's bottom fade-to-white used to be a fixed
+ * `h-48 sm:h-56` band anchored to the section's bottom edge, while the
+ * section's own bottom padding was only `pb-20 sm:pb-24`. On pages with
+ * short hero copy (Learning Center, Dashboard, Contact -- one-line
+ * descriptions), the section was barely taller than
+ * pt + content + pb, so the fade's lighter portion crept upward into the
+ * still-white/slate-300 description text, killing contrast right where
+ * visitors are reading. Two independent fixes (a `min-h-*` floor was tried
+ * first but produced an obviously oversized empty gap on short-copy pages,
+ * so it was dropped in favor of these):
+ *  1. Bottom padding grew from `pb-20 sm:pb-24` to `pb-24 sm:pb-28`, and the
+ *     fade itself shrank and its lightening is deferred to the last half of
+ *     that shorter band (`transparent` until the midpoint, not from the
+ *     top) -- together, meaningfully less of the section is visually white,
+ *     and what remains sits further from the copy.
+ *  2. A soft, same-hue (slate-950) radial glow sits behind the copy
+ *     specifically -- not a hard-edged rectangle, just extra density in the
+ *     area text actually occupies -- as a content-length-agnostic safety
+ *     net that covers arbitrarily long wrapped text at narrow widths/200%
+ *     zoom without adding any visible empty space when copy is short.
  *
  * Server component: nothing here needs interactivity, so it stays one.
  */
@@ -53,16 +81,31 @@ export function SectionHero({
   tagline,
   description,
   theme,
+  accentWord,
   children,
   animateIn = true,
 }: SectionHeroProps) {
   const isDark = theme.variant === 'dark'
 
+  const accentIndex = accentWord ? title.indexOf(accentWord) : -1
+  const titleNode =
+    accentWord && accentIndex !== -1 ? (
+      <>
+        {title.slice(0, accentIndex)}
+        <span className="hero-title-accent bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent">
+          {accentWord}
+        </span>
+        {title.slice(accentIndex + accentWord.length)}
+      </>
+    ) : (
+      title
+    )
+
   return (
     <section
       className={cn(
         'relative overflow-hidden pt-16 sm:pt-20',
-        children ? 'pb-16 sm:pb-20' : 'pb-20 sm:pb-24',
+        children ? 'pb-16 sm:pb-20' : 'pb-24 sm:pb-28',
         isDark ? 'bg-slate-950' : cn('border-b border-slate-100', theme.lightWashClasses)
       )}
     >
@@ -77,6 +120,17 @@ export function SectionHero({
           <div key={index} className={cn('pointer-events-none absolute rounded-full blur-[110px]', glowClass)} aria-hidden="true" />
         ))}
 
+      {/* Soft, same-hue scrim behind the copy -- see the contrast-fix note
+          above. An ellipse with a smooth falloff, not a hard rectangle, and
+          the same slate-950 hue as the base background so it reads as
+          "denser dark" rather than a distinct shape. */}
+      {isDark && (
+        <div
+          className="pointer-events-none absolute inset-0 [background:radial-gradient(ellipse_70%_65%_at_50%_38%,rgba(2,6,23,0.55)_0%,rgba(2,6,23,0.22)_55%,transparent_78%)]"
+          aria-hidden="true"
+        />
+      )}
+
       <div
         className={cn(
           'relative mx-auto max-w-3xl px-4 sm:px-6 text-center',
@@ -88,7 +142,7 @@ export function SectionHero({
           {badgeLabel}
         </span>
         <h1 className={cn('text-4xl sm:text-5xl font-bold tracking-tight mb-4', isDark ? 'text-white' : 'text-slate-900')}>
-          {title}
+          {titleNode}
         </h1>
         {tagline && (
           <p className={cn('text-lg font-semibold mb-5', isDark ? 'text-cyan-300' : 'text-blue-700')}>{tagline}</p>
@@ -99,9 +153,12 @@ export function SectionHero({
         {children && <div className="mt-7">{children}</div>}
       </div>
 
+      {/* Fade-to-white: shorter than before, and transparent for its own
+          first half, so lightening is confined close to the literal bottom
+          edge instead of reaching up toward the copy. */}
       {isDark && (
         <div
-          className="pointer-events-none absolute inset-x-0 bottom-0 h-48 sm:h-56 bg-gradient-to-b from-transparent via-white/70 to-white"
+          className="pointer-events-none absolute inset-x-0 bottom-0 h-32 sm:h-40 [background:linear-gradient(to_bottom,transparent_0%,transparent_45%,white_100%)]"
           aria-hidden="true"
         />
       )}
