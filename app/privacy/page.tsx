@@ -22,7 +22,11 @@ export const metadata: Metadata = {
  * conversation content" -- migrations/003_ai_tutor_feedback_and_usage.sql).
  * Practice question answers and Practice Lab/SQL Console state are not
  * persisted anywhere server-side -- confirmed by the absence of any table
- * for them, not assumed.
+ * for them, not assumed. The Contact form claims (PR #201) were checked the
+ * same way against supabase/migrations/012_contact_form_submissions.sql and
+ * lib/contact-email-template.ts: that table stores only a hashed IP and
+ * submission status/outcome, never name/email/subject/message content,
+ * which instead goes to Resend as the email itself.
  */
 export default function PrivacyPolicyPage() {
   return (
@@ -86,6 +90,27 @@ export default function PrivacyPolicyPage() {
         SQL, exercise progress -- is saved to our servers.
       </p>
 
+      <h2>Contact form</h2>
+      <p>
+        The &ldquo;Send a message&rdquo; form on the <Link href="/contact">Contact page</Link>{' '}
+        sends your name, email address, subject, and message to <strong>Resend</strong>, our
+        transactional email provider, which delivers it as an email to our contact inbox. We use
+        this information only to review and respond to your message. We do not store the content
+        of your submission in our own database -- it exists only as that email, subject to the
+        retention of that inbox and of Resend. Your reply-to address is used only so we can
+        respond to you; the form does not add you to any mailing list or marketing communications.
+      </p>
+      <p>
+        To prevent abuse of this public form, our servers also retain a one-way cryptographic hash
+        of the sending IP address (never the IP address itself) alongside the submission&apos;s
+        status, used only for spam and rate-limiting and never linked to your message content.
+      </p>
+      <p>
+        <strong>Do not send passwords, IBM&nbsp;i credentials, production system details, client
+        confidential data, private source code, or other secrets through the contact form</strong>{' '}
+        -- the same guidance as the AI Tutor above.
+      </p>
+
       <h2>Basic technical logs</h2>
       <p>
         Our hosting provider (Vercel) and database provider (Supabase) generate standard
@@ -134,6 +159,7 @@ export default function PrivacyPolicyPage() {
         <li><strong>Supabase</strong> -- authentication and database hosting.</li>
         <li><strong>Vercel</strong> -- application hosting and deployment.</li>
         <li><strong>Anthropic</strong> -- the AI model provider behind the AI Tutor.</li>
+        <li><strong>Resend</strong> -- delivers email sent through the Contact page&apos;s form.</li>
         <li><strong>Google Analytics</strong> -- website usage statistics, described above.</li>
       </ul>
       <p>Each provider only receives the minimum data needed to perform its role, described above.</p>

@@ -22,6 +22,7 @@
     "test:user-profile": "npx tsx scripts/user-profile-regression.ts",
     "test:insights": "npx tsx scripts/insights-regression.ts",
     "test:site-navigation": "npx tsx scripts/site-navigation-regression.ts",
+    "test:contact-form": "npx tsx scripts/contact-form-regression.ts",
     "test:tailwind-content": "npx tsx scripts/tailwind-content-regression.ts"
   },
   "dependencies": {
@@ -39,6 +40,7 @@
     "remark": "^15.0.1",
     "remark-gfm": "^4.0.1",
     "remark-rehype": "^11.1.1",
+    "resend": "^6.19.0",
     "server-only": "^0.0.1",
     "tailwind-merge": "^2.5.5"
   },

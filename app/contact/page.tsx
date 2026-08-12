@@ -16,11 +16,12 @@ export const metadata: Metadata = {
 }
 
 /**
- * Contact page (PR #148). No backend: no server action, API route, or
- * database table -- the two contact cards are plain mailto: links, and the
- * optional form (components/contact-form.tsx) just composes a mailto: URL
- * client-side. If either email constant is ever unset, its card/section is
- * omitted rather than showing a broken mailto: link.
+ * Contact page (PR #148; form backed by Resend as of PR #201). The two
+ * contact cards remain plain mailto: links -- if either email constant is
+ * ever unset, its card/section is omitted rather than showing a broken
+ * mailto: link. The "Send a message" form (components/contact-form.tsx)
+ * submits to app/api/contact/route.ts, which sends via Resend server-side;
+ * it no longer depends on the visitor having a local email app configured.
  */
 export default function ContactPage() {
   return (
@@ -149,11 +150,10 @@ export default function ContactPage() {
                 <h2 className="text-lg font-semibold text-slate-900">Send a message</h2>
               </div>
               <p className="text-sm text-slate-500 mb-6">
-                Prefer not to copy an email address by hand? Fill this in and it opens your email
-                app with everything pre-filled — nothing here is sent or stored by {SITE_NAME}{' '}
-                itself.
+                Send your feedback, question, or suggestion directly to {SITE_NAME}. We&apos;ll use
+                your details only to review and respond to your message.
               </p>
-              <ContactForm toEmail={CONTACT_EMAIL} />
+              <ContactForm />
             </div>
           )}
         </div>
