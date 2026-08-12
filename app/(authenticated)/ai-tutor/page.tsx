@@ -55,7 +55,7 @@ export default async function AiTutorPage({ searchParams }: Props) {
   const initialLessonContext = lesson ? { slug: lesson.slug, title: lesson.title } : null
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 px-4 py-10 sm:px-6">
       <div className="relative overflow-hidden rounded-3xl border border-cyan-100 bg-gradient-to-br from-cyan-50/70 via-white to-blue-50/40 px-6 py-8 sm:px-8 sm:py-10">
         <div
           className="pointer-events-none absolute -top-14 -right-10 h-48 w-48 rounded-full bg-cyan-300/25 blur-[90px]"

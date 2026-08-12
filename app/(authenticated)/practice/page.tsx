@@ -35,14 +35,15 @@ interface Props {
 }
 
 /**
- * Practice landing page (visually upgraded -- Site-wide Navigation and
- * Section Landing Page Visual Upgrade). app/(authenticated)/layout.tsx
- * wraps every authenticated page (including Onboarding, which this PR must
- * not touch) in a padded `max-w-3xl` <main>, so this hero uses
- * <SectionHero>'s `contained` prop -- same constraint and reasoning as
- * app/learn/page.tsx. PRACTICE_HERO_THEME (lib/section-theme.ts) is the
- * same dark bg-slate-950 + glow + line-grid recipe as Deep Dives, in
- * emerald/teal.
+ * Practice landing page (visually upgraded -- Premium Section Layout
+ * Alignment). app/(authenticated)/layout.tsx no longer imposes a page-wide
+ * max-width/padding (see that file's own comment), so this page renders a
+ * full-bleed <SectionHero> as a direct child of <main> -- same structure as
+ * app/deep-dives/page.tsx: hero, then the no-score notice + Practice Lab
+ * promo overlapping the hero's bottom fade, then the topic/question browser
+ * in a normally-padded section below. PRACTICE_HERO_THEME
+ * (lib/section-theme.ts) is the same dark bg-slate-950 + glow + line-grid
+ * recipe as Deep Dives, in emerald/teal.
  * INTRO_NOTICE's wording, PracticeBrowser's props/behavior, and the auth
  * redirect are all byte-for-byte unchanged.
  */
@@ -66,9 +67,8 @@ export default async function PracticePage({ searchParams }: Props) {
   const lessonTitleBySlug = Object.fromEntries(lessons.map((l) => [l.slug, l.title]))
 
   return (
-    <div className="space-y-8">
+    <>
       <SectionHero
-        contained
         icon={ClipboardCheck}
         badgeLabel="Low-pressure, no-score practice"
         title="Practice Questions"
@@ -76,41 +76,45 @@ export default async function PracticePage({ searchParams }: Props) {
         theme={PRACTICE_HERO_THEME}
       />
 
-      <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-4 text-sm text-slate-700 leading-relaxed">
-        {INTRO_NOTICE}
+      <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-3xl space-y-4 px-4 sm:px-6">
+        <div className="rounded-2xl border border-emerald-100 bg-white p-4 text-sm text-slate-700 leading-relaxed shadow-sm">
+          {INTRO_NOTICE}
+        </div>
+
+        <Link
+          href="/practice-lab"
+          className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
+        >
+          <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
+            <div
+              className="pointer-events-none absolute -top-10 right-0 h-32 w-32 rounded-full bg-emerald-500/20 blur-[60px]"
+              aria-hidden="true"
+            />
+            <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
+              <FlaskConical className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="relative flex-1">
+              <span className="block font-semibold">Try the Practice Lab</span>
+              <span className="mt-0.5 block text-sm text-slate-300">
+                Hands-on 5250-style command practice and an ACS-style SQL console.
+              </span>
+            </div>
+            <ArrowRight
+              className="relative h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+              aria-hidden="true"
+            />
+          </div>
+        </Link>
       </div>
 
-      <Link
-        href="/practice-lab"
-        className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-2"
-      >
-        <div className="relative flex items-center gap-3 overflow-hidden rounded-2xl border border-slate-800 bg-gradient-to-r from-slate-900 to-slate-800 p-5 text-white shadow-sm transition-all duration-300 group-hover:-translate-y-0.5 group-hover:shadow-lg motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
-          <div
-            className="pointer-events-none absolute -top-10 right-0 h-32 w-32 rounded-full bg-emerald-500/20 blur-[60px]"
-            aria-hidden="true"
-          />
-          <span className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-emerald-500 to-teal-500 text-white">
-            <FlaskConical className="h-5 w-5" aria-hidden="true" />
-          </span>
-          <div className="relative flex-1">
-            <span className="block font-semibold">Try the Practice Lab</span>
-            <span className="mt-0.5 block text-sm text-slate-300">
-              Hands-on 5250-style command practice and an ACS-style SQL console.
-            </span>
-          </div>
-          <ArrowRight
-            className="relative h-4 w-4 shrink-0 text-slate-400 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-            aria-hidden="true"
-          />
-        </div>
-      </Link>
-
-      <PracticeBrowser
-        topics={PRACTICE_TOPICS}
-        questions={PRACTICE_QUESTIONS}
-        lessonTitleBySlug={lessonTitleBySlug}
-        initialTopicId={initialTopicId ?? null}
-      />
-    </div>
+      <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-16">
+        <PracticeBrowser
+          topics={PRACTICE_TOPICS}
+          questions={PRACTICE_QUESTIONS}
+          lessonTitleBySlug={lessonTitleBySlug}
+          initialTopicId={initialTopicId ?? null}
+        />
+      </div>
+    </>
   )
 }

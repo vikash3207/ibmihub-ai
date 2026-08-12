@@ -23,6 +23,8 @@ import { ProgressBar } from '@/components/ui/progress-bar'
 import { formatCompletionDate, parseAcceptLanguage } from '@/lib/format-date'
 import { buttonVariants } from '@/components/ui/button'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
+import { SectionHero } from '@/components/section-hero'
+import { DASHBOARD_HERO_THEME } from '@/lib/section-theme'
 import { cn } from '@/lib/utils'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
@@ -70,6 +72,18 @@ const TOPIC_STATUS_LABEL: Record<string, string> = {
   completed: 'Completed',
 }
 
+/**
+ * Dashboard landing page (visually upgraded -- Premium Section Layout
+ * Alignment). Same full-bleed <SectionHero> structure as Deep Dives/Learning
+ * Center/Practice: hero, then the 3 KPI cards overlapping its bottom fade,
+ * then the rest of the page (Continue Learning, topic progress,
+ * achievements, recent activity, quick links) in a normally-padded section.
+ * DASHBOARD_HERO_THEME (lib/section-theme.ts) is the same dark
+ * bg-slate-950 + glow + line-grid recipe as Deep Dives, in blue/cyan.
+ * Every value below (completedCount, percent, achievements, etc.) is the
+ * exact same calculation this page already made -- only the surrounding
+ * layout changed.
+ */
 export default async function DashboardPage() {
   const supabase = await createClient()
   const {
@@ -150,33 +164,20 @@ export default async function DashboardPage() {
       : "Welcome back. Here's where you left off."
 
   return (
-    <div className="space-y-8">
-      <div className="relative overflow-hidden rounded-3xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50/50 px-6 py-8 sm:px-8 sm:py-10">
-        <div
-          className="pointer-events-none absolute -top-14 -right-10 h-48 w-48 rounded-full bg-indigo-200/30 blur-[80px]"
-          aria-hidden="true"
-        />
-        <div className="relative flex items-start gap-4">
-          <span className="hidden sm:flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-500 text-white shadow-sm">
-            <TrendingUp className="h-6 w-6" aria-hidden="true" />
-          </span>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-slate-900 mb-2">Learning Progress</h1>
-            <p className="text-slate-600 leading-relaxed">{welcomeMessage}</p>
-          </div>
-        </div>
-      </div>
+    <>
+      <SectionHero
+        icon={TrendingUp}
+        badgeLabel="Your personal learning progress"
+        title="Learning Progress"
+        description={welcomeMessage}
+        theme={DASHBOARD_HERO_THEME}
+      />
 
-      <PublicBetaNotice compact />
-
-      {/* -- Learning overview ------------------------------------------- */}
-      <section aria-labelledby="overview-heading" className="space-y-3">
-        <h2 id="overview-heading" className="text-lg font-semibold text-slate-900">
-          Overview
-        </h2>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <Card className="border-t-4 border-t-blue-500 bg-gradient-to-b from-blue-50/50 via-white to-white transition-shadow hover:shadow-md">
+      {/* -- Learning overview -- overlaps the hero's bottom fade, same
+          composition as app/deep-dives/page.tsx's 3-pillar-card row. */}
+      <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-3xl px-4 sm:px-6">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <Card className="border-t-4 border-t-blue-500 bg-gradient-to-b from-blue-50/50 via-white to-white shadow-md transition-shadow hover:shadow-lg">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
               <span className="flex h-6 w-6 items-center justify-center rounded-md bg-blue-100 text-blue-600">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -190,9 +191,9 @@ export default async function DashboardPage() {
             <p className="mt-1 text-xs text-slate-500">Currently published lessons</p>
           </Card>
 
-          <Card className="border-t-4 border-t-indigo-500 bg-gradient-to-b from-indigo-50/50 via-white to-white transition-shadow hover:shadow-md">
+          <Card className="border-t-4 border-t-cyan-500 bg-gradient-to-b from-cyan-50/50 via-white to-white shadow-md transition-shadow hover:shadow-lg">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-cyan-100 text-cyan-700">
                 <TrendingUp className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               Curriculum progress
@@ -206,9 +207,9 @@ export default async function DashboardPage() {
             />
           </Card>
 
-          <Card className="border-t-4 border-t-violet-500 bg-gradient-to-b from-violet-50/50 via-white to-white transition-shadow hover:shadow-md">
+          <Card className="border-t-4 border-t-indigo-500 bg-gradient-to-b from-indigo-50/50 via-white to-white shadow-md transition-shadow hover:shadow-lg">
             <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-slate-500">
-              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-violet-100 text-violet-600">
+              <span className="flex h-6 w-6 items-center justify-center rounded-md bg-indigo-100 text-indigo-600">
                 <Layers className="h-3.5 w-3.5" aria-hidden="true" />
               </span>
               Topics started
@@ -225,11 +226,14 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        <p className="text-xs text-slate-400">
+        <p className="mt-3 text-xs text-slate-400">
           Progress reflects lessons you marked complete. It measures how much of the curriculum you
           have worked through, not a skill assessment.
         </p>
-      </section>
+      </div>
+
+      <div className="mx-auto max-w-3xl space-y-8 px-4 py-12 sm:px-6 sm:py-16">
+      <PublicBetaNotice compact />
 
       {/* -- Continue learning ------------------------------------------- */}
       <section aria-labelledby="continue-heading" className="space-y-3">
@@ -516,6 +520,7 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </section>
-    </div>
+      </div>
+    </>
   )
 }

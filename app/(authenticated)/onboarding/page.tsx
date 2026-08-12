@@ -50,6 +50,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
   }
 
   return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
     <div className="mx-auto max-w-lg">
       <Card className="p-8">
         <h1 className="text-2xl font-semibold text-slate-900 mb-1">Which best describes you?</h1>
@@ -89,6 +90,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
           </button>
         </form>
       </Card>
+    </div>
     </div>
   )
 }

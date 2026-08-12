@@ -38,6 +38,7 @@ export default async function ProfilePage() {
     .maybeSingle()
 
   return (
+    <div className="mx-auto w-full max-w-3xl px-4 py-10 sm:px-6">
     <div className="mx-auto max-w-lg">
       <Card className="p-8">
         <h1 className="text-2xl font-semibold text-slate-900 mb-1">My Profile</h1>
@@ -50,6 +51,7 @@ export default async function ProfilePage() {
           initialContactNumber={profile?.contact_number ?? null}
         />
       </Card>
+    </div>
     </div>
   )
 }

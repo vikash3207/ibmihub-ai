@@ -31,7 +31,7 @@ export default async function PracticeLab5250Page() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="mx-auto w-full max-w-3xl space-y-8 px-4 py-10 sm:px-6">
       <div>
         <Link href="/practice-lab" className="text-sm text-slate-500 transition-colors hover:text-slate-700 active:opacity-70">
           &larr; Practice Lab
