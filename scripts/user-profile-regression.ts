@@ -188,8 +188,11 @@ section('Server Action security (source)')
 // ---------------------------------------------------------------------------
 
 check("the action module is server-only ('use server')", /^'use server'/m.test(profileAction))
-check('user.id comes from a real getUser() call', /const \{\s*data: \{ user \},?\s*\} = await supabase\.auth\.getUser\(\)/.test(profileAction))
-check('the action refuses when there is no session', /if \(!user\)/.test(profileAction))
+check('user comes from a real getUser() call', /user = \(await supabase\.auth\.getUser\(\)\)\.data\.user/.test(profileAction))
+check(
+  'a session that completes normally with no user still returns the specific "log in again" message, unchanged',
+  /if \(!user\) \{[\s\S]{0,120}Your session has expired/.test(profileAction)
+)
 check('there is no id field read from the submitted form', !/formData\.get\(['"]id['"]\)/.test(profileAction))
 check('there is no email field read from the submitted form', !/formData\.get\(['"]email['"]\)/.test(profileAction))
 check('no service-role key is used', !/SERVICE_ROLE|service_role|createAdminClient/.test(profileAction))
@@ -198,19 +201,38 @@ check(
   'the contact number is validated before being written',
   profileAction.indexOf('isValidContactNumber') < profileAction.indexOf(".from('user_profiles')")
 )
-check('only a stable error code/label is logged, never the raw Supabase error message', !/console\.[a-z]+\([^)]*\berror\.message\b/.test(profileAction))
 check('the header is refreshed after a successful save', /revalidatePath\('\/', 'layout'\)/.test(profileAction))
+
+// ---------------------------------------------------------------------------
+section('Hotfix: Profile Save Server Error -- logging never leaks raw error detail (source)')
+// ---------------------------------------------------------------------------
+
+// These assert the *absence* of specific leak patterns across the whole
+// file, not just near one call site -- a prior version of this fix logged
+// `caughtError.message` in the upsert's catch block, which these are
+// written to genuinely reject (they failed against that version).
+check("error.message is never logged", !/console\.[a-z]+\([^;]*\berror\.message\b/.test(profileAction))
+check("caughtError.message is never logged", !/console\.[a-z]+\([^;]*\bcaughtError\.message\b/.test(profileAction))
+check(
+  'a caught exception is never bound to a name and passed to console -- catch blocks take no parameter at all',
+  !/catch \([a-zA-Z]+\)/.test(profileAction)
+)
+check(
+  'every console.error call logs only the fixed, non-sensitive label',
+  (profileAction.match(/console\.error\(([^)]*)\)/g) ?? []).every((call) => /'unexpected_exception'/.test(call))
+)
 
 // ---------------------------------------------------------------------------
 section('Hotfix: Profile Save Server Error -- upsert + crash safety (source)')
 // ---------------------------------------------------------------------------
 
-// Root cause: a plain .update() silently matches zero rows (no error) when a
-// user has no user_profiles row yet -- which production has at least one
-// account of -- and the write path had no defense against an unexpected
-// thrown exception either, so a failure there escaped as an unhandled
-// Server Action error and crashed the whole page instead of degrading to a
-// normal form-error state.
+// Confirmed: a missing user_profiles row made the OLD plain .update() fail/
+// no-op. Separately confirmed: an unhandled thrown exception is what
+// crashed the /profile page on Save. NOT confirmed: that the missing row
+// directly caused that specific exception (the production exception itself
+// was never inspected -- no Vercel log access). upsert() fixes the
+// missing-row edge case; try/catch is an independent fix that stops any
+// unexpected Supabase exception, whatever its cause, from crashing the page.
 check('the write is an upsert, not a plain update (creates the row if missing)', /\.upsert\(/.test(profileAction))
 check('there is no remaining plain .update( call on user_profiles', !/\.update\(\{/.test(profileAction))
 check('the upsert has an explicit onConflict on the primary key', /\{\s*onConflict:\s*'id'\s*\}/.test(profileAction))
@@ -219,15 +241,30 @@ check(
   /buildProfileUpsertPayload\(user\.id, firstName, lastName, contactNumber\)/.test(profileAction)
 )
 check('the row is still requested back to confirm the write actually happened', /\.select\('id'\)\s*\.maybeSingle\(\)/.test(profileAction))
-check('the Supabase call is wrapped in try/catch so a thrown exception cannot escape the action', /try \{[\s\S]{0,400}\.upsert\([\s\S]{0,400}\} catch/.test(profileAction))
-check('a caught exception is turned into an error code, not rethrown', /catch \(caughtError\) \{[\s\S]{0,600}errorCode = 'unexpected_exception'/.test(profileAction))
 check(
-  'a missing/failed write (whether via an explicit error or a caught exception) still returns a normal form-error state',
-  /if \(!updated\) \{[\s\S]{0,200}status: 'error'/.test(profileAction)
+  'createClient() and getUser() are wrapped in try/catch too -- not just the upsert',
+  /try \{[\s\S]{0,120}supabase = await createClient\(\)[\s\S]{0,200}getUser\(\)[\s\S]{0,120}\} catch/.test(profileAction)
+)
+check('the upsert call is wrapped in try/catch so a thrown exception cannot escape the action', /try \{[\s\S]{0,400}\.upsert\([\s\S]{0,600}\} catch/.test(profileAction))
+check(
+  'a caught exception from createClient()/getUser() returns the generic failure, not a specific/leaky message',
+  /catch \{[\s\S]{0,120}logUnexpectedFailure\(\)[\s\S]{0,60}return GENERIC_FAILURE/.test(profileAction)
 )
 check(
-  'success is returned only after a row was actually confirmed back from the upsert',
-  profileAction.indexOf('if (!updated)') < profileAction.lastIndexOf("status: 'success',")
+  "an explicit Supabase error on the upsert is tracked as failure independently of whether a row was also returned",
+  /hasFailed = Boolean\(error\)/.test(profileAction)
+)
+check(
+  'a caught exception on the upsert also sets the same failure flag (not a separate, weaker path)',
+  /catch \{[\s\S]{0,80}hasFailed = true/.test(profileAction)
+)
+check(
+  'failure is either signal, not just a missing row -- data being non-null cannot override an explicit error',
+  /if \(hasFailed \|\| !updated\)/.test(profileAction)
+)
+check(
+  'success is returned only after the combined hasFailed/!updated check has passed',
+  profileAction.indexOf('if (hasFailed || !updated)') < profileAction.lastIndexOf("status: 'success',")
 )
 
 // ---------------------------------------------------------------------------

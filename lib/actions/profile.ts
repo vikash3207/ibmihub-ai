@@ -52,15 +52,45 @@ export const UPDATE_PROFILE_INITIAL_STATE: UpdateProfileState = { status: 'idle'
  * (the profile page renders it as plain text, not an input), so it cannot
  * be part of this update regardless of what a tampered request contains.
  */
+const GENERIC_FAILURE: UpdateProfileState = {
+  status: 'error',
+  message: 'We could not save your profile. Please try again.',
+}
+
+/**
+ * Never logs `error.message`, a caught exception's `.message`, or the
+ * caught object itself -- only this fixed, non-sensitive label. Supabase/
+ * PostgREST/network error text can carry connection strings, query
+ * fragments, or other details that don't belong in application logs; a
+ * stable label is all any of the call sites below need to be debuggable
+ * (paired with which call site logged it), matching how lib/actions/auth.ts
+ * logs Supabase failures elsewhere in this repo.
+ */
+function logUnexpectedFailure() {
+  console.error('Profile update failed:', 'unexpected_exception')
+}
+
 export async function updateProfile(
   _previousState: UpdateProfileState,
   formData: FormData
 ): Promise<UpdateProfileState> {
-  const supabase = await createClient()
+  // createClient() and auth.getUser() are wrapped the same as the upsert
+  // below: a thrown exception from either (a cookie/session failure, a
+  // network error reaching Supabase Auth) must degrade to the same generic
+  // form error, not escape this Server Action and crash the page. This is
+  // deliberately a *different* outcome from `user` being null, which is not
+  // an exception -- getUser() completing normally and reporting no session
+  // is the expected, specific "please log in again" case below, unchanged.
+  let supabase: Awaited<ReturnType<typeof createClient>>
+  let user: { id: string } | null
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+  try {
+    supabase = await createClient()
+    user = (await supabase.auth.getUser()).data.user
+  } catch {
+    logUnexpectedFailure()
+    return GENERIC_FAILURE
+  }
 
   if (!user) {
     return { status: 'error', message: 'Your session has expired. Please log in again.' }
@@ -83,30 +113,25 @@ export async function updateProfile(
     return { status: 'error', message }
   }
 
-  // upsert(), not update(): a plain .update() matches zero rows -- silently,
-  // no error -- when this user has no user_profiles row yet. That's supposed
-  // to be impossible (001's handle_new_user() trigger inserts one for every
-  // new signup), but production has at least one account where it's false
-  // (root cause of the Save changes crash this fixed -- see below), so the
-  // action needs to handle "row doesn't exist yet" as a normal case, not an
-  // assumption. upsert() with an explicit onConflict on the primary key
-  // performs an insert when the row is missing and an update when it
-  // exists, in one round trip. RLS still fully governs both branches: 001's
-  // insert policy (`with check auth.uid() = id`) and update policy (`using
-  // auth.uid() = id with check auth.uid() = id`) both must pass, and `id` is
-  // always `user.id` from the verified getUser() call above -- never read
-  // from the form, so there is nothing here a client could use to write to
-  // another user's row. On the update branch, only the three columns listed
-  // below are touched -- onboarding_response/onboarding_skipped on an
-  // existing row are left exactly as they were.
-  //
-  // The whole call is also wrapped in try/catch: a thrown exception here
-  // (a malformed/non-JSON error response from PostgREST, a network hiccup)
-  // must never propagate out of a Server Action and crash the whole page
-  // with Next's generic error boundary -- it has to degrade to the same
-  // ordinary form-error state as a normal Supabase `error` result.
+  // upsert(), not update(): a plain .update() silently matches zero rows --
+  // no error -- when this user has no user_profiles row yet. That edge case
+  // (a missing row) is a confirmed, real failure mode of the old .update();
+  // whether it was specifically what threw the exception that crashed the
+  // page in production is NOT confirmed -- Vercel logs were not available
+  // to inspect the actual exception. upsert() fixes the missing-row edge
+  // case directly (insert when absent, update when present, one round
+  // trip); the try/catch below is a separate, independent fix that stops
+  // *any* unexpected Supabase exception -- whatever its cause -- from ever
+  // reaching the caller unhandled. RLS still fully governs both upsert
+  // branches: 001's insert policy (`with check auth.uid() = id`) and update
+  // policy (`using auth.uid() = id with check auth.uid() = id`) both must
+  // pass, and `id` is always `user.id` from the verified getUser() call
+  // above -- never read from the form, so there is nothing here a client
+  // could use to write to another user's row. On the update branch, only
+  // the three columns listed below are touched -- onboarding_response/
+  // onboarding_skipped on an existing row are left exactly as they were.
   let updated: { id: string } | null = null
-  let errorCode = 'no_row_returned'
+  let hasFailed = false
 
   try {
     const { data, error } = await supabase
@@ -115,19 +140,19 @@ export async function updateProfile(
       .select('id')
       .maybeSingle()
 
+    // Either signal alone means failure -- `data` being non-null must never
+    // be read as success while `error` is also set (an upsert can, in
+    // principle, return both in the same response).
+    hasFailed = Boolean(error)
     updated = data
-    if (error) errorCode = error.code
-  } catch (caughtError) {
-    // Only a stable, non-sensitive label is logged, never the raw error --
-    // consistent with how lib/actions/auth.ts logs Supabase failures
-    // elsewhere in this repo.
-    console.error('Profile update threw:', caughtError instanceof Error ? caughtError.message : 'unknown')
-    errorCode = 'unexpected_exception'
+    if (error) logUnexpectedFailure()
+  } catch {
+    hasFailed = true
+    logUnexpectedFailure()
   }
 
-  if (!updated) {
-    console.error('Profile update failed:', errorCode)
-    return { status: 'error', message: 'We could not save your profile. Please try again.' }
+  if (hasFailed || !updated) {
+    return GENERIC_FAILURE
   }
 
   // Same mechanism login()/logout()/saveOnboardingResponse() already use to

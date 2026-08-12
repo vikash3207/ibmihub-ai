@@ -4,17 +4,25 @@
 -- Forward-only. Migrations 001-010 have already been applied to production
 -- and are NOT edited or replaced by this file.
 --
--- Root cause this backfill addresses: 001's handle_new_user() trigger
--- inserts a user_profiles row for every new auth.users signup, so every
--- account created through the normal signup flow should already have one.
--- In practice, production has at least one auth.users row with no matching
--- user_profiles row (root cause is unconfirmed -- an account predating the
--- trigger, a manual/dashboard-created user, or some other one-off path that
--- never went through handle_new_user()). lib/actions/profile.ts's
--- updateProfile() no longer depends on the row already existing (it now
--- upserts), so this backfill is not required for correctness going forward
--- -- it only closes the gap for any row that is missing *right now*, and is
--- a genuine no-op for every account that already has one.
+-- Edge case this backfill addresses: 001's handle_new_user() trigger inserts
+-- a user_profiles row for every new auth.users signup, so every account
+-- created through the normal signup flow should already have one. In
+-- practice, production has at least one auth.users row with no matching
+-- user_profiles row (why that account's row is missing -- an account
+-- predating the trigger, a manual/dashboard-created user, some other
+-- one-off path -- is not confirmed).
+--
+-- What IS confirmed: a missing row made the OLD plain .update() in
+-- lib/actions/profile.ts fail/no-op (it matches zero rows). Separately, an
+-- unhandled thrown exception is what actually crashed the /profile page on
+-- Save. What is NOT confirmed is that the missing row directly caused that
+-- specific exception -- the precise production exception was never
+-- inspected (Vercel logs were not available). lib/actions/profile.ts no
+-- longer depends on the row already existing (it now upserts) and no
+-- longer lets an unexpected exception escape unhandled (try/catch), so this
+-- backfill is not required for correctness going forward -- it only closes
+-- the gap for any row that is missing *right now*, and is a genuine no-op
+-- for every account that already has one.
 --
 -- Pure data backfill, no schema change: no new column, table, grant, or RLS
 -- policy. Idempotent and safe to re-run any number of times -- `on conflict
