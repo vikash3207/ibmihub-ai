@@ -7,6 +7,7 @@ import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { buttonVariants } from '@/components/ui/button'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
 import { RegisterAiTutorPageContext } from '@/components/ai-tutor/register-page-context'
+import { SectionHero } from '@/components/section-hero'
 import { LEARN_HERO_THEME } from '@/lib/section-theme'
 import { cn } from '@/lib/utils'
 
@@ -22,13 +23,14 @@ export const metadata: Metadata = {
  * and Section Landing Page Visual Upgrade). app/learn/layout.tsx already
  * wraps every /learn/* page (including the lesson reader, which this PR
  * must not touch) in a padded `max-w-6xl` <main>, so this page's hero is a
- * contained, rounded gradient card rather than the edge-to-edge
- * <SectionHero> other upgraded pages use -- reusing that full-bleed
- * component here would mean restructuring the shared layout's padding,
- * which risks the lesson reader pages this PR is explicitly not allowed to
- * redesign. Uses LEARN_HERO_THEME's rich blue/indigo gradient (see
- * lib/section-theme.ts) so it reads as premium as Deep Dives/Insights'
- * full-bleed dark heroes despite being a contained card.
+ * contained, rounded card via <SectionHero>'s `contained` prop rather than
+ * its default edge-to-edge shell -- reusing the full-bleed layout here would
+ * mean restructuring the shared layout's padding, which risks the lesson
+ * reader pages this PR is explicitly not allowed to redesign. `contained`
+ * renders the exact same dark bg-slate-950 + glow + line-grid recipe as
+ * Deep Dives (LEARN_HERO_THEME, see lib/section-theme.ts), just clipped to
+ * a card, so it reads as premium as Deep Dives/Insights despite not being
+ * full-bleed.
  *
  * publishedCount and DEEP_DIVES.length are unchanged data flow -- only the
  * cards around them are richer than the previous plain `border-l-4` boxes.
@@ -46,48 +48,14 @@ export default async function LearnPage() {
         context={{ sourceType: 'learning-center', title: 'iRPGenie Learning Center' }}
       />
 
-      <div
-        className={cn(
-          'relative overflow-hidden rounded-3xl border px-6 py-14 text-center shadow-lg sm:px-10 sm:py-20',
-          LEARN_HERO_THEME.cardClasses
-        )}
-      >
-        <div
-          className="pointer-events-none absolute inset-0 opacity-[0.08] [background-image:radial-gradient(white_1px,transparent_1px)] [background-size:22px_22px]"
-          aria-hidden="true"
-        />
-        <div
-          className={cn(
-            'pointer-events-none absolute -top-16 -left-10 h-64 w-64 rounded-full blur-[100px]',
-            LEARN_HERO_THEME.glowClasses[0]
-          )}
-          aria-hidden="true"
-        />
-        <div
-          className={cn(
-            'pointer-events-none absolute -bottom-20 -right-10 h-64 w-64 rounded-full blur-[100px]',
-            LEARN_HERO_THEME.glowClasses[1]
-          )}
-          aria-hidden="true"
-        />
-        <div className="relative section-hero-enter">
-          <span
-            className={cn(
-              'mb-5 inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium backdrop-blur-sm',
-              LEARN_HERO_THEME.badgeClasses
-            )}
-          >
-            <GraduationCap className="h-3.5 w-3.5" aria-hidden="true" />
-            Guided, beginner-friendly learning
-          </span>
-          <h1 className={cn('text-3xl sm:text-4xl font-bold tracking-tight mb-3', LEARN_HERO_THEME.headingTextClasses)}>
-            Learning Center
-          </h1>
-          <p className={cn('leading-relaxed max-w-xl mx-auto', LEARN_HERO_THEME.bodyTextClasses)}>
-            A guided starting point for learning IBM&nbsp;i, one structured lesson at a time.
-          </p>
-        </div>
-      </div>
+      <SectionHero
+        contained
+        icon={GraduationCap}
+        badgeLabel="Guided, beginner-friendly learning"
+        title="Learning Center"
+        description="A guided starting point for learning IBM&nbsp;i, one structured lesson at a time."
+        theme={LEARN_HERO_THEME}
+      />
 
       <PublicBetaNotice compact>
         We are continuously upgrading the curriculum. Beginner-friendly lessons are available now,

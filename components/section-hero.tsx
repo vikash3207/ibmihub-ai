@@ -15,6 +15,8 @@ export interface SectionHeroTheme {
   badgeClasses: string
   iconChipClasses: string
   lightWashClasses?: string
+  /** Border color for `contained` rendering only -- see the `contained` prop below. */
+  containedBorderClasses?: string
 }
 
 interface SectionHeroProps {
@@ -28,6 +30,15 @@ interface SectionHeroProps {
   children?: ReactNode
   /** Set false to skip the one-time entrance animation (rarely needed). */
   animateIn?: boolean
+  /**
+   * Renders as a rounded, bordered card instead of an edge-to-edge section --
+   * for pages (Learning Center, Practice) that sit inside a shared padded
+   * layout also wrapping pages this PR must not redesign (the lesson
+   * reader, Onboarding), so they can't use the full-bleed shell directly.
+   * Same dark background/glow/grid/badge recipe as the full-bleed dark
+   * variant, just clipped to a card -- dark variant only.
+   */
+  contained?: boolean
 }
 
 /**
@@ -42,15 +53,27 @@ interface SectionHeroProps {
  *
  * Server component: nothing here needs interactivity, so it stays one.
  */
-export function SectionHero({ icon: Icon, badgeLabel, title, tagline, description, theme, children, animateIn = true }: SectionHeroProps) {
+export function SectionHero({
+  icon: Icon,
+  badgeLabel,
+  title,
+  tagline,
+  description,
+  theme,
+  children,
+  animateIn = true,
+  contained = false,
+}: SectionHeroProps) {
   const isDark = theme.variant === 'dark'
 
   return (
     <section
       className={cn(
-        'relative overflow-hidden pt-16 sm:pt-20',
-        children ? 'pb-16 sm:pb-20' : 'pb-20 sm:pb-24',
-        isDark ? 'bg-slate-950' : cn('border-b border-slate-100', theme.lightWashClasses)
+        'relative overflow-hidden',
+        contained
+          ? cn('rounded-3xl border px-6 py-14 shadow-lg sm:px-10 sm:py-20', theme.containedBorderClasses)
+          : cn('pt-16 sm:pt-20', children ? 'pb-16 sm:pb-20' : 'pb-20 sm:pb-24'),
+        isDark ? 'bg-slate-950' : cn(!contained && 'border-b border-slate-100', theme.lightWashClasses)
       )}
     >
       {isDark && theme.gridPattern && (
@@ -66,7 +89,8 @@ export function SectionHero({ icon: Icon, badgeLabel, title, tagline, descriptio
 
       <div
         className={cn(
-          'relative mx-auto max-w-3xl px-4 sm:px-6 text-center',
+          'relative mx-auto max-w-3xl text-center',
+          !contained && 'px-4 sm:px-6',
           animateIn && 'section-hero-enter'
         )}
       >
@@ -86,7 +110,7 @@ export function SectionHero({ icon: Icon, badgeLabel, title, tagline, descriptio
         {children && <div className="mt-7">{children}</div>}
       </div>
 
-      {isDark && (
+      {isDark && !contained && (
         <div
           className="pointer-events-none absolute inset-x-0 bottom-0 h-48 sm:h-56 bg-gradient-to-b from-transparent via-white/70 to-white"
           aria-hidden="true"

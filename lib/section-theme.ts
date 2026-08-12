@@ -55,42 +55,44 @@ export const DEEP_DIVES_PILLAR_THEMES: SectionFeatureCardTheme[] = [
 
 /**
  * Learning Center and Practice heroes (app/learn/page.tsx,
- * app/(authenticated)/practice/page.tsx) can't use <SectionHero> directly --
- * both sit inside a shared padded layout (app/learn/layout.tsx,
+ * app/(authenticated)/practice/page.tsx) can't use <SectionHero> edge-to-edge
+ * -- both sit inside a shared padded layout (app/learn/layout.tsx,
  * app/(authenticated)/layout.tsx) that also wraps pages this PR must not
- * redesign (the lesson reader, Onboarding), so their hero is a contained
- * rounded card rather than SectionHero's edge-to-edge shell. This bundle is
- * that card's background/badge/glow recipe -- rich and dark like the other
- * sections' heroes, just contained instead of full-bleed. A dot-grid
- * texture (vs. Deep Dives/Practice Lab's line grid) keeps these two visually
- * distinct from the other dark heroes despite sharing the same formula.
+ * redesign (the lesson reader, Onboarding). They use <SectionHero>'s
+ * `contained` mode instead: the exact same dark bg-slate-950 + glow-blob +
+ * line-grid recipe as Deep Dives/Practice Lab/Contact, just rendered as a
+ * rounded card. A flat saturated gradient card was tried here first and
+ * looked like a generic banner next to Deep Dives' subtler dark hero --
+ * this recipe is deliberately identical to the other sections' dark heroes,
+ * only the glow color and containedBorderClasses vary.
  */
-export interface ContainedHeroTheme {
-  /** Gradient background + border for the outer card. */
-  cardClasses: string
-  /** Two blurred glow-blob color classes (position/size are shared, only color varies). */
-  glowClasses: [string, string]
-  badgeClasses: string
-  headingTextClasses: string
-  bodyTextClasses: string
+
+/** Learning Center: blue/indigo glow over the shared dark base -- guided-learning identity, distinct from Deep Dives' indigo/violet reference-guide look. */
+export const LEARN_HERO_THEME: SectionHeroTheme = {
+  variant: 'dark',
+  gridPattern: true,
+  glowClasses: [
+    '-top-20 left-1/4 h-[22rem] w-[22rem] -translate-x-1/2 bg-blue-600/25',
+    'top-0 right-0 h-[18rem] w-[18rem] bg-indigo-600/20',
+    'bottom-0 left-1/3 h-64 w-64 bg-cyan-500/10',
+  ],
+  badgeClasses: 'border-blue-400/30 bg-blue-400/10 text-blue-300',
+  iconChipClasses: 'bg-gradient-to-br from-blue-500 to-indigo-500',
+  containedBorderClasses: 'border-blue-900/40',
 }
 
-/** Learning Center: rich blue-to-indigo gradient -- guided-learning identity, distinct from Deep Dives' neutral-dark reference-guide look. */
-export const LEARN_HERO_THEME: ContainedHeroTheme = {
-  cardClasses: 'border-blue-900/40 bg-gradient-to-br from-blue-600 via-indigo-700 to-indigo-950',
-  glowClasses: ['bg-cyan-400/20', 'bg-indigo-400/25'],
-  badgeClasses: 'border-white/20 bg-white/10 text-blue-50',
-  headingTextClasses: 'text-white',
-  bodyTextClasses: 'text-blue-100/90',
-}
-
-/** Practice: rich emerald-to-teal gradient -- interactive practice identity, distinct from Practice Lab's neutral-dark terminal look. */
-export const PRACTICE_HERO_THEME: ContainedHeroTheme = {
-  cardClasses: 'border-emerald-900/40 bg-gradient-to-br from-emerald-600 via-teal-700 to-teal-950',
-  glowClasses: ['bg-cyan-300/20', 'bg-emerald-400/25'],
-  badgeClasses: 'border-white/20 bg-white/10 text-emerald-50',
-  headingTextClasses: 'text-white',
-  bodyTextClasses: 'text-emerald-100/90',
+/** Practice: emerald/teal glow over the shared dark base -- interactive practice identity, distinct from Practice Lab's emerald/teal terminal look (Practice keeps the badge/heading warmer via its cyan secondary glow). */
+export const PRACTICE_HERO_THEME: SectionHeroTheme = {
+  variant: 'dark',
+  gridPattern: true,
+  glowClasses: [
+    '-top-20 right-1/4 h-[22rem] w-[22rem] translate-x-1/2 bg-emerald-600/25',
+    'top-0 left-0 h-[18rem] w-[18rem] bg-teal-500/20',
+    'bottom-0 right-1/3 h-64 w-64 bg-cyan-400/10',
+  ],
+  badgeClasses: 'border-emerald-400/30 bg-emerald-400/10 text-emerald-300',
+  iconChipClasses: 'bg-gradient-to-br from-emerald-500 to-teal-500',
+  containedBorderClasses: 'border-emerald-900/40',
 }
 
 /** Practice Lab: controlled dark terminal-inspired hero -- distinct from Practice's calmer light theme. */
