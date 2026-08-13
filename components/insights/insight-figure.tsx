@@ -53,7 +53,7 @@ export function InsightFigure({ number, title, caption, accent, scrollable = fal
   return (
     <figure
       className={cn(
-        'my-10 overflow-hidden rounded-2xl border border-slate-100 border-t-4 bg-gradient-to-b shadow-sm',
+        'my-10 overflow-hidden rounded-2xl border border-slate-100 border-t-4 bg-gradient-to-b shadow-md shadow-slate-900/5 ring-1 ring-slate-900/5',
         classes.border,
         classes.wash
       )}

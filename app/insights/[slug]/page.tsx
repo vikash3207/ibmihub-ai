@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Clock } from 'lucide-react'
+import { Clock, BookOpen, Compass } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { INSIGHTS } from '@/content/insights/catalog'
@@ -115,7 +115,7 @@ export default async function InsightPage({ params }: Props) {
   const relatedDeepDives = DEEP_DIVES.filter((d) => relatedDeepDiveSlugs.includes(d.slug) && isDeepDiveAvailable(d))
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-blue-50/40 to-white">
       <StructuredData data={buildInsightStructuredData(insight)} />
       <StructuredData data={buildBreadcrumbStructuredData(insight)} />
       <SiteHeader />
@@ -143,40 +143,65 @@ export default async function InsightPage({ params }: Props) {
           </nav>
 
           <div className="mt-2 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:gap-10">
-            <DeepDiveToc items={toc} />
+            <DeepDiveToc items={toc} variant="insight" />
 
             <article className={`max-w-3xl space-y-8 rounded-2xl border-t-4 bg-white p-6 shadow-sm sm:p-8 ${accentClasses.topBorder}`}>
               <div
-                className={`-mx-6 -mt-6 rounded-t-2xl border-b border-slate-100 px-6 pb-6 pt-6 sm:-mx-8 sm:-mt-8 sm:px-8 sm:pt-8 ${accentClasses.headerWash}`}
+                className={`relative -mx-6 -mt-6 overflow-hidden rounded-t-2xl px-6 pb-7 pt-7 sm:-mx-8 sm:-mt-8 sm:px-8 sm:pt-9 sm:pb-9 ${accentClasses.headerWash}`}
               >
-                <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`rounded-full border px-2 py-0.5 text-xs font-medium ${accentClasses.badgeBg} ${accentClasses.badgeText} ${accentClasses.badgeBorder}`}
-                  >
-                    {categoryLabel}
-                  </span>
-                  <Badge variant="ai">Insight</Badge>
-                </div>
-                <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{insight.title}</h1>
-                <p className="mt-3 text-base text-slate-600 leading-relaxed">{insight.description}</p>
-                {/* Deliberately no publication date here (IBM i Insights Attribution
-                    Cleanup and Date Display Removal) -- this section is meant to read
-                    as evergreen, not time-stamped. publishedAt still exists on the
-                    Insight record for catalog validation, sitemap lastModified, and
-                    the (non-visible) openGraph.publishedTime / JSON-LD datePublished
-                    generated elsewhere on this page -- see generateMetadata() above
-                    and lib/insight-structured-data.ts. None of those render as
-                    visible page content. */}
-                <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-slate-500">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-white/70 px-2.5 py-1 text-xs font-medium text-slate-600">
-                    <Clock className="h-3.5 w-3.5" aria-hidden="true" />
-                    ~{insight.readingTimeMinutes} min read
-                  </span>
-                  {insight.tags.map((tag) => (
-                    <span key={tag} className="rounded-full bg-white/70 px-2.5 py-1 text-xs text-slate-500">
-                      {tag}
+                {/* Decorative texture only -- a faint grid plus soft glow blobs,
+                    the same "premium hero" language as the Insights listing
+                    page's own dark hero (app/insights/page.tsx) and
+                    components/section-hero.tsx, scaled down for this smaller
+                    card-topper banner. All aria-hidden; none of it carries
+                    information, so it never needs a text alternative. The
+                    gradient itself (INSIGHT_ACCENT_CLASSES.headerWash) stays
+                    in the 600/700 range specifically so the white text below
+                    keeps comfortable contrast regardless of where these blobs
+                    fall. */}
+                <div
+                  className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:34px_34px]"
+                  aria-hidden="true"
+                />
+                <div
+                  className="pointer-events-none absolute -top-10 right-0 h-48 w-48 rounded-full bg-cyan-300/25 blur-[70px]"
+                  aria-hidden="true"
+                />
+                <div
+                  className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-violet-400/20 blur-[80px]"
+                  aria-hidden="true"
+                />
+
+                <div className="relative">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border border-white/30 bg-white/15 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+                      {categoryLabel}
                     </span>
-                  ))}
+                    <Badge variant="ai" className="border border-white/25 bg-white/15 text-white">
+                      Insight
+                    </Badge>
+                  </div>
+                  <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">{insight.title}</h1>
+                  <p className="mt-3 max-w-2xl text-base text-blue-50 leading-relaxed">{insight.description}</p>
+                  {/* Deliberately no publication date here (IBM i Insights Attribution
+                      Cleanup and Date Display Removal) -- this section is meant to read
+                      as evergreen, not time-stamped. publishedAt still exists on the
+                      Insight record for catalog validation, sitemap lastModified, and
+                      the (non-visible) openGraph.publishedTime / JSON-LD datePublished
+                      generated elsewhere on this page -- see generateMetadata() above
+                      and lib/insight-structured-data.ts. None of those render as
+                      visible page content. */}
+                  <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm">
+                      <Clock className="h-3.5 w-3.5" aria-hidden="true" />
+                      ~{insight.readingTimeMinutes} min read
+                    </span>
+                    {insight.tags.map((tag) => (
+                      <span key={tag} className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
 
@@ -215,13 +240,18 @@ export default async function InsightPage({ params }: Props) {
 
               {relatedLessons.length > 0 && (
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900 mb-3">Related lessons</h2>
+                  <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm">
+                      <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                    Related lessons
+                  </h2>
                   <ul className="space-y-2">
                     {relatedLessons.map((lesson) => (
                       <li key={lesson.slug}>
                         <Link
                           href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
-                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2"
+                          className="flex items-center justify-between gap-2 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/60 to-cyan-50/30 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                         >
                           <span>{lesson.title}</span>
                           <span aria-hidden="true">&rarr;</span>
@@ -234,13 +264,18 @@ export default async function InsightPage({ params }: Props) {
 
               {relatedDeepDives.length > 0 && (
                 <div>
-                  <h2 className="text-lg font-semibold text-slate-900 mb-3">Related Deep Dive</h2>
+                  <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm">
+                      <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                    Related Deep Dive
+                  </h2>
                   <ul className="space-y-2">
                     {relatedDeepDives.map((related) => (
                       <li key={related.slug}>
                         <Link
                           href={`/deep-dives/${related.slug}`}
-                          className="flex items-center justify-between gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 transition-colors hover:border-indigo-300 hover:bg-indigo-50/50 hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2"
+                          className="flex items-center justify-between gap-2 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/60 to-violet-50/30 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
                         >
                           <span>{related.title}</span>
                           <span aria-hidden="true">&rarr;</span>
