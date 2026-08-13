@@ -116,10 +116,14 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
                   isInsight
                     ? isActive
                       ? isSubItem
-                        ? 'bg-indigo-50 font-semibold text-indigo-800 shadow-sm'
-                        : 'border-transparent bg-gradient-to-r from-blue-600 to-cyan-500 font-semibold text-white shadow-sm'
+                        ? 'bg-indigo-50/80 font-semibold text-indigo-800'
+                        : // Softer than a solid saturated fill on purpose (follow-up pass):
+                          // a light blue/cyan tint with a clear left accent reads as
+                          // "current section" without competing with the hero banner's
+                          // own, much bolder gradient a few pixels above the fold.
+                          'border-blue-500 bg-gradient-to-r from-blue-50 to-cyan-50/70 font-semibold text-blue-800 shadow-sm'
                       : isSubItem
-                        ? 'text-slate-500 hover:bg-indigo-50/70 hover:text-indigo-800'
+                        ? 'text-slate-500 hover:bg-indigo-50/60 hover:text-indigo-800'
                         : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-blue-50/70 hover:text-blue-900'
                     : isActive
                       ? isSubItem
@@ -134,13 +138,17 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
                   <span
                     className={cn(
                       'shrink-0 tabular-nums font-semibold',
-                      isInsight ? (isActive && !isSubItem ? 'text-white/90' : 'text-indigo-500') : isActive ? 'text-blue-600' : 'text-cyan-600'
+                      isInsight ? (isActive ? 'text-blue-600' : 'text-indigo-500') : isActive ? 'text-blue-600' : 'text-cyan-600'
                     )}
                   >
                     {ordinal}.
                   </span>
                 )}
-                <span>{rest}</span>
+                {/* min-w-0 lets a long heading actually wrap inside the sidebar's
+                    fixed width instead of forcing the row wider than its column --
+                    without it, a flex child's default min-width:auto can push past
+                    the parent and get clipped rather than wrap. */}
+                <span className="min-w-0 flex-1 break-words">{rest}</span>
               </a>
             </li>
           )
