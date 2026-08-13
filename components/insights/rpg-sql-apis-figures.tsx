@@ -156,6 +156,18 @@ const SEQUENCE_PHASES: SequencePhase[] = [
   },
 ]
 
+/**
+ * The icon and the text used to be positioned with `-translate-x` on the
+ * icon plus a compensating negative margin on the text, both hand-tuned to
+ * land the icon centered on the LI's own `border-l-2` line. That dual-offset
+ * arithmetic broke down for a taller card (Step 4's longer detail text) and
+ * let the icon visually cover the STEP label. Fixed by making the icon and
+ * text plain flex siblings instead: the icon is `shrink-0` (fixed size,
+ * never compressed), the text column is `min-w-0 flex-1` (takes the rest of
+ * the row and wraps normally), and the connecting colored line now belongs
+ * to the text column's own left border rather than the row's -- there is no
+ * offset math left to get wrong at any content length or viewport width.
+ */
 export function IntegrationSequenceFigure() {
   return (
     <InsightFigure
@@ -164,13 +176,13 @@ export function IntegrationSequenceFigure() {
       accent="cyan"
       caption="A remote call is not a single event -- it is a request that Db2 for i's SQL helps build, an HTTPS call that can fail or time out, and a response the application still has to validate before trusting it."
     >
-      <ol className="insight-figure-enter space-y-0 px-1">
+      <ol className="insight-figure-enter space-y-6 px-1">
         {SEQUENCE_PHASES.map((phase, i) => (
-          <li key={phase.title} className={cn('flex gap-3 border-l-2 pl-4 pb-6 pt-1 sm:pl-5', phase.accentBorder, i === SEQUENCE_PHASES.length - 1 && 'pb-1')}>
-            <span className={cn('flex h-7 w-7 shrink-0 -translate-x-[calc(0.875rem+1px)] items-center justify-center rounded-full text-white shadow-sm', phase.accentDot)} aria-hidden="true">
+          <li key={phase.title} className="flex gap-3">
+            <span className={cn('flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white shadow-sm', phase.accentDot)} aria-hidden="true">
               <phase.icon className="h-3.5 w-3.5" aria-hidden="true" />
             </span>
-            <span className="-ml-7 min-w-0 sm:-ml-8">
+            <span className={cn('min-w-0 flex-1 border-l-2 pl-4 sm:pl-5', phase.accentBorder)}>
               <span className={cn('block text-xs font-semibold uppercase tracking-wide', phase.accentText)}>Step {i + 1}</span>
               <span className="block text-sm font-semibold text-slate-900">{phase.title}</span>
               <span className="block break-words text-sm leading-relaxed text-slate-600">{phase.detail}</span>
