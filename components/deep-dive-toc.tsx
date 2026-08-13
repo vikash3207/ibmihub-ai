@@ -7,6 +7,15 @@ import type { DeepDiveTocItem } from '@/lib/deep-dive-render'
 
 interface DeepDiveTocProps {
   items: DeepDiveTocItem[]
+  /**
+   * 'default' (the historical look, used by app/deep-dives/[slug]/page.tsx --
+   * omitting this prop keeps that page pixel-identical) or 'insight'
+   * (a richer, more saturated treatment for app/insights/[slug]/page.tsx,
+   * PR #202's visual-design pass). Deliberately a prop on the one shared
+   * component rather than a fork: Deep Dives must never regress just
+   * because Insights wanted a bolder sidebar.
+   */
+  variant?: 'default' | 'insight'
 }
 
 /**
@@ -22,10 +31,11 @@ function splitOrdinal(title: string): { ordinal: string | null; rest: string } {
 }
 
 /**
- * "On this page" navigator for Deep Dive detail pages (PR #158). A single
- * component renders both the desktop sticky sidebar and the mobile
- * collapsible "Contents" card, sharing one active-heading tracker rather
- * than running two separate IntersectionObservers for the same content.
+ * "On this page" navigator for Deep Dive and Insight detail pages (PR #158;
+ * `variant` added PR #202). A single component renders both the desktop
+ * sticky sidebar and the mobile collapsible "Contents" card, sharing one
+ * active-heading tracker rather than running two separate
+ * IntersectionObservers for the same content.
  *
  * The mobile disclosure is a plain <details>/<summary> -- fully keyboard
  * and screen-reader accessible, and functional even with JavaScript
@@ -34,9 +44,10 @@ function splitOrdinal(title: string): { ordinal: string | null; rest: string } {
  * on top: if the IntersectionObserver effect never runs (or `items` is
  * empty), every link still works via normal browser anchor navigation.
  */
-export function DeepDiveToc({ items }: DeepDiveTocProps) {
+export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const detailsRef = useRef<HTMLDetailsElement>(null)
+  const isInsight = variant === 'insight'
 
   useEffect(() => {
     if (items.length === 0) return
@@ -80,7 +91,10 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
           const isSubItem = item.level === 3
 
           return (
-            <li key={item.id} className={isSubItem ? 'ml-3 border-l border-cyan-100 pl-3' : undefined}>
+            <li
+              key={item.id}
+              className={isSubItem ? cn('ml-3 border-l pl-3', isInsight ? 'border-indigo-100' : 'border-cyan-100') : undefined}
+            >
               <a
                 href={`#${item.id}`}
                 onClick={closeMobilePanel}
@@ -96,18 +110,33 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
                   // text horizontally when it appears -- the 2px is reserved from
                   // the very first render, only its color changes.
                   'flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 leading-snug transition-colors',
+                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
+                  isInsight ? 'focus-visible:ring-blue-600' : 'focus-visible:ring-cyan-600',
                   isSubItem ? 'text-xs' : 'border-l-2 text-sm',
-                  isActive
-                    ? isSubItem
-                      ? 'bg-blue-50 font-medium text-blue-800'
-                      : 'border-blue-500 bg-blue-50 font-semibold text-blue-800'
-                    : isSubItem
-                      ? 'text-slate-500 hover:bg-cyan-50/60 hover:text-slate-800'
-                      : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/60 hover:text-cyan-900'
+                  isInsight
+                    ? isActive
+                      ? isSubItem
+                        ? 'bg-indigo-50 font-semibold text-indigo-800 shadow-sm'
+                        : 'border-transparent bg-gradient-to-r from-blue-600 to-cyan-500 font-semibold text-white shadow-sm'
+                      : isSubItem
+                        ? 'text-slate-500 hover:bg-indigo-50/70 hover:text-indigo-800'
+                        : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-blue-50/70 hover:text-blue-900'
+                    : isActive
+                      ? isSubItem
+                        ? 'bg-blue-50 font-medium text-blue-800'
+                        : 'border-blue-500 bg-blue-50 font-semibold text-blue-800'
+                      : isSubItem
+                        ? 'text-slate-500 hover:bg-cyan-50/60 hover:text-slate-800'
+                        : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/60 hover:text-cyan-900'
                 )}
               >
                 {ordinal && (
-                  <span className={cn('shrink-0 tabular-nums font-semibold', isActive ? 'text-blue-600' : 'text-cyan-600')}>
+                  <span
+                    className={cn(
+                      'shrink-0 tabular-nums font-semibold',
+                      isInsight ? (isActive && !isSubItem ? 'text-white/90' : 'text-indigo-500') : isActive ? 'text-blue-600' : 'text-cyan-600'
+                    )}
+                  >
                     {ordinal}.
                   </span>
                 )}
@@ -117,6 +146,40 @@ export function DeepDiveToc({ items }: DeepDiveTocProps) {
           )
         })}
       </ul>
+    )
+  }
+
+  if (isInsight) {
+    return (
+      <>
+        {/* Mobile / narrow screens: collapsible "Contents" card near the top of the article. */}
+        <details
+          ref={detailsRef}
+          className="group mb-6 overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-cyan-50/40 to-white shadow-sm lg:hidden"
+        >
+          <summary className="flex cursor-pointer list-none items-center gap-2 p-4 text-sm font-semibold text-slate-900">
+            <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-sm">
+              <List className="h-3.5 w-3.5" aria-hidden="true" />
+            </span>
+            Contents
+            <ChevronDown className="ml-auto h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
+          </summary>
+          <div className="max-h-72 overflow-y-auto border-t border-blue-100 bg-white/70 px-4 pb-4 pt-3">{renderList()}</div>
+        </details>
+
+        {/* Desktop / wide screens: sticky left sidebar. */}
+        <nav aria-label="On this page" className="hidden lg:sticky lg:top-24 lg:block">
+          <div className="overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-cyan-50/40 to-white shadow-md shadow-blue-900/5">
+            <div className="flex items-center gap-2 border-b border-blue-100/80 bg-white/50 px-4 py-3">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-cyan-500 text-white shadow-sm">
+                <List className="h-3.5 w-3.5" aria-hidden="true" />
+              </span>
+              <p className="text-xs font-bold uppercase tracking-wider text-blue-800">On this page</p>
+            </div>
+            <div className="max-h-[calc(100vh-14rem)] overflow-y-auto p-3 pr-2">{renderList()}</div>
+          </div>
+        </nav>
+      </>
     )
   }
 

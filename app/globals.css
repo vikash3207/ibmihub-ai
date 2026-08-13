@@ -443,3 +443,144 @@
     animation: none;
   }
 }
+
+/*
+ * IBM i Insights visual-design pass (PR #202 follow-up). Every rule below is
+ * scoped under `.insight-article` -- app/insights/[slug]/page.tsx's own hook
+ * class, present ONLY on Insight detail pages (never on
+ * `.deep-dive-article` alone, which Deep Dive pages use without this
+ * class) -- so none of it can ever reach a Deep Dive or lesson page. This
+ * is presentation-only: no rule here changes what HTML lib/markdown.ts or
+ * lib/deep-dive-render.ts produce, only how the existing markup paints.
+ * Where a selector's specificity ties an earlier generic rule (`.prose h2`,
+ * `.deep-dive-article blockquote.callout-*`, etc.), these rules are placed
+ * after it in this file so they win by source order, the same mechanism
+ * every earlier PR #146/#158 rule above already relies on.
+ */
+
+/* Section headings read as distinct colored panels instead of a plain
+   heading with a thin line, so a long article visibly breaks into sections
+   rather than reading as one continuous white page. Scoped to
+   `.insight-article .prose h2/h3` (not the bare element) specifically to
+   exclude InsightFigure's own <h3> figure title -- figures render as
+   siblings of the .prose divs within .insight-article, not inside one, but
+   they DO share that ancestor, so the extra `.prose` hop is what keeps this
+   from reskinning figure chrome by accident. */
+.insight-article .prose h2 {
+  position: relative;
+  margin-top: 3rem;
+  margin-bottom: 1.25rem;
+  padding: 0.85rem 1.1rem 0.85rem 1.5rem;
+  border-radius: 0.75rem;
+  border-bottom: none;
+  background-image: linear-gradient(to right, rgb(37 99 235 / 0.1), rgb(6 182 212 / 0.06) 60%, transparent 100%);
+}
+
+.insight-article .prose h2::before {
+  content: '';
+  position: absolute;
+  left: 0.4rem;
+  top: 0.55rem;
+  bottom: 0.55rem;
+  height: auto;
+  width: 0.3rem;
+  border-radius: 9999px;
+  background-image: linear-gradient(to bottom, rgb(37 99 235), rgb(6 182 212)); /* blue-600 -> cyan-500 */
+}
+
+.insight-article .prose h3 {
+  position: relative;
+  margin-top: 2rem;
+  padding: 0.3rem 0.9rem;
+  border-left-width: 3px;
+  border-left-color: rgb(99 102 241 / 0.5); /* indigo-500 */
+  border-radius: 0 0.5rem 0.5rem 0;
+  background-color: rgb(99 102 241 / 0.05);
+}
+
+/* Callouts: richer tint, rounded outer corner, and a soft shadow so they
+   read as cards rather than a thin colored line. Colors stay matched to
+   the base .deep-dive-article treatment (note=blue, best-practice=emerald,
+   mistake=amber, warning=red, interview=purple) -- only presence is richer. */
+.insight-article blockquote.callout-note,
+.insight-article blockquote.callout-best-practice,
+.insight-article blockquote.callout-mistake,
+.insight-article blockquote.callout-warning,
+.insight-article blockquote.callout-interview {
+  border-radius: 0 0.85rem 0.85rem 0;
+  box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
+}
+
+.insight-article blockquote.callout-note {
+  background-color: rgb(219 234 254 / 0.45); /* blue-100/45 */
+}
+
+.insight-article blockquote.callout-best-practice {
+  background-color: rgb(209 250 229 / 0.55); /* emerald-100/55 */
+}
+
+.insight-article blockquote.callout-mistake {
+  background-color: rgb(254 243 199 / 0.55); /* amber-100/55 */
+}
+
+.insight-article blockquote.callout-warning {
+  background-color: rgb(254 226 226 / 0.55); /* red-100/55 */
+}
+
+.insight-article blockquote.callout-interview {
+  background-color: rgb(243 232 255 / 0.55); /* purple-100/55 */
+}
+
+/* Tables: a colored gradient header row (white text, contrast-checked --
+   see the gradient stops below), a slightly richer border/shadow on the
+   wrapper, and a blue-tinted zebra stripe instead of the generic slate one. */
+.insight-article .dd-table-wrap {
+  border-color: rgb(191 219 254); /* blue-200 */
+  border-radius: 1rem;
+  box-shadow: 0 4px 14px -6px rgb(30 64 175 / 0.18);
+}
+
+/* blue-600 -> cyan-700 (not cyan-600): the lighter cyan-600 end measured
+   3.68:1 against white header text, short of WCAG AA's 4.5:1 for normal
+   text -- cyan-700 keeps the same "blue into cyan" feel while holding
+   5.3+:1 at both gradient stops and the midpoint. */
+.insight-article .dd-table-wrap table thead tr {
+  background-image: linear-gradient(to right, rgb(37 99 235), rgb(14 116 144));
+}
+
+.insight-article .dd-table-wrap table thead th {
+  color: white;
+  font-weight: 600;
+  padding-top: 0.7rem;
+  padding-bottom: 0.7rem;
+}
+
+.insight-article .dd-table-wrap table tbody tr:nth-child(even) {
+  background-color: rgb(239 246 255 / 0.6); /* blue-50/60 */
+}
+
+.insight-article .dd-table-wrap table tbody tr:nth-child(odd) {
+  background-color: white;
+}
+
+.insight-article .dd-table-wrap table tbody tr {
+  transition: background-color 0.15s ease-out;
+}
+
+.insight-article .dd-table-wrap table tbody tr:hover {
+  background-color: rgb(207 250 254 / 0.7); /* cyan-100/70 */
+}
+
+/* Code blocks: a soft colored glow instead of a flat shadow-less dark box,
+   so they visually belong to the richer page rather than looking like a
+   plain inserted terminal screenshot. The block's own dark background and
+   accent top border (set above, unscoped) are unchanged. */
+.insight-article pre {
+  box-shadow: 0 10px 28px -12px rgb(37 99 235 / 0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .insight-article .dd-table-wrap table tbody tr {
+    transition: none;
+  }
+}

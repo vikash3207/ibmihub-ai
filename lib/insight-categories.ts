@@ -68,6 +68,15 @@ interface InsightAccentClasses {
  * ./app, ./components, ./pages -- see tailwind.config.ts) can see them and
  * generate the corresponding CSS at build time. Same pattern as
  * lib/deep-dive-categories.ts's DEEP_DIVE_ACCENT_CLASSES.
+ *
+ * `headerWash` (PR #202 visual-design pass) is a saturated, blue/cyan/
+ * violet-forward gradient -- deliberately in the 600/700 range, never a
+ * -50/-100 tint, so the white text app/insights/[slug]/page.tsx's header
+ * banner paints on top of it stays comfortably above WCAG AA contrast
+ * regardless of where the gradient's diagonal lands. It is used in exactly
+ * one place (that page's hero-style header banner) -- badgeBg/badgeText/
+ * badgeBorder remain pale chips for light backgrounds (the listing card,
+ * etc.) and are unaffected by this change.
  */
 export const INSIGHT_ACCENT_CLASSES: Record<InsightAccent, InsightAccentClasses> = {
   sky: {
@@ -75,41 +84,41 @@ export const INSIGHT_ACCENT_CLASSES: Record<InsightAccent, InsightAccentClasses>
     badgeText: 'text-sky-700',
     badgeBorder: 'border-sky-200',
     topBorder: 'border-t-sky-500',
-    headerWash: 'bg-gradient-to-br from-sky-50 via-white to-cyan-50/60',
+    headerWash: 'bg-gradient-to-br from-sky-600 via-blue-600 to-cyan-500',
   },
   blue: {
     badgeBg: 'bg-blue-50',
     badgeText: 'text-blue-700',
     badgeBorder: 'border-blue-200',
     topBorder: 'border-t-blue-500',
-    headerWash: 'bg-gradient-to-br from-blue-50 via-white to-cyan-50/60',
+    headerWash: 'bg-gradient-to-br from-blue-700 via-indigo-600 to-violet-600',
   },
   cyan: {
     badgeBg: 'bg-cyan-50',
     badgeText: 'text-cyan-700',
     badgeBorder: 'border-cyan-200',
     topBorder: 'border-t-cyan-500',
-    headerWash: 'bg-gradient-to-br from-cyan-50 via-white to-blue-50/60',
+    headerWash: 'bg-gradient-to-br from-cyan-600 via-blue-600 to-indigo-600',
   },
   orange: {
     badgeBg: 'bg-orange-50',
     badgeText: 'text-orange-700',
     badgeBorder: 'border-orange-200',
     topBorder: 'border-t-orange-500',
-    headerWash: 'bg-gradient-to-br from-orange-50 via-white to-white',
+    headerWash: 'bg-gradient-to-br from-orange-600 via-amber-600 to-rose-500',
   },
   rose: {
     badgeBg: 'bg-rose-50',
     badgeText: 'text-rose-700',
     badgeBorder: 'border-rose-200',
     topBorder: 'border-t-rose-500',
-    headerWash: 'bg-gradient-to-br from-rose-50 via-white to-white',
+    headerWash: 'bg-gradient-to-br from-rose-600 via-pink-600 to-fuchsia-600',
   },
   emerald: {
     badgeBg: 'bg-emerald-50',
     badgeText: 'text-emerald-700',
     badgeBorder: 'border-emerald-200',
     topBorder: 'border-t-emerald-500',
-    headerWash: 'bg-gradient-to-br from-emerald-50 via-white to-white',
+    headerWash: 'bg-gradient-to-br from-emerald-600 via-teal-600 to-cyan-600',
   },
 }
