@@ -11,14 +11,20 @@
  * header comment for the same constraint on a different feature).
  *
  * Scope note: this section launched with ZERO Insight articles (Product
- * Owner review of the section's design on its own first) and PR #199
- * published the first one, "IBM i MCP Server: The New Bridge Between AI
- * Assistants and IBM i" (content/insights/ibm-i-mcp-server-ai-assistants.md).
- * Sections below that used to assert an empty catalog (no article, no
- * sitemap entry, no static route) have been updated to assert the opposite
- * for that real entry, while keeping the *generic* logic checks (synthetic
- * fixtures, structured-data builders, slug-resolution mechanics) unchanged
- * -- they were never coupled to the catalog being empty.
+ * Owner review of the section's design on its own first); PR #199 published
+ * the first one, "IBM i MCP Server: The New Bridge Between AI Assistants and
+ * IBM i" (content/insights/ibm-i-mcp-server-ai-assistants.md); and this PR
+ * published the second, "Modernizing RPG Applications with SQL and APIs"
+ * (content/insights/modernizing-rpg-applications-with-sql-and-apis.md).
+ * Sections below that once asserted "exactly one Insight"/"exactly one
+ * Markdown file"/etc. now assert two, and the figure-embedding checks
+ * (section 10) loop generically over every published Insight with a
+ * Markdown file rather than hardcoding a single slug -- a third Insight
+ * only needs its own entries in these arrays, not a rewrite of the loop
+ * logic. Article-specific fact/content checks (sections 11 and 12) stay
+ * scoped to the article they verify, with a matching subsection added per
+ * article rather than generalized, since their assertions are inherently
+ * about that one article's specific claims.
  *
  * Usage:
  *   npm run test:insights
@@ -33,9 +39,11 @@ import { buildInsightStructuredData, buildBreadcrumbStructuredData } from '../li
 import { SITE_URL } from '../lib/config'
 import { DEEP_DIVES } from '../content/deep-dives/catalog'
 import { splitInsightHtmlOnFigureMarkers } from '../lib/insight-render'
-import { INSIGHT_FIGURE_REGISTRY } from '../components/insights/mcp-figures'
+import { INSIGHT_FIGURE_REGISTRY } from '../components/insights/insight-figure-registry'
 
 const LAUNCH_SLUG = 'ibm-i-mcp-server-ai-assistants'
+const RPG_SQL_APIS_SLUG = 'modernizing-rpg-applications-with-sql-and-apis'
+const PUBLISHED_SLUGS = [LAUNCH_SLUG, RPG_SQL_APIS_SLUG]
 
 let failures = 0
 let passed = 0
@@ -84,28 +92,45 @@ const SYNTHETIC_INSIGHT: Insight = {
 
 async function runChecks() {
   // ---------------------------------------------------------------------------
-  section('1. The real catalog publishes exactly the first Insight, well-formed')
+  section('1. The real catalog publishes both Insights, each well-formed')
   // ---------------------------------------------------------------------------
 
-  check('content/insights/catalog.ts has exactly one entry', INSIGHTS.length === 1, `got ${INSIGHTS.length}`)
-  check('getPublishedInsights() on the real catalog returns that one entry', getPublishedInsights(INSIGHTS).length === 1)
-  check('the entry\'s slug is the expected launch slug', INSIGHTS[0]?.slug === LAUNCH_SLUG)
-  check('getFeaturedInsight() on the real catalog returns the launch article (marked featured: true)', getFeaturedInsight(INSIGHTS)?.slug === LAUNCH_SLUG)
-  check('the entry has a known InsightCategoryId', INSIGHT_CATEGORIES.some((c) => c.id === INSIGHTS[0]?.category))
-  check('the entry has at least one tag', (INSIGHTS[0]?.tags.length ?? 0) > 0)
-  check('the entry has a valid, non-future ISO publishedAt', (() => {
-    const t = new Date(`${INSIGHTS[0]?.publishedAt}T00:00:00Z`).getTime()
-    return !Number.isNaN(t) && t <= Date.now()
-  })())
-  check('the entry has a positive readingTimeMinutes', (INSIGHTS[0]?.readingTimeMinutes ?? 0) > 0)
+  check('content/insights/catalog.ts has exactly two entries', INSIGHTS.length === 2, `got ${INSIGHTS.length}`)
+  check('getPublishedInsights() on the real catalog returns both entries', getPublishedInsights(INSIGHTS).length === 2)
+  check('both expected slugs are present in the catalog', PUBLISHED_SLUGS.every((slug) => INSIGHTS.some((i) => i.slug === slug)))
   check(
-    'every relatedDeepDiveSlugs entry actually exists in the Deep Dive catalog (no dangling reference)',
-    (INSIGHTS[0]?.relatedDeepDiveSlugs ?? []).every((slug) => DEEP_DIVES.some((d) => d.slug === slug))
+    'getFeaturedInsight() on the real catalog returns the launch article (the only one marked featured: true)',
+    getFeaturedInsight(INSIGHTS)?.slug === LAUNCH_SLUG
   )
+  check(
+    'the launch article is still listing-page position 0 (its "featured" card treatment is positional, not the featured flag)',
+    INSIGHTS[0]?.slug === LAUNCH_SLUG
+  )
+
+  for (const insight of INSIGHTS) {
+    check(`${insight.slug} has a known InsightCategoryId`, INSIGHT_CATEGORIES.some((c) => c.id === insight.category))
+    check(`${insight.slug} has at least one tag`, insight.tags.length > 0)
+    check(
+      `${insight.slug} has a valid, non-future ISO publishedAt`,
+      (() => {
+        const t = new Date(`${insight.publishedAt}T00:00:00Z`).getTime()
+        return !Number.isNaN(t) && t <= Date.now()
+      })()
+    )
+    check(`${insight.slug} has a positive readingTimeMinutes`, insight.readingTimeMinutes > 0)
+    check(
+      `${insight.slug}'s relatedDeepDiveSlugs entries all exist in the Deep Dive catalog (no dangling reference)`,
+      (insight.relatedDeepDiveSlugs ?? []).every((slug) => DEEP_DIVES.some((d) => d.slug === slug))
+    )
+  }
 
   const insightsContentDir = resolve(__dirname, '..', 'content', 'insights')
   const markdownFiles = readdirSync(insightsContentDir).filter((f) => f.endsWith('.md'))
-  check('content/insights/ has exactly one Markdown file, matching the catalog slug', markdownFiles.length === 1 && markdownFiles[0] === `${LAUNCH_SLUG}.md`, `found: ${markdownFiles.join(', ')}`)
+  check(
+    'content/insights/ has exactly two Markdown files, matching both catalog slugs',
+    markdownFiles.length === 2 && PUBLISHED_SLUGS.every((slug) => markdownFiles.includes(`${slug}.md`)),
+    `found: ${markdownFiles.join(', ')}`
+  )
 
   // ---------------------------------------------------------------------------
   section('2. Catalog entry validation logic (executed against a synthetic fixture, generically)')
@@ -199,10 +224,10 @@ async function runChecks() {
     check('sitemap.ts includes a static /insights listing route', sitemapSrc.includes('${SITE_URL}/insights`'))
     check('sitemap.ts includes an insightRoutes block in the returned array', sitemapSrc.includes('insightRoutes'))
     check(
-      'the launch article is published, so sitemap.ts (which filters with isInsightAvailable) will include it',
-      INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === LAUNCH_SLUG)
+      'both published articles are eligible, so sitemap.ts (which filters with isInsightAvailable) will include them',
+      PUBLISHED_SLUGS.every((slug) => INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === slug))
     )
-    check('exactly one Insight is eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 1)
+    check('exactly two Insights are eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 2)
 
     const robotsSrc = readRepoFile('app/robots.ts')
     check("robots.ts allows '/insights'", /allow:\s*\[[^\]]*'\/insights'/.test(robotsSrc))
@@ -293,13 +318,14 @@ async function runChecks() {
       !/\b(every week|weekly|monthly|this month|next month|launching soon)\b/i.test(listingSrc)
     )
 
-    // With a real Insight now published, this listing page should actually
-    // render at build time, containing that real article's title.
+    // With real Insights now published, this listing page should actually
+    // render at build time: the launch article as the featured card
+    // (array position 0), the second article in the grid alongside it.
     check(
-      'the real published article renders on the listing page',
+      'both published articles render on the listing page (featured card + grid)',
       (() => {
         const published = getPublishedInsights(INSIGHTS)
-        return published.length > 0 && published[0].slug === LAUNCH_SLUG
+        return published.length === 2 && published[0].slug === LAUNCH_SLUG && published[1].slug === RPG_SQL_APIS_SLUG
       })()
     )
   }
@@ -313,8 +339,9 @@ async function runChecks() {
     check('generateStaticParams() only ever includes available Insights', /INSIGHTS\.filter\(isInsightAvailable\)/.test(detailSrc))
     check('an unresolved slug calls notFound()', /if \(!insight\) \{[\s\S]{0,40}notFound\(\)/.test(detailSrc))
     check(
-      'generateStaticParams() now produces exactly one route, for the launch article',
-      INSIGHTS.filter(isInsightAvailable).length === 1 && INSIGHTS.filter(isInsightAvailable)[0].slug === LAUNCH_SLUG
+      'generateStaticParams() now produces exactly two routes, one per published article',
+      INSIGHTS.filter(isInsightAvailable).length === 2 &&
+        PUBLISHED_SLUGS.every((slug) => INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === slug))
     )
     check('the removed (older, unrelated) article-specific diagram component is not reintroduced', !detailSrc.includes('architecture-diagram'))
     check('the detail route still reuses the generic Deep Dive TOC/markdown primitives (retained, reusable infrastructure)', detailSrc.includes('DeepDiveToc'))
@@ -344,26 +371,38 @@ async function runChecks() {
     check('HTML with no figure marker splits into a single html segment (no-op case)', splitInsightHtmlOnFigureMarkers('<p>just prose</p>').length === 1)
     check('consecutive figure markers with no prose between them both survive the split', splitInsightHtmlOnFigureMarkers('<p>[[FIGURE:a]]</p><p>[[FIGURE:b]]</p>').filter((s) => s.type === 'figure').length === 2)
 
+    // Loops generically over every published Insight with a Markdown file --
+    // a third article only needs its own entry in PUBLISHED_SLUGS and the
+    // merged registry, not a rewrite of this loop.
+    for (const slug of PUBLISHED_SLUGS) {
+      const markdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${slug}.md`), 'utf-8')
+      const markersInMarkdown = [...markdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+      const registered = Object.keys(INSIGHT_FIGURE_REGISTRY[slug] ?? {})
+
+      check(`${slug} has at least one figure marker`, markersInMarkdown.length >= 1, `found ${markersInMarkdown.length}`)
+      check(`no duplicate figure marker names within ${slug}`, markersInMarkdown.length === new Set(markersInMarkdown).size)
+      check(
+        `every figure marker referenced in ${slug} has a matching registry entry`,
+        markersInMarkdown.every((name) => registered.includes(name)),
+        `missing: ${markersInMarkdown.filter((n) => !registered.includes(n)).join(', ')}`
+      )
+      check(
+        `the registry for ${slug} has no orphan entries the article never references (stays in sync both ways)`,
+        registered.every((name) => markersInMarkdown.includes(name)),
+        `orphaned: ${registered.filter((n) => !markersInMarkdown.includes(n)).join(', ')}`
+      )
+
+      check(`${slug}'s Markdown source contains no raw HTML tags (remark-rehype never enables allowDangerousHtml, so any would just render as escaped text)`, !/<(div|svg|script|iframe)[\s>]/i.test(markdown))
+      check(`${slug}'s Markdown source references no external image URL`, !/!\[[^\]]*\]\(https?:\/\//.test(markdown))
+      check(`${slug}'s Markdown source does not use an <img> tag`, !/<img[\s>]/i.test(markdown))
+    }
+
+    // The launch article specifically still needs its full complement --
+    // kept as its own assertion since "at least 6" was a launch-specific
+    // editorial requirement, not a rule every future Insight must follow.
     const launchMarkdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${LAUNCH_SLUG}.md`), 'utf-8')
-    const markersInMarkdown = [...launchMarkdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
-    const registeredForLaunch = Object.keys(INSIGHT_FIGURE_REGISTRY[LAUNCH_SLUG] ?? {})
-
-    check('the launch article has at least the 5 required figures plus the optional 6th', markersInMarkdown.length >= 6, `found ${markersInMarkdown.length}`)
-    check('no duplicate figure marker names within the launch article', markersInMarkdown.length === new Set(markersInMarkdown).size)
-    check(
-      'every figure marker referenced in the launch article has a matching registry entry',
-      markersInMarkdown.every((name) => registeredForLaunch.includes(name)),
-      `missing: ${markersInMarkdown.filter((n) => !registeredForLaunch.includes(n)).join(', ')}`
-    )
-    check(
-      'the registry has no orphan entries the article never references (stays in sync both ways)',
-      registeredForLaunch.every((name) => markersInMarkdown.includes(name)),
-      `orphaned: ${registeredForLaunch.filter((n) => !markersInMarkdown.includes(n)).join(', ')}`
-    )
-
-    check('the Markdown source contains no raw HTML tags (remark-rehype never enables allowDangerousHtml, so any would just render as escaped text)', !/<(div|svg|script|iframe)[\s>]/i.test(launchMarkdown))
-    check('the Markdown source references no external image URL', !/!\[[^\]]*\]\(https?:\/\//.test(launchMarkdown))
-    check('the Markdown source does not use an <img> tag', !/<img[\s>]/i.test(launchMarkdown))
+    const launchMarkers = [...launchMarkdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+    check('the launch article has at least the 5 required figures plus the optional 6th', launchMarkers.length >= 6, `found ${launchMarkers.length}`)
   }
 
   // ---------------------------------------------------------------------------
@@ -478,6 +517,77 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
+  section('11b. Second Insight ("Modernizing RPG Applications with SQL and APIs"): diagram components and content checks')
+  // ---------------------------------------------------------------------------
+
+  {
+    const rpgFiguresSrc = readRepoFile('components/insights/rpg-sql-apis-figures.tsx')
+    const figureWrapperSrc = readRepoFile('components/insights/insight-figure.tsx')
+    const rpgMarkdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${RPG_SQL_APIS_SLUG}.md`), 'utf-8')
+
+    check('every InsightFigure call in the new figure file passes a non-empty caption', !/caption=""/.test(rpgFiguresSrc))
+    check('no figure uses an <img> tag or an external image URL', !/<img[\s>]/i.test(rpgFiguresSrc) && !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/i.test(rpgFiguresSrc))
+    check('none of the three figures opt into the horizontally-scrollable viewport (plain HTML/CSS, not a fixed-width drawing)', !/^\s*scrollable(\s*=|\s*$)/m.test(rpgFiguresSrc))
+    check('the one-time diagram entrance uses the shared reduced-motion-safe class', rpgFiguresSrc.includes('insight-figure-enter'))
+    check('the shared figure wrapper renders a real <figure>/<figcaption> pair (semantic, not div soup)', figureWrapperSrc.includes('<figure') && figureWrapperSrc.includes('<figcaption'))
+    check('the registry export is nested by slug, matching the shared INSIGHT_FIGURE_REGISTRY shape', /RPG_SQL_APIS_FIGURE_REGISTRY: Record<string, Record<string, ComponentType>>/.test(rpgFiguresSrc))
+
+    // Figure numbers must ascend in the order the [[FIGURE:...]] markers
+    // appear in the Markdown, same discipline as the launch article's
+    // section 11 check above (that ordering drifted apart once already for
+    // the MCP article).
+    {
+      const markerOrder = [...rpgMarkdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+      const numberByComponent = new Map<string, number>()
+      for (const chunk of rpgFiguresSrc.split(/(?=export function )/)) {
+        const name = chunk.match(/^export function (\w+)\(/)?.[1]
+        const num = chunk.match(/number=\{(\d+)\}/)?.[1]
+        if (name && num) numberByComponent.set(name, Number(num))
+      }
+      const registryBlock = rpgFiguresSrc.slice(rpgFiguresSrc.indexOf('RPG_SQL_APIS_FIGURE_REGISTRY'))
+      const componentByMarker = new Map<string, string>()
+      for (const m of registryBlock.matchAll(/'?([a-z0-9-]+)'?\s*:\s*(\w+Figure)\b/g)) {
+        componentByMarker.set(m[1], m[2])
+      }
+      const numbersInReadingOrder = markerOrder
+        .map((marker) => numberByComponent.get(componentByMarker.get(marker) ?? ''))
+        .filter((n): n is number => typeof n === 'number')
+
+      check(
+        'every figure marker resolves to a "Figure N" label',
+        numbersInReadingOrder.length === markerOrder.length,
+        `resolved ${numbersInReadingOrder.length} of ${markerOrder.length} markers`
+      )
+      check(
+        'figure numbers ascend in the order a reader scrolls past them',
+        numbersInReadingOrder.every((n, i) => i === 0 || n > numbersInReadingOrder[i - 1]),
+        `reading order gives: ${numbersInReadingOrder.join(', ')}`
+      )
+      check(
+        'figure numbers start at 1 and have no gaps',
+        numbersInReadingOrder.every((n, i) => n === i + 1),
+        `got: ${numbersInReadingOrder.join(', ')}`
+      )
+    }
+
+    // Content-accuracy guardrails: this article was written from a prepared
+    // source document and validated against IBM's own Db2 for i / QSYS2 HTTP
+    // function documentation before publishing -- these checks pin the
+    // resulting claims so a future edit can't silently drop them.
+    check('the article cites Db2 for i JSON generation documentation as a source', rpgMarkdown.includes('topic=data-generating-json'))
+    check('the article cites the QSYS2 HTTP functions documentation as a source', rpgMarkdown.includes('topic=programming-http-functions-overview'))
+    check('the article cites Integrated Web Services documentation as a source', rpgMarkdown.includes('topic=tasks-integrated-web-services-i'))
+    check('the article includes a Sources and further reading section', /### Sources and further reading/.test(rpgMarkdown))
+    check(
+      'the article explains the repeated "header" key in httpOptions rather than leaving it looking like a mistake',
+      /documented convention/.test(rpgMarkdown) && /repeated/.test(rpgMarkdown)
+    )
+    check('the article states the correct IBM i licensed program prerequisite (5770SS1 options 3 and 34)', /5770SS1, option 3/.test(rpgMarkdown) && /option 34/.test(rpgMarkdown))
+    check('the article never claims a live IBM i connection or real customer data', !/real (customer|production) data/i.test(rpgMarkdown))
+    check('every rpgle/sql/json/text fenced code block has a recognized language tag Insights code styling already covers', ['```rpgle', '```sql', '```json', '```text'].every((tag) => rpgMarkdown.includes(tag)))
+  }
+
+  // ---------------------------------------------------------------------------
   section('12. Sources attribution (IBM i Insights Attribution Cleanup and Date Display Removal)')
   // ---------------------------------------------------------------------------
 
@@ -570,6 +680,8 @@ async function runChecks() {
       'components/insight-card.tsx': readRepoFile('components/insight-card.tsx'),
       'components/insights/insight-figure.tsx': readRepoFile('components/insights/insight-figure.tsx'),
       'components/insights/mcp-figures.tsx': readRepoFile('components/insights/mcp-figures.tsx'),
+      'components/insights/rpg-sql-apis-figures.tsx': readRepoFile('components/insights/rpg-sql-apis-figures.tsx'),
+      'components/insights/insight-figure-registry.ts': readRepoFile('components/insights/insight-figure-registry.ts'),
       'app/insights/page.tsx': readRepoFile('app/insights/page.tsx'),
       'app/insights/[slug]/page.tsx': readRepoFile('app/insights/[slug]/page.tsx'),
     }
