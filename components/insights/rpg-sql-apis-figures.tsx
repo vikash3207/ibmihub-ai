@@ -115,9 +115,8 @@ export function LayeredArchitectureFigure() {
 interface SequencePhase {
   icon: ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' | 'false' }>
   accentDot: string
+  accentBorder: string
   accentText: string
-  cardBorder: string
-  cardBg: string
   title: string
   detail: string
 }
@@ -126,53 +125,37 @@ const SEQUENCE_PHASES: SequencePhase[] = [
   {
     icon: FileJson,
     accentDot: 'bg-blue-500',
+    accentBorder: 'border-blue-200',
     accentText: 'text-blue-700',
-    cardBorder: 'border-blue-100',
-    cardBg: 'bg-blue-50/50',
     title: 'RPG builds the request',
     detail: 'Db2 for i’s JSON_OBJECT assembles the outbound document from RPG host variables -- no manual string concatenation.',
   },
   {
     icon: SendHorizontal,
     accentDot: 'bg-cyan-500',
+    accentBorder: 'border-cyan-200',
     accentText: 'text-cyan-700',
-    cardBorder: 'border-cyan-100',
-    cardBg: 'bg-cyan-50/50',
     title: 'RPG calls the external API',
     detail: 'QSYS2.HTTP_POST_VERBOSE sends the HTTPS request and waits for a response.',
   },
   {
     icon: ListChecks,
-    accentDot: 'bg-violet-500',
-    accentText: 'text-violet-700',
-    cardBorder: 'border-violet-100',
-    cardBg: 'bg-violet-50/50',
+    accentDot: 'bg-indigo-500',
+    accentBorder: 'border-indigo-200',
+    accentText: 'text-indigo-700',
     title: 'The external API responds',
     detail: 'Status, headers, and a JSON body come back together -- the verbose form captures all three, not just the payload.',
   },
   {
     icon: CheckCircle2,
     accentDot: 'bg-emerald-500',
+    accentBorder: 'border-emerald-200',
     accentText: 'text-emerald-700',
-    cardBorder: 'border-emerald-100',
-    cardBg: 'bg-emerald-50/50',
     title: 'RPG parses and validates the outcome',
     detail: 'JSON_TABLE extracts the fields the business logic needs, then the application checks the result -- a 200 status is not the same thing as business success.',
   },
 ]
 
-/**
- * Each step is its own self-contained card (icon + a fixed-width column,
- * text in a separate `min-w-0` column) -- deliberately NOT the earlier
- * version's `-translate-x`/negative-margin trick to pull an icon onto a
- * connecting border line, which let the icon visually overlap the STEP
- * label at some widths (worst on Step 4, whose longer detail text pushed
- * the card taller and exposed the offset math). A plain two-column flex
- * row has no such failure mode at any width. The connecting line between
- * steps is a real, separate flex item in the icon column (a thin bar that
- * grows to fill the gap down to the next icon), not a border on the whole
- * row, so it can never drift out of alignment with the icons it connects.
- */
 export function IntegrationSequenceFigure() {
   return (
     <InsightFigure
@@ -181,26 +164,20 @@ export function IntegrationSequenceFigure() {
       accent="cyan"
       caption="A remote call is not a single event -- it is a request that Db2 for i's SQL helps build, an HTTPS call that can fail or time out, and a response the application still has to validate before trusting it."
     >
-      <div className="insight-figure-enter mx-auto max-w-xl px-1 sm:px-2">
-        {SEQUENCE_PHASES.map((phase, i) => {
-          const isLast = i === SEQUENCE_PHASES.length - 1
-          return (
-            <div key={phase.title} className="flex gap-3">
-              <div className="flex flex-col items-center">
-                <span className={cn('flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-white shadow-sm ring-4 ring-white', phase.accentDot)} aria-hidden="true">
-                  <phase.icon className="h-4 w-4" aria-hidden="true" />
-                </span>
-                {!isLast && <span className="mt-1 w-0.5 flex-1 bg-slate-200" aria-hidden="true" />}
-              </div>
-              <div className={cn('min-w-0 flex-1 rounded-xl border p-3.5 sm:p-4', phase.cardBorder, phase.cardBg, isLast ? 'mb-0' : 'mb-3')}>
-                <p className={cn('text-xs font-semibold uppercase tracking-wide', phase.accentText)}>Step {i + 1}</p>
-                <p className="mt-0.5 text-sm font-semibold text-slate-900">{phase.title}</p>
-                <p className="mt-1 text-[15px] leading-relaxed text-slate-600">{phase.detail}</p>
-              </div>
-            </div>
-          )
-        })}
-      </div>
+      <ol className="insight-figure-enter space-y-0 px-1">
+        {SEQUENCE_PHASES.map((phase, i) => (
+          <li key={phase.title} className={cn('flex gap-3 border-l-2 pl-4 pb-6 pt-1 sm:pl-5', phase.accentBorder, i === SEQUENCE_PHASES.length - 1 && 'pb-1')}>
+            <span className={cn('flex h-7 w-7 shrink-0 -translate-x-[calc(0.875rem+1px)] items-center justify-center rounded-full text-white shadow-sm', phase.accentDot)} aria-hidden="true">
+              <phase.icon className="h-3.5 w-3.5" aria-hidden="true" />
+            </span>
+            <span className="-ml-7 min-w-0 sm:-ml-8">
+              <span className={cn('block text-xs font-semibold uppercase tracking-wide', phase.accentText)}>Step {i + 1}</span>
+              <span className="block text-sm font-semibold text-slate-900">{phase.title}</span>
+              <span className="block break-words text-sm leading-relaxed text-slate-600">{phase.detail}</span>
+            </span>
+          </li>
+        ))}
+      </ol>
     </InsightFigure>
   )
 }

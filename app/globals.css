@@ -458,58 +458,6 @@
  * every earlier PR #146/#158 rule above already relies on.
  */
 
-/* Long-form reading typography (follow-up pass): a calmer, technical-blog
-   measure and scale instead of stretching prose across the full ~48rem
-   article column. Body copy sits at 17px/1.75 line-height on desktop and
-   16px on narrow screens (media query below); paragraphs, lists, headings,
-   and callouts are capped at ~42rem (roughly 72-78 characters per line at
-   this size) while tables (.dd-table-wrap), code blocks (pre), and figures
-   are deliberately NOT selected here, so they keep using the full article
-   column width -- the "narrow text, wide media" pattern. */
-.insight-article .prose {
-  font-size: 1.0625rem; /* 17px */
-  line-height: 1.75;
-}
-
-.insight-article .prose > p,
-.insight-article .prose > ul,
-.insight-article .prose > ol,
-.insight-article .prose > blockquote {
-  max-width: 42rem;
-}
-
-.insight-article .prose > p {
-  margin: 0 0 1.375rem;
-}
-
-.insight-article .prose > ul,
-.insight-article .prose > ol {
-  margin: 0 0 1.375rem;
-}
-
-/* 10px between items (margin-bottom only, no margin-top): adjoining block
-   margins collapse to the larger of the two, so a symmetric top+bottom
-   margin here would have produced half the intended gap between items. */
-.insight-article .prose li {
-  margin: 0 0 0.625rem;
-}
-
-.insight-article .prose li:last-child {
-  margin-bottom: 0;
-}
-
-.insight-article .prose li > p {
-  margin: 0;
-}
-
-.insight-article .prose pre {
-  margin: 1.75rem 0;
-  font-size: 0.875rem; /* 14px -- explicit and absolute, decoupled from the
-    17px prose base above so a future body-size change can't also resize
-    code blocks; .prose pre code inherits this via the font-size: inherit
-    !important rule at the top of this file. */
-}
-
 /* Section headings read as distinct colored panels instead of a plain
    heading with a thin line, so a long article visibly breaks into sections
    rather than reading as one continuous white page. Scoped to
@@ -520,15 +468,12 @@
    from reskinning figure chrome by accident. */
 .insight-article .prose h2 {
   position: relative;
-  max-width: 42rem;
-  margin-top: 2.75rem;
+  margin-top: 3rem;
   margin-bottom: 1.25rem;
   padding: 0.85rem 1.1rem 0.85rem 1.5rem;
   border-radius: 0.75rem;
   border-bottom: none;
   background-image: linear-gradient(to right, rgb(37 99 235 / 0.1), rgb(6 182 212 / 0.06) 60%, transparent 100%);
-  font-size: 1.75rem; /* 28px */
-  line-height: 1.3;
 }
 
 .insight-article .prose h2::before {
@@ -545,29 +490,12 @@
 
 .insight-article .prose h3 {
   position: relative;
-  max-width: 42rem;
   margin-top: 2rem;
   padding: 0.3rem 0.9rem;
   border-left-width: 3px;
   border-left-color: rgb(99 102 241 / 0.5); /* indigo-500 */
   border-radius: 0 0.5rem 0.5rem 0;
   background-color: rgb(99 102 241 / 0.05);
-  font-size: 1.375rem; /* 22px */
-  line-height: 1.35;
-}
-
-@media (max-width: 640px) {
-  .insight-article .prose {
-    font-size: 1rem; /* 16px */
-  }
-
-  .insight-article .prose h2 {
-    font-size: 1.4rem; /* ~22.4px -- 28px reads oversized on a 320-375px column */
-  }
-
-  .insight-article .prose h3 {
-    font-size: 1.15rem; /* ~18.4px */
-  }
 }
 
 /* Callouts: richer tint, rounded outer corner, and a soft shadow so they
@@ -579,7 +507,6 @@
 .insight-article blockquote.callout-mistake,
 .insight-article blockquote.callout-warning,
 .insight-article blockquote.callout-interview {
-  margin: 1.5rem 0;
   border-radius: 0 0.85rem 0.85rem 0;
   box-shadow: 0 1px 3px rgb(15 23 42 / 0.06);
 }

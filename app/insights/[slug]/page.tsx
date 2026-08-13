@@ -145,55 +145,30 @@ export default async function InsightPage({ params }: Props) {
           <div className="mt-2 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:gap-10">
             <DeepDiveToc items={toc} variant="insight" />
 
-            <article className={`relative max-w-3xl space-y-8 overflow-hidden rounded-2xl border-t-4 bg-white p-6 shadow-sm sm:p-8 ${accentClasses.topBorder}`}>
-              {/* Soft continuation wash bridging the saturated hero into the white
-                  body -- a FIXED height, not a percentage-based gradient stop, so
-                  it always completes within the same visual distance regardless of
-                  how long the article body is (a percentage gradient across the
-                  whole, often very long, <article> would only reach its lighter
-                  stop partway down a multi-thousand-pixel page -- the same bug
-                  fixed in the figure washes below). Painting order: this is a
-                  position:absolute child with no z-index, and both the header and
-                  the body-content wrapper below carry an explicit `relative z-10`,
-                  so they always paint above it regardless of DOM order -- the
-                  precise stacking bug once already caught on this section's own
-                  listing-page hero (see app/insights/page.tsx's git history) is
-                  what this pattern deliberately avoids. */}
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-[24rem] bg-gradient-to-b from-blue-50/70 to-transparent" aria-hidden="true" />
-
+            <article className={`max-w-3xl space-y-8 rounded-2xl border-t-4 bg-white p-6 shadow-sm sm:p-8 ${accentClasses.topBorder}`}>
               <div
-                className={`relative z-10 -mx-6 -mt-6 overflow-hidden rounded-t-2xl px-6 pb-7 pt-7 sm:-mx-8 sm:-mt-8 sm:px-8 sm:pt-9 sm:pb-9 ${accentClasses.headerWash}`}
+                className={`relative -mx-6 -mt-6 overflow-hidden rounded-t-2xl px-6 pb-7 pt-7 sm:-mx-8 sm:-mt-8 sm:px-8 sm:pt-9 sm:pb-9 ${accentClasses.headerWash}`}
               >
                 {/* Decorative texture only -- a faint grid plus soft glow blobs,
                     the same "premium hero" language as the Insights listing
                     page's own dark hero (app/insights/page.tsx) and
                     components/section-hero.tsx, scaled down for this smaller
-                    card-topper banner and toned down further in a follow-up pass
-                    (lower opacity blobs, calmer two-stop gradient above) so the
-                    banner reads as premium rather than loud. All aria-hidden;
-                    none of it carries information, so it never needs a text
-                    alternative. The gradient itself (INSIGHT_ACCENT_CLASSES.
-                    headerWash) stays in the 600/700 range specifically so the
-                    white text below keeps comfortable contrast regardless of
-                    where these blobs fall. */}
+                    card-topper banner. All aria-hidden; none of it carries
+                    information, so it never needs a text alternative. The
+                    gradient itself (INSIGHT_ACCENT_CLASSES.headerWash) stays
+                    in the 600/700 range specifically so the white text below
+                    keeps comfortable contrast regardless of where these blobs
+                    fall. */}
                 <div
-                  className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:34px_34px]"
+                  className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:34px_34px]"
                   aria-hidden="true"
                 />
                 <div
-                  className="pointer-events-none absolute -top-10 right-0 h-48 w-48 rounded-full bg-cyan-300/15 blur-[70px]"
+                  className="pointer-events-none absolute -top-10 right-0 h-48 w-48 rounded-full bg-cyan-300/25 blur-[70px]"
                   aria-hidden="true"
                 />
                 <div
-                  className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-violet-400/15 blur-[80px]"
-                  aria-hidden="true"
-                />
-                {/* Fade-to-tint strip at the very bottom of the banner -- eases the
-                    handoff from the saturated gradient into the soft wash above
-                    instead of ending on a hard color seam, so the hero and body
-                    read as one continuous surface rather than two stacked blocks. */}
-                <div
-                  className="pointer-events-none absolute inset-x-0 bottom-0 h-12 sm:h-16 [background:linear-gradient(to_bottom,transparent,rgb(239_246_255/0.9))]"
+                  className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-violet-400/20 blur-[80px]"
                   aria-hidden="true"
                 />
 
@@ -207,7 +182,7 @@ export default async function InsightPage({ params }: Props) {
                     </Badge>
                   </div>
                   <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">{insight.title}</h1>
-                  <p className="mt-3 max-w-2xl text-base text-white/90 leading-relaxed">{insight.description}</p>
+                  <p className="mt-3 max-w-2xl text-base text-blue-50 leading-relaxed">{insight.description}</p>
                   {/* Deliberately no publication date here (IBM i Insights Attribution
                       Cleanup and Date Display Removal) -- this section is meant to read
                       as evergreen, not time-stamped. publishedAt still exists on the
@@ -230,88 +205,86 @@ export default async function InsightPage({ params }: Props) {
                 </div>
               </div>
 
-              <div className="relative z-10 space-y-8">
-                {loadError ? (
-                  <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-800">
-                    This Insight could not be loaded right now. Please try again later, or{' '}
-                    <Link
-                      href="/insights"
-                      prefetch={false}
-                      className="rounded underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-                    >
-                      return to IBM i Insights
-                    </Link>
-                    .
-                  </div>
-                ) : (
-                  // `deep-dive-article` reuses that scope's existing table/callout/heading CSS
-                  // (app/globals.css) rather than duplicating it; `insight-article` is Insights'
-                  // own hook for any future insight-only styling, kept separate from the start.
-                  <div className="insight-article deep-dive-article">
-                    {splitInsightHtmlOnFigureMarkers(bodyHtml).map((segment, i) => {
-                      if (segment.type === 'html') {
-                        return <LessonContent key={i} html={segment.html} />
-                      }
-                      const Figure = INSIGHT_FIGURE_REGISTRY[insight.slug]?.[segment.name]
-                      return Figure ? <Figure key={i} /> : null
-                    })}
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-6">
-                  <Link href="/insights" className={buttonVariants({ variant: 'secondary' })}>
-                    &larr; All IBM i Insights
+              {loadError ? (
+                <div className="rounded-2xl border border-red-100 bg-red-50 p-6 text-sm text-red-800">
+                  This Insight could not be loaded right now. Please try again later, or{' '}
+                  <Link
+                    href="/insights"
+                    prefetch={false}
+                    className="rounded underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+                  >
+                    return to IBM i Insights
                   </Link>
+                  .
                 </div>
+              ) : (
+                // `deep-dive-article` reuses that scope's existing table/callout/heading CSS
+                // (app/globals.css) rather than duplicating it; `insight-article` is Insights'
+                // own hook for any future insight-only styling, kept separate from the start.
+                <div className="insight-article deep-dive-article">
+                  {splitInsightHtmlOnFigureMarkers(bodyHtml).map((segment, i) => {
+                    if (segment.type === 'html') {
+                      return <LessonContent key={i} html={segment.html} />
+                    }
+                    const Figure = INSIGHT_FIGURE_REGISTRY[insight.slug]?.[segment.name]
+                    return Figure ? <Figure key={i} /> : null
+                  })}
+                </div>
+              )}
 
-                {relatedLessons.length > 0 && (
-                  <div>
-                    <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm">
-                        <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
-                      </span>
-                      Related lessons
-                    </h2>
-                    <ul className="space-y-2">
-                      {relatedLessons.map((lesson) => (
-                        <li key={lesson.slug}>
-                          <Link
-                            href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
-                            className="flex items-center justify-between gap-2 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/60 to-cyan-50/30 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                          >
-                            <span>{lesson.title}</span>
-                            <span aria-hidden="true">&rarr;</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-
-                {relatedDeepDives.length > 0 && (
-                  <div>
-                    <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm">
-                        <Compass className="h-3.5 w-3.5" aria-hidden="true" />
-                      </span>
-                      Related Deep Dive
-                    </h2>
-                    <ul className="space-y-2">
-                      {relatedDeepDives.map((related) => (
-                        <li key={related.slug}>
-                          <Link
-                            href={`/deep-dives/${related.slug}`}
-                            className="flex items-center justify-between gap-2 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/60 to-violet-50/30 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
-                          >
-                            <span>{related.title}</span>
-                            <span aria-hidden="true">&rarr;</span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+              <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-6">
+                <Link href="/insights" className={buttonVariants({ variant: 'secondary' })}>
+                  &larr; All IBM i Insights
+                </Link>
               </div>
+
+              {relatedLessons.length > 0 && (
+                <div>
+                  <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm">
+                      <BookOpen className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                    Related lessons
+                  </h2>
+                  <ul className="space-y-2">
+                    {relatedLessons.map((lesson) => (
+                      <li key={lesson.slug}>
+                        <Link
+                          href={`/learn/ibm-i-fundamentals/${lesson.slug}`}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-blue-100 bg-gradient-to-r from-blue-50/60 to-cyan-50/30 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md hover:text-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                        >
+                          <span>{lesson.title}</span>
+                          <span aria-hidden="true">&rarr;</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {relatedDeepDives.length > 0 && (
+                <div>
+                  <h2 className="mb-3 flex items-center gap-2 text-lg font-semibold text-slate-900">
+                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm">
+                      <Compass className="h-3.5 w-3.5" aria-hidden="true" />
+                    </span>
+                    Related Deep Dive
+                  </h2>
+                  <ul className="space-y-2">
+                    {relatedDeepDives.map((related) => (
+                      <li key={related.slug}>
+                        <Link
+                          href={`/deep-dives/${related.slug}`}
+                          className="flex items-center justify-between gap-2 rounded-xl border border-indigo-100 bg-gradient-to-r from-indigo-50/60 to-violet-50/30 px-4 py-3 text-sm font-medium text-slate-700 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md hover:text-indigo-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-600 focus-visible:ring-offset-2 motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+                        >
+                          <span>{related.title}</span>
+                          <span aria-hidden="true">&rarr;</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
             </article>
           </div>
         </div>
