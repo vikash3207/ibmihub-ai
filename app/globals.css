@@ -76,6 +76,20 @@
 }
 
 /*
+ * An inline `code` span outside a fenced block (e.g. a parameter or column
+ * name called out in a "Note:" callout) has no spaces to break on, so a
+ * long identifier can push the page into horizontal scroll on narrow
+ * viewports even though `.prose table`/`.dd-table-wrap code` already handle
+ * the same problem inside tables. `:not(pre) >` scopes this to inline code
+ * only -- fenced code blocks keep their own `overflow-x: auto` scrolling
+ * behavior on `pre` untouched.
+ */
+.prose :not(pre) > code {
+  overflow-wrap: break-word;
+  word-break: break-word;
+}
+
+/*
  * PR #146 (Lesson Visual Enrichment). Additive only -- none of these rules
  * touch the `.prose pre code`, `.prose pre::before`, or `.prose table`
  * selectors above; every fix those apply is unaffected.
