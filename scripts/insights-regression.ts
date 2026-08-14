@@ -13,18 +13,21 @@
  * Scope note: this section launched with ZERO Insight articles (Product
  * Owner review of the section's design on its own first); PR #199 published
  * the first one, "IBM i MCP Server: The New Bridge Between AI Assistants and
- * IBM i" (content/insights/ibm-i-mcp-server-ai-assistants.md); and this PR
+ * IBM i" (content/insights/ibm-i-mcp-server-ai-assistants.md); PR #202
  * published the second, "Modernizing RPG Applications with SQL and APIs"
- * (content/insights/modernizing-rpg-applications-with-sql-and-apis.md).
- * Sections below that once asserted "exactly one Insight"/"exactly one
- * Markdown file"/etc. now assert two, and the figure-embedding checks
- * (section 10) loop generically over every published Insight with a
- * Markdown file rather than hardcoding a single slug -- a third Insight
- * only needs its own entries in these arrays, not a rewrite of the loop
- * logic. Article-specific fact/content checks (sections 11 and 12) stay
- * scoped to the article they verify, with a matching subsection added per
- * article rather than generalized, since their assertions are inherently
- * about that one article's specific claims.
+ * (content/insights/modernizing-rpg-applications-with-sql-and-apis.md); and
+ * this PR published the third, "Db2 for i and QSYS2 Services Every
+ * Developer Should Know" (content/insights/db2-for-i-qsys2-services-
+ * developers-should-know.md). Sections below that once asserted "exactly
+ * one Insight"/"exactly one Markdown file"/etc. now assert three, and the
+ * figure-embedding checks (section 10) loop generically over every
+ * published Insight with a Markdown file rather than hardcoding a single
+ * slug -- a fourth Insight only needs its own entries in these arrays, not
+ * a rewrite of the loop logic. Article-specific fact/content checks
+ * (sections 11, 11b, 11c, and 12) stay scoped to the article they verify,
+ * with a matching subsection added per article rather than generalized,
+ * since their assertions are inherently about that one article's specific
+ * claims.
  *
  * Usage:
  *   npm run test:insights
@@ -43,7 +46,8 @@ import { INSIGHT_FIGURE_REGISTRY } from '../components/insights/insight-figure-r
 
 const LAUNCH_SLUG = 'ibm-i-mcp-server-ai-assistants'
 const RPG_SQL_APIS_SLUG = 'modernizing-rpg-applications-with-sql-and-apis'
-const PUBLISHED_SLUGS = [LAUNCH_SLUG, RPG_SQL_APIS_SLUG]
+const DB2_QSYS2_SLUG = 'db2-for-i-qsys2-services-developers-should-know'
+const PUBLISHED_SLUGS = [LAUNCH_SLUG, RPG_SQL_APIS_SLUG, DB2_QSYS2_SLUG]
 
 let failures = 0
 let passed = 0
@@ -92,12 +96,12 @@ const SYNTHETIC_INSIGHT: Insight = {
 
 async function runChecks() {
   // ---------------------------------------------------------------------------
-  section('1. The real catalog publishes both Insights, each well-formed')
+  section('1. The real catalog publishes all three Insights, each well-formed')
   // ---------------------------------------------------------------------------
 
-  check('content/insights/catalog.ts has exactly two entries', INSIGHTS.length === 2, `got ${INSIGHTS.length}`)
-  check('getPublishedInsights() on the real catalog returns both entries', getPublishedInsights(INSIGHTS).length === 2)
-  check('both expected slugs are present in the catalog', PUBLISHED_SLUGS.every((slug) => INSIGHTS.some((i) => i.slug === slug)))
+  check('content/insights/catalog.ts has exactly three entries', INSIGHTS.length === 3, `got ${INSIGHTS.length}`)
+  check('getPublishedInsights() on the real catalog returns all three entries', getPublishedInsights(INSIGHTS).length === 3)
+  check('all three expected slugs are present in the catalog', PUBLISHED_SLUGS.every((slug) => INSIGHTS.some((i) => i.slug === slug)))
   check(
     'getFeaturedInsight() on the real catalog returns the launch article (the only one marked featured: true)',
     getFeaturedInsight(INSIGHTS)?.slug === LAUNCH_SLUG
@@ -127,8 +131,8 @@ async function runChecks() {
   const insightsContentDir = resolve(__dirname, '..', 'content', 'insights')
   const markdownFiles = readdirSync(insightsContentDir).filter((f) => f.endsWith('.md'))
   check(
-    'content/insights/ has exactly two Markdown files, matching both catalog slugs',
-    markdownFiles.length === 2 && PUBLISHED_SLUGS.every((slug) => markdownFiles.includes(`${slug}.md`)),
+    'content/insights/ has exactly three Markdown files, matching all catalog slugs',
+    markdownFiles.length === 3 && PUBLISHED_SLUGS.every((slug) => markdownFiles.includes(`${slug}.md`)),
     `found: ${markdownFiles.join(', ')}`
   )
 
@@ -224,10 +228,10 @@ async function runChecks() {
     check('sitemap.ts includes a static /insights listing route', sitemapSrc.includes('${SITE_URL}/insights`'))
     check('sitemap.ts includes an insightRoutes block in the returned array', sitemapSrc.includes('insightRoutes'))
     check(
-      'both published articles are eligible, so sitemap.ts (which filters with isInsightAvailable) will include them',
+      'all three published articles are eligible, so sitemap.ts (which filters with isInsightAvailable) will include them',
       PUBLISHED_SLUGS.every((slug) => INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === slug))
     )
-    check('exactly two Insights are eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 2)
+    check('exactly three Insights are eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 3)
 
     const robotsSrc = readRepoFile('app/robots.ts')
     check("robots.ts allows '/insights'", /allow:\s*\[[^\]]*'\/insights'/.test(robotsSrc))
@@ -320,12 +324,18 @@ async function runChecks() {
 
     // With real Insights now published, this listing page should actually
     // render at build time: the launch article as the featured card
-    // (array position 0), the second article in the grid alongside it.
+    // (array position 0), the second and third articles in the grid
+    // alongside it.
     check(
-      'both published articles render on the listing page (featured card + grid)',
+      'all three published articles render on the listing page (featured card + grid)',
       (() => {
         const published = getPublishedInsights(INSIGHTS)
-        return published.length === 2 && published[0].slug === LAUNCH_SLUG && published[1].slug === RPG_SQL_APIS_SLUG
+        return (
+          published.length === 3 &&
+          published[0].slug === LAUNCH_SLUG &&
+          published[1].slug === RPG_SQL_APIS_SLUG &&
+          published[2].slug === DB2_QSYS2_SLUG
+        )
       })()
     )
   }
@@ -339,8 +349,8 @@ async function runChecks() {
     check('generateStaticParams() only ever includes available Insights', /INSIGHTS\.filter\(isInsightAvailable\)/.test(detailSrc))
     check('an unresolved slug calls notFound()', /if \(!insight\) \{[\s\S]{0,40}notFound\(\)/.test(detailSrc))
     check(
-      'generateStaticParams() now produces exactly two routes, one per published article',
-      INSIGHTS.filter(isInsightAvailable).length === 2 &&
+      'generateStaticParams() now produces exactly three routes, one per published article',
+      INSIGHTS.filter(isInsightAvailable).length === 3 &&
         PUBLISHED_SLUGS.every((slug) => INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === slug))
     )
     check('the removed (older, unrelated) article-specific diagram component is not reintroduced', !detailSrc.includes('architecture-diagram'))
@@ -588,6 +598,107 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
+  section('11c. Third Insight ("Db2 for i and QSYS2 Services Every Developer Should Know"): diagram components and content checks')
+  // ---------------------------------------------------------------------------
+
+  {
+    const db2FiguresSrc = readRepoFile('components/insights/db2-qsys2-figures.tsx')
+    const figureWrapperSrc = readRepoFile('components/insights/insight-figure.tsx')
+    const db2Markdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${DB2_QSYS2_SLUG}.md`), 'utf-8')
+
+    check('every InsightFigure call in the new figure file passes a non-empty caption', !/caption=""/.test(db2FiguresSrc))
+    check('no figure uses an <img> tag or an external image URL', !/<img[\s>]/i.test(db2FiguresSrc) && !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/i.test(db2FiguresSrc))
+    check('none of the three figures opt into the horizontally-scrollable viewport (plain HTML/CSS, not a fixed-width drawing)', !/^\s*scrollable(\s*=|\s*$)/m.test(db2FiguresSrc))
+    check('the one-time diagram entrance uses the shared reduced-motion-safe class', db2FiguresSrc.includes('insight-figure-enter'))
+    check('the shared figure wrapper renders a real <figure>/<figcaption> pair (semantic, not div soup)', figureWrapperSrc.includes('<figure') && figureWrapperSrc.includes('<figcaption'))
+    check('the registry export is nested by slug, matching the shared INSIGHT_FIGURE_REGISTRY shape', /DB2_QSYS2_FIGURE_REGISTRY: Record<string, Record<string, ComponentType>>/.test(db2FiguresSrc))
+
+    // The step-list layout in Figure 2 reuses the icon-column + connector-line
+    // + card pattern proven safe by the second article's Figure 2 bugfix
+    // (rpg-sql-apis-figures.tsx) -- explicitly NOT the -translate-x/negative-
+    // margin approach that caused the original overlap. Pinning the pattern
+    // here catches a regression back to that hack.
+    check(
+      'the symptom-to-cause figure uses the proven-safe icon-column/connector-line/card layout, not a negative-margin hack',
+      /flex flex-col items-center/.test(db2FiguresSrc) &&
+        /min-w-0 flex-1 rounded-xl border/.test(db2FiguresSrc) &&
+        !/-translate-x/.test(db2FiguresSrc)
+    )
+
+    // Figure numbers must ascend in the order the [[FIGURE:...]] markers
+    // appear in the Markdown, same discipline as sections 11 and 11b above.
+    {
+      const markerOrder = [...db2Markdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+      const numberByComponent = new Map<string, number>()
+      for (const chunk of db2FiguresSrc.split(/(?=export function )/)) {
+        const name = chunk.match(/^export function (\w+)\(/)?.[1]
+        const num = chunk.match(/number=\{(\d+)\}/)?.[1]
+        if (name && num) numberByComponent.set(name, Number(num))
+      }
+      const registryBlock = db2FiguresSrc.slice(db2FiguresSrc.indexOf('DB2_QSYS2_FIGURE_REGISTRY'))
+      const componentByMarker = new Map<string, string>()
+      for (const m of registryBlock.matchAll(/'?([a-z0-9-]+)'?\s*:\s*(\w+Figure)\b/g)) {
+        componentByMarker.set(m[1], m[2])
+      }
+      const numbersInReadingOrder = markerOrder
+        .map((marker) => numberByComponent.get(componentByMarker.get(marker) ?? ''))
+        .filter((n): n is number => typeof n === 'number')
+
+      check(
+        'every figure marker resolves to a "Figure N" label',
+        numbersInReadingOrder.length === markerOrder.length,
+        `resolved ${numbersInReadingOrder.length} of ${markerOrder.length} markers`
+      )
+      check(
+        'figure numbers ascend in the order a reader scrolls past them',
+        numbersInReadingOrder.every((n, i) => i === 0 || n > numbersInReadingOrder[i - 1]),
+        `reading order gives: ${numbersInReadingOrder.join(', ')}`
+      )
+      check(
+        'figure numbers start at 1 and have no gaps',
+        numbersInReadingOrder.every((n, i) => n === i + 1),
+        `got: ${numbersInReadingOrder.join(', ')}`
+      )
+    }
+
+    // Content-accuracy guardrails: this article was written from a prepared
+    // source document and fact-checked against IBM's official QSYS2/Db2 for i
+    // Services documentation before publishing, which surfaced several real
+    // inaccuracies in the source (wrong parameter names, an unconfirmed
+    // column, an overclaimed automatic feature). These checks pin the
+    // corrected claims so a future edit can't silently reintroduce the
+    // originals.
+    check(
+      "OBJECT_STATISTICS uses the real OBJTYPELIST parameter name, not the source document's invented OBJECT_TYPE_LIST",
+      db2Markdown.includes('OBJTYPELIST') && !/OBJECT_TYPE_LIST\s*=>\s*'\*PGM/.test(db2Markdown)
+    )
+    check(
+      'MESSAGE_QUEUE_INFO uses the real QUEUE_LIBRARY/QUEUE_NAME parameter names in its example, not the column names mistaken for them',
+      db2Markdown.includes('QUEUE_LIBRARY') &&
+        db2Markdown.includes('QUEUE_NAME') &&
+        !/MESSAGE_QUEUE_LIBRARY\s*=>|MESSAGE_QUEUE_NAME\s*=>/.test(db2Markdown)
+    )
+    check(
+      'SYSINDEXSTAT selects the real last_invalidation_timestamp column, not the unconfirmed index_valid',
+      db2Markdown.includes('last_invalidation_timestamp') && !/\bindex_valid\b/i.test(db2Markdown)
+    )
+    check(
+      'DISPLAY_JOURNAL never selects the unconfirmed commit_cycle output column, and no prose claims it as retrievable',
+      !/commit_cycle/i.test(db2Markdown) && !/commit cycle/i.test(db2Markdown)
+    )
+    check('JOBLOG_INFO states the release/PTF gating for MESSAGE_ORDER, MESSAGE_TIMESTAMP, and MESSAGE_LIMIT', /MESSAGE_ORDER.*MESSAGE_TIMESTAMP.*MESSAGE_LIMIT/.test(db2Markdown))
+    check('QCMDEXC states the scalar function form\'s TR gating (IBM i 7.4 TR4 and 7.3 TR10)', /7\.4 TR4/.test(db2Markdown) && /7\.3 TR10/.test(db2Markdown))
+    check(
+      'ACTIVE_JOB_INFO states the precise function-usage/authority requirement for detailed columns',
+      /QIBM_DB_SQLADM/.test(db2Markdown) && /QIBM_DB_SYSMON/.test(db2Markdown)
+    )
+    check('the article cites the official IBM i Services documentation index as a source', db2Markdown.includes('topic=optimization-i-services'))
+    check('the article includes a Sources and further reading section', /### Sources and further reading/.test(db2Markdown))
+    check('every sql fenced code block uses a recognized language tag Insights code styling already covers', db2Markdown.includes('```sql'))
+    check('the article never claims a live IBM i connection or real customer/production data', !/real (customer|production) data/i.test(db2Markdown))
+  }
+
+  // ---------------------------------------------------------------------------
   section('12. Sources attribution (IBM i Insights Attribution Cleanup and Date Display Removal)')
   // ---------------------------------------------------------------------------
 
@@ -681,6 +792,7 @@ async function runChecks() {
       'components/insights/insight-figure.tsx': readRepoFile('components/insights/insight-figure.tsx'),
       'components/insights/mcp-figures.tsx': readRepoFile('components/insights/mcp-figures.tsx'),
       'components/insights/rpg-sql-apis-figures.tsx': readRepoFile('components/insights/rpg-sql-apis-figures.tsx'),
+      'components/insights/db2-qsys2-figures.tsx': readRepoFile('components/insights/db2-qsys2-figures.tsx'),
       'components/insights/insight-figure-registry.ts': readRepoFile('components/insights/insight-figure-registry.ts'),
       'app/insights/page.tsx': readRepoFile('app/insights/page.tsx'),
       'app/insights/[slug]/page.tsx': readRepoFile('app/insights/[slug]/page.tsx'),
