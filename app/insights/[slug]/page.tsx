@@ -170,39 +170,38 @@ export default async function InsightPage({ params }: Props) {
                 className={`relative -mx-6 -mt-6 overflow-hidden rounded-t-2xl px-6 pb-7 pt-7 sm:-mx-8 sm:-mt-8 sm:px-8 sm:pt-9 sm:pb-9 ${accentClasses.headerWash}`}
               >
                 {/* Decorative texture only -- a faint grid plus soft glow blobs,
-                    the same "premium hero" language as the Insights listing
-                    page's own dark hero (app/insights/page.tsx) and
-                    components/section-hero.tsx, scaled down for this smaller
-                    card-topper banner. All aria-hidden; none of it carries
-                    information, so it never needs a text alternative. The
-                    gradient itself (INSIGHT_ACCENT_CLASSES.headerWash) stays
-                    in the 600/700 range specifically so the white text below
-                    keeps comfortable contrast regardless of where these blobs
-                    fall. */}
+                    kept but toned down (Insights Header Visual Refinement):
+                    the header background is now a soft, light, category-
+                    tinted wash rather than a saturated 600/700 gradient, so
+                    the grid is dark-on-light at low opacity instead of the
+                    old white-on-dark, and the blobs are pale category-color
+                    echoes (INSIGHT_ACCENT_CLASSES.headerBlobOne/Two) rather
+                    than a fixed cyan/violet pair. All aria-hidden; none of it
+                    carries information, so it never needs a text alternative,
+                    and none of it sits under text at meaningful opacity, so
+                    it never affects text contrast. */}
                 <div
-                  className="pointer-events-none absolute inset-0 opacity-[0.07] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:34px_34px]"
+                  className="pointer-events-none absolute inset-0 opacity-[0.035] [background-image:linear-gradient(to_right,#0f172a_1px,transparent_1px),linear-gradient(to_bottom,#0f172a_1px,transparent_1px)] [background-size:34px_34px]"
                   aria-hidden="true"
                 />
                 <div
-                  className="pointer-events-none absolute -top-10 right-0 h-48 w-48 rounded-full bg-cyan-300/25 blur-[70px]"
+                  className={`pointer-events-none absolute -top-10 right-0 h-48 w-48 rounded-full blur-[70px] ${accentClasses.headerBlobOne}`}
                   aria-hidden="true"
                 />
                 <div
-                  className="pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full bg-violet-400/20 blur-[80px]"
+                  className={`pointer-events-none absolute -bottom-16 -left-10 h-56 w-56 rounded-full blur-[80px] ${accentClasses.headerBlobTwo}`}
                   aria-hidden="true"
                 />
 
                 <div className="relative">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border border-white/30 bg-white/15 px-2.5 py-0.5 text-xs font-semibold text-white backdrop-blur-sm">
+                    <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold text-white shadow-sm ${accentClasses.headerBadgeBg}`}>
                       {categoryLabel}
                     </span>
-                    <Badge variant="ai" className="border border-white/25 bg-white/15 text-white">
-                      Insight
-                    </Badge>
+                    <Badge variant="ai">Insight</Badge>
                   </div>
-                  <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">{insight.title}</h1>
-                  <p className="mt-3 max-w-2xl text-base text-blue-50 leading-relaxed">{insight.description}</p>
+                  <h1 className="mt-3 text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">{insight.title}</h1>
+                  <p className="mt-3 max-w-2xl text-base text-slate-600 leading-relaxed">{insight.description}</p>
                   {/* Deliberately no publication date here (IBM i Insights Attribution
                       Cleanup and Date Display Removal) -- this section is meant to read
                       as evergreen, not time-stamped. publishedAt still exists on the
@@ -212,12 +211,12 @@ export default async function InsightPage({ params }: Props) {
                       and lib/insight-structured-data.ts. None of those render as
                       visible page content. */}
                   <div className="mt-4 flex flex-wrap items-center gap-2 text-sm">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm">
+                    <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-semibold text-slate-700 shadow-sm">
                       <Clock className="h-3.5 w-3.5" aria-hidden="true" />
                       ~{insight.readingTimeMinutes} min read
                     </span>
                     {insight.tags.map((tag) => (
-                      <span key={tag} className="rounded-full border border-white/25 bg-white/10 px-2.5 py-1 text-xs font-medium text-white backdrop-blur-sm">
+                      <span key={tag} className="rounded-full border border-slate-200 bg-white/70 px-2.5 py-1 text-xs font-medium text-slate-600">
                         {tag}
                       </span>
                     ))}
