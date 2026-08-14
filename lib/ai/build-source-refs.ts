@@ -28,21 +28,31 @@ export const MAX_SOURCE_REFS = 5
  * shows as a single clean title-only line rather than an ambiguous/repeated
  * heading.
  *
- * Gated on hasStrongMatch: a weak/incidental retrieval result must not
- * produce a visible source list that implies confident site coverage (the
- * "PowerHA" case from PR #131 QA) -- callers should only attach this to the
- * response when the gate passes.
+ * Gated on hasStrongMatch OR hasGuaranteedCurrentContent: a weak/incidental
+ * general-retrieval result must not produce a visible source list that
+ * implies confident site coverage (the "PowerHA" case from PR #131 QA), but
+ * a server-verified current page (the learner is confirmed to be reading
+ * this exact lesson/Insight/Deep Dive) is real, confirmed grounding
+ * regardless of keyword score -- "explain this in simpler terms" (zero
+ * lexical overlap) must still show the current page under "Sources used",
+ * not be treated as if nothing was found. When only the guaranteed bucket
+ * qualifies (hasStrongMatch is false), only its own chunks -- tagged
+ * 'current page' by retrievePublishedContent() -- are included; an
+ * incidental low-score general chunk that merely rode along must not be
+ * shown as if it were a confident source too.
  */
 export function buildSourceRefs(result: RetrievalResult): AiTutorSourceRef[] {
-  if (!result.hasStrongMatch) {
+  if (!result.hasStrongMatch && !result.hasGuaranteedCurrentContent) {
     return []
   }
+
+  const eligibleChunks = result.hasStrongMatch ? result.chunks : result.chunks.filter((c) => c.reasons.includes('current page'))
 
   const headingsByKey = new Map<string, Set<string>>()
   const order: string[] = []
   const byKey = new Map<string, AiTutorSourceRef>()
 
-  for (const chunk of result.chunks) {
+  for (const chunk of eligibleChunks) {
     const key = `${chunk.contentType}:${chunk.slug}`
     if (!byKey.has(key)) {
       byKey.set(key, {

@@ -47,7 +47,7 @@ import { createClient } from '@supabase/supabase-js'
 
 dotenv.config({ path: resolve(__dirname, '../.env.local') })
 
-import { chunkMarkdownContent, type ChunkableContent, type ContentChunk } from '../lib/ai/content-chunks'
+import { chunkMarkdownContent, INTRODUCTION_HEADING, type ChunkableContent, type ContentChunk } from '../lib/ai/content-chunks'
 import { tokenize, scoreChunk, selectGuaranteedChunks } from '../lib/ai/retrieval-score'
 import { formatRetrievedContentForPrompt } from '../lib/ai/format-retrieved-content'
 import { buildSourceRefs, MAX_SOURCE_REFS } from '../lib/ai/build-source-refs'
@@ -157,7 +157,8 @@ Some content.
 More content.
 `
   const chunks = chunkMarkdownContent(fixtureInsight, insightMarkdown)
-  check('an Insight with no leading H1 chunks correctly (2 headings + no stray title strip)', chunks.length === 2, `got ${chunks.length}`)
+  check('an Insight with leading intro text produces 3 chunks: Introduction + 2 headings', chunks.length === 3, `got ${chunks.length}`)
+  check('the leading intro text becomes its own Introduction chunk, first in order', chunks[0]?.heading === INTRODUCTION_HEADING && chunks[0]?.chunkText === 'Intro paragraph, no heading.')
   check('Insight chunks carry contentType insight', chunks.every((c) => c.contentType === 'insight'))
   check('Insight chunk path is /insights/<slug>', chunks[0]?.path === '/insights/fixture-insight')
 
@@ -165,6 +166,190 @@ More content.
   const deepDiveChunks = chunkMarkdownContent(fixtureDeepDive, insightMarkdown)
   check('Deep Dive chunks carry contentType deep-dive', deepDiveChunks.every((c) => c.contentType === 'deep-dive'))
   check('Insight/Deep Dive chunks have null masterCategoryId (no taxonomy for those content types)', chunks.every((c) => c.masterCategoryId === null) && deepDiveChunks.every((c) => c.masterCategoryId === null))
+
+  const noLeadingText = chunkMarkdownContent(fixtureInsight, '## What You Will Learn\n\nSome content.\n')
+  check('content with no text before the first heading produces no Introduction chunk', !noLeadingText.some((c) => c.heading === INTRODUCTION_HEADING) && noLeadingText.length === 1)
+
+  const onlyWhitespaceBeforeHeading = chunkMarkdownContent(fixtureInsight, '   \n\n## What You Will Learn\n\nSome content.\n')
+  check('only-whitespace content before the first heading also produces no Introduction chunk', !onlyWhitespaceBeforeHeading.some((c) => c.heading === INTRODUCTION_HEADING))
+}
+
+// ---------------------------------------------------------------------------
+// Section 1b: Introduction-chunk preservation against real content (PR
+// review finding: leading prose before the first ## was silently dropped,
+// never chunked or retrievable -- confirmed real, substantial loss in both
+// named Insights below, ~900 characters each).
+// ---------------------------------------------------------------------------
+section('1b. Introduction-chunk preservation (real QSYS2 and RPG-modernization Insights)')
+
+{
+  const qsys2Slug = 'db2-for-i-qsys2-services-developers-should-know'
+  const rpgSlug = 'modernizing-rpg-applications-with-sql-and-apis'
+
+  for (const slug of [qsys2Slug, rpgSlug]) {
+    const insight = INSIGHTS.find((i) => i.slug === slug && isInsightAvailable(i))
+    check(`${slug} is genuinely published (test fixture sanity check)`, insight !== undefined)
+    if (!insight) continue
+
+    const markdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${slug}.md`), 'utf-8')
+    const firstHeadingIndex = markdown.search(/^##\s+/m)
+    check(`${slug} genuinely has real leading content before its first ## (test fixture sanity check)`, firstHeadingIndex > 100, `first ## at index ${firstHeadingIndex}`)
+
+    const chunkable: ChunkableContent = {
+      contentType: 'insight',
+      slug: insight.slug,
+      title: insight.title,
+      path: `/insights/${insight.slug}`,
+      tags: insight.tags,
+      masterCategoryId: null,
+      masterSubcategory: null,
+      secondaryCategoryIds: [],
+    }
+    const chunks = chunkMarkdownContent(chunkable, markdown)
+    const introChunks = chunks.filter((c) => c.heading === INTRODUCTION_HEADING)
+    check(`${slug} produces at least one Introduction chunk from its real leading prose`, introChunks.length > 0, `${introChunks.length} Introduction chunk(s)`)
+    check(`${slug}'s Introduction chunk is a real excerpt of the actual leading markdown, not empty/placeholder`, (introChunks[0]?.chunkText.length ?? 0) > 50)
+    check(`${slug}'s Introduction chunk comes first, before any other heading's chunk`, chunks[0]?.heading === INTRODUCTION_HEADING)
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Section 1c: Oversized-section-safe chunking (PR review finding: a single
+// large ## section could exceed both the 3,000-character current-page
+// budget and the 8,000-character overall retrieval budget, since both
+// consumer loops in retrieve-published-content.ts always admit at least one
+// candidate chunk regardless of its size, to guarantee a non-empty result).
+// ---------------------------------------------------------------------------
+section('1c. Oversized-section-safe chunking (subsection/paragraph/code-block-aware)')
+
+const MAX_CHUNK_CHARS_UNDER_TEST = 2000 // must match lib/ai/content-chunks.ts's MAX_CHUNK_CHARS
+
+{
+  // Synthetic fixture: one oversized ## section with two ### subsections,
+  // one of which is itself still oversized and must fall back to
+  // paragraph-level splitting -- including a code block that must never be
+  // split mid-fence even though it pushes a paragraph over budget alone.
+  const bigParagraph = (label: string, chars: number) => `${label} ${'x'.repeat(chars)}`
+  const codeBlock = ['```rpgle', ...Array.from({ length: 40 }, (_, i) => `  // line ${i} of a long code sample that must stay intact`), '```'].join('\n')
+
+  const oversizedFixtureMarkdown = `## Big Section
+
+### First Subsection
+${bigParagraph('First subsection intro.', 500)}
+
+${bigParagraph('Second paragraph of the first subsection, still short enough alone.', 400)}
+
+### Second Subsection
+${bigParagraph('A subsection that is oversized all on its own and must be paragraph-split.', 1200)}
+
+${bigParagraph('A second paragraph in the same oversized subsection.', 1200)}
+
+${codeBlock}
+
+## Small Section
+A short section that never needs splitting.
+`
+
+  const fixtureContent: ChunkableContent = {
+    contentType: 'deep-dive',
+    slug: 'fixture-oversized',
+    title: 'Fixture Oversized Deep Dive',
+    path: '/deep-dives/fixture-oversized',
+    tags: [],
+    masterCategoryId: null,
+    masterSubcategory: null,
+    secondaryCategoryIds: [],
+  }
+
+  const chunks = chunkMarkdownContent(fixtureContent, oversizedFixtureMarkdown)
+
+  check('no chunk exceeds MAX_CHUNK_CHARS, even from a deliberately oversized section', chunks.every((c) => c.chunkText.length <= MAX_CHUNK_CHARS_UNDER_TEST), `sizes: ${chunks.map((c) => c.chunkText.length).join(', ')}`)
+  check('the oversized section splits along its real ### subsection boundaries first', chunks.some((c) => c.heading === 'Big Section — First Subsection') && chunks.some((c) => c.heading.startsWith('Big Section — Second Subsection')))
+  check('a subsection that is itself still oversized gets further paragraph-split, keeping its own heading', chunks.filter((c) => c.heading === 'Big Section — Second Subsection').length > 1)
+  check('a small section that was never oversized is left as a single, unsplit chunk', chunks.some((c) => c.heading === 'Small Section' && c.chunkText === 'A short section that never needs splitting.'))
+
+  const codeChunks = chunks.filter((c) => c.chunkText.includes('```'))
+  check('every chunk containing a fence has an even number of ``` markers (no dangling/unterminated fence)', codeChunks.every((c) => (c.chunkText.match(/```/g) ?? []).length % 2 === 0))
+  check('a fenced code block is never split mid-fence -- opening and closing fences stay in the same chunk', codeChunks.some((c) => c.chunkText.includes('```rpgle') && (c.chunkText.match(/```/g) ?? []).length === 2))
+
+  // This fixture's code block (40 lines, ~2.4KB) is deliberately larger
+  // than MAX_CHUNK_CHARS on its own -- confirms the re-fencing path (not
+  // just the "small enough to stay whole" path) is actually exercised.
+  const totalFenceMarkers = codeChunks.reduce((sum, c) => sum + (c.chunkText.match(/```/g) ?? []).length, 0)
+  check('an oversized code block that cannot fit in one chunk is re-split into more than one well-formed fenced piece', codeChunks.length > 1 && totalFenceMarkers === codeChunks.length * 2, `${codeChunks.length} fenced chunks, ${totalFenceMarkers} total fence markers`)
+}
+
+{
+  // Real content: content/deep-dives/sql-error-handling-on-ibm-i.md (the
+  // largest published Deep Dive, ~88KB) has several real ## sections well
+  // over both budgets -- up to 8,778 characters in "5. Production SQLRPGLE
+  // error-handling patterns" alone, confirmed by direct inspection before
+  // writing this fixture.
+  const slug = 'sql-error-handling-on-ibm-i'
+  const deepDive = DEEP_DIVES.find((d) => d.slug === slug && isDeepDiveAvailable(d))
+  check(`${slug} is genuinely published (test fixture sanity check)`, deepDive !== undefined)
+
+  if (deepDive) {
+    const markdown = readFileSync(resolve(__dirname, '..', 'content', 'deep-dives', `${slug}.md`), 'utf-8')
+
+    // Confirm the raw, unchunked source really does contain an oversized
+    // section, so this test can't silently pass just because the fixture
+    // content changed under it.
+    const rawSectionMatches = [...markdown.matchAll(/^##\s+(.+)$/gm)]
+    const rawSectionSizes = rawSectionMatches.map((m, i) => {
+      const start = m.index! + m[0].length
+      const end = i + 1 < rawSectionMatches.length ? rawSectionMatches[i + 1].index! : markdown.length
+      return end - start
+    })
+    check('the real fixture Deep Dive genuinely has at least one raw ## section over both the 3,000 and 8,000-character budgets', Math.max(...rawSectionSizes) > 8000, `largest raw section: ${Math.max(...rawSectionSizes)} chars`)
+
+    const chunkable: ChunkableContent = {
+      contentType: 'deep-dive',
+      slug: deepDive.slug,
+      title: deepDive.title,
+      path: `/deep-dives/${deepDive.slug}`,
+      tags: deepDive.tags,
+      masterCategoryId: null,
+      masterSubcategory: null,
+      secondaryCategoryIds: [],
+    }
+    const chunks = chunkMarkdownContent(chunkable, markdown)
+
+    check('every chunk from the real oversized Deep Dive stays within MAX_CHUNK_CHARS', chunks.every((c) => c.chunkText.length <= MAX_CHUNK_CHARS_UNDER_TEST), `largest chunk: ${Math.max(...chunks.map((c) => c.chunkText.length))} chars`)
+    check('every chunk therefore also fits within the tighter 3,000-character current-page budget', chunks.every((c) => c.chunkText.length <= CURRENT_CONTENT_MAX_CHARS))
+    check('splitting an oversized section produces more than one chunk (content is preserved, not truncated away)', chunks.length > rawSectionMatches.length, `${chunks.length} chunks from ${rawSectionMatches.length} raw ## sections`)
+
+    // No content is silently dropped: every chunk's total character count
+    // (joined) should roughly match the total raw section content (allowing
+    // for trimmed whitespace/blank lines between paragraphs).
+    const totalChunkChars = chunks.reduce((sum, c) => sum + c.chunkText.length, 0)
+    const totalRawChars = rawSectionSizes.reduce((sum, n) => sum + n, 0)
+    check('splitting does not silently drop a meaningful amount of content (within 10% of the raw total)', totalChunkChars >= totalRawChars * 0.9, `chunked: ${totalChunkChars}, raw: ${totalRawChars}`)
+
+    // The specific real bug this section's tests caught during development:
+    // "13. Legacy patterns and modern recommendations" is a markdown
+    // comparison table with no blank lines between rows -- one atomic
+    // paragraph with no natural break at all -- and was the first real
+    // content to exceed MAX_CHUNK_CHARS (2,844 chars) even after subsection/
+    // paragraph splitting. Pin it directly: every resulting piece from that
+    // section must stay within budget AND never break a table row in half
+    // (a row is one line; every non-empty line of the raw section must
+    // appear whole inside exactly one resulting chunk's text).
+    const legacyIndex = rawSectionMatches.findIndex((m) => m[1].trim().startsWith('13. Legacy patterns'))
+    check('the specific real section that originally caught this bug is still present in the fixture', legacyIndex >= 0)
+    if (legacyIndex >= 0) {
+      const legacyChunks = chunks.filter((c) => c.heading === rawSectionMatches[legacyIndex][1].trim())
+      check('the table-only oversized section produces more than one chunk', legacyChunks.length > 1, `${legacyChunks.length} chunks`)
+      check('every piece of the table-only section stays within MAX_CHUNK_CHARS', legacyChunks.every((c) => c.chunkText.length <= MAX_CHUNK_CHARS_UNDER_TEST))
+
+      const start = rawSectionMatches[legacyIndex].index! + rawSectionMatches[legacyIndex][0].length
+      const end = legacyIndex + 1 < rawSectionMatches.length ? rawSectionMatches[legacyIndex + 1].index! : markdown.length
+      const rawLines = markdown.slice(start, end).split('\n').map((l) => l.trim()).filter(Boolean)
+      const chunkedText = legacyChunks.map((c) => c.chunkText).join('\n')
+      const brokenRows = rawLines.filter((line) => line.startsWith('|') && !chunkedText.includes(line))
+      check('no table row from the oversized section is broken across a split (every original row appears whole)', brokenRows.length === 0, `${brokenRows.length} row(s) not found intact: ${brokenRows.slice(0, 2).join(' | ')}`)
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -309,6 +494,7 @@ function fixtureRetrievedChunk(overrides: Partial<RetrievedChunk> = {}): Retriev
       fixtureRetrievedChunk({ heading: 'Practical Example' }),
     ],
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   const dedupedRefs = buildSourceRefs(twoChunksSameLesson)
@@ -321,6 +507,7 @@ function fixtureRetrievedChunk(overrides: Partial<RetrievedChunk> = {}): Retriev
   const oneChunk: RetrievalResult = {
     chunks: [fixtureRetrievedChunk()],
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   const singleHeadingRefs = buildSourceRefs(oneChunk)
@@ -341,6 +528,7 @@ function fixtureRetrievedChunk(overrides: Partial<RetrievedChunk> = {}): Retriev
       fixtureRetrievedChunk({ contentType: 'insight', slug: 'shared-slug', title: 'An Insight', path: '/insights/shared-slug' }),
     ],
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   const collidingRefs = buildSourceRefs(collidingSlugs)
@@ -353,6 +541,7 @@ function fixtureRetrievedChunk(overrides: Partial<RetrievedChunk> = {}): Retriev
       fixtureRetrievedChunk({ contentType: 'deep-dive', slug: 'deep-dive-a', title: 'Deep Dive A', path: '/deep-dives/deep-dive-a' }),
     ],
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   const mixedRefs = buildSourceRefs(mixedContentTypes)
@@ -364,6 +553,7 @@ function fixtureRetrievedChunk(overrides: Partial<RetrievedChunk> = {}): Retriev
       fixtureRetrievedChunk({ slug: `lesson-${i}`, title: `Lesson ${i}`, path: `/learn/ibm-i-fundamentals/lesson-${i}` })
     ),
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   check(
@@ -381,6 +571,7 @@ section('5. Weak / no-match behavior')
   const weakResult: RetrievalResult = {
     chunks: [fixtureRetrievedChunk({ score: 1 })],
     hasStrongMatch: false,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   check('a weak-match result produces NO source refs (no misleading "Sources used" block)', buildSourceRefs(weakResult).length === 0)
@@ -389,7 +580,7 @@ section('5. Weak / no-match behavior')
     formatRetrievedContentForPrompt(weakResult).includes('only loosely related')
   )
 
-  const emptyResult: RetrievalResult = { chunks: [], hasStrongMatch: false, resolvedCurrentContent: null }
+  const emptyResult: RetrievalResult = { chunks: [], hasStrongMatch: false, hasGuaranteedCurrentContent: false, resolvedCurrentContent: null }
   check('an empty result produces no source refs', buildSourceRefs(emptyResult).length === 0)
   check(
     'an empty result\'s prompt text says the topic may not be covered, not that it is confirmed absent',
@@ -399,6 +590,7 @@ section('5. Weak / no-match behavior')
   const strongResult: RetrievalResult = {
     chunks: [fixtureRetrievedChunk({ score: 10 })],
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   check('a strong-match result does produce source refs', buildSourceRefs(strongResult).length === 1)
@@ -409,6 +601,7 @@ section('5. Weak / no-match behavior')
       fixtureRetrievedChunk({ contentType: 'deep-dive', title: 'A Deep Dive', slug: 'a-deep-dive' }),
     ],
     hasStrongMatch: true,
+    hasGuaranteedCurrentContent: false,
     resolvedCurrentContent: null,
   }
   const promptText = formatRetrievedContentForPrompt(mixedTypesResult)
@@ -683,6 +876,33 @@ section('8. Cross-content general retrieval, and guaranteed grounding on real In
       `got ${guaranteed.length} chunks`
     )
     check('every guaranteed chunk is genuinely from this Insight, not another content item', guaranteed.every((s) => s.chunk.slug === dbInsight.slug && s.chunk.contentType === 'insight'))
+
+    // PR review finding: the guaranteed current-page bucket must show up
+    // under "Sources used" and must never be described as "loosely
+    // related" -- assemble the exact RetrievalResult shape
+    // retrievePublishedContent() would return for this zero-overlap query
+    // (hasStrongMatch false, since every score is 0; hasGuaranteedCurrentContent
+    // true, since the current Insight's own chunks are present) and run it
+    // through the real buildSourceRefs()/formatRetrievedContentForPrompt().
+    const guaranteedResult: RetrievalResult = {
+      chunks: guaranteed.map((s) => ({
+        contentType: s.chunk.contentType,
+        title: s.chunk.title,
+        slug: s.chunk.slug,
+        path: s.chunk.path,
+        heading: s.chunk.heading,
+        chunkText: s.chunk.chunkText,
+        score: s.score,
+        reasons: [...s.reasons, 'current page'],
+      })),
+      hasStrongMatch: false,
+      hasGuaranteedCurrentContent: true,
+      resolvedCurrentContent: { contentType: 'insight', slug: dbInsight.slug, title: dbInsight.title },
+    }
+    const sources = buildSourceRefs(guaranteedResult)
+    check('"Sources used" includes the current Insight even with zero keyword overlap', sources.some((s) => s.contentType === 'insight' && s.slug === dbInsight.slug))
+    const promptText = formatRetrievedContentForPrompt(guaranteedResult)
+    check('the prompt text does NOT describe the guaranteed current-Insight excerpt as "loosely related"', !promptText.includes('only loosely related'))
   }
 
   const triggersDeepDive = DEEP_DIVES.find((d) => d.slug === 'database-triggers-on-ibm-i' && isDeepDiveAvailable(d))
@@ -701,7 +921,84 @@ section('8. Cross-content general retrieval, and guaranteed grounding on real In
       `got ${guaranteed.length} chunks`
     )
     check('every guaranteed chunk is genuinely from this Deep Dive, not another content item', guaranteed.every((s) => s.chunk.slug === triggersDeepDive.slug && s.chunk.contentType === 'deep-dive'))
+
+    const guaranteedResult: RetrievalResult = {
+      chunks: guaranteed.map((s) => ({
+        contentType: s.chunk.contentType,
+        title: s.chunk.title,
+        slug: s.chunk.slug,
+        path: s.chunk.path,
+        heading: s.chunk.heading,
+        chunkText: s.chunk.chunkText,
+        score: s.score,
+        reasons: [...s.reasons, 'current page'],
+      })),
+      hasStrongMatch: false,
+      hasGuaranteedCurrentContent: true,
+      resolvedCurrentContent: { contentType: 'deep-dive', slug: triggersDeepDive.slug, title: triggersDeepDive.title },
+    }
+    const sources = buildSourceRefs(guaranteedResult)
+    check('"Sources used" includes the current Deep Dive even with zero keyword overlap', sources.some((s) => s.contentType === 'deep-dive' && s.slug === triggersDeepDive.slug))
+    const promptText = formatRetrievedContentForPrompt(guaranteedResult)
+    check('the prompt text does NOT describe the guaranteed current-Deep-Dive excerpt as "loosely related"', !promptText.includes('only loosely related'))
   }
+}
+
+// ---------------------------------------------------------------------------
+// Section 8b: hasGuaranteedCurrentContent gating, synthetic edge cases
+// ---------------------------------------------------------------------------
+section('8b. Guaranteed-current-content gating (synthetic edge cases)')
+
+{
+  const guaranteedOnlyChunk: RetrievedChunk = {
+    contentType: 'insight',
+    title: 'Some Insight',
+    slug: 'some-insight',
+    path: '/insights/some-insight',
+    heading: 'Some Heading',
+    chunkText: 'irrelevant text',
+    score: 0,
+    reasons: ['current page'],
+  }
+  const guaranteedOnlyResult: RetrievalResult = {
+    chunks: [guaranteedOnlyChunk],
+    hasStrongMatch: false,
+    hasGuaranteedCurrentContent: true,
+    resolvedCurrentContent: { contentType: 'insight', slug: 'some-insight', title: 'Some Insight' },
+  }
+  check('a zero-score guaranteed-only chunk still produces a source ref', buildSourceRefs(guaranteedOnlyResult).length === 1)
+  check('a zero-score guaranteed-only chunk\'s prompt text has no "loosely related" caveat', !formatRetrievedContentForPrompt(guaranteedOnlyResult).includes('only loosely related'))
+
+  // An incidental low-score general chunk riding alongside a guaranteed
+  // chunk must not be shown as if it were an equally confident source --
+  // only the guaranteed chunk should surface when hasStrongMatch is false.
+  const incidentalGeneralChunk: RetrievedChunk = {
+    contentType: 'lesson',
+    title: 'Unrelated Lesson',
+    slug: 'unrelated-lesson',
+    path: '/learn/ibm-i-fundamentals/unrelated-lesson',
+    heading: 'Some Section',
+    chunkText: 'irrelevant text',
+    score: 1, // nonzero but below STRONG_MATCH_SCORE -- an incidental, non-confident match
+    reasons: ['body match'], // NOT tagged 'current page'
+  }
+  const mixedResult: RetrievalResult = {
+    chunks: [guaranteedOnlyChunk, incidentalGeneralChunk],
+    hasStrongMatch: false,
+    hasGuaranteedCurrentContent: true,
+    resolvedCurrentContent: { contentType: 'insight', slug: 'some-insight', title: 'Some Insight' },
+  }
+  const mixedSources = buildSourceRefs(mixedResult)
+  check('with hasStrongMatch false, only the guaranteed current-page chunk becomes a source -- an incidental weak general chunk does not ride along', mixedSources.length === 1 && mixedSources[0]?.slug === 'some-insight')
+
+  const neitherResult: RetrievalResult = {
+    chunks: [{ ...incidentalGeneralChunk, score: 1 }],
+    hasStrongMatch: false,
+    hasGuaranteedCurrentContent: false,
+    resolvedCurrentContent: null,
+  }
+  check('with neither hasStrongMatch nor hasGuaranteedCurrentContent, no sources are shown (unchanged prior behavior)', buildSourceRefs(neitherResult).length === 0)
+  check('with neither flag set, the weak-coverage caveat is still shown (unchanged prior behavior)', formatRetrievedContentForPrompt(neitherResult).includes('only loosely related'))
 }
 
 // ---------------------------------------------------------------------------

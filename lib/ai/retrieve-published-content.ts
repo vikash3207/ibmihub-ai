@@ -76,8 +76,23 @@ export interface RetrievedChunk {
 
 export interface RetrievalResult {
   chunks: RetrievedChunk[]
-  /** True if at least one chunk scored high enough to be a genuine, confident match -- not just present because it was guaranteed (current page) or barely scraped a nonzero score. */
+  /** True if at least one chunk scored high enough via keyword overlap to be a genuine, confident general-retrieval match -- not just present because it was guaranteed (current page) or barely scraped a nonzero score. */
   hasStrongMatch: boolean
+  /**
+   * True if at least one chunk in `chunks` is from the server-verified
+   * current lesson/Insight/Deep Dive (the guaranteed current-page bucket --
+   * see this function's own doc comment, part 1), regardless of its
+   * keyword score. This is a real, confirmed grounding signal distinct
+   * from keyword-match confidence: the server already knows which page the
+   * learner is on, so "explain this in simpler terms" (zero keyword
+   * overlap) is still genuinely grounded, not a weak/loose match. Callers
+   * (buildSourceRefs, formatRetrievedContentForPrompt) must treat this the
+   * same as hasStrongMatch for "is this confidently grounded," while still
+   * being able to tell the two apart when they need to (e.g. to avoid
+   * showing an unrelated low-score general chunk as a confident source
+   * just because the current page also happened to ground the reply).
+   */
+  hasGuaranteedCurrentContent: boolean
   /** Set only when a current*Slug option was provided and actually resolved to a published content item -- lets the caller build an accurate "Using ... context: <title>" label without a second lookup. */
   resolvedCurrentContent: { contentType: AiContentType; slug: string; title: string } | null
 }
@@ -311,6 +326,7 @@ export async function retrievePublishedContent(options: RetrievalOptions): Promi
   return {
     chunks: [...currentContentChunks, ...generalChunks],
     hasStrongMatch,
+    hasGuaranteedCurrentContent: currentContentChunks.length > 0,
     resolvedCurrentContent: currentSource
       ? { contentType: currentSource.contentType, slug: currentSource.slug, title: currentSource.title }
       : null,

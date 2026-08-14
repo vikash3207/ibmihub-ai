@@ -34,6 +34,14 @@ function labelForContentType(contentType: AiContentType): string {
  * "found some loosely-related chunks, but treat that as weak coverage"
  * (planning/AI_TUTOR_RAG_V2_DESIGN_AUDIT.md Section D.4/G) rather than only
  * checking whether the array is empty.
+ *
+ * The weak-coverage caveat only makes sense for keyword-scored general
+ * retrieval. A guaranteed current-page excerpt (hasGuaranteedCurrentContent)
+ * is confirmed grounding -- the server already knows which lesson/Insight/
+ * Deep Dive the learner is on -- never "loosely related," even when its own
+ * keyword score is 0 (e.g. "explain this in simpler terms"). The caveat is
+ * suppressed whenever any guaranteed current-page chunk is present, so it
+ * never mischaracterizes real, verified grounding as a weak guess.
  */
 export function formatRetrievedContentForPrompt(result: RetrievalResult): string {
   if (result.chunks.length === 0) {
@@ -45,9 +53,10 @@ export function formatRetrievedContentForPrompt(result: RetrievalResult): string
     .map((c, i) => `${i + 1}. [${labelForContentType(c.contentType)}] "${c.title}" (slug: ${c.slug}) -- ${c.heading}\n   ${c.chunkText}`)
     .join('\n\n')
 
-  const weakNote = result.hasStrongMatch
-    ? ''
-    : '\n\n(Note: these are only loosely related matches, not a strong or confident hit -- treat this as weak or absent site coverage, not confirmation the site covers this topic in depth.)'
+  const weakNote =
+    result.hasStrongMatch || result.hasGuaranteedCurrentContent
+      ? ''
+      : '\n\n(Note: these are only loosely related matches, not a strong or confident hit -- treat this as weak or absent site coverage, not confirmation the site covers this topic in depth.)'
 
   return `${header}\n\n${body}${weakNote}`
 }
