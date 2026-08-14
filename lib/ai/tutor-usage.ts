@@ -17,7 +17,7 @@ import 'server-only'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { AI_TUTOR_DAILY_LIMIT, AI_TUTOR_MAX_MESSAGE_CHARS, AI_TUTOR_COOLDOWN_SECONDS } from './tutor-limits'
 
-export type AiTutorUsageOrigin = 'standalone' | 'lesson' | 'practice' | 'deep-dive'
+export type AiTutorUsageOrigin = 'standalone' | 'lesson' | 'practice' | 'deep-dive' | 'insight'
 export type AiTutorBlockReason = 'message_too_long' | 'cooldown' | 'daily_limit'
 
 export type AiTutorLimitCheck =

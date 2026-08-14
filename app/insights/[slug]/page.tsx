@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
-import { Clock, BookOpen, Compass } from 'lucide-react'
+import { Clock, BookOpen, Compass, Sparkles } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { INSIGHTS } from '@/content/insights/catalog'
@@ -21,6 +21,10 @@ import { isDeepDiveAvailable } from '@/lib/deep-dives'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
+import { Card } from '@/components/ui/card'
+import { AskAiTutorButton } from '@/components/ai-tutor/ask-ai-tutor-button'
+import { RegisterAiTutorPageContext } from '@/components/ai-tutor/register-page-context'
+import type { AiTutorContext } from '@/components/ai-tutor/types'
 
 interface Props {
   params: Promise<{ slug: string }>
@@ -114,10 +118,26 @@ export default async function InsightPage({ params }: Props) {
   const relatedDeepDiveSlugs = insight.relatedDeepDiveSlugs ?? []
   const relatedDeepDives = DEEP_DIVES.filter((d) => relatedDeepDiveSlugs.includes(d.slug) && isDeepDiveAvailable(d))
 
+  // Canonical Insight context (AI Tutor Insights/Deep Dives Grounding),
+  // mirroring the Deep Dive detail page's aiTutorContext exactly. Only
+  // stable identifiers -- slug, title, route -- are carried; the server
+  // re-resolves this slug against content/insights/catalog.ts before
+  // trusting any of it. Registering it here is what lets the header's AI
+  // Tutor button open already grounded in this Insight, and its body is
+  // now genuinely retrievable (not just a page-awareness label) via
+  // lib/ai/retrieve-published-content.ts.
+  const aiTutorContext: Extract<AiTutorContext, { sourceType: 'insight' }> = {
+    sourceType: 'insight',
+    insightSlug: insight.slug,
+    insightTitle: insight.title,
+    insightPath: `/insights/${insight.slug}`,
+  }
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-blue-50/40 to-white">
       <StructuredData data={buildInsightStructuredData(insight)} />
       <StructuredData data={buildBreadcrumbStructuredData(insight)} />
+      <RegisterAiTutorPageContext context={aiTutorContext} />
       <SiteHeader />
 
       <main className="flex-1">
@@ -285,6 +305,28 @@ export default async function InsightPage({ params }: Props) {
                   </ul>
                 </div>
               )}
+
+              <Card variant="ai">
+                <p className="flex items-center gap-1.5 text-sm font-medium text-cyan-900">
+                  <Sparkles className="h-4 w-4" aria-hidden="true" />
+                  Have a question about this Insight?
+                </p>
+                <p className="mt-1 text-sm text-slate-600 leading-relaxed">
+                  The AI Tutor can answer questions grounded in this article -- ask it to explain a section in
+                  simpler terms, compare it with something you already know, or point you to a related lesson or
+                  Deep Dive. It cannot connect to a real IBM i system, execute code, or analyze production code.
+                </p>
+                {/* Opens the shared panel in place (PR #180) so the Insight stays
+                    on screen and the reading position is kept, instead of
+                    navigating away to the full-page route. This Insight's own
+                    sections are guaranteed to be retrieved for a contextless
+                    question like "explain this simpler" -- see
+                    lib/ai/retrieve-published-content.ts's currentInsightSlug
+                    bucket. */}
+                <AskAiTutorButton context={aiTutorContext} size="sm" className="mt-3">
+                  Ask AI Tutor about this Insight
+                </AskAiTutorButton>
+              </Card>
             </article>
           </div>
         </div>

@@ -11,10 +11,12 @@ import {
 } from '@/lib/ai/anthropic'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { isDeepDiveAvailable } from '@/lib/deep-dives'
+import { INSIGHTS } from '@/content/insights/catalog'
+import { isInsightAvailable } from '@/lib/insights'
 import { SITE_URL } from '@/lib/config'
 import { buildGroundedSystemPrompt } from '@/lib/ai/system-prompt'
 import { buildProductFactsSection } from '@/lib/ai/product-facts'
-import { retrieveCourseContext, formatCourseContextForPrompt } from '@/lib/ai/retrieve-course-context'
+import { retrievePublishedContent, formatRetrievedContentForPrompt } from '@/lib/ai/retrieve-published-content'
 import { formatPracticeContextForPrompt } from '@/lib/ai/practice-context'
 import { buildSourceRefs } from '@/lib/ai/build-source-refs'
 import {
@@ -79,6 +81,10 @@ function originForContext(context: ParsedAiTutorContext): AiTutorUsageOrigin {
       // Persisted as its own origin so Deep Dive usage is distinguishable.
       // REQUIRES migration 009 to have been applied -- see that file.
       return 'deep-dive'
+    case 'insight':
+      // Persisted as its own origin, mirroring 'deep-dive' above. REQUIRES
+      // migration 013 to have been applied -- see that file.
+      return 'insight'
     case 'learning-center':
       // Deliberately NOT its own persisted origin: the brief is explicit
       // about not expanding the database enum unnecessarily, and a question
@@ -223,6 +229,18 @@ interface DeepDiveAiTutorContext {
   deepDiveSlug: string
 }
 
+/**
+ * The learner is reading a published IBM i Insight. Only the slug survives
+ * parsing -- the client's title/path are deliberately discarded and the
+ * slug is re-resolved against content/insights/catalog.ts, exactly
+ * mirroring DeepDiveAiTutorContext above, so a browser cannot inject a fake
+ * title or an unpublished/draft Insight.
+ */
+interface InsightAiTutorContext {
+  sourceType: 'insight'
+  insightSlug: string
+}
+
 /** The learner is browsing the Learning Center curriculum (PR #181). Carries no client data at all. */
 interface LearningCenterAiTutorContext {
   sourceType: 'learning-center'
@@ -232,6 +250,7 @@ type ParsedAiTutorContext =
   | LessonAiTutorContext
   | PracticeAiTutorContext
   | DeepDiveAiTutorContext
+  | InsightAiTutorContext
   | LearningCenterAiTutorContext
   | undefined
 
@@ -281,6 +300,18 @@ function parseContext(body: unknown): ParsedAiTutorContext {
       return undefined
     }
     return { sourceType: 'deep-dive', deepDiveSlug: slug }
+  }
+
+  if (sourceType === 'insight') {
+    const slug = parseSlug((raw as { insightSlug?: unknown }).insightSlug)
+    // Re-resolve against the canonical catalog and require it to be
+    // published, mirroring the deep-dive case above exactly. An unknown,
+    // draft, or spoofed slug is not an error -- it degrades to general
+    // grounding, same as any other invalid context.
+    if (!slug || !INSIGHTS.some((i) => i.slug === slug && isInsightAvailable(i))) {
+      return undefined
+    }
+    return { sourceType: 'insight', insightSlug: slug }
   }
 
   if (sourceType === 'learning-center') {
@@ -339,15 +370,16 @@ function parseContext(body: unknown): ParsedAiTutorContext {
 }
 
 /**
- * Resolve this request's course-content grounding via the single, shared
- * RAG v2 retrieval entry point (lib/ai/retrieve-course-context.ts) --
- * lesson-origin, practice-origin, and general questions all go through the
- * exact same retrieveCourseContext() call, differing only in which options
- * are set, per Spec 001 v1.1 AI-TUTOR-FR-023 (one implementation, not
- * three). Returns the composed system prompt, a short, ready-to-display
- * label describing what context was used (or null if none was
- * found/applicable), and a compact list of source lesson references for the
- * client's "Sources used" UI (PR #132).
+ * Resolve this request's published-content grounding via the single,
+ * shared RAG v2 retrieval entry point (lib/ai/retrieve-published-content.ts)
+ * -- lesson-origin, insight-origin, deep-dive-origin, practice-origin, and
+ * general questions all go through the exact same retrievePublishedContent()
+ * call, differing only in which options are set, per Spec 001 v1.1
+ * AI-TUTOR-FR-023 (one implementation, not one per content type). Returns
+ * the composed system prompt, a short, ready-to-display label describing
+ * what context was used (or null if none was found/applicable), and a
+ * compact list of source references for the client's "Sources used" UI
+ * (PR #132).
  */
 async function resolveGrounding(
   context: ParsedAiTutorContext,
@@ -355,24 +387,32 @@ async function resolveGrounding(
 ): Promise<{ systemPrompt: string; contextLabel: string | null; sources: AiTutorSourceRef[] }> {
   const practiceSection = context?.sourceType === 'practice' ? formatPracticeContextForPrompt(context) : null
 
-  // Server-resolved from the canonical catalog, never from client input.
+  // Server-resolved from the canonical catalogs, never from client input.
   const resolvedDeepDive =
     context?.sourceType === 'deep-dive'
       ? (DEEP_DIVES.find((d) => d.slug === context.deepDiveSlug) ?? null)
       : null
+  const resolvedInsight =
+    context?.sourceType === 'insight'
+      ? (INSIGHTS.find((i) => i.slug === context.insightSlug) ?? null)
+      : null
 
-  const result = await retrieveCourseContext({
+  const result = await retrievePublishedContent({
     query: latestUserMessage,
     currentLessonSlug: context?.sourceType === 'lesson' ? context.lessonSlug : undefined,
+    currentInsightSlug: resolvedInsight?.slug,
+    currentDeepDiveSlug: resolvedDeepDive?.slug,
     relatedLessonSlugs: context?.sourceType === 'practice' ? context.relatedLessonSlugs : undefined,
   })
 
   /**
-   * Page-awareness sections (PR #181). These state *where the learner is*
-   * using verified canonical metadata; they are not a substitute for
-   * retrieval and deliberately tell the model it has no indexed Deep Dive
-   * body, so it cannot pass off general knowledge as page grounding. Deep
-   * Dive content indexing lands separately -- see the PR notes.
+   * Page-awareness sections (PR #181; Deep Dive and Insight bodies both
+   * joined the retrieval index in AI Tutor Insights/Deep Dives Grounding).
+   * These state *where the learner is* using verified canonical metadata --
+   * the actual grounding still comes from the retrieved chunks below
+   * (guaranteed to include this item's own sections via
+   * currentInsightSlug/currentDeepDiveSlug above), this section is only an
+   * orientation anchor naming the title and URL explicitly.
    */
   const pageSections: string[] = []
   if (resolvedDeepDive) {
@@ -381,7 +421,16 @@ async function resolveGrounding(
         'CURRENT PAGE',
         `The learner is reading the iRPGenie Deep Dive "${resolvedDeepDive.title}" (${SITE_URL}/deep-dives/${resolvedDeepDive.slug}).`,
         `Summary: ${resolvedDeepDive.description}`,
-        'The full text of this Deep Dive is NOT available to you. If the retrieved course sections below do not cover the question, answer from general IBM i knowledge and say plainly that you are not quoting this Deep Dive. Never invent what this Deep Dive says.',
+        'Relevant excerpts from this Deep Dive are included in the retrieved content section below when applicable. If those sections do not cover the question, answer from general IBM i knowledge and say plainly that you are not quoting this Deep Dive directly. Never invent what this Deep Dive says beyond what is retrieved.',
+      ].join('\n')
+    )
+  } else if (resolvedInsight) {
+    pageSections.push(
+      [
+        'CURRENT PAGE',
+        `The learner is reading the iRPGenie Insight "${resolvedInsight.title}" (${SITE_URL}/insights/${resolvedInsight.slug}).`,
+        `Summary: ${resolvedInsight.description}`,
+        'Relevant excerpts from this Insight are included in the retrieved content section below when applicable. If those sections do not cover the question, answer from general IBM i knowledge and say plainly that you are not quoting this Insight directly. Never invent what this Insight says beyond what is retrieved.',
       ].join('\n')
     )
   } else if (context?.sourceType === 'learning-center') {
@@ -389,7 +438,7 @@ async function resolveGrounding(
       [
         'CURRENT PAGE',
         'The learner is browsing the iRPGenie Learning Center.',
-        'On iRPGenie: "lessons" are the ordered IBM i Fundamentals curriculum; "Deep Dives" are iRPGenie\'s standalone professional-grade articles on a single topic; "Practice" and "Practice Lab" are the question bank and the guided 5250/SQL simulators; "AI Tutor" is you. These are iRPGenie product terms, not IBM terminology -- if the learner asks what a Deep Dive is, explain the iRPGenie feature rather than the generic English phrase.',
+        'On iRPGenie: "lessons" are the ordered IBM i Fundamentals curriculum; "Insights" are iRPGenie\'s focused, practical editorial articles; "Deep Dives" are iRPGenie\'s standalone professional-grade articles on a single topic; "Practice" and "Practice Lab" are the question bank and the guided 5250/SQL simulators; "AI Tutor" is you. These are iRPGenie product terms, not IBM terminology -- if the learner asks what a Deep Dive or an Insight is, explain the iRPGenie feature rather than the generic English phrase.',
       ].join('\n')
     )
   }
@@ -397,29 +446,34 @@ async function resolveGrounding(
   // Priority order (PR #182): trusted platform facts FIRST, then verified
   // current-page context, then whatever retrieval found. Product questions
   // ("who founded this?", "is it free?") must be answerable from the facts
-  // block regardless of which lesson or Deep Dive is open, and retrieved
-  // content must never be able to redefine the founder, quota, pricing, or
-  // affiliation. Costs a few hundred tokens per request and no extra model
-  // call -- there is deliberately no classifier step.
+  // block regardless of which lesson, Insight, or Deep Dive is open, and
+  // retrieved content must never be able to redefine the founder, quota,
+  // pricing, or affiliation. Costs a few hundred tokens per request and no
+  // extra model call -- there is deliberately no classifier step.
   const sections = [
     buildProductFactsSection(),
     ...pageSections,
     ...(practiceSection ? [practiceSection] : []),
-    formatCourseContextForPrompt(result),
+    formatRetrievedContentForPrompt(result),
   ]
   const systemPrompt = buildGroundedSystemPrompt(sections)
 
   let contextLabel: string | null
-  if (context?.sourceType === 'lesson' && result.resolvedCurrentLesson) {
-    contextLabel = `Using lesson context: ${result.resolvedCurrentLesson.title}`
+  if (context?.sourceType === 'lesson' && result.resolvedCurrentContent?.contentType === 'lesson') {
+    contextLabel = `Using lesson context: ${result.resolvedCurrentContent.title}`
   } else if (context?.sourceType === 'practice') {
     contextLabel = `Using practice context: ${context.questionTitle}`
   } else if (context?.sourceType === 'deep-dive' && resolvedDeepDive) {
     // Names the Deep Dive the learner is on, which the server verified
-    // against the catalog. Deliberately says "Reading" rather than "Using
-    // ... context": Deep Dive bodies are not in the retrieval index yet, so
-    // claiming the answer is grounded in this Deep Dive would be false.
-    contextLabel = `Reading Deep Dive: ${resolvedDeepDive.title}`
+    // against the catalog. Deep Dive bodies are now in the retrieval index
+    // (the currentDeepDiveSlug bucket above guarantees this item's own
+    // sections are included), so "Using ... context" is accurate here --
+    // matching the lesson/insight phrasing rather than the old "Reading"
+    // wording that existed only because retrieval didn't cover Deep Dives
+    // yet.
+    contextLabel = `Using Deep Dive context: ${resolvedDeepDive.title}`
+  } else if (context?.sourceType === 'insight' && resolvedInsight) {
+    contextLabel = `Using Insight context: ${resolvedInsight.title}`
   } else if (context?.sourceType === 'learning-center') {
     contextLabel = 'Using Learning Center context'
   } else if (result.chunks.length > 0) {

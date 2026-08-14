@@ -209,7 +209,7 @@ section('8. No fabricated pricing or purchasable plan')
 section('9. Existing behavior preserved')
 
 {
-  check('all four usage origins still supported', /'deep-dive'/.test(route) && /'standalone'/.test(route))
+  check('all five usage origins still supported', /'deep-dive'/.test(route) && /'insight'/.test(route) && /'standalone'/.test(route))
   check('page-aware context from PR #181 intact', /pageSections/.test(route))
   check('deep-dive slug validation intact', /isDeepDiveAvailable/.test(route))
   check('auth still required', /You must be logged in to use the AI Tutor/.test(route))

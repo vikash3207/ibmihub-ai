@@ -3,8 +3,9 @@
  * Kept in its own module per NFR-Maintainability, not inline in the route.
  *
  * D-AI-003 (no lesson-aware templating) is superseded: the API route now
- * appends a per-request grounding section (retrieved course content chunks,
- * from lib/ai/retrieve-course-context.ts -- RAG v2, see
+ * appends a per-request grounding section (retrieved published-content
+ * chunks -- lessons, Insights, and Deep Dives -- from
+ * lib/ai/retrieve-published-content.ts -- RAG v2, see
  * planning/AI_TUTOR_RAG_V2_DESIGN_AUDIT.md) after this static base prompt.
  * This file still holds only the static, request-independent instructions.
  */

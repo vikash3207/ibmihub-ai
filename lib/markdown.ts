@@ -21,7 +21,7 @@ import rehypeStringify from 'rehype-stringify'
  * own styled <h1> above the body. Left in, that line rendered a second,
  * unstyled <h1> at the top of the body -- a visible duplicate title (PR
  * #140 visual polish fix). Mirrors the identical stripping already done
- * for AI Tutor grounding in lib/ai/lesson-chunks.ts, for the same reason.
+ * for AI Tutor grounding in lib/ai/content-chunks.ts, for the same reason.
  */
 function stripLeadingTitle(markdown: string): string {
   return markdown.replace(/^#\s+.+\r?\n+/, '')
@@ -30,7 +30,7 @@ function stripLeadingTitle(markdown: string): string {
 /**
  * Every lesson in this course follows the same fixed 7-heading template
  * (confirmed across the content set, and already relied on for AI Tutor
- * RAG chunking in lib/ai/lesson-chunks.ts). This is what makes exact-text
+ * RAG chunking in lib/ai/content-chunks.ts). This is what makes exact-text
  * matching safe here rather than fragile: these are not guessed prefixes,
  * they're a heading vocabulary that is already load-bearing elsewhere.
  * A heading that doesn't match one of these exact strings is simply left
