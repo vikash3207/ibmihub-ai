@@ -1,4 +1,13 @@
 /**
+ * The three published-content types the AI Tutor can be grounded in
+ * (lessons, IBM i Insights articles, Deep Dive guides). Shared between the
+ * client context payload below, lib/ai/content-chunks.ts's chunking, and
+ * lib/ai/retrieve-published-content.ts's retrieval -- one union, not a
+ * parallel string type per module.
+ */
+export type AiContentType = 'lesson' | 'insight' | 'deep-dive'
+
+/**
  * Shared AI Tutor context payload (Spec 001 v1.1 AI-TUTOR-FR-018/019/021).
  *
  * A discriminated union so the embedded panel, the standalone /ai-tutor
@@ -53,6 +62,20 @@ export type AiTutorContext =
       sectionId?: string
     }
   | {
+      /**
+       * The learner is reading a published IBM i Insight article. Only
+       * stable identifiers travel over the wire -- the server re-resolves
+       * the slug against content/insights/catalog.ts and ignores anything
+       * it cannot verify, exactly mirroring the 'deep-dive' case above.
+       * `title` here is for the client-side label only and is never
+       * trusted as grounding.
+       */
+      sourceType: 'insight'
+      insightSlug: string
+      insightTitle: string
+      insightPath: string
+    }
+  | {
       /** The learner is browsing the Learning Center curriculum (PR #181). */
       sourceType: 'learning-center'
       title: string
@@ -72,6 +95,8 @@ export function getContextLabel(context: AiTutorContext): string | null {
       return `Using practice context: ${context.questionTitle}`
     case 'deep-dive':
       return `Using Deep Dive context: ${context.deepDiveTitle}`
+    case 'insight':
+      return `Using Insight context: ${context.insightTitle}`
     case 'learning-center':
       return `Using Learning Center context`
     case 'general':
@@ -88,6 +113,8 @@ export function getContextKey(context: AiTutorContext): string {
       return `practice:${context.questionId}:${context.revealed}`
     case 'deep-dive':
       return `deep-dive:${context.deepDiveSlug}:${context.sectionId ?? ''}`
+    case 'insight':
+      return `insight:${context.insightSlug}`
     case 'learning-center':
       return 'learning-center'
     case 'general':
@@ -96,17 +123,20 @@ export function getContextKey(context: AiTutorContext): string {
 }
 
 /**
- * A compact, UI-safe reference to a lesson an AI Tutor response was
- * grounded in (PR #132 -- Source / Related Lesson References Polish).
- * Deliberately excludes chunk text, score, and match reasons: those are
- * internal retrieval details (lib/ai/retrieve-course-context.ts), not
- * something to show a learner. `heading` is only ever present when a
- * single distinct section of that lesson was used, to keep the display to
- * one line per source rather than listing every matched section.
+ * A compact, UI-safe reference to a piece of published content (lesson,
+ * Insight, or Deep Dive) an AI Tutor response was grounded in (PR #132 --
+ * Source / Related Lesson References Polish; generalized beyond lessons
+ * once Insight/Deep Dive retrieval landed). Deliberately excludes chunk
+ * text, score, and match reasons: those are internal retrieval details
+ * (lib/ai/retrieve-published-content.ts), not something to show a learner.
+ * `heading` is only ever present when a single distinct section of that
+ * content item was used, to keep the display to one line per source rather
+ * than listing every matched section.
  */
 export interface AiTutorSourceRef {
-  lessonTitle: string
-  lessonSlug: string
-  lessonPath: string
+  contentType: AiContentType
+  title: string
+  slug: string
+  path: string
   heading?: string
 }

@@ -275,21 +275,24 @@ export default async function DeepDivePage({ params }: Props) {
               <Card variant="ai">
                 <p className="flex items-center gap-1.5 text-sm font-medium text-cyan-900">
                   <Sparkles className="h-4 w-4" aria-hidden="true" />
-                  Have a question?
+                  Have a question about this Deep Dive?
                 </p>
                 <p className="text-sm text-slate-600 mt-1 leading-relaxed">
-                  The AI Tutor is for educational guidance only. It cannot connect to a real IBM i
-                  system, execute code, or analyze production code. See the &ldquo;Ask the AI
-                  Tutor&rdquo; section above for good prompts to start with.
+                  The AI Tutor can answer questions grounded in this guide -- ask it to explain a section in
+                  simpler terms or compare it with something you already know. See the &ldquo;Ask the AI
+                  Tutor&rdquo; section above for good prompts to start with. It cannot connect to a real IBM i
+                  system, execute code, or analyze production code.
                 </p>
                 {/* Opens the shared panel in place (PR #180) so the Deep Dive
                     stays on screen and the reading position is kept, instead
-                    of navigating away to the full-page route. General
-                    context: Deep Dives are not part of the AI Tutor's
-                    retrieval index, so no Deep-Dive-specific grounding is
-                    claimed here -- see the PR notes. */}
+                    of navigating away to the full-page route. This Deep
+                    Dive's own sections are guaranteed to be retrieved for a
+                    contextless question like "explain this simpler" -- see
+                    lib/ai/retrieve-published-content.ts's
+                    currentDeepDiveSlug bucket (AI Tutor Insights/Deep Dives
+                    Grounding; Deep Dive bodies were not indexed before). */}
                 <AskAiTutorButton context={aiTutorContext} size="sm" className="mt-3">
-                  Open the AI Tutor
+                  Ask AI Tutor about this Deep Dive
                 </AskAiTutorButton>
               </Card>
             </article>

@@ -14,9 +14,19 @@ const nextConfig = {
   // isn't a static import, so the bundler can't discover it through static
   // analysis; this tells the file tracer explicitly which files those routes
   // need, instead of it falling back to tracing the whole project.
+  //
+  // AI Tutor Insights/Deep Dives Grounding: lib/ai/retrieve-published-content.ts
+  // (called from /api/ai-tutor) now also reads content/deep-dives/*.md and
+  // content/insights/*.md at request time -- via the same
+  // loadDeepDiveMarkdown()/loadInsightMarkdown() functions the detail routes
+  // below already use, but from inside the API route this time. Both globs
+  // must be listed under '/api/ai-tutor' too, or a deployed Vercel function
+  // for that route would be missing these files even though they work fine
+  // in local dev (which reads straight off the real filesystem, not a traced
+  // output bundle).
   outputFileTracingIncludes: {
     '/learn/ibm-i-fundamentals/[slug]': ['./content/lessons/*.md'],
-    '/api/ai-tutor': ['./content/lessons/*.md'],
+    '/api/ai-tutor': ['./content/lessons/*.md', './content/deep-dives/*.md', './content/insights/*.md'],
     // The Deep Dive detail route (lib/deep-dive-content.ts's
     // loadDeepDiveMarkdown) reads content/deep-dives/*.md at request time
     // the same way the lesson route reads content/lessons/*.md above.

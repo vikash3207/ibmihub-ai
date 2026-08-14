@@ -1,11 +1,11 @@
 'use client'
 
-import { ThumbsUp, ThumbsDown, Bot, User, Send, BookOpen } from 'lucide-react'
+import { ThumbsUp, ThumbsDown, Bot, User, Send, BookOpen, Newspaper, Compass } from 'lucide-react'
 import Link from 'next/link'
 import { buttonVariants } from '@/components/ui/button'
 import { AiTutorHeader } from './chat-header'
 import { cn } from '@/lib/utils'
-import type { AiTutorSourceRef } from './types'
+import type { AiTutorSourceRef, AiContentType } from './types'
 
 /**
  * Shared, presentational AI Tutor conversation UI (Spec 001 v1.1
@@ -185,31 +185,43 @@ function AssistantContentBlocks({ blocks }: { blocks: Block[] }) {
   )
 }
 
+/** Matches the BookOpen/Compass convention already used for "Related lessons"/"Related Deep Dive" elsewhere (e.g. app/insights/[slug]/page.tsx); Newspaper is Insights' equivalent, not reused from anywhere else so it reads as its own content type at a glance. */
+const SOURCE_TYPE_ICON: Record<AiContentType, typeof BookOpen> = {
+  lesson: BookOpen,
+  insight: Newspaper,
+  'deep-dive': Compass,
+}
+
 /**
  * Compact "Sources used" pills for a single assistant reply (PR #132,
- * restyled as small chips in PR #153). Deliberately title-first and
+ * restyled as small chips in PR #153; generalized beyond lessons once
+ * Insight/Deep Dive retrieval landed). Deliberately title-first and
  * link-only: no raw chunk text, no visible relevance score. `heading`
- * (present only when a lesson contributed a single distinct section -- see
- * buildSourceRefs in the API route) is appended inline, never its own link.
+ * (present only when an item contributed a single distinct section -- see
+ * buildSourceRefs in lib/ai/build-source-refs.ts) is appended inline, never
+ * its own link.
  */
 function SourcesList({ sources }: { sources: AiTutorSourceRef[] }) {
   return (
     <div className="mb-2.5">
       <p className="mb-1.5 font-medium text-slate-500">Sources used</p>
       <div className="flex flex-wrap gap-1.5">
-        {sources.map((source) => (
-          <Link
-            key={source.lessonSlug}
-            href={source.lessonPath}
-            className="inline-flex max-w-full items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-cyan-800 transition-colors hover:border-cyan-300 hover:bg-cyan-100"
-          >
-            <BookOpen className="h-3 w-3 shrink-0" aria-hidden="true" />
-            <span className="truncate font-medium">
-              {source.lessonTitle}
-              {source.heading && <span className="font-normal text-cyan-700"> — {source.heading}</span>}
-            </span>
-          </Link>
-        ))}
+        {sources.map((source) => {
+          const Icon = SOURCE_TYPE_ICON[source.contentType]
+          return (
+            <Link
+              key={`${source.contentType}:${source.slug}`}
+              href={source.path}
+              className="inline-flex max-w-full items-center gap-1 rounded-full border border-cyan-200 bg-cyan-50 px-2.5 py-1 text-cyan-800 transition-colors hover:border-cyan-300 hover:bg-cyan-100"
+            >
+              <Icon className="h-3 w-3 shrink-0" aria-hidden="true" />
+              <span className="truncate font-medium">
+                {source.title}
+                {source.heading && <span className="font-normal text-cyan-700"> — {source.heading}</span>}
+              </span>
+            </Link>
+          )
+        })}
       </div>
     </div>
   )
