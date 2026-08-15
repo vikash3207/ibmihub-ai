@@ -12,11 +12,12 @@
  * anymore. The second (PR #202): "Modernizing RPG Applications with SQL and
  * APIs". The third (PR #203): "Db2 for i and QSYS2 Services Every Developer
  * Should Know". The fourth (PR #206): "Building REST APIs from IBM i
- * Applications". The fifth (this PR): "Practical AI-Assisted Development for
- * RPG Programmers" -- entries are appended in publication order, and the
- * listing page's "featured" treatment is positional (array index 0 after
- * filtering to published), not driven by the `featured` flag, so none of
- * these later entries carries one.
+ * Applications". The fifth (PR #207): "Practical AI-Assisted Development for
+ * RPG Programmers". The sixth (this PR): "IBM i Application Monitoring and
+ * Production Troubleshooting" -- entries are appended in publication order,
+ * and the listing page's "featured" treatment is positional (array index 0
+ * after filtering to published), not driven by the `featured` flag, so none
+ * of these later entries carries one.
  *
  * The fourth entry deliberately covers only *exposing* IBM i logic as a
  * REST API (the server side) -- the second entry ("Modernizing RPG
@@ -37,6 +38,15 @@
  * design intent (see that file's header comment). The article is
  * fundamentally about operational diagnostics and troubleshooting via SQL,
  * which is what 'operations-performance' already exists to cover.
+ *
+ * The sixth entry shares that same category and even several of the same
+ * QSYS2 services as the third entry, but the two are scoped deliberately
+ * differently, not duplicated: the third is a broad service catalog ("here
+ * is what each service does"), while the sixth is a single end-to-end
+ * production-incident workflow ("confirm symptom, gather evidence, isolate
+ * cause, recover safely, find root cause") that uses a handful of those
+ * services -- plus lock/job-queue/message/SQL-diagnostic services the third
+ * article doesn't cover -- as evidence sources inside that workflow.
  *
  * Only `status: 'published'` entries are ever listed or linkable -- see
  * isInsightAvailable() in lib/insights.ts. Each entry's Markdown body lives
@@ -114,5 +124,18 @@ export const INSIGHTS: Insight[] = [
     status: 'published',
     relatedDeepDiveSlugs: ['embedded-sql-in-rpgle', 'sql-error-handling-on-ibm-i'],
     relatedLessonSlugs: ['compile-errors-vs-runtime-errors', 'modern-ibm-i-development-overview', 'debugging-rpgle-programs'],
+  },
+  {
+    slug: 'ibm-i-application-monitoring-and-production-troubleshooting',
+    title: 'IBM i Application Monitoring and Production Troubleshooting',
+    description:
+      'A practical, evidence-first guide to detecting production failures, finding the right job, and diagnosing application issues safely — comparing conventional commands like WRKACTJOB and WRKOBJLCK with SQL-based QSYS2 monitoring services.',
+    category: 'operations-performance',
+    tags: ['IBM i', 'Production Support', 'Application Monitoring', 'QSYS2 Services', 'RPGLE', 'Db2 for i'],
+    publishedAt: '2026-08-15',
+    readingTimeMinutes: 26,
+    status: 'published',
+    relatedDeepDiveSlugs: ['sql-error-handling-on-ibm-i', 'sql-on-ibm-i'],
+    relatedLessonSlugs: ['wrkactjob-basics-for-developers', 'job-status-values-explained', 'troubleshooting-locked-record-scenario'],
   },
 ]
