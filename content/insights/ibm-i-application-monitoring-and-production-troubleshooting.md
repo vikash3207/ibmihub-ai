@@ -411,18 +411,20 @@ Ending the visible waiting job may remove the symptom while leaving the actual h
 A job can also wait in `LCKW` for a lock on an entire object — a program that is being replaced, a file opened exclusively during a maintenance step, a data area held during a batch update — rather than a single row. `RECORD_LOCK_INFO` will not show this; it only reports row-level activity inside a member. For object-level conflicts, query `OBJECT_LOCK_INFO` instead:
 
 ```sql
-SELECT OBJECT_SCHEMA,
-       OBJECT_NAME,
+SELECT SYSTEM_OBJECT_SCHEMA,
+       SYSTEM_OBJECT_NAME,
        OBJECT_TYPE,
        LOCK_STATE,
        LOCK_STATUS,
        LOCK_SCOPE,
        JOB_NAME
   FROM QSYS2.OBJECT_LOCK_INFO
- WHERE OBJECT_SCHEMA = 'MYLIB'
-   AND OBJECT_NAME = 'ORDERSVC'
+ WHERE SYSTEM_OBJECT_SCHEMA = 'MYLIB'
+   AND SYSTEM_OBJECT_NAME = 'ORDERSVC'
  ORDER BY LOCK_STATUS;
 ```
+
+Selecting and filtering on `SYSTEM_OBJECT_SCHEMA`/`SYSTEM_OBJECT_NAME` (the IBM i system object names) rather than any SQL long-name equivalent keeps this example correct even when a library or object has a long SQL name that differs from its system name.
 
 This is the SQL equivalent of `WRKOBJLCK OBJ(MYLIB/ORDERSVC) OBJTYPE(*PGM)`. The same holder/waiter reasoning applies: identify what the holding job is doing and whether it is progressing before considering any recovery action.
 
@@ -477,7 +479,7 @@ SELECT LOGGED_TIME,
  ORDER BY LOGGED_TIME DESC;
 ```
 
-An empty result does not prove that no SQL errors occurred. SELF only captures SQLCODEs registered through the `SYSIBMADM.SELFCODES` global variable — it is off by default for every job until that variable is set — and reading `SQL_ERROR_LOG` itself requires `*ALLOBJ` special authority or the `QIBM_DB_SQLADM` function-usage ID. Enabling or changing system-wide SELF configuration is a planned administrative action, not an improvised incident command.
+An empty result does not prove that no SQL errors occurred. SELF only captures SQLCODEs registered through the `SYSIBMADM.SELFCODES` global variable, which is scoped to the current SQL session and defaults to `NULL` (off) unless a different default has been configured. Authority to `SQL_ERROR_LOG` is also narrower than it first appears: seeing every job's rows requires `*ALLOBJ` special authority or the `QIBM_DB_SQLADM` function-usage ID, but a caller without either can still see rows where their own profile matches `USER_NAME`, `ADOPTED_USER_NAME`, or `INITIAL_ADOPTED_USER_NAME` — so a developer can usually see their own program's logged errors without an elevated authority request. Enabling or changing system-wide SELF configuration is a planned administrative action, not an improvised incident command.
 
 ## Step 8: Capture SQL Diagnostics in the Application
 

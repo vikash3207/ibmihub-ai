@@ -1021,6 +1021,18 @@ async function runChecks() {
       /WRKOBJLCK/.test(monitoringMarkdown) && /OBJECT_LOCK_INFO/.test(monitoringMarkdown) && /object-level locks/i.test(monitoringMarkdown)
     )
     check(
+      'the OBJECT_LOCK_INFO example selects and filters on the system object name columns (SYSTEM_OBJECT_SCHEMA/SYSTEM_OBJECT_NAME), not a long-SQL-name equivalent that can differ from the IBM i system name',
+      (() => {
+        const sqlBlock = monitoringMarkdown.match(/```sql\nSELECT SYSTEM_OBJECT_SCHEMA,[\s\S]*?```/)?.[0] ?? ''
+        return (
+          sqlBlock.length > 0 &&
+          /SELECT SYSTEM_OBJECT_SCHEMA,[\s\S]*?SYSTEM_OBJECT_NAME,/.test(sqlBlock) &&
+          /WHERE SYSTEM_OBJECT_SCHEMA = 'MYLIB'/.test(sqlBlock) &&
+          /AND SYSTEM_OBJECT_NAME = 'ORDERSVC'/.test(sqlBlock)
+        )
+      })()
+    )
+    check(
       'the article explicitly distinguishes monitoring, troubleshooting, recovery, and root-cause analysis',
       /\*\*Monitoring\*\*/.test(monitoringMarkdown) &&
         /\*\*Troubleshooting\*\*/.test(monitoringMarkdown) &&
@@ -1028,8 +1040,14 @@ async function runChecks() {
         /\*\*Root-cause analysis\*\*/.test(monitoringMarkdown)
     )
     check(
-      'the article states SELF\'s precise authority requirement (*ALLOBJ or QIBM_DB_SQLADM), not just "authority-dependent"',
-      /QIBM_DB_SQLADM/.test(monitoringMarkdown)
+      "the article states SELF's precise authority model: *ALLOBJ or QIBM_DB_SQLADM for every job's rows, but a caller can still see their own rows by USER_NAME/ADOPTED_USER_NAME/INITIAL_ADOPTED_USER_NAME without either",
+      /QIBM_DB_SQLADM/.test(monitoringMarkdown) &&
+        /ADOPTED_USER_NAME/.test(monitoringMarkdown) &&
+        /INITIAL_ADOPTED_USER_NAME/.test(monitoringMarkdown)
+    )
+    check(
+      'the article states SYSIBMADM.SELFCODES is session-scoped and defaults to NULL/off unless a different default has been configured (not an unconditional "off by default for every job")',
+      /scoped to the current SQL session/.test(monitoringMarkdown) && /unless a different default has been configured/.test(monitoringMarkdown)
     )
     check(
       'the article includes a standalone "evidence to capture before any disruptive action" checklist',
