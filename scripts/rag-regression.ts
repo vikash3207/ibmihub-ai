@@ -789,6 +789,7 @@ const INSIGHT_SCENARIOS: Scenario[] = [
   { query: 'What is the IBM i MCP Server and how do AI assistants use it?', pool: insightChunks, expectSlugOneOf: ['ibm-i-mcp-server-ai-assistants'] },
   { query: 'How do I generate JSON or call a REST API from RPG?', pool: insightChunks, expectSlugOneOf: ['modernizing-rpg-applications-with-sql-and-apis'] },
   { query: 'Which QSYS2 service shows job log messages as rows?', pool: insightChunks, expectSlugOneOf: ['db2-for-i-qsys2-services-developers-should-know'] },
+  { query: 'How do I deploy an RPG program as a REST API using Integrated Web Services and PCML?', pool: insightChunks, expectSlugOneOf: ['building-rest-apis-from-ibm-i-applications'] },
 ]
 
 const DEEP_DIVE_SCENARIOS: Scenario[] = [
