@@ -340,7 +340,7 @@ export default async function LandingPage() {
             </p>
           </div>
 
-          <div className="grid gap-6 lg:grid-cols-3">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Journey 1: New to IBM i */}
             <Card className="flex flex-col p-6">
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
@@ -348,9 +348,10 @@ export default async function LandingPage() {
               </div>
               <h3 className="font-semibold text-slate-900 mb-2">New to IBM&nbsp;i</h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-5 flex-1">
-                Start with a structured, beginner-friendly path that assumes no prior IBM&nbsp;i
-                knowledge -- {publishedLessons.length} lessons from what IBM&nbsp;i is to a basic
-                development workflow.
+                {/* A single expression, not JSX text wrapped around {publishedLessons.length} --
+                    avoids relying on the compiler's line-wrap whitespace collapsing, which
+                    silently drops the space on one side of an expression split across lines. */}
+                {`Start with a structured, beginner-friendly path that assumes no prior IBM i knowledge -- ${publishedLessons.length} lessons from what IBM i is to a basic development workflow.`}
               </p>
               <div className="space-y-2">
                 <Link
