@@ -1,11 +1,13 @@
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { ArrowRight, Database, FlaskConical, Terminal } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { SimulatorNotice } from '@/components/practice-lab/simulator-notice'
 import { PRACTICE_LAB_5250_THEME, PRACTICE_LAB_SQL_THEME } from '@/lib/section-theme'
 import { cn } from '@/lib/utils'
+import { FeaturePreviewShell } from '@/components/feature-preview/feature-preview-shell'
+import { PreviewAuthCta } from '@/components/feature-preview/preview-auth-cta'
+import { PRACTICE_LAB_PREVIEW_THEME } from '@/lib/feature-preview-theme'
 
 // Auth-gated page -- never statically cache; always compute fresh per request.
 // Mirrors app/(authenticated)/practice/page.tsx and dashboard/ai-tutor.
@@ -22,19 +24,66 @@ export const metadata: Metadata = {
 }
 
 /**
- * Practice Lab landing page (visually upgraded -- Site-wide Navigation and
- * Section Landing Page Visual Upgrade). Same layout-padding constraint as
- * app/(authenticated)/practice/page.tsx (app/(authenticated)/layout.tsx
- * wraps every authenticated page in a padded max-w-3xl <main>, including
- * Onboarding, which this PR must not touch) -- this hero is a contained,
- * rounded dark "terminal" card, not the edge-to-edge <SectionHero>.
- * <SimulatorNotice> is rendered completely unchanged (its exact "does not
- * connect to a real IBM i system" wording is the platform's explicit
- * safety promise -- see that component's own doc comment). The two path
- * cards get distinct sub-identities (5250 = amber, SQL = blue/cyan) per
- * lib/section-theme.ts's PRACTICE_LAB_5250_THEME/PRACTICE_LAB_SQL_THEME,
- * but their descriptive text is unchanged from before this pass.
+ * Signed-out public preview (Homepage Hierarchy and Signed-Out Feature
+ * Discovery). Replaces the previous unconditional `redirect('/auth/login')`.
+ * Deliberately narrower than <PracticePreview> (app/(authenticated)/practice/page.tsx)
+ * -- a focused look at just the two simulated environments this specific
+ * route is about, not the broader practice-questions pitch. <SimulatorNotice>
+ * is reused unchanged, same as the real page below.
  */
+function PracticeLabPreview() {
+  return (
+    <FeaturePreviewShell
+      icon={FlaskConical}
+      badgeLabel="Practice Lab"
+      title="Practice Lab"
+      description="A guided 5250-style command simulator and an ACS-style SQL console -- both built for learning, both safe simulations with no connection to a real IBM&nbsp;i system."
+      theme={PRACTICE_LAB_PREVIEW_THEME}
+      cta={<PreviewAuthCta next="/practice-lab" />}
+    >
+      <SimulatorNotice />
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div
+          className={cn(
+            'relative overflow-hidden rounded-2xl border bg-gradient-to-b p-5 shadow-sm',
+            PRACTICE_LAB_5250_THEME.border,
+            PRACTICE_LAB_5250_THEME.cardWash
+          )}
+        >
+          <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', PRACTICE_LAB_5250_THEME.accent)} aria-hidden="true" />
+          <div className={cn('mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm', PRACTICE_LAB_5250_THEME.accent)}>
+            <Terminal className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <span className="block font-semibold text-slate-900">5250 Command Practice</span>
+          <span className="mt-1 block text-sm text-slate-600 leading-relaxed">
+            Practice common IBM i commands -- WRKOBJ, DSPJOB, WRKACTJOB, and more -- in a guided
+            5250-style simulator.
+          </span>
+        </div>
+
+        <div
+          className={cn(
+            'relative overflow-hidden rounded-2xl border bg-gradient-to-b p-5 shadow-sm',
+            PRACTICE_LAB_SQL_THEME.border,
+            PRACTICE_LAB_SQL_THEME.cardWash
+          )}
+        >
+          <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', PRACTICE_LAB_SQL_THEME.accent)} aria-hidden="true" />
+          <div className={cn('mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br text-white shadow-sm', PRACTICE_LAB_SQL_THEME.accent)}>
+            <Database className="h-5 w-5" aria-hidden="true" />
+          </div>
+          <span className="block font-semibold text-slate-900">SQL Practice Console</span>
+          <span className="mt-1 block text-sm text-slate-600 leading-relaxed">
+            Write and run SQL -- SELECT, WHERE, JOIN, GROUP BY, and more -- against safe, simulated
+            sample data.
+          </span>
+        </div>
+      </div>
+    </FeaturePreviewShell>
+  )
+}
+
 export default async function PracticeLabPage() {
   const supabase = await createClient()
   const {
@@ -42,7 +91,7 @@ export default async function PracticeLabPage() {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/login?next=%2Fpractice-lab')
+    return <PracticeLabPreview />
   }
 
   return (

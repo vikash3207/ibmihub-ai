@@ -113,16 +113,18 @@ const LOGGED_IN_LINKS: NavLinkDef[] = [
   { href: '/contact', label: 'Contact Us', accent: CONTACT_ACCENT },
 ]
 
-// AI Tutor links straight to the real, already-protected /ai-tutor route
-// for signed-out visitors too -- that page's own `if (!user) redirect(...)`
-// (app/(authenticated)/ai-tutor/page.tsx) is what sends them to login with
-// `?next=%2Fai-tutor` already attached, so a signed-in visitor lands on AI
-// Tutor directly and a signed-out one is returned there after logging in.
-// No second auth check or redirect is introduced here.
+// AI Tutor and Practice both link straight to their real, already-protected
+// routes for signed-out visitors too (Homepage Hierarchy and Signed-Out
+// Feature Discovery) -- those pages now render a public preview instead of
+// redirecting (app/(authenticated)/ai-tutor/page.tsx,
+// app/(authenticated)/practice/page.tsx), so a signed-out visitor sees a
+// preview and a signed-in one lands on the real feature directly. No second
+// auth check or redirect is introduced here.
 const LOGGED_OUT_LINKS: NavLinkDef[] = [
   { href: '/learn', label: 'Learning Center', accent: LEARN_ACCENT },
   { href: '/deep-dives', label: 'Deep Dives', accent: DEEP_DIVES_ACCENT },
   { href: '/insights', label: 'IBM i Insights', accent: INSIGHTS_ACCENT },
+  { href: '/practice', label: 'Practice', accent: PRACTICE_ACCENT },
   { href: '/ai-tutor', label: 'AI Tutor', accent: AI_TUTOR_ACCENT, alwaysAccented: true, opensAiTutorPanel: true },
   { href: '/contact', label: 'Contact Us', accent: CONTACT_ACCENT },
 ]

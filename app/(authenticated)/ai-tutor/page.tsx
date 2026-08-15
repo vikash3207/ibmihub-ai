@@ -1,9 +1,11 @@
-import { redirect } from 'next/navigation'
+import { ShieldAlert, Sparkles, BookOpenCheck, MessageCircleQuestion } from 'lucide-react'
 import type { Metadata } from 'next'
-import { ShieldAlert, Sparkles } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
 import { AiTutorChat } from '@/components/ai-tutor-chat'
+import { FeaturePreviewShell } from '@/components/feature-preview/feature-preview-shell'
+import { PreviewAuthCta } from '@/components/feature-preview/preview-auth-cta'
+import { AI_TUTOR_PREVIEW_THEME } from '@/lib/feature-preview-theme'
 
 // Auth-gated page -- never statically cache; always compute fresh per request
 // so a production visitor's real session (not a build-time snapshot) decides
@@ -38,6 +40,62 @@ interface Props {
   searchParams: Promise<{ lesson?: string }>
 }
 
+/**
+ * Signed-out public preview (Homepage Hierarchy and Signed-Out Feature
+ * Discovery). Replaces the previous unconditional `redirect('/auth/login')`
+ * -- a visitor who has never seen AI Tutor should understand what it does
+ * before being asked to create an account, not bounce straight to a blank
+ * login form. Renders no chat UI, no usage quota, and makes no AI Tutor
+ * request of its own -- STARTER_PROMPTS and PRIVACY_NOTICE below are the
+ * same static constants the real, authenticated page already renders.
+ */
+function AiTutorPreview() {
+  return (
+    <FeaturePreviewShell
+      icon={Sparkles}
+      badgeLabel="AI Tutor"
+      title="Ask IBM i questions, get IBM i-specific answers"
+      description="iRPGenie's AI Tutor gives plain-language explanations of RPGLE, CLLE, Db2 for i, and IBM i operations -- grounded in the same lessons, Deep Dives, and Insights you're reading, not a generic programming assistant."
+      theme={AI_TUTOR_PREVIEW_THEME}
+      cta={<PreviewAuthCta next="/ai-tutor" signupVariant="ai" />}
+    >
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <BookOpenCheck className="h-4 w-4 text-cyan-700" aria-hidden="true" />
+            Contextual help
+          </div>
+          <p className="text-sm text-slate-600 leading-relaxed">
+            Ask about the lesson, Deep Dive, or Insight you're currently reading and the Tutor
+            already knows what you're looking at -- no need to re-explain your context.
+          </p>
+        </div>
+        <div className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
+          <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-slate-900">
+            <MessageCircleQuestion className="h-4 w-4 text-cyan-700" aria-hidden="true" />
+            Example questions
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {STARTER_PROMPTS.map((prompt) => (
+              <span
+                key={prompt}
+                className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs text-slate-600"
+              >
+                {prompt}
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div className="flex items-start gap-3 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+        <ShieldAlert className="mt-0.5 h-5 w-5 shrink-0 text-amber-600" aria-hidden="true" />
+        <p className="text-sm text-amber-900 leading-relaxed">{PRIVACY_NOTICE}</p>
+      </div>
+    </FeaturePreviewShell>
+  )
+}
+
 export default async function AiTutorPage({ searchParams }: Props) {
   const supabase = await createClient()
   const {
@@ -45,7 +103,7 @@ export default async function AiTutorPage({ searchParams }: Props) {
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/auth/login?next=%2Fai-tutor')
+    return <AiTutorPreview />
   }
 
   const { lesson: lessonSlug } = await searchParams
