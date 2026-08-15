@@ -23,7 +23,9 @@
     "test:insights": "npx tsx scripts/insights-regression.ts",
     "test:site-navigation": "npx tsx scripts/site-navigation-regression.ts",
     "test:contact-form": "npx tsx scripts/contact-form-regression.ts",
-    "test:tailwind-content": "npx tsx scripts/tailwind-content-regression.ts"
+    "test:tailwind-content": "npx tsx scripts/tailwind-content-regression.ts",
+    "test:homepage": "npx tsx scripts/homepage-journeys-regression.ts",
+    "test:protected-preview": "npx tsx scripts/protected-preview-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",

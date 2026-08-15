@@ -3,7 +3,6 @@ import type { Metadata } from 'next'
 import {
   BookOpen,
   Sparkles,
-  TrendingUp,
   Unlock,
   Route,
   Award,
@@ -13,19 +12,15 @@ import {
   Code2,
   Terminal,
   Database,
-  LifeBuoy,
   MessageCircle,
   Layers,
-  ArrowLeftRight,
-  Lock,
-  History,
-  Bug,
-  Gauge,
+  Lightbulb,
+  FlaskConical,
+  ArrowRight,
 } from 'lucide-react'
-import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL, SUPPORT_EMAIL, CONTACT_EMAIL } from '@/lib/config'
+import { PRIMARY_CTA_LABEL, SITE_DEFAULT_DESCRIPTION, SITE_NAME, SITE_URL } from '@/lib/config'
 import { getPublishedLessons, type Lesson } from '@/lib/lessons'
 import { getTopicForLesson } from '@/lib/topics'
-import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
@@ -93,39 +88,6 @@ export const metadata: Metadata = {
     description: SITE_DEFAULT_DESCRIPTION,
   },
 }
-
-const FEATURES = [
-  {
-    icon: BookOpen,
-    title: 'Structured Curriculum',
-    body: 'A structured, beginner-friendly learning path covering IBM i concepts, RPGLE, CLLE, Db2 for i, job logs, and more.',
-  },
-  {
-    icon: Sparkles,
-    title: 'AI Tutor',
-    body: 'Ask IBM i questions in plain language and get clear, IBM i-specific explanations -- not a generic programming assistant.',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Progress Tracking',
-    body: 'Mark lessons complete and pick up exactly where you left off, every time you come back.',
-  },
-  {
-    icon: Award,
-    title: 'Career-Ready IBM i Skills',
-    body: 'Build practical foundations that support IBM i development, support, modernization, and long-term career growth.',
-  },
-  {
-    icon: Terminal,
-    title: '5250-Style Practice Lab',
-    body: 'Practice real IBM i commands -- WRKOBJ, DSPJOB, WRKACTJOB, and more -- in a guided, 5250-style simulator with no real system connection.',
-  },
-  {
-    icon: Database,
-    title: 'ACS-Style SQL Practice Console',
-    body: 'Write and run SQL -- SELECT, WHERE, JOIN, GROUP BY, and more -- in an ACS-style console against safe, simulated sample data.',
-  },
-]
 
 // Built from the Published lesson count once fetched in the page component --
 // learner-facing counts must reflect Published lessons only, never the raw
@@ -208,55 +170,10 @@ function buildCurriculumHighlights(lessons: Lesson[]) {
   return CURRICULUM_BUCKETS.map((bucket) => ({ ...bucket, count: counts.get(bucket) ?? 0 }))
 }
 
-/**
- * "What's coming next" roadmap items (PR #151) -- future-facing, no dates.
- * Each item gets one of the accent groups the Product Owner suggested
- * (blue/indigo for RPGLE/learning, teal/cyan for SQL/data, amber/orange for
- * operations, emerald for hands-on practice), reusing the same Card-based
- * visual language as the rest of the page rather than introducing a new
- * component just for this list.
- */
-const ROADMAP_ACCENTS = {
-  indigo: { bg: 'bg-indigo-50', border: 'border-indigo-100', iconBg: 'bg-indigo-100', iconText: 'text-indigo-700' },
-  teal: { bg: 'bg-teal-50', border: 'border-teal-100', iconBg: 'bg-teal-100', iconText: 'text-teal-700' },
-  amber: { bg: 'bg-amber-50', border: 'border-amber-100', iconBg: 'bg-amber-100', iconText: 'text-amber-700' },
-  emerald: { bg: 'bg-emerald-50', border: 'border-emerald-100', iconBg: 'bg-emerald-100', iconText: 'text-emerald-700' },
-} as const
-
-const ROADMAP_ITEMS = [
-  { icon: Code2, label: 'Professional-grade RPGLE deep dives', accent: 'indigo' as const },
-  { icon: Database, label: 'SQLRPGLE production patterns', accent: 'teal' as const },
-  { icon: ArrowLeftRight, label: 'Native I/O vs SQL decision guides', accent: 'teal' as const },
-  { icon: Lock, label: 'Record locking and error handling scenarios', accent: 'amber' as const },
-  { icon: History, label: 'Journaling and commitment control real-world cases', accent: 'amber' as const },
-  { icon: Bug, label: 'Debugging, job logs, and MSGW troubleshooting', accent: 'amber' as const },
-  { icon: Gauge, label: 'Performance and modernization topics', accent: 'indigo' as const },
-  { icon: Terminal, label: 'More hands-on 5250-style and SQL practice labs', accent: 'emerald' as const },
-]
-
-const AUDIENCE = [
-  {
-    icon: GraduationCap,
-    title: 'IBM i Beginners',
-    body: 'New to IBM i? Start with a structured learning path designed to build your understanding step by step, without assuming prior IBM i knowledge.',
-  },
-  {
-    icon: Code2,
-    title: 'Working IBM i Developers',
-    body: 'Already working with IBM i? Use the AI Tutor to refresh concepts, clarify RPGLE or CLLE questions, and explore topics you want to understand better.',
-  },
-]
-
 const AI_TUTOR_SAMPLE_PROMPTS = ['What is a job log in IBM i?', 'Show a simple RPGLE example.']
 
 export default async function LandingPage() {
-  const supabase = await createClient()
-  const [
-    {
-      data: { user },
-    },
-    publishedLessons,
-  ] = await Promise.all([supabase.auth.getUser(), getPublishedLessons()])
+  const publishedLessons = await getPublishedLessons()
 
   const STATS = buildStats(publishedLessons.length)
   const CURRICULUM_HIGHLIGHTS = buildCurriculumHighlights(publishedLessons)
@@ -359,7 +276,12 @@ export default async function LandingPage() {
       </section>
 
       <main className="flex-1">
-        {/* -- Public beta notice ------------------------------------------ */}
+        {/* -- Public beta notice ------------------------------------------
+            The homepage's one, unobtrusive beta message (Homepage Hierarchy
+            and Signed-Out Feature Discovery) -- the previous large, detailed
+            roadmap section (an itemized "coming next" grid) is gone; this
+            compact banner is now the only beta/roadmap messaging on the
+            page. */}
         <section className="bg-slate-50 pt-10 sm:pt-12">
           <div className="mx-auto max-w-5xl px-4 sm:px-6">
             <PublicBetaNotice />
@@ -397,96 +319,144 @@ export default async function LandingPage() {
           </div>
         </section>
 
-        {/* -- Platform features ------------------------------------------ */}
+        {/* -- Choose your learning journey (Homepage Hierarchy and
+            Signed-Out Feature Discovery) -- replaces the previous three-card
+            section that sent both of its first two cards to the exact same
+            /learn destination, while omitting Insights and hands-on
+            Practice entirely. These three cards are goal-based, not
+            content-type-based, and absorb the audience framing the
+            now-removed standalone audience section used to carry, so that
+            section is gone rather than duplicated here. */}
         <section className="mx-auto max-w-5xl px-4 sm:px-6 py-20 sm:py-24">
           <div className="max-w-2xl mx-auto text-center mb-12">
             <Badge variant="neutral" className="mb-4">
-              Platform
+              Where to start
             </Badge>
             <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-              Everything you need to learn IBM&nbsp;i
+              Choose your learning journey
             </h2>
             <p className="text-slate-600 leading-relaxed">
-              A focused platform built around one thing: helping you actually understand IBM&nbsp;i.
+              Whatever brought you here, there&apos;s a clear next step.
             </p>
-          </div>
-          <div className="grid sm:grid-cols-2 gap-6">
-            {FEATURES.map((f) => (
-              <Card key={f.title} className="p-8 transition-shadow hover:shadow-md">
-                <div className="mb-5 flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                  <f.icon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-2">{f.title}</h3>
-                <p className="text-sm text-slate-600 leading-relaxed">{f.body}</p>
-              </Card>
-            ))}
           </div>
 
-          <div className="mt-10 text-center">
-            <p className="text-sm text-slate-600 mb-3">
-              Want to practice hands-on? Try the 5250-style Practice Lab and ACS-style SQL Console.
-            </p>
-            {user ? (
-              <Link href="/practice-lab" className={buttonVariants({ variant: 'secondary' })}>
-                Try the Practice Lab
-              </Link>
-            ) : (
-              <Link href="/auth/sign-up" className={buttonVariants({ variant: 'secondary' })}>
-                Sign up to try the Practice Lab
-              </Link>
-            )}
-          </div>
-        </section>
-
-        {/* -- Three ways to learn (PR #154 -- Deep Dives as third pillar) -- */}
-        <section className="mx-auto max-w-5xl px-4 sm:px-6 py-16 sm:py-20">
-          <div className="max-w-2xl mx-auto text-center mb-10">
-            <Badge variant="neutral" className="mb-4">
-              Three ways to learn
-            </Badge>
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">Choose your path</h2>
-            <p className="text-slate-600 leading-relaxed">
-              Whether you&apos;re starting from zero or need a deep answer on one specific topic,
-              iRPGenie has a path for you.
-            </p>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            <Card className="p-6">
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {/* Journey 1: New to IBM i */}
+            <Card className="flex flex-col p-6">
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
                 <GraduationCap className="h-5 w-5" aria-hidden="true" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2">Foundations</h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Learn IBM&nbsp;i step-by-step with a guided, beginner-friendly lesson path.
+              <h3 className="font-semibold text-slate-900 mb-2">New to IBM&nbsp;i</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-5 flex-1">
+                {/* A single expression, not JSX text wrapped around {publishedLessons.length} --
+                    avoids relying on the compiler's line-wrap whitespace collapsing, which
+                    silently drops the space on one side of an expression split across lines. */}
+                {`Start with a structured, beginner-friendly path that assumes no prior IBM i knowledge -- ${publishedLessons.length} lessons from what IBM i is to a basic development workflow.`}
               </p>
-              <Link href="/learn" className="text-sm font-medium text-blue-700 hover:underline">
-                Start learning &rarr;
-              </Link>
+              <div className="space-y-2">
+                <Link
+                  href="/learn/ibm-i-fundamentals/what-is-ibm-i"
+                  className={cn(buttonVariants({ variant: 'primary', size: 'sm' }), 'w-full')}
+                >
+                  Start Lesson 1
+                </Link>
+                <Link
+                  href="/learn"
+                  className="block text-center text-sm font-medium text-blue-700 hover:underline"
+                >
+                  Browse the Learning Center &rarr;
+                </Link>
+              </div>
             </Card>
-            <Card className="p-6">
+
+            {/* Journey 2: Already working with IBM i */}
+            <Card className="flex flex-col p-6">
               <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                <Award className="h-5 w-5" aria-hidden="true" />
+                <Code2 className="h-5 w-5" aria-hidden="true" />
               </div>
-              <h3 className="font-semibold text-slate-900 mb-2">Advanced</h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Build professional skills with deeper lessons later in the same guided path.
+              <h3 className="font-semibold text-slate-900 mb-2">Already working with IBM&nbsp;i</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-5">
+                Skip the beginner path -- go straight to focused, professional-level topics.
               </p>
-              <Link href="/learn" className="text-sm font-medium text-blue-700 hover:underline">
-                Explore the path &rarr;
+              <div className="mt-auto space-y-3">
+                <Link
+                  href="/deep-dives"
+                  className="group flex items-start gap-3 rounded-xl border border-slate-100 p-3 transition-colors hover:border-violet-200 hover:bg-violet-50/40"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-violet-50 text-violet-700">
+                    <Layers className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-slate-900">
+                      Deep Dives
+                      <ArrowRight className="ml-1 inline h-3 w-3 -translate-x-0.5 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" aria-hidden="true" />
+                    </span>
+                    <span className="block text-xs text-slate-500 leading-relaxed">
+                      Reference-grade, non-linear topic guides -- jump straight to what a production
+                      issue or interview needs.
+                    </span>
+                  </span>
+                </Link>
+                <Link
+                  href="/insights"
+                  className="group flex items-start gap-3 rounded-xl border border-slate-100 p-3 transition-colors hover:border-cyan-200 hover:bg-cyan-50/40"
+                >
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-cyan-50 text-cyan-700">
+                    <Lightbulb className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span>
+                    <span className="block text-sm font-semibold text-slate-900">
+                      IBM i Insights
+                      <ArrowRight className="ml-1 inline h-3 w-3 -translate-x-0.5 opacity-0 transition-all group-hover:translate-x-0 group-hover:opacity-100" aria-hidden="true" />
+                    </span>
+                    <span className="block text-xs text-slate-500 leading-relaxed">
+                      Practical articles on modernization ideas and emerging IBM&nbsp;i techniques.
+                    </span>
+                  </span>
+                </Link>
+              </div>
+            </Card>
+
+            {/* Journey 3: Want hands-on practice */}
+            <Card className="flex flex-col p-6">
+              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-700">
+                <FlaskConical className="h-5 w-5" aria-hidden="true" />
+              </div>
+              <h3 className="font-semibold text-slate-900 mb-2">Want hands-on practice?</h3>
+              <p className="text-sm text-slate-600 leading-relaxed mb-4 flex-1">
+                Check your understanding with practice questions, then get hands-on in a simulated
+                5250-style command environment and an ACS-style SQL console --{' '}
+                <strong className="font-semibold text-slate-800">
+                  safe learning simulations, not a connection to a real IBM&nbsp;i system.
+                </strong>
+              </p>
+              <div className="mb-5 flex items-center gap-4 text-xs text-slate-500">
+                <span className="inline-flex items-center gap-1.5">
+                  <Terminal className="h-3.5 w-3.5 text-amber-600" aria-hidden="true" />
+                  5250-style Lab
+                </span>
+                <span className="inline-flex items-center gap-1.5">
+                  <Database className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
+                  SQL Console
+                </span>
+              </div>
+              <Link href="/practice" className={cn(buttonVariants({ variant: 'secondary', size: 'sm' }), 'w-full')}>
+                Explore Practice
               </Link>
             </Card>
-            <Card className="p-6">
-              <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-cyan-50 text-cyan-700">
-                <Layers className="h-5 w-5" aria-hidden="true" />
-              </div>
-              <h3 className="font-semibold text-slate-900 mb-2">Deep Dives</h3>
-              <p className="text-sm text-slate-600 leading-relaxed mb-4">
-                Explore standalone, expert-level topic guides -- no fixed order required.
-              </p>
-              <Link href="/deep-dives" className="text-sm font-medium text-blue-700 hover:underline">
-                Browse Deep Dives &rarr;
-              </Link>
-            </Card>
+          </div>
+
+          {/* AI Tutor: a cross-journey capability, not a fourth content
+              library -- deliberately a slim connecting strip here, with the
+              full showcase below. */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 rounded-2xl border border-cyan-100 bg-cyan-50/50 px-5 py-4 text-center sm:flex-row sm:text-left">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-cyan-500 to-blue-500 text-white">
+              <Sparkles className="h-4 w-4" aria-hidden="true" />
+            </span>
+            <p className="text-sm text-slate-700">
+              <strong className="font-semibold text-slate-900">AI Tutor works alongside every path above</strong>{' '}
+              -- ask questions from any lesson, Deep Dive, Insight, or practice exercise.
+            </p>
           </div>
         </section>
 
@@ -526,60 +496,6 @@ export default async function LandingPage() {
                 Explore the Learning Center
               </Link>
             </div>
-          </div>
-        </section>
-
-        {/* -- Roadmap ("What's coming next") ------------------------------
-            PR #151. Future-facing, no promised dates -- see the item text
-            below, all phrased as topics being added, never as a timeline. */}
-        <section className="relative overflow-hidden py-20 sm:py-24">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50 via-white to-cyan-50/60" />
-          <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="max-w-2xl mx-auto text-center mb-12">
-              <Badge variant="ai" className="mb-4">
-                Roadmap
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-3">
-                Professional-grade content is coming next
-              </h2>
-              <p className="text-slate-600 leading-relaxed">
-                We are actively upgrading iRPGenie with deeper real-world IBM&nbsp;i, RPGLE, SQL, and
-                operations topics for working professionals.
-              </p>
-            </div>
-
-            <div className="grid sm:grid-cols-2 gap-4">
-              {ROADMAP_ITEMS.map((item) => {
-                const accent = ROADMAP_ACCENTS[item.accent]
-                return (
-                  <div
-                    key={item.label}
-                    className={cn('flex items-center gap-3 rounded-xl border p-4', accent.bg, accent.border)}
-                  >
-                    <span
-                      className={cn(
-                        'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg',
-                        accent.iconBg,
-                        accent.iconText
-                      )}
-                    >
-                      <item.icon className="h-4 w-4" aria-hidden="true" />
-                    </span>
-                    <p className="text-sm font-medium text-slate-800">{item.label}</p>
-                  </div>
-                )
-              })}
-            </div>
-
-            {CONTACT_EMAIL && (
-              <p className="mt-8 text-center text-sm text-slate-500">
-                Have a topic suggestion? Contact us at{' '}
-                <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-blue-700 hover:underline">
-                  {CONTACT_EMAIL}
-                </a>
-                .
-              </p>
-            )}
           </div>
         </section>
 
@@ -633,37 +549,12 @@ export default async function LandingPage() {
               </h2>
               <p className="text-slate-600 leading-relaxed mb-6">
                 Get clear, plain-language explanations of RPGLE, CLLE, and Db2 for i concepts, tuned for
-                the IBM&nbsp;i ecosystem specifically -- not a generic programming assistant.
+                the IBM&nbsp;i ecosystem specifically -- not a generic programming assistant. Works from
+                any lesson, Deep Dive, Insight, or practice question -- not a separate content library.
               </p>
-              {user ? (
-                <Link href="/ai-tutor" className={buttonVariants({ variant: 'ai' })}>
-                  Open AI Tutor
-                </Link>
-              ) : (
-                <Link href="/auth/sign-up" className={buttonVariants({ variant: 'ai' })}>
-                  Sign up to try AI Tutor
-                </Link>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* -- Audience ("Why iRPGenie") ---------------------------------- */}
-        <section className="bg-slate-50 border-t border-slate-100 py-20 sm:py-24">
-          <div className="mx-auto max-w-5xl px-4 sm:px-6">
-            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 mb-10 text-center">
-              Why iRPGenie?
-            </h2>
-            <div className="grid sm:grid-cols-2 gap-6">
-              {AUDIENCE.map((a) => (
-                <Card key={a.title} variant="muted" className="p-8">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
-                    <a.icon className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-2">{a.title}</h3>
-                  <p className="text-sm text-slate-600 leading-relaxed">{a.body}</p>
-                </Card>
-              ))}
+              <Link href="/ai-tutor" className={buttonVariants({ variant: 'ai' })}>
+                Open AI Tutor
+              </Link>
             </div>
           </div>
         </section>
@@ -685,69 +576,25 @@ export default async function LandingPage() {
           </Card>
         </section>
 
-        {/* -- Contact ------------------------------------------------------
-            Homepage teaser for the dedicated /contact page (PR #150) --
-            Product Owner feedback was that Contact felt too buried/subtle,
-            so it gets its own highlighted section here, not just a footer
-            link. Kept intentionally short (two email cards + a link to the
-            full page) rather than duplicating /contact's founder note,
-            safety note, and mailto form -- that would clutter the homepage. */}
-        <section className="relative overflow-hidden border-t border-slate-100 py-20 sm:py-24">
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-blue-50/70 via-slate-50 to-cyan-50/50" />
-          <div className="relative mx-auto max-w-5xl px-4 sm:px-6">
-            <div className="max-w-2xl mx-auto text-center mb-10">
-              <Badge variant="neutral" className="mb-4">
-                Get in touch
-              </Badge>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900 mb-3">
-                Contact iRPGenie
-              </h2>
-              <p className="text-slate-600 leading-relaxed">
-                Have feedback, a bug to report, or a question about the platform? We&apos;d love to
-                hear from you.
-              </p>
+        {/* -- Contact (compact) --------------------------------------------
+            Replaces the previous large, two-email-card Contact section
+            (Homepage Hierarchy and Signed-Out Feature Discovery) -- the
+            dedicated /contact page already covers Support vs. General
+            Contact in full; this is now a single small CTA pointing there
+            instead of duplicating that content on the homepage. */}
+        <section className="mx-auto max-w-3xl px-4 sm:px-6 py-12">
+          <Card className="flex flex-col items-center gap-4 p-6 text-center sm:flex-row sm:text-left">
+            <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+              <MessageCircle className="h-5 w-5" aria-hidden="true" />
+            </span>
+            <div className="flex-1">
+              <p className="font-semibold text-slate-900">Have feedback or a question?</p>
+              <p className="text-sm text-slate-500">We&apos;d love to hear from you.</p>
             </div>
-
-            <div className="grid sm:grid-cols-2 gap-6 max-w-3xl mx-auto">
-              {SUPPORT_EMAIL && (
-                <Card className="p-6 border-t-4 border-t-blue-600 shadow-md transition-shadow hover:shadow-lg">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-700 text-white shadow-sm">
-                    <LifeBuoy className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-1">Support</h3>
-                  <p className="text-sm text-slate-500 mb-3">Login help, bugs, and technical issues.</p>
-                  <a
-                    href={`mailto:${SUPPORT_EMAIL}`}
-                    className="text-sm font-semibold text-blue-700 hover:text-blue-900 hover:underline break-all"
-                  >
-                    {SUPPORT_EMAIL}
-                  </a>
-                </Card>
-              )}
-
-              {CONTACT_EMAIL && (
-                <Card variant="ai" className="p-6 border-t-4 border-t-cyan-500 shadow-md transition-shadow hover:shadow-lg">
-                  <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-400 to-cyan-600 text-white shadow-sm">
-                    <MessageCircle className="h-5 w-5" aria-hidden="true" />
-                  </div>
-                  <h3 className="font-semibold text-slate-900 mb-1">General Contact</h3>
-                  <p className="text-sm text-slate-500 mb-3">Feedback, suggestions, and collaboration.</p>
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    className="text-sm font-semibold text-cyan-800 hover:text-cyan-950 hover:underline break-all"
-                  >
-                    {CONTACT_EMAIL}
-                  </a>
-                </Card>
-              )}
-            </div>
-
-            <div className="mt-8 text-center">
-              <Link href="/contact" className={buttonVariants({ variant: 'secondary' })}>
-                Visit the Contact page
-              </Link>
-            </div>
-          </div>
+            <Link href="/contact" className={buttonVariants({ variant: 'secondary', size: 'sm' })}>
+              Contact us
+            </Link>
+          </Card>
         </section>
 
         {/* -- Final CTA --------------------------------------------------- */}

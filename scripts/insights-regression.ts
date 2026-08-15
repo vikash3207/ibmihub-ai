@@ -266,18 +266,26 @@ async function runChecks() {
 
     const homepageSrc = readRepoFile('app/page.tsx')
     // PR #199 published the first Insight but deliberately did not touch the
-    // homepage (out of scope -- "do not modify ... unrelated UI"), so these
-    // checks stay as they were: no featured-Insight section on the homepage.
+    // homepage (out of scope -- "do not modify ... unrelated UI"), so this
+    // first check stays as it was: no featured-Insight section on the
+    // homepage. The old "Three ways to learn" section was later replaced by
+    // "Choose your learning journey" (Homepage Hierarchy and Signed-Out
+    // Feature Discovery) -- deeper coverage of that section now lives in
+    // scripts/homepage-journeys-regression.ts (test:homepage); the card-count
+    // check below is only updated to point at its replacement, so it keeps
+    // verifying what it always verified: that section still renders exactly
+    // 3 top-level cards, unaffected by the Insights listing work this file
+    // otherwise covers.
     check('homepage has no featured-Insight section', !homepageSrc.includes('Explore IBM i Insights'))
     check('homepage does not import InsightCard', !homepageSrc.includes('InsightCard'))
     check('homepage does not import the Insights catalog', !homepageSrc.includes("from '@/content/insights/catalog'"))
     check(
-      'homepage still has exactly 3 Cards in "Three ways to learn" (unaffected by removing the Insights section)',
+      'homepage still has exactly 3 Cards in "Choose your learning journey" (unaffected by removing the Insights section)',
       (() => {
-        const start = homepageSrc.indexOf('Three ways to learn')
+        const start = homepageSrc.indexOf('Choose your learning journey')
         const end = homepageSrc.indexOf('IBM i Fundamentals highlight')
         const between = start >= 0 && end > start ? homepageSrc.slice(start, end) : ''
-        return (between.match(/<Card className="p-6">/g) ?? []).length === 3
+        return (between.match(/<Card className="flex flex-col p-6">/g) ?? []).length === 3
       })()
     )
   }

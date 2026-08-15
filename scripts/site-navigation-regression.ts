@@ -105,12 +105,15 @@ async function main() {
       loggedInHrefs.join(', ')
     )
     check(
-      'logged-out nav includes all five expected destinations (no Dashboard/Practice, which require auth)',
-      ['/learn', '/deep-dives', '/insights', '/ai-tutor', '/contact'].every((href) => loggedOutHrefs.includes(href)),
+      'logged-out nav includes all six expected destinations (Practice added -- Homepage Hierarchy and Signed-Out Feature Discovery; no Dashboard, which stays a signed-in-only feature)',
+      ['/learn', '/deep-dives', '/insights', '/practice', '/ai-tutor', '/contact'].every((href) => loggedOutHrefs.includes(href)),
       loggedOutHrefs.join(', ')
     )
     check('logged-out nav omits /dashboard', !loggedOutHrefs.includes('/dashboard'))
-    check('logged-out nav omits /practice', !loggedOutHrefs.includes('/practice'))
+    check(
+      'logged-out nav now includes /practice (it renders a public preview instead of redirecting -- app/(authenticated)/practice/page.tsx)',
+      loggedOutHrefs.includes('/practice')
+    )
     check('every logged-in link has a non-empty label', loggedIn.every((l) => l.label.trim().length > 0))
     check('every nav link carries a full accent-class bundle (no dynamic/interpolated color)', [...loggedIn, ...loggedOut].every(hasFullAccent))
   }
@@ -316,12 +319,16 @@ async function main() {
     check('the Insights catalog now publishes at least one Insight', /INSIGHTS: Insight\[\] = \[\s*\{/.test(catalogSrc))
 
     const practiceSrc = readRepoFile('app/(authenticated)/practice/page.tsx')
-    check("Practice still redirects an unauthenticated visitor to /auth/login?next=%2Fpractice", practiceSrc.includes("redirect('/auth/login?next=%2Fpractice')"))
+    // Homepage Hierarchy and Signed-Out Feature Discovery: an unauthenticated
+    // visitor now sees a public preview (<PracticePreview>) instead of being
+    // redirected straight to login -- deeper coverage of that preview lives
+    // in scripts/protected-preview-regression.ts (test:protected-preview).
+    check('an unauthenticated visitor now sees <PracticePreview> instead of a login redirect', practiceSrc.includes('return <PracticePreview />'))
     check('Practice still preserves the exact INTRO_NOTICE wording', practiceSrc.includes('there is no ') && practiceSrc.includes('score, ranking, or certificate attached to them'))
 
     const practiceLabSrc = readRepoFile('app/(authenticated)/practice-lab/page.tsx')
-    check("Practice Lab still redirects an unauthenticated visitor to /auth/login?next=%2Fpractice-lab", practiceLabSrc.includes("redirect('/auth/login?next=%2Fpractice-lab')"))
-    check('Practice Lab still renders the untouched <SimulatorNotice /> component (exact safety wording lives there)', practiceLabSrc.includes('<SimulatorNotice />'))
+    check('an unauthenticated visitor now sees <PracticeLabPreview> instead of a login redirect', practiceLabSrc.includes('return <PracticeLabPreview />'))
+    check('Practice Lab still renders the untouched <SimulatorNotice /> component (exact safety wording lives there) for signed-in users', practiceLabSrc.includes('<SimulatorNotice />'))
 
     const learnSrc = readRepoFile('app/learn/page.tsx')
     check('Learning Center still computes its lesson count from getPublishedLessonCount(), not a hardcoded number', learnSrc.includes('getPublishedLessonCount()'))

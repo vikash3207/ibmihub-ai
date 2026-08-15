@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import type { Metadata } from 'next'
 import { createClient } from '@/lib/supabase/server'
 import { saveOnboardingResponse } from '@/lib/actions/auth'
+import { safeInternalPath } from '@/lib/auth-redirect'
 import { Card } from '@/components/ui/card'
 
 // Account-specific, not useful search-result content, and excluded from
@@ -25,7 +26,12 @@ interface Props {
 }
 
 export default async function OnboardingPage({ searchParams }: Props) {
-  const { next = '/' } = await searchParams
+  const { next: rawNext = '/' } = await searchParams
+  // Validated once here, then reused for the already-onboarded redirect and
+  // both hidden form fields below -- matches the guard already applied to
+  // login()/signUp()/saveOnboardingResponse() in lib/actions/auth.ts and the
+  // auth callback route (lib/auth-redirect.ts's safeInternalPath).
+  const next = safeInternalPath(rawNext, '/')
 
   const supabase = await createClient()
   const {
