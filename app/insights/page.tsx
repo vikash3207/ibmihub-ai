@@ -6,8 +6,10 @@ import { SiteFooter } from '@/components/site-footer'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
 import { InsightCard } from '@/components/insight-card'
+import { ExploreInsightsNav } from '@/components/insights/explore-insights-nav'
 import { INSIGHTS } from '@/content/insights/catalog'
 import { getPublishedInsights } from '@/lib/insights'
+import { INSIGHT_CATEGORIES, type InsightCategoryId } from '@/lib/insight-categories'
 import { cn } from '@/lib/utils'
 
 const INSIGHTS_TITLE = 'IBM i Insights — Practical Ideas, Modern Techniques & Emerging Trends'
@@ -98,10 +100,37 @@ const POSITIONING_POINTS = [
  * cyan/indigo/violet accent mix (vs. the homepage's blue/cyan). All
  * decorative elements (glow blobs, grid pattern, code glyphs) are
  * `aria-hidden` and CSS-only -- no images, no animation library.
+ *
+ * Explore Insights navigation (Insights listing UI/UX refinement): an
+ * optional `?category=<id>` query param, read server-side below, narrows
+ * the results to one category -- real navigation via
+ * components/insights/explore-insights-nav.tsx's plain <Link>s, not client
+ * filtering, so a filtered URL is server-rendered HTML on the first
+ * response and browser Back/Forward work through ordinary history entries.
+ * The featured-card treatment stays tied to the catalog-wide first
+ * published article (array position 0 of `publishedInsights`) and is never
+ * recalculated per category -- filtering shows a plain grid instead, so a
+ * category filter can never invent a new "featured" article.
  */
-export default function InsightsPage() {
+interface InsightsPageProps {
+  searchParams: Promise<{ category?: string }>
+}
+
+export default async function InsightsPage({ searchParams }: InsightsPageProps) {
   const publishedInsights = getPublishedInsights(INSIGHTS)
-  const [featuredInsight, ...restInsights] = publishedInsights
+
+  const { category: requestedCategory } = await searchParams
+  const activeCategory: InsightCategoryId | null =
+    requestedCategory && INSIGHT_CATEGORIES.some((c) => c.id === requestedCategory)
+      ? (requestedCategory as InsightCategoryId)
+      : null
+
+  const visibleInsights = activeCategory
+    ? publishedInsights.filter((insight) => insight.category === activeCategory)
+    : publishedInsights
+
+  const featuredInsight = activeCategory === null ? visibleInsights[0] : undefined
+  const restInsights = activeCategory === null ? visibleInsights.slice(1) : visibleInsights
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -218,7 +247,7 @@ export default function InsightsPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14 sm:py-20">
           {publishedInsights.length === 0 ? (
             // Empty state -- deliberately no article cards, no sample/placeholder
             // content, and no publication-date or cadence claims. Kept as the
@@ -256,15 +285,41 @@ export default function InsightsPage() {
               </div>
             </div>
           ) : (
-            <div className="space-y-6">
-              {featuredInsight && <InsightCard insight={featuredInsight} featured />}
-              {restInsights.length > 0 && (
-                <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {restInsights.map((insight) => (
-                    <InsightCard key={insight.slug} insight={insight} />
-                  ))}
-                </div>
-              )}
+            <div className="lg:grid lg:grid-cols-[260px_minmax(0,1fr)] lg:items-start lg:gap-8">
+              <ExploreInsightsNav insights={publishedInsights} activeCategory={activeCategory} />
+
+              <div className="min-w-0">
+                {visibleInsights.length === 0 ? (
+                  // Reachable only via a hand-edited URL for a real, valid
+                  // category with zero published articles right now --
+                  // ExploreInsightsNav never links to a category with a
+                  // zero count. Plain text, no heading (matches
+                  // components/lesson-browser.tsx's "No lessons match..."
+                  // empty-filter state), so this never adds another heading
+                  // below the page's existing hero title and section titles.
+                  <div className="rounded-2xl border border-slate-100 bg-slate-50 p-6 text-center text-sm text-slate-600">
+                    No Insights are published in this category yet.{' '}
+                    <Link
+                      href="/insights"
+                      className="font-medium text-sky-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 rounded"
+                    >
+                      View all Insights
+                    </Link>{' '}
+                    to see everything published so far.
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {featuredInsight && <InsightCard insight={featuredInsight} featured />}
+                    {restInsights.length > 0 && (
+                      <div className="grid gap-5 sm:grid-cols-2 xl:grid-cols-3">
+                        {restInsights.map((insight) => (
+                          <InsightCard key={insight.slug} insight={insight} />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </div>
