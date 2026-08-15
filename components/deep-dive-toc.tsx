@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { List, ChevronDown, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { groupTocItems, type DeepDiveTocItem } from '@/lib/deep-dive-render'
+import { groupTocItems, resolveExpandedGroupId, resolveHashHeadingId, type DeepDiveTocItem } from '@/lib/deep-dive-render'
 
 interface DeepDiveTocProps {
   items: DeepDiveTocItem[]
@@ -48,19 +48,65 @@ function splitOrdinal(title: string): { ordinal: string | null; rest: string } {
  * TOC simplification: a long article's h3 sub-headings (e.g. 41 of them
  * across 23 h2 sections in the "SQL Error Handling on IBM i" Deep Dive) used
  * to all render flatly at once -- the sidebar read like a second article.
- * Now an h2's h3 children only render while that h2 (or one of its own
- * children) is the CURRENTLY ACTIVE heading, reusing the exact `activeId`
- * the existing IntersectionObserver already computes -- no new tracking
- * system. Before that observer has run even once (`activeId === null`,
- * true on first paint and permanently true with JavaScript disabled), every
- * group renders fully expanded -- identical to this component's previous,
- * always-flat behavior -- so nothing regresses for a no-JS visitor.
+ * Exactly ONE group's h3 children render at a time now, via
+ * resolveExpandedGroupId() (lib/deep-dive-render.ts) -- a single pure
+ * function that covers every case a review found the first version of this
+ * fell back to "every group expanded" for:
+ *  - Initial load, no scroll yet: the first group (`activeId` starts null;
+ *    resolveExpandedGroupId's own fallback is "the first group", so this
+ *    needs no special-casing here).
+ *  - A direct URL with a heading hash (h2 or h3): resolveHashHeadingId()
+ *    validates the fragment against real heading ids, and a
+ *    `useLayoutEffect` applies it as the initial `activeId` BEFORE paint --
+ *    not `useEffect` -- so a hash-targeted load never flashes the
+ *    first-group default first. The initial `useState(null)` itself stays
+ *    hash-free (SSR-safe, no hydration mismatch: server and client render
+ *    the same "first group" default on the first pass).
+ *  - Scrolling: the existing IntersectionObserver below still owns
+ *    `activeId`; resolveExpandedGroupId() just always resolves it to a real
+ *    owning group, so the TOC can never end up with zero or "all" groups
+ *    expanded once a heading has ever been active.
+ *
+ * All h2 links are always rendered regardless of which group is expanded --
+ * only h3 children are conditionally shown. The `ChevronRight` indicator on
+ * an h2 with children is deliberately non-interactive (no cursor/hover/focus
+ * styling, `aria-hidden`) -- it reports which group is currently expanded,
+ * it is not a control of its own; clicking a heading still just navigates
+ * to it, the same real `<a href="#id">` it always was.
  */
 export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
+  // Starts null on both server and client -- reading window.location.hash
+  // in the initializer would make the very first client render differ from
+  // the server-rendered HTML (a hydration mismatch). resolveExpandedGroupId()
+  // treats null the same as "no match": the first group. The layout effect
+  // below corrects this to the hash-targeted group, if any, before the
+  // browser paints.
   const [activeId, setActiveId] = useState<string | null>(null)
   const detailsRef = useRef<HTMLDetailsElement>(null)
   const isInsight = variant === 'insight'
   const groups = useMemo(() => groupTocItems(items), [items])
+  const expandedGroupId = useMemo(() => resolveExpandedGroupId(groups, activeId), [groups, activeId])
+
+  // Resolves an initial hash-targeted heading (h2 or h3) before paint --
+  // useLayoutEffect, not useEffect, so a direct link to a heading deep in
+  // the article never flashes the first-group default first. Runs once per
+  // `items` identity (a new article), same dependency as the observer
+  // effect below.
+  useLayoutEffect(() => {
+    const hashId = resolveHashHeadingId(items, window.location.hash)
+    // One-time sync from an external system (the URL, which the server
+    // never sees) on mount -- not the cascading-render pattern this rule
+    // otherwise guards against. The alternative, reading window.location.hash
+    // in the useState initializer above, would cause an actual hydration
+    // mismatch, which is the one thing this effect exists to avoid.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    if (hashId) setActiveId(hashId)
+    // Deliberately depends on `items` only -- resolveHashHeadingId and
+    // setActiveId are both stable references, and this must run once per
+    // article (mount), not re-fire on every activeId update the observer
+    // below makes, or it would keep re-pinning the TOC back to the URL's
+    // original hash instead of following the reader's scroll position.
+  }, [items])
 
   useEffect(() => {
     if (items.length === 0) return
@@ -155,12 +201,11 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
     return (
       <ul className="space-y-0.5">
         {groups.map((group) => {
-          const isGroupActive = group.heading.id === activeId || group.children.some((child) => child.id === activeId)
-          // Before the observer has run at least once, activeId is null --
-          // show every group fully expanded, matching this component's
-          // previous always-flat behavior exactly (first paint, and
-          // permanently with JavaScript disabled).
-          const showChildren = group.children.length > 0 && (activeId === null || isGroupActive)
+          // Exactly one group is ever expanded -- resolveExpandedGroupId()
+          // already picked it (first group by default, the hash-targeted or
+          // currently-scrolled-to group otherwise), so this is a direct
+          // equality check, not a fallback.
+          const showChildren = group.children.length > 0 && group.heading.id === expandedGroupId
 
           return (
             <li key={group.heading.id}>

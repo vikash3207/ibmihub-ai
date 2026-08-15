@@ -152,6 +152,56 @@ export function groupTocItems(items: DeepDiveTocItem[]): DeepDiveTocGroup[] {
 }
 
 /**
+ * Which group's children should currently be expanded (Deep Dives, IBM i
+ * Insights and Reader-Experience Polish -- follow-up fix). A review found
+ * the original grouping fell back to "every group expanded" whenever
+ * `activeId` was still null -- true on first paint, and permanently true if
+ * no heading ever happened to intersect the observer's active band. That
+ * defeated the whole point of grouping a long TOC.
+ *
+ * One rule now covers every case the caller needs (initial load, a
+ * hash-targeted heading, and live scroll tracking all just become a
+ * different `activeId` input to this same function):
+ *  - `activeId` names a real heading (h2 or h3) that belongs to one of
+ *    `groups` -> that heading's OWNING group (its own group if it's an h2,
+ *    its parent's group if it's an h3).
+ *  - Anything else (null, or an id that matches nothing -- an unknown hash,
+ *    for instance) -> the first group, so there is always exactly one
+ *    expanded group, never zero and never "all of them".
+ *  - No groups at all -> null (nothing to expand).
+ *
+ * Pure and side-effect free so it can be unit-tested directly against
+ * synthetic group lists, the same reasoning groupTocItems() above already
+ * documents.
+ */
+export function resolveExpandedGroupId(groups: DeepDiveTocGroup[], activeId: string | null): string | null {
+  if (groups.length === 0) return null
+
+  if (activeId) {
+    const owningGroup = groups.find((group) => group.heading.id === activeId || group.children.some((child) => child.id === activeId))
+    if (owningGroup) return owningGroup.heading.id
+  }
+
+  return groups[0].heading.id
+}
+
+/**
+ * Resolves a URL fragment (e.g. `location.hash`, with or without its
+ * leading "#") to a real heading id from `items`, or null if the fragment
+ * is empty or doesn't match any known heading -- an unknown/stale hash must
+ * fall back safely, never be trusted as-is. Deliberately takes the hash as
+ * a plain string rather than reading `window.location` itself, so it stays
+ * pure and testable without a DOM; the one caller in
+ * components/deep-dive-toc.tsx is what actually reads `window.location.hash`.
+ */
+export function resolveHashHeadingId(items: DeepDiveTocItem[], hash: string | null | undefined): string | null {
+  if (!hash) return null
+  const id = hash.startsWith('#') ? hash.slice(1) : hash
+  if (!id) return null
+  return items.some((item) => item.id === id) ? id : null
+}
+
+/**
  * Best-effort classification of `> ...` blockquotes into a small set of
  * callout styles (Note, Best practice, Common mistake, Warning, Interview),
  * based on the first bold lead-in text inside the blockquote -- the pattern

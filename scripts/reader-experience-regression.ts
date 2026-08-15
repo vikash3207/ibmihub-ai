@@ -20,7 +20,13 @@
 
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
-import { addDeepDiveHeadingAnchors, groupTocItems, type DeepDiveTocItem } from '../lib/deep-dive-render'
+import {
+  addDeepDiveHeadingAnchors,
+  groupTocItems,
+  resolveExpandedGroupId,
+  resolveHashHeadingId,
+  type DeepDiveTocItem,
+} from '../lib/deep-dive-render'
 import { isDeepDiveAvailable, type DeepDive } from '../lib/deep-dives'
 import { buildReaderBreadcrumbStructuredData } from '../lib/reader-breadcrumb'
 import { SITE_URL } from '../lib/config'
@@ -224,16 +230,94 @@ async function main() {
     check('an h3 with no preceding h2 becomes its own top-level group rather than being dropped', orphanGroups.length === 2 && orphanGroups[0].heading.id === 'orphan-sub')
 
     check('an empty item list groups to an empty array', groupTocItems([]).length === 0)
+  }
+
+  // ---------------------------------------------------------------------------
+  section('6b. Expanded-group resolution: real execution against synthetic group lists (follow-up fix)')
+  // ---------------------------------------------------------------------------
+
+  {
+    // A review found the first version of this fell back to "every group
+    // expanded" whenever activeId was null -- true on first paint, and
+    // permanently true if no heading ever intersected the observer's active
+    // band. Every case below exercises resolveExpandedGroupId/
+    // resolveHashHeadingId directly (the real functions the component calls),
+    // not a source-string pattern match, per the review's explicit preference.
+    const items: DeepDiveTocItem[] = [
+      tocItem('intro', '1. Introduction', 2),
+      tocItem('intro-sub-a', 'Sub A', 3),
+      tocItem('intro-sub-b', 'Sub B', 3),
+      tocItem('deep-dive', '2. Deep Dive', 2),
+      tocItem('deep-dive-sub-a', 'Sub A', 3),
+      tocItem('wrap-up', '3. Wrap-up', 2),
+    ]
+    const groups = groupTocItems(items)
+
+    check(
+      'default initial state (activeId null) expands only the first H2 group, not every group',
+      resolveExpandedGroupId(groups, null) === 'intro'
+    )
+
+    const h2Hash = resolveHashHeadingId(items, '#deep-dive')
+    check('a hash targeting an H2 resolves to that H2 id', h2Hash === 'deep-dive')
+    check('a hash targeting an H2 expands that H2 group', resolveExpandedGroupId(groups, h2Hash) === 'deep-dive')
+
+    const h3Hash = resolveHashHeadingId(items, '#deep-dive-sub-a')
+    check('a hash targeting an H3 resolves to that H3 id', h3Hash === 'deep-dive-sub-a')
+    check("a hash targeting an H3 expands its parent H2's group, not a group of its own", resolveExpandedGroupId(groups, h3Hash) === 'deep-dive')
+
+    const unknownHash = resolveHashHeadingId(items, '#does-not-exist')
+    check('an unknown hash does not resolve to a real heading id', unknownHash === null)
+    check('an unknown/stale hash falls back safely to the first group, never zero or all groups', resolveExpandedGroupId(groups, unknownHash) === 'intro')
+    check('a leading-# and bare-id hash resolve identically', resolveHashHeadingId(items, 'deep-dive') === resolveHashHeadingId(items, '#deep-dive'))
+    check('an empty/null hash resolves to no match', resolveHashHeadingId(items, '') === null && resolveHashHeadingId(items, null) === null)
+
+    check(
+      'changing the active heading (as the observer would) changes the expanded group away from the default',
+      resolveExpandedGroupId(groups, 'wrap-up') === 'wrap-up' && resolveExpandedGroupId(groups, 'wrap-up') !== resolveExpandedGroupId(groups, null)
+    )
+
+    check(
+      'exactly one group is ever expanded for any activeId input (never zero, never more than one)',
+      [null, 'intro', 'intro-sub-a', 'deep-dive', 'deep-dive-sub-a', 'wrap-up', 'unknown-id'].every(
+        (id) => groups.filter((g) => g.heading.id === resolveExpandedGroupId(groups, id)).length === 1
+      )
+    )
+
+    check('all H2 headings remain present in the grouped structure regardless of which group is expanded', groups.map((g) => g.heading.id).join(',') === 'intro,deep-dive,wrap-up')
+    check(
+      'H3 headings are never lost from the grouped structure (grouping itself is unaffected by expansion state)',
+      groups.reduce((n, g) => n + g.children.length, 0) === items.filter((i) => i.level === 3).length
+    )
+
+    check('an empty TOC has no groups to expand', resolveExpandedGroupId(groupTocItems([]), null) === null)
+    check('an empty TOC has no heading hash to resolve', resolveHashHeadingId([], '#anything') === null)
+
+    // Orphan H3 (no preceding H2) becomes its own top-level "group" (see
+    // section 6 above) -- resolving it as the active id must still land on
+    // a real, existing group id, not crash or return something stale.
+    const orphanItems: DeepDiveTocItem[] = [tocItem('orphan-sub', 'Orphan sub-heading', 3), tocItem('real-h2', 'Real section', 2)]
+    const orphanGroups = groupTocItems(orphanItems)
+    check('an orphan H3 group resolves safely as its own expandable group', resolveExpandedGroupId(orphanGroups, 'orphan-sub') === 'orphan-sub')
 
     const tocSrc = readRepoFile('components/deep-dive-toc.tsx')
-    check('DeepDiveToc imports the grouping helper rather than redefining it', /import \{ groupTocItems, type DeepDiveTocItem \} from '@\/lib\/deep-dive-render'/.test(tocSrc))
     check(
-      'children render only for the active group once the observer has run (activeId !== null)',
-      /activeId === null \|\| isGroupActive/.test(tocSrc)
+      'DeepDiveToc imports the grouping and expansion helpers rather than redefining them',
+      /import \{ groupTocItems, resolveExpandedGroupId, resolveHashHeadingId, type DeepDiveTocItem \} from '@\/lib\/deep-dive-render'/.test(tocSrc)
     )
-    check('before the observer has run, every group renders fully expanded (no-JS / first-paint parity)', tocSrc.includes('activeId === null'))
-    check('DeepDiveToc still has no client-side scroll-tracking system beyond the existing single IntersectionObserver', (tocSrc.match(/new IntersectionObserver/g) ?? []).length === 1)
+    check(
+      'children render only for the group resolveExpandedGroupId actually picked, not a hand-rolled null fallback',
+      tocSrc.includes('group.heading.id === expandedGroupId')
+    )
+    check(
+      'the old "activeId === null means expand everything" fallback is gone',
+      !/activeId === null \|\| isGroupActive/.test(tocSrc)
+    )
+    check('DeepDiveToc still has exactly one client-side scroll-tracking system (the existing single IntersectionObserver, no second one added)', (tocSrc.match(/new IntersectionObserver/g) ?? []).length === 1)
     check('the mobile disclosure is still the native, zero-JS <details>/<summary> pattern', tocSrc.includes('<details') && tocSrc.includes('<summary'))
+    check('the initial activeId state stays hash-free (no window.location read in the useState initializer, to avoid a hydration mismatch)', !/useState<string \| null>\(\s*window\.location/.test(tocSrc))
+    check('a useLayoutEffect resolves the hash before paint (not useEffect, to avoid a first-group flash on hash-targeted loads)', /useLayoutEffect\(\(\) => \{\s*const hashId = resolveHashHeadingId/.test(tocSrc))
+    check('the chevron expand indicator is decorative only, not a misleading interactive control', tocSrc.includes('aria-hidden="true"') && !/<ChevronRight[\s\S]{0,120}onClick/.test(tocSrc))
   }
 
   // ---------------------------------------------------------------------------
