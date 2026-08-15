@@ -20,13 +20,38 @@ export interface DeepDiveTocItem {
 
 const HEADING_PATTERN = /<h([23])>([\s\S]*?)<\/h\1>/g
 
+/**
+ * Decodes every character reference form rehype-stringify can actually
+ * produce inside heading text, not just named ones.
+ *
+ * Root cause of a real, live bug (Deep Dives, IBM i Insights and
+ * Reader-Experience Polish): rehype-stringify's default entity encoder does
+ * NOT use named references for `<`/`&` in text content -- it emits hex
+ * numeric character references instead (confirmed directly against this
+ * pipeline: a heading containing a literal `<` renders as `<h3>...&#x3C;...</h3>`,
+ * never `&lt;`). The previous version of this function only handled a
+ * hardcoded list of named entities, so any heading with a literal `<` or `&`
+ * (e.g. a Deep Dive section titled `Why \`SqlCode < 0\` alone is
+ * insufficient`) left the raw text "&#x3C;" in the extracted TOC title --
+ * and since that title is later interpolated as plain JSX text (which does
+ * not itself interpret HTML entities), the literal string "&#x3C;" rendered
+ * visibly in the sidebar instead of "<". The heading anchor id was affected
+ * too (slugify() stripped the entity's punctuation into an "x3c" fragment).
+ *
+ * Numeric references are decoded generically (any codepoint, not a fixed
+ * list) before the small set of named ones this pipeline can also emit, so
+ * this stays correct even if remark/rehype's own encoding choices change --
+ * fixed at this rendering layer, not with a page-level string replacement.
+ */
 function decodeEntities(text: string): string {
   return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_match, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_match, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&apos;/g, "'")
 }
 
 function stripTags(html: string): string {
@@ -85,6 +110,45 @@ export function addDeepDiveHeadingAnchors(html: string): { html: string; toc: De
   })
 
   return { html: withAnchors, toc }
+}
+
+export interface DeepDiveTocGroup {
+  heading: DeepDiveTocItem
+  children: DeepDiveTocItem[]
+}
+
+/**
+ * Groups a flat h2/h3 TOC list into { heading, children } pairs (Deep
+ * Dives, IBM i Insights and Reader-Experience Polish -- TOC simplification).
+ * Lives here (a plain, framework-free module already imported by
+ * scripts/deep-dive-toc-regression.ts) rather than inside
+ * components/deep-dive-toc.tsx, which is a 'use client' component -- same
+ * "pure logic stays out of the client component" convention lib/nav-links.ts
+ * already documents for the same reason: it keeps this function safely,
+ * directly importable from a standalone regression script.
+ *
+ * Every h2 becomes its own group, in order; every h3 joins the most recent
+ * h2's `children`. An h3 with no preceding h2 (not expected from real
+ * article content -- addDeepDiveHeadingAnchors() above only ever sees a
+ * real article's own heading order -- but not impossible for a hand-built
+ * item list in a test) becomes its own top-level group rather than being
+ * silently dropped, so no real heading can ever disappear from the TOC.
+ */
+export function groupTocItems(items: DeepDiveTocItem[]): DeepDiveTocGroup[] {
+  const groups: DeepDiveTocGroup[] = []
+  for (const item of items) {
+    if (item.level === 2) {
+      groups.push({ heading: item, children: [] })
+      continue
+    }
+    const lastGroup = groups[groups.length - 1]
+    if (lastGroup) {
+      lastGroup.children.push(item)
+    } else {
+      groups.push({ heading: item, children: [] })
+    }
+  }
+  return groups
 }
 
 /**

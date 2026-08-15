@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
-import { List, ChevronDown } from 'lucide-react'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { List, ChevronDown, ChevronRight } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import type { DeepDiveTocItem } from '@/lib/deep-dive-render'
+import { groupTocItems, type DeepDiveTocItem } from '@/lib/deep-dive-render'
 
 interface DeepDiveTocProps {
   items: DeepDiveTocItem[]
@@ -32,10 +32,11 @@ function splitOrdinal(title: string): { ordinal: string | null; rest: string } {
 
 /**
  * "On this page" navigator for Deep Dive and Insight detail pages (PR #158;
- * `variant` added PR #202). A single component renders both the desktop
- * sticky sidebar and the mobile collapsible "Contents" card, sharing one
- * active-heading tracker rather than running two separate
- * IntersectionObservers for the same content.
+ * `variant` added PR #202; grouped/progressive-disclosure rendering added in
+ * Deep Dives, IBM i Insights and Reader-Experience Polish). A single
+ * component renders both the desktop sticky sidebar and the mobile
+ * collapsible "Contents" card, sharing one active-heading tracker rather
+ * than running two separate IntersectionObservers for the same content.
  *
  * The mobile disclosure is a plain <details>/<summary> -- fully keyboard
  * and screen-reader accessible, and functional even with JavaScript
@@ -43,11 +44,23 @@ function splitOrdinal(title: string): { ordinal: string | null; rest: string } {
  * tags. The active-section highlight is a progressive enhancement layered
  * on top: if the IntersectionObserver effect never runs (or `items` is
  * empty), every link still works via normal browser anchor navigation.
+ *
+ * TOC simplification: a long article's h3 sub-headings (e.g. 41 of them
+ * across 23 h2 sections in the "SQL Error Handling on IBM i" Deep Dive) used
+ * to all render flatly at once -- the sidebar read like a second article.
+ * Now an h2's h3 children only render while that h2 (or one of its own
+ * children) is the CURRENTLY ACTIVE heading, reusing the exact `activeId`
+ * the existing IntersectionObserver already computes -- no new tracking
+ * system. Before that observer has run even once (`activeId === null`,
+ * true on first paint and permanently true with JavaScript disabled), every
+ * group renders fully expanded -- identical to this component's previous,
+ * always-flat behavior -- so nothing regresses for a no-JS visitor.
  */
 export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
   const [activeId, setActiveId] = useState<string | null>(null)
   const detailsRef = useRef<HTMLDetailsElement>(null)
   const isInsight = variant === 'insight'
+  const groups = useMemo(() => groupTocItems(items), [items])
 
   useEffect(() => {
     if (items.length === 0) return
@@ -82,66 +95,94 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
     detailsRef.current?.removeAttribute('open')
   }
 
-  function renderList() {
+  function renderLink(item: DeepDiveTocItem) {
+    const { ordinal, rest } = splitOrdinal(item.title)
+    const isActive = activeId === item.id
+    const isSubItem = item.level === 3
+
+    return (
+      <a
+        href={`#${item.id}`}
+        onClick={closeMobilePanel}
+        className={cn(
+          // items-start (not items-center) + the number sitting on its own
+          // line-height keeps a wrapped title's second line flush under the
+          // first, never under the number -- that's the whole fix for the
+          // "wrapped lines align with the number" bug PR #161 addressed; the
+          // color/border changes below are purely additive on top of that.
+          //
+          // Top-level items always carry `border-l-2` (color starts
+          // transparent) so the active/hover accent border never shifts the
+          // text horizontally when it appears -- the 2px is reserved from
+          // the very first render, only its color changes.
+          'flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 leading-snug transition-colors',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
+          isInsight ? 'focus-visible:ring-blue-600' : 'focus-visible:ring-cyan-600',
+          isSubItem ? 'text-xs' : 'border-l-2 text-sm',
+          isInsight
+            ? isActive
+              ? isSubItem
+                ? 'bg-indigo-50 font-semibold text-indigo-800 shadow-sm'
+                : 'border-transparent bg-gradient-to-r from-blue-600 to-cyan-500 font-semibold text-white shadow-sm'
+              : isSubItem
+                ? 'text-slate-500 hover:bg-indigo-50/70 hover:text-indigo-800'
+                : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-blue-50/70 hover:text-blue-900'
+            : isActive
+              ? isSubItem
+                ? 'bg-blue-50 font-medium text-blue-800'
+                : 'border-blue-500 bg-blue-50 font-semibold text-blue-800'
+              : isSubItem
+                ? 'text-slate-500 hover:bg-cyan-50/60 hover:text-slate-800'
+                : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/60 hover:text-cyan-900'
+        )}
+      >
+        {ordinal && (
+          <span
+            className={cn(
+              'shrink-0 tabular-nums font-semibold',
+              isInsight ? (isActive && !isSubItem ? 'text-white/90' : 'text-indigo-500') : isActive ? 'text-blue-600' : 'text-cyan-600'
+            )}
+          >
+            {ordinal}.
+          </span>
+        )}
+        <span>{rest}</span>
+      </a>
+    )
+  }
+
+  function renderGroupedList() {
     return (
       <ul className="space-y-0.5">
-        {items.map((item) => {
-          const { ordinal, rest } = splitOrdinal(item.title)
-          const isActive = activeId === item.id
-          const isSubItem = item.level === 3
+        {groups.map((group) => {
+          const isGroupActive = group.heading.id === activeId || group.children.some((child) => child.id === activeId)
+          // Before the observer has run at least once, activeId is null --
+          // show every group fully expanded, matching this component's
+          // previous always-flat behavior exactly (first paint, and
+          // permanently with JavaScript disabled).
+          const showChildren = group.children.length > 0 && (activeId === null || isGroupActive)
 
           return (
-            <li
-              key={item.id}
-              className={isSubItem ? cn('ml-3 border-l pl-3', isInsight ? 'border-indigo-100' : 'border-cyan-100') : undefined}
-            >
-              <a
-                href={`#${item.id}`}
-                onClick={closeMobilePanel}
-                className={cn(
-                  // items-start (not items-center) + the number sitting on its own
-                  // line-height keeps a wrapped title's second line flush under the
-                  // first, never under the number -- that's the whole fix for the
-                  // "wrapped lines align with the number" bug PR #161 addressed; the
-                  // color/border changes below are purely additive on top of that.
-                  //
-                  // Top-level items always carry `border-l-2` (color starts
-                  // transparent) so the active/hover accent border never shifts the
-                  // text horizontally when it appears -- the 2px is reserved from
-                  // the very first render, only its color changes.
-                  'flex items-start gap-1.5 rounded-lg px-2.5 py-1.5 leading-snug transition-colors',
-                  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-1',
-                  isInsight ? 'focus-visible:ring-blue-600' : 'focus-visible:ring-cyan-600',
-                  isSubItem ? 'text-xs' : 'border-l-2 text-sm',
-                  isInsight
-                    ? isActive
-                      ? isSubItem
-                        ? 'bg-indigo-50 font-semibold text-indigo-800 shadow-sm'
-                        : 'border-transparent bg-gradient-to-r from-blue-600 to-cyan-500 font-semibold text-white shadow-sm'
-                      : isSubItem
-                        ? 'text-slate-500 hover:bg-indigo-50/70 hover:text-indigo-800'
-                        : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-blue-50/70 hover:text-blue-900'
-                    : isActive
-                      ? isSubItem
-                        ? 'bg-blue-50 font-medium text-blue-800'
-                        : 'border-blue-500 bg-blue-50 font-semibold text-blue-800'
-                      : isSubItem
-                        ? 'text-slate-500 hover:bg-cyan-50/60 hover:text-slate-800'
-                        : 'border-transparent text-slate-600 hover:border-cyan-300 hover:bg-cyan-50/60 hover:text-cyan-900'
-                )}
-              >
-                {ordinal && (
-                  <span
+            <li key={group.heading.id}>
+              <div className="flex items-center gap-1">
+                <div className="min-w-0 flex-1">{renderLink(group.heading)}</div>
+                {group.children.length > 0 && (
+                  <ChevronRight
                     className={cn(
-                      'shrink-0 tabular-nums font-semibold',
-                      isInsight ? (isActive && !isSubItem ? 'text-white/90' : 'text-indigo-500') : isActive ? 'text-blue-600' : 'text-cyan-600'
+                      'h-3 w-3 shrink-0 text-slate-300 transition-transform motion-reduce:transition-none',
+                      showChildren && 'rotate-90'
                     )}
-                  >
-                    {ordinal}.
-                  </span>
+                    aria-hidden="true"
+                  />
                 )}
-                <span>{rest}</span>
-              </a>
+              </div>
+              {showChildren && (
+                <ul className={cn('ml-3 space-y-0.5 border-l pl-3', isInsight ? 'border-indigo-100' : 'border-cyan-100')}>
+                  {group.children.map((child) => (
+                    <li key={child.id}>{renderLink(child)}</li>
+                  ))}
+                </ul>
+              )}
             </li>
           )
         })}
@@ -164,7 +205,7 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
             Contents
             <ChevronDown className="ml-auto h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
           </summary>
-          <div className="max-h-72 overflow-y-auto border-t border-blue-100 bg-white/70 px-4 pb-4 pt-3">{renderList()}</div>
+          <div className="max-h-72 overflow-y-auto border-t border-blue-100 bg-white/70 px-4 pb-4 pt-3">{renderGroupedList()}</div>
         </details>
 
         {/* Desktop / wide screens: sticky left sidebar. */}
@@ -176,7 +217,7 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
               </span>
               <p className="text-xs font-bold uppercase tracking-wider text-blue-800">On this page</p>
             </div>
-            <div className="max-h-[calc(100vh-14rem)] overflow-y-auto p-3 pr-2">{renderList()}</div>
+            <div className="max-h-[calc(100vh-14rem)] overflow-y-auto p-3 pr-2">{renderGroupedList()}</div>
           </div>
         </nav>
       </>
@@ -195,7 +236,7 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
           Contents
           <ChevronDown className="ml-auto h-4 w-4 text-slate-400 transition-transform group-open:rotate-180" aria-hidden="true" />
         </summary>
-        <div className="mt-3 max-h-72 overflow-y-auto border-t border-cyan-100 pt-3">{renderList()}</div>
+        <div className="mt-3 max-h-72 overflow-y-auto border-t border-cyan-100 pt-3">{renderGroupedList()}</div>
       </details>
 
       {/* Desktop / wide screens: sticky left sidebar. */}
@@ -205,7 +246,7 @@ export function DeepDiveToc({ items, variant = 'default' }: DeepDiveTocProps) {
             <List className="h-3.5 w-3.5 text-cyan-500" aria-hidden="true" />
             On this page
           </p>
-          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderList()}</div>
+          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderGroupedList()}</div>
         </div>
       </nav>
     </>
