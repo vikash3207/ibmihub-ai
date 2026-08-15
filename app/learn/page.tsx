@@ -1,10 +1,15 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowRight, BookOpen, GraduationCap, Layers } from 'lucide-react'
-import { getPublishedLessonCount } from '@/lib/lessons'
+import { ArrowRight, CheckCircle2, GraduationCap, Layers } from 'lucide-react'
+import { getPublishedLessons } from '@/lib/lessons'
+import { createClient } from '@/lib/supabase/server'
+import { getCompletionRecordsForUser } from '@/lib/progress'
+import { calculateOverallProgress, selectContinueLesson, getTopicLabelForLesson } from '@/lib/dashboard-metrics'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
+import { isDeepDiveAvailable } from '@/lib/deep-dives'
 import { buttonVariants } from '@/components/ui/button'
+import { ProgressBar } from '@/components/ui/progress-bar'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
 import { RegisterAiTutorPageContext } from '@/components/ai-tutor/register-page-context'
 import { SectionHero } from '@/components/section-hero'
@@ -18,22 +23,53 @@ export const metadata: Metadata = {
   alternates: { canonical: '/learn' },
 }
 
+// Reads the auth session (for the Start/Continue Learning card below) --
+// never statically cache this page or it could serve a stale/incorrect
+// progress state.
+export const dynamic = 'force-dynamic'
+
 /**
- * Learning Center landing page (visually upgraded -- Premium Section
- * Layout Alignment). app/learn/layout.tsx no longer imposes a page-wide
- * max-width/padding (see that file's own comment), so this page renders a
- * full-bleed <SectionHero> as a direct child of <main> -- identical
- * structure to app/deep-dives/page.tsx: hero, then the path cards
- * overlapping the hero's bottom fade via a negative top margin, then a
- * normally-padded section below. LEARN_HERO_THEME (lib/section-theme.ts) is
- * the same dark bg-slate-950 + glow + line-grid recipe as Deep Dives, in
- * blue/indigo.
+ * Learning Center landing page (Learning Center and 288-Lesson Catalog
+ * Simplification). app/learn/layout.tsx renders a full-bleed <SectionHero>
+ * as a direct child of <main> -- identical structure to app/deep-dives/page.tsx.
  *
- * publishedCount and DEEP_DIVES.length are unchanged data flow -- only the
- * cards around them are richer than the previous plain `border-l-4` boxes.
+ * The previous version's Fundamentals pillar card was a static "Start
+ * Learning" CTA that never reflected sign-in state or progress -- a
+ * returning learner with real progress saw the identical button as a
+ * brand-new visitor. It's replaced here with one prominent, state-aware
+ * Start/Continue Learning card, computed from the exact same
+ * lib/dashboard-metrics.ts helpers app/(authenticated)/dashboard/page.tsx
+ * already uses (calculateOverallProgress, selectContinueLesson) -- no new
+ * progress calculation exists here that could disagree with the Dashboard.
+ * Deep Dives moves to a smaller, clearly secondary link below it, so the
+ * page has one prominent action, not two competing ones.
  */
 export default async function LearnPage() {
-  const publishedCount = await getPublishedLessonCount()
+  const supabase = await createClient()
+  const [lessons, { data: { user } }] = await Promise.all([getPublishedLessons(), supabase.auth.getUser()])
+
+  const completionRecords = user ? await getCompletionRecordsForUser(user.id) : []
+  const completedLessonIds = new Set(completionRecords.map((record) => record.lessonId))
+  const lessonById = new Map(lessons.map((lesson) => [lesson.id, lesson]))
+
+  const overall = calculateOverallProgress(lessons, completedLessonIds)
+  // Same anchor rule the Dashboard uses: the most recent completion that
+  // still points at a currently published lesson.
+  const mostRecentCompletedLessonId =
+    completionRecords.find((record) => lessonById.has(record.lessonId))?.lessonId ?? null
+  const continueLesson = selectContinueLesson(lessons, completedLessonIds, mostRecentCompletedLessonId)
+  const continueTopicLabel = continueLesson ? getTopicLabelForLesson(continueLesson) : undefined
+
+  const isReturningLearner = Boolean(user) && overall.completedCount > 0
+
+  // DEEP_DIVES.length counts every catalog entry, including `planned` and
+  // `review-ready` ones that have no real, readable content yet -- only
+  // `published` entries are actually available to a visitor who clicks
+  // through. isDeepDiveAvailable() (lib/deep-dives.ts) is the single
+  // existing source of truth for that distinction, already used by the
+  // Deep Dives listing page itself; reused here rather than a second
+  // status check.
+  const publishedDeepDiveCount = DEEP_DIVES.filter(isDeepDiveAvailable).length
 
   return (
     <>
@@ -54,72 +90,112 @@ export default async function LearnPage() {
         theme={LEARN_HERO_THEME}
       />
 
-      <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-3xl px-4 sm:px-6">
-        <div className="grid gap-6 sm:grid-cols-2 sm:items-stretch">
-          <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-b from-blue-50 via-white to-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-300 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500" aria-hidden="true" />
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
-              <BookOpen className="h-6 w-6" aria-hidden="true" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">{IBM_I_FUNDAMENTALS_PATH_NAME}</h2>
-            <p className="text-sm text-slate-600 leading-relaxed mb-5">
-              Foundational IBM i concepts, from what the platform is to basic development workflow —
-              covering libraries and objects, the 5250 interface, RPGLE, CLLE, Db2 for i, and more.
-            </p>
-
-            <div className="mt-auto space-y-4">
-              <p className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
-                {publishedCount} {publishedCount === 1 ? 'lesson' : 'lessons'} published
-              </p>
-
-              {publishedCount > 0 ? (
-                <Link href="/learn/ibm-i-fundamentals" className={cn(buttonVariants({ variant: 'primary' }), 'group/link w-full sm:w-auto')}>
-                  Start Learning
-                  <ArrowRight
-                    className="h-4 w-4 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
-                    aria-hidden="true"
-                  />
-                </Link>
-              ) : (
-                <div className="rounded-xl border border-amber-100 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                  Lesson content is being finalized — check back soon.
-                </div>
-              )}
-            </div>
+      <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-3xl px-4 sm:px-6 space-y-4">
+        {lessons.length === 0 ? (
+          <div className="rounded-2xl border border-amber-100 bg-amber-50 p-6 text-sm text-amber-900 shadow-sm">
+            Lesson content is being finalized — check back soon.
           </div>
-
-          <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-b from-indigo-50 via-white to-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-300 hover:shadow-lg motion-reduce:transition-none motion-reduce:hover:translate-y-0">
-            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-indigo-500 to-violet-500" aria-hidden="true" />
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-500 to-violet-500 text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100">
-              <Layers className="h-6 w-6" aria-hidden="true" />
-            </div>
-            <h2 className="text-xl font-bold text-slate-900 mb-2">Deep Dives</h2>
-            <p className="text-sm text-slate-600 leading-relaxed mb-5">
-              Standalone, professional-grade topic guides for real-world development, debugging,
-              integration, and interview readiness — no fixed order required.
+        ) : overall.isCurriculumComplete ? (
+          <div className="relative overflow-hidden rounded-2xl border border-emerald-100 bg-gradient-to-b from-emerald-50 via-white to-white p-6 shadow-sm sm:p-8">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-emerald-500 to-teal-500" aria-hidden="true" />
+            <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-emerald-700">
+              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+              Curriculum complete
             </p>
-
-            <div className="mt-auto space-y-4">
-              <p className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-medium text-indigo-700">
-                {DEEP_DIVES.length} {DEEP_DIVES.length === 1 ? 'topic' : 'topics'} planned
-              </p>
-
-              <Link
-                href="/deep-dives"
-                className={cn(
-                  buttonVariants({ variant: 'primary' }),
-                  'group/link w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 focus-visible:ring-indigo-600 sm:w-auto'
-                )}
-              >
-                Browse Deep Dives
-                <ArrowRight
-                  className="h-4 w-4 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
-                  aria-hidden="true"
-                />
+            <h2 className="text-xl font-bold text-slate-900 mb-2">
+              You&apos;ve completed all {overall.totalCount} published lessons
+            </h2>
+            <p className="text-sm text-slate-600 leading-relaxed mb-5">
+              New lessons are added over time, and they&apos;ll appear here when they are. In the
+              meantime, review any lesson or explore Deep Dives for professional-grade topics.
+            </p>
+            <div className="flex flex-wrap gap-3">
+              <Link href="/learn/ibm-i-fundamentals" className={buttonVariants({ variant: 'primary' })}>
+                Review lessons
+              </Link>
+              <Link href="/deep-dives" className={buttonVariants({ variant: 'secondary' })}>
+                Explore Deep Dives
               </Link>
             </div>
           </div>
-        </div>
+        ) : continueLesson ? (
+          <div className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-b from-blue-50 via-white to-white p-6 shadow-sm sm:p-8">
+            <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-500" aria-hidden="true" />
+            <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-blue-600">
+              {isReturningLearner ? 'Continue learning' : 'Where to start'}
+            </p>
+
+            <div className="flex items-start gap-4">
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 text-sm font-semibold tabular-nums text-white shadow-sm">
+                {continueLesson.lesson_order}
+              </span>
+              <div className="min-w-0 flex-1">
+                <h2 className="text-xl font-bold text-slate-900">{continueLesson.title}</h2>
+                {continueTopicLabel && <p className="mt-0.5 text-xs font-medium text-blue-700">{continueTopicLabel}</p>}
+                <p className="mt-1.5 text-sm text-slate-600 leading-relaxed">
+                  {isReturningLearner
+                    ? "Here's where you left off in the IBM i Fundamentals path."
+                    : `A structured, beginner-friendly path through ${lessons.length} lessons -- no prior IBM i knowledge required.`}
+                </p>
+              </div>
+            </div>
+
+            {isReturningLearner && (
+              <div className="mt-4 max-w-xs">
+                <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
+                  <span>Overall progress</span>
+                  <span>{overall.percent}%</span>
+                </div>
+                <ProgressBar percent={overall.percent} label={`${IBM_I_FUNDAMENTALS_PATH_NAME} progress: ${overall.percent}% complete`} />
+              </div>
+            )}
+
+            <Link
+              href={`/learn/ibm-i-fundamentals/${continueLesson.slug}`}
+              className={cn(buttonVariants({ variant: 'primary' }), 'group/link mt-5 w-full sm:w-auto')}
+            >
+              {isReturningLearner ? 'Continue Learning' : 'Start Learning'}
+              <ArrowRight
+                className="h-4 w-4 transition-transform duration-200 group-hover/link:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover/link:translate-x-0"
+                aria-hidden="true"
+              />
+            </Link>
+          </div>
+        ) : null}
+
+        {/* Answers "can I follow lessons in order / jump to a topic" right
+            where the primary action is, without a second explanatory
+            section. */}
+        {lessons.length > 0 && (
+          <p className="px-1 text-xs text-slate-500">
+            Lessons are ordered start to finish for a guided path -- or open the{' '}
+            <Link href="/learn/ibm-i-fundamentals" className="font-medium text-blue-600 hover:underline">
+              full curriculum
+            </Link>{' '}
+            to jump straight to a topic.
+          </p>
+        )}
+
+        {/* Deep Dives: a clearly secondary link, not a second equally
+            prominent CTA competing with the card above. */}
+        <Link
+          href="/deep-dives"
+          className="group flex items-center gap-3 rounded-2xl border border-indigo-100 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:border-indigo-300 hover:shadow-md motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+            <Layers className="h-4 w-4" aria-hidden="true" />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-semibold text-slate-900">Already know the basics?</span>
+            <span className="block text-xs text-slate-500">
+              Browse {publishedDeepDiveCount} published Deep Dive{publishedDeepDiveCount === 1 ? '' : 's'} -- no fixed order required.
+            </span>
+          </span>
+          <ArrowRight
+            className="h-4 w-4 shrink-0 text-indigo-400 transition-transform duration-200 group-hover:translate-x-0.5 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+            aria-hidden="true"
+          />
+        </Link>
       </div>
 
       <div className="mx-auto max-w-3xl px-4 sm:px-6 py-12 sm:py-16">

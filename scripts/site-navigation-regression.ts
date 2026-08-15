@@ -331,8 +331,23 @@ async function main() {
     check('Practice Lab still renders the untouched <SimulatorNotice /> component (exact safety wording lives there) for signed-in users', practiceLabSrc.includes('<SimulatorNotice />'))
 
     const learnSrc = readRepoFile('app/learn/page.tsx')
-    check('Learning Center still computes its lesson count from getPublishedLessonCount(), not a hardcoded number', learnSrc.includes('getPublishedLessonCount()'))
-    check('Learning Center still derives its Deep Dives count from DEEP_DIVES.length, not a hardcoded number', learnSrc.includes('DEEP_DIVES.length'))
+    // Learning Center and 288-Lesson Catalog Simplification: the Start/Continue
+    // Learning card needs the real lesson list (not just a count) to pick a
+    // recommended lesson, so this now calls getPublishedLessons() instead of
+    // the count-only getPublishedLessonCount() -- same underlying query, still
+    // never a hardcoded number (lessons.length replaces the old published count).
+    check('Learning Center still derives its lesson count from getPublishedLessons(), not a hardcoded number', learnSrc.includes('getPublishedLessons()'))
+    // Raw DEEP_DIVES.length counts planned/review-ready entries too, which
+    // introduced an inaccurate "N standalone Deep Dives" claim (fixed by
+    // review) -- the Learning Center now filters through the catalog's own
+    // isDeepDiveAvailable() first. Deeper coverage (mixed-status fixture
+    // execution) lives in scripts/learning-center-regression.ts
+    // (test:learning-center); this check only confirms the raw, unfiltered
+    // count is not what reaches the page's copy.
+    check(
+      "Learning Center derives its Deep Dives count from DEEP_DIVES filtered through isDeepDiveAvailable(), not raw DEEP_DIVES.length",
+      learnSrc.includes('DEEP_DIVES.filter(isDeepDiveAvailable).length') && !/Browse \{DEEP_DIVES\.length\}/.test(learnSrc)
+    )
 
     const dashboardSrc = readRepoFile('app/(authenticated)/dashboard/page.tsx')
     check('Dashboard still calls the real metric functions, not reimplemented inline math', [
