@@ -200,6 +200,66 @@ async function main() {
     check('PreviewAuthCta links to both /auth/login and /auth/sign-up', ctaSrc.includes("/auth/login?next=") && ctaSrc.includes("/auth/sign-up?next="))
   }
 
+  // ---------------------------------------------------------------------------
+  section('8. Onboarding page: `next` is validated before use anywhere on the page')
+  // ---------------------------------------------------------------------------
+  //
+  // Independent review flagged that app/(authenticated)/onboarding/page.tsx
+  // read `next` straight from searchParams and passed it to `redirect(next)`
+  // for an already-onboarded user, and into both hidden form fields --
+  // bypassing the safeInternalPath() guard every other `next` call site in
+  // this PR already applies. Fixed by validating once, immediately after
+  // reading searchParams, and reusing that single validated value
+  // everywhere else on the page (no second helper, no duplicated logic).
+
+  {
+    const onboardingSrc = readRepoFile('app/(authenticated)/onboarding/page.tsx')
+
+    check('imports the existing safeInternalPath helper (no new/duplicate validator)', /import \{ safeInternalPath \} from '@\/lib\/auth-redirect'/.test(onboardingSrc))
+    check(
+      '`next` is validated exactly once, immediately after reading searchParams',
+      (onboardingSrc.match(/safeInternalPath\(rawNext, '\/'\)/g) ?? []).length === 1
+    )
+    check('the raw searchParams value is never used directly (renamed to rawNext, not `next`)', /const \{ next: rawNext = '\/' \} = await searchParams/.test(onboardingSrc))
+    check('the already-onboarded redirect uses the validated `next`', /if \(profile\?\.onboarding_response \|\| profile\?\.onboarding_skipped\) \{\s*redirect\(next\)/.test(onboardingSrc))
+    check(
+      'both hidden form fields carry the validated `next` (two occurrences)',
+      (onboardingSrc.match(/<input type="hidden" name="next" value=\{next\} \/>/g) ?? []).length === 2
+    )
+    check('no second/duplicate redirect-validation helper is introduced in this file', !/function safeInternalPath|function isSafePath|function validateNext/.test(onboardingSrc))
+
+    // saveOnboardingResponse() itself also re-validates its `next` param
+    // (lib/actions/auth.ts) before its own final redirect -- both call
+    // sites (the button formActions) forward the value the now-validated
+    // hidden field carries, and the function's own guard is the second,
+    // independent layer defense-in-depth relies on.
+    const authActionsSrc = readRepoFile('lib/actions/auth.ts')
+    check(
+      'saveOnboardingResponse() independently re-validates next before its own redirect (defense in depth)',
+      /redirect\(safeInternalPath\(next, '\/'\)\)/.test(authActionsSrc)
+    )
+
+    // Real function execution against the exact categories the review
+    // asked for -- proves the fix actually blocks these payloads for the
+    // onboarding destination, not just that the source calls the helper.
+    const unsafeOnboardingDestinations: Array<[string, string]> = [
+      ['absolute external URL', 'https://malicious.example'],
+      ['scheme-relative URL', '//malicious.example'],
+      ['backslash-based path', '/\\malicious.example'],
+      ['protocol-like path', '/javascript:alert(1)'],
+    ]
+    for (const [label, payload] of unsafeOnboardingDestinations) {
+      check(`onboarding next=${payload} (${label}) falls back to '/'`, safeInternalPath(payload, '/') === '/')
+    }
+
+    // Valid internal destinations must keep working -- the fix must not
+    // over-block legitimate post-onboarding routing.
+    const validOnboardingDestinations = ['/', '/dashboard', '/practice-lab', '/ai-tutor']
+    for (const dest of validOnboardingDestinations) {
+      check(`onboarding next=${dest} (valid internal path) is preserved`, safeInternalPath(dest, '/') === dest)
+    }
+  }
+
   console.log(`\n${'-'.repeat(60)}`)
   console.log(`Protected-feature preview regression: ${passed} passed, ${failures} failed.`)
   if (failures > 0) {
