@@ -331,7 +331,12 @@ async function main() {
     check('Practice Lab still renders the untouched <SimulatorNotice /> component (exact safety wording lives there) for signed-in users', practiceLabSrc.includes('<SimulatorNotice />'))
 
     const learnSrc = readRepoFile('app/learn/page.tsx')
-    check('Learning Center still computes its lesson count from getPublishedLessonCount(), not a hardcoded number', learnSrc.includes('getPublishedLessonCount()'))
+    // Learning Center and 288-Lesson Catalog Simplification: the Start/Continue
+    // Learning card needs the real lesson list (not just a count) to pick a
+    // recommended lesson, so this now calls getPublishedLessons() instead of
+    // the count-only getPublishedLessonCount() -- same underlying query, still
+    // never a hardcoded number (lessons.length replaces the old published count).
+    check('Learning Center still derives its lesson count from getPublishedLessons(), not a hardcoded number', learnSrc.includes('getPublishedLessons()'))
     check('Learning Center still derives its Deep Dives count from DEEP_DIVES.length, not a hardcoded number', learnSrc.includes('DEEP_DIVES.length'))
 
     const dashboardSrc = readRepoFile('app/(authenticated)/dashboard/page.tsx')
