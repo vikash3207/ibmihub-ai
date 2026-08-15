@@ -1271,6 +1271,80 @@ async function runChecks() {
     // source) plus the empty-state's own heading -- both one level below h1.
     check('the positioning-card and empty-state headings are h2, one level below h1 (no skipped heading level)', (listingSrc.match(/<h2[^>]*>/g) ?? []).length === 2)
   }
+
+  // ---------------------------------------------------------------------------
+  section('17. Explore Insights navigation and featured-card compactness (Insights listing UI/UX refinement)')
+  // ---------------------------------------------------------------------------
+
+  {
+    const listingSrc = readRepoFile('app/insights/page.tsx')
+    const navSrc = readRepoFile('components/insights/explore-insights-nav.tsx')
+    const cardSrc = readRepoFile('components/insight-card.tsx')
+
+    check('the listing page imports ExploreInsightsNav', /import \{ ExploreInsightsNav \} from '@\/components\/insights\/explore-insights-nav'/.test(listingSrc))
+    check('the listing page renders <ExploreInsightsNav', listingSrc.includes('<ExploreInsightsNav'))
+    check('the listing page reads a `category` search param, not a hardcoded filter', /searchParams:\s*Promise<\{\s*category\?:\s*string\s*\}>/.test(listingSrc))
+    check(
+      'the requested category is validated against the real INSIGHT_CATEGORIES taxonomy before use (an unknown/invalid value falls back to no filter, never a crash or an unfiltered bypass)',
+      /INSIGHT_CATEGORIES\.some\(\(c\) => c\.id === requestedCategory\)/.test(listingSrc)
+    )
+    check(
+      'the featured-card treatment is only ever computed for the unfiltered view -- a category filter can never invent a new "featured" article',
+      /featuredInsight = activeCategory === null \? visibleInsights\[0\] : undefined/.test(listingSrc)
+    )
+    check('a category with zero results gets its own message distinct from the whole-catalog empty state', listingSrc.includes('No Insights are published in this category yet.'))
+
+    // ExploreInsightsNav must be a Server Component (no 'use client') that
+    // filters via real navigation (plain <Link>s to ?category=<id>), not
+    // client-side state -- this is what keeps every category's articles
+    // present in the server-rendered HTML of their own URL (nothing hidden
+    // from a crawler that never executes JS) and makes browser Back/Forward
+    // work through ordinary history entries rather than bespoke JS state.
+    check("ExploreInsightsNav is a Server Component (no 'use client' directive)", !navSrc.includes("'use client'"))
+    check('ExploreInsightsNav filters via real <Link> navigation to a ?category= URL, not client-side JS state', /href=\{`\/insights\?category=\$\{category\.id\}`\}/.test(navSrc))
+    check('ExploreInsightsNav provides an "All Insights" link back to the unfiltered listing', /href="\/insights"/.test(navSrc) && navSrc.includes('All Insights'))
+    check('ExploreInsightsNav links article titles straight to their detail page', /href=\{`\/insights\/\$\{insight\.slug\}`\}/.test(navSrc))
+    check('ExploreInsightsNav marks the active selection for assistive tech via aria-current', /aria-current=\{[^}]*\? 'true'/.test(navSrc))
+    check('ExploreInsightsNav is a labeled landmark distinct from other page navs', navSrc.includes('aria-label="Explore Insights"'))
+    check('every interactive link in ExploreInsightsNav carries focus-visible styling', (navSrc.match(/focus-visible:ring-2/g) ?? []).length >= 3)
+
+    check(
+      'ExploreInsightsNav generates categories and counts from the `insights` prop it receives, not a second import of the catalog',
+      !/from '@\/content\/insights\/catalog'/.test(navSrc)
+    )
+    for (const insight of INSIGHTS) {
+      check(`ExploreInsightsNav has no hardcoded reference to "${insight.title}"`, !navSrc.includes(insight.title))
+    }
+
+    check('the mobile "Browse Insights" panel is a native, zero-JS <details>/<summary> disclosure', /<details[^>]*lg:hidden[^>]*>[\s\S]{0,300}<summary/.test(navSrc))
+    check('the mobile panel is labeled "Browse Insights"', /<summary[^>]*>[\s\S]{0,200}Browse Insights/.test(navSrc))
+    check('the desktop sidebar is sticky, positioned below the sticky site header', /lg:sticky lg:top-20/.test(navSrc))
+
+    // Featured-card compactness: the old oversized treatment (a bigger step
+    // up in padding and title size, same stacked layout as a standard card)
+    // must be gone, replaced by a modest title bump and a two-column layout
+    // from `sm:` up.
+    check('the featured card no longer uses the old oversized padding step (p-6 sm:p-8)', !cardSrc.includes("'border-slate-100 p-6 sm:p-8'"))
+    check('the featured card no longer uses the old oversized title size (text-2xl sm:text-3xl)', !cardSrc.includes('text-2xl sm:text-3xl'))
+    check('the featured card title is only modestly larger than a standard card\'s text-lg', cardSrc.includes('text-xl font-bold text-slate-900 sm:text-2xl'))
+    check('the featured card uses a balanced two-column layout from sm: up (content left, reading time + CTA right)', /sm:flex sm:items-start sm:justify-between sm:gap-6/.test(cardSrc))
+    // Preserved content, just restructured: category badge, "Featured Insight"
+    // badge, summary, tags, reading time, and the Read Insight action all
+    // still render for the featured variant (asserted elsewhere in this file
+    // too -- section 13's "InsightCard still renders reading time/tags" and
+    // section 14's "Featured Insight" badge checks -- these two are specific
+    // to the featured branch's own JSX).
+    // Isolate the featured branch's own JSX (between the ternary's opening
+    // and its " : (" that starts the non-featured branch) so these checks
+    // can't accidentally pass by matching content from the other branch.
+    const featuredBranchStart = cardSrc.indexOf('featured ? (')
+    const featuredBranchEnd = cardSrc.indexOf(') : (', featuredBranchStart)
+    const featuredBranchSrc = cardSrc.slice(featuredBranchStart, featuredBranchEnd)
+
+    check('the featured branch still renders the article description', featuredBranchSrc.includes('insight.description'))
+    check('the featured branch still renders the Read Insight action', featuredBranchSrc.includes('readInsightCta'))
+    check('long titles wrap naturally rather than being truncated or clamped', !/line-clamp|truncate/.test(featuredBranchSrc))
+  }
 }
 
 async function main() {
