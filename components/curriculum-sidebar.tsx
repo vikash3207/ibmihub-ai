@@ -1,88 +1,56 @@
-'use client'
-
-import { useId, useRef, useState } from 'react'
 import Link from 'next/link'
 import { List, ChevronDown, ChevronRight, Check } from 'lucide-react'
 import type { Lesson } from '@/lib/lessons'
-import type { TopicFilter } from '@/lib/topics'
+import { TOPIC_FILTERS } from '@/lib/topics'
 import { cn } from '@/lib/utils'
 
-export interface CurriculumTopicGroup {
-  topic: TopicFilter
-  /** Already sorted by lesson_order; already filtered by search + category, but NOT by topic -- every topic stays visible/selectable regardless of which one is currently active. */
-  lessons: Lesson[]
-}
-
 interface CurriculumSidebarProps {
-  topicGroups: CurriculumTopicGroup[]
-  /** Lessons matching the current search + category filters, before any topic narrowing -- the "All Topics" row's count. */
-  allCount: number
+  /** Full published-lesson list -- topic groups/counts are derived here, the same way components/insights/explore-insights-nav.tsx derives category groups from its `insights` prop, so counts always reflect the real catalog. */
+  lessons: Lesson[]
   activeTopicId: string | null
-  onSelectTopic: (id: string | null) => void
   completedSet: Set<string>
 }
 
 /**
- * Curriculum index for the Learning Center (PR #175). Groups the full
- * lesson catalog by the same lib/topics.ts TOPIC_FILTERS the search chips
- * already use -- a single shared source of truth, not a second filtering
- * system -- so selecting a topic here sets the exact same `topicId` state
- * components/lesson-browser.tsx's chips already read and write.
+ * Curriculum index for the Learning Center (Learning Center and 288-Lesson
+ * Catalog Simplification). Now the ONE primary browsing control for the
+ * catalog -- previously this sidebar duplicated a second topic-filter UI
+ * (a 19-button pill row) and a third, unrelated master-category dropdown,
+ * both removed from components/lesson-browser.tsx in this same change.
  *
- * One component renders both the desktop sticky sidebar and the mobile
- * collapsible "Curriculum" panel, matching the established pattern in
- * components/deep-dive-toc.tsx: shared render logic, no new dependency.
- * The mobile panel itself is still a native <details> (its open/closed
- * state is purely local and has nothing to sync with); the topic sections
- * inside it are explicit <button> disclosures instead -- see the
- * `manualExpansion` comment below for why that distinction matters.
+ * A plain Server Component, no client state: every row is a real
+ * `<Link>` to `/learn/ibm-i-fundamentals` or
+ * `/learn/ibm-i-fundamentals?topic=<id>`, and app/learn/ibm-i-fundamentals/page.tsx
+ * reads that query param server-side to filter -- the exact pattern
+ * components/insights/explore-insights-nav.tsx already established (real
+ * navigation, shareable/bookmarkable URLs, browser Back/Forward works
+ * through ordinary history entries, nothing hidden from a crawler).
  *
- * Clicking a topic section header does two things on purpose: it selects
- * that topic as the active filter (the same state the main list's topic
- * chips read/write) and toggles that section's expansion. Sections are
- * independently expandable -- more than one can be open at a time.
+ * Only the currently active topic's lesson list renders expanded; every
+ * other topic shows just its header row and count. This replaces the old
+ * client `useState`-driven "manual expansion, independent of the active
+ * topic" behavior (components/lesson-sidebar.tsx-adjacent PR #177 once had
+ * to fix a desync bug in that exact model) with something that cannot
+ * desync by construction: expanded state IS the active-topic state, both
+ * driven by the one URL this component reads nothing but a prop from.
+ *
+ * One render function serves both surfaces: the mobile collapsible
+ * "Curriculum" panel (a native <details>/<summary>, zero JS, matching
+ * components/insights/explore-insights-nav.tsx's mobile "Browse Insights"
+ * panel) and the desktop sticky sidebar.
  */
-export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSelectTopic, completedSet }: CurriculumSidebarProps) {
-  const mobilePanelRef = useRef<HTMLDetailsElement>(null)
-  const baseId = useId()
+export function CurriculumSidebar({ lessons, activeTopicId, completedSet }: CurriculumSidebarProps) {
+  const topicGroups = TOPIC_FILTERS.map((topic) => ({
+    topic,
+    lessons: lessons.filter((lesson) => topic.match(lesson)),
+  }))
 
-  /**
-   * Section expansion is explicit React state rather than a native
-   * <details open> attribute (PR #177). The previous implementation set
-   * `open={isActive}` on a <details> while the browser ALSO toggled that
-   * same attribute natively on click, so the two could disagree -- clicking
-   * an already-active section collapsed the DOM, but `isActive` was
-   * unchanged, so React had no state change to re-render from and the
-   * chevron/content could desync. Deriving both the chevron and the
-   * lesson list from this one value makes that impossible by construction.
-   *
-   * `undefined` means "follow the active topic" -- a section auto-expands
-   * when it becomes the selected topic (including when selected from the
-   * main list's topic chips, which this component doesn't own). An explicit
-   * true/false is a user's own toggle for that section and takes precedence.
-   */
-  const [manualExpansion, setManualExpansion] = useState<Record<string, boolean>>({})
-
-  function toggleSection(topicId: string, isExpanded: boolean) {
-    setManualExpansion((prev) => ({ ...prev, [topicId]: !isExpanded }))
-  }
-
-  // Declared as a stable callback rather than an inline arrow in JSX so the
-  // ref is only read when a lesson is actually clicked, never during render.
-  function closeMobilePanel() {
-    mobilePanelRef.current?.removeAttribute('open')
-  }
-
-  // `surface` namespaces the aria-controls ids: this component renders twice
-  // (desktop sidebar + mobile drawer), so an unnamespaced id would appear
-  // twice in the document and aria-controls would resolve ambiguously.
-  function renderSections(surface: 'desktop' | 'mobile') {
+  function renderSections() {
     return (
       <div className="space-y-1">
-        <button
-          type="button"
+        <Link
+          href="/learn/ibm-i-fundamentals"
           aria-current={activeTopicId === null ? 'true' : undefined}
-          onClick={() => onSelectTopic(null)}
           className={cn(
             'flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors motion-reduce:transition-none',
             'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600',
@@ -98,31 +66,20 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
               activeTopicId === null ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
             )}
           >
-            {allCount}
+            {lessons.length}
           </span>
-        </button>
+        </Link>
 
-        {topicGroups.map(({ topic, lessons }) => {
+        {topicGroups.map(({ topic, lessons: topicLessons }) => {
           const isActive = activeTopicId === topic.id
-          // Falls back to the active topic when the user hasn't toggled this
-          // section themselves, so selecting a topic anywhere (sidebar or the
-          // main list's chips) auto-expands it with a matching chevron.
-          const isExpanded = manualExpansion[topic.id] ?? isActive
-          const hasLessons = lessons.length > 0
-          const panelId = `${baseId}-${surface}-${topic.id}`
+          const hasLessons = topicLessons.length > 0
+
           return (
             <div key={topic.id}>
-              <button
-                type="button"
-                // Both the chevron below and the lesson list's presence read
-                // this same `isExpanded` value, so they cannot disagree.
-                aria-expanded={isExpanded}
-                aria-controls={hasLessons ? panelId : undefined}
+              <Link
+                href={`/learn/ibm-i-fundamentals?topic=${topic.id}`}
                 aria-current={isActive ? 'true' : undefined}
-                onClick={() => {
-                  onSelectTopic(topic.id)
-                  toggleSection(topic.id, isExpanded)
-                }}
+                aria-expanded={isActive}
                 className={cn(
                   'flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 text-left text-sm transition-colors motion-reduce:transition-none',
                   'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600',
@@ -130,18 +87,16 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
                 )}
               >
                 <span className="flex min-w-0 items-center gap-1.5">
-                  {/* A right-pointing chevron rotated 90deg when expanded, so
-                      collapsed reads as ">" and expanded as "v". Previously a
-                      ChevronDown carried `group-open:rotate-180`, but the
-                      `group` class sat on the <summary> while the `open`
-                      attribute lived on its parent <details> -- `group-open:`
-                      only matches when the SAME element has both, so it never
-                      applied and every chevron pointed down permanently
-                      regardless of state. */}
+                  {/* Right-pointing when collapsed, rotated 90deg (pointing
+                      down) when this is the active/expanded topic -- always
+                      accurate because it's driven by the same `isActive`
+                      value the expansion itself is, computed once
+                      server-side, never a separately-tracked React state
+                      that could desync from it. */}
                   <ChevronRight
                     className={cn(
                       'h-3.5 w-3.5 shrink-0 transition-transform motion-reduce:transition-none',
-                      isExpanded && 'rotate-90',
+                      isActive && 'rotate-90',
                       isActive ? 'text-blue-500' : 'text-slate-400'
                     )}
                     aria-hidden="true"
@@ -154,30 +109,31 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
                     isActive ? 'bg-blue-100 text-blue-700' : 'bg-slate-100 text-slate-500'
                   )}
                 >
-                  {lessons.length}
+                  {topicLessons.length}
                 </span>
-              </button>
-              {isExpanded && hasLessons && (
-                <ol id={panelId} className="ml-5 mt-0.5 space-y-0.5 border-l border-slate-100 pl-2.5">
-                  {lessons.map((lesson) => (
+              </Link>
+              {isActive && hasLessons && (
+                <ol className="ml-5 mt-0.5 space-y-0.5 border-l border-slate-100 pl-2.5">
+                  {topicLessons.map((lesson) => (
                     <li key={lesson.id}>
                       <Link
                         href={`/learn/ibm-i-fundamentals/${lesson.slug}?topic=${topic.id}`}
-                        // 288 lessons render here; Next.js's default prefetch
-                        // would queue a payload fetch per link as rows enter
-                        // the viewport. Same reason the lesson cards in
-                        // components/lesson-browser.tsx opt out.
+                        // 288 lessons render across this sidebar; Next.js's
+                        // default prefetch would queue a payload fetch per
+                        // link as rows enter the viewport. Same reason the
+                        // lesson cards in components/lesson-browser.tsx opt
+                        // out.
                         prefetch={false}
                         title={lesson.title}
+                        aria-current={false}
                         className="flex items-center gap-2 rounded-md py-1 pl-2 pr-3 text-xs text-slate-500 transition-colors motion-reduce:transition-none hover:bg-slate-50 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
                       >
-                        {/* Fixed-width, non-shrinking number slot. The old
-                            `w-3` (12px) was sized for 1-2 digits, but 189 of
-                            the 288 lessons are numbered 100+, so a 3-digit
-                            number overflowed its box and ran into the title.
-                            `w-7` fits "288" at this font size with room to
-                            spare, and text-right keeps every title starting
-                            at the same x regardless of digit count. */}
+                        {/* Fixed-width, non-shrinking number slot. 189 of the
+                            288 lessons are numbered 100+, so a slot sized for
+                            1-2 digits would overflow into the title -- w-7
+                            fits "288" with room to spare, text-right keeps
+                            every title starting at the same x regardless of
+                            digit count. */}
                         <span className="flex w-7 shrink-0 items-center justify-end tabular-nums text-slate-400">
                           {completedSet.has(lesson.id) ? (
                             <Check className="h-3 w-3 text-emerald-500" aria-hidden="true" />
@@ -185,10 +141,6 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
                             lesson.lesson_order
                           )}
                         </span>
-                        {/* min-w-0 is what actually lets `truncate` work on a
-                            flex child -- without it the item's automatic
-                            min-width is its content width, so it refuses to
-                            shrink and overflows instead of ellipsing. */}
                         <span className="min-w-0 truncate">{lesson.title}</span>
                       </Link>
                     </li>
@@ -205,33 +157,15 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
   return (
     <>
       {/* Mobile / narrow screens: collapsible "Curriculum" panel, matching
-          components/deep-dive-toc.tsx's mobile "Contents" panel convention. */}
-      <details ref={mobilePanelRef} className="group mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
+          components/insights/explore-insights-nav.tsx's mobile "Browse
+          Insights" panel -- a native <details>/<summary>, no client JS. */}
+      <details className="group mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:hidden">
         <summary className="flex cursor-pointer list-none items-center gap-2 rounded-lg text-sm font-semibold text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600">
           <List className="h-4 w-4 text-blue-600" aria-hidden="true" />
           Curriculum
           <ChevronDown className="ml-auto h-4 w-4 text-slate-400 transition-transform motion-reduce:transition-none group-open:rotate-180" aria-hidden="true" />
         </summary>
-        {/* Delegated click: closing the drawer is a concern of the mobile
-            surface only, so it's handled here rather than threaded into every
-            row. Keyboard Enter on a link also dispatches a bubbling click, so
-            this covers keyboard navigation too, and the wrapper itself stays
-            non-interactive (no role/tabIndex) -- it only reacts to clicks
-            that originated on a real link inside it.
-
-            The previous implementation instead called
-            `event.currentTarget.closest('details')` from the row itself,
-            which resolves to the NEAREST <details> ancestor -- the lesson's
-            own topic section, not the drawer -- so it collapsed the section
-            the user had just opened and left the drawer open. */}
-        <div
-          className="mt-3 max-h-96 overflow-y-auto border-t border-slate-100 pt-3"
-          onClick={(event) => {
-            if ((event.target as HTMLElement).closest('a')) closeMobilePanel()
-          }}
-        >
-          {renderSections('mobile')}
-        </div>
+        <div className="mt-3 max-h-96 overflow-y-auto border-t border-slate-100 pt-3">{renderSections()}</div>
       </details>
 
       {/* Desktop / wide screens: sticky left sidebar. */}
@@ -241,7 +175,7 @@ export function CurriculumSidebar({ topicGroups, allCount, activeTopicId, onSele
             <List className="h-3.5 w-3.5 text-blue-600" aria-hidden="true" />
             Curriculum
           </p>
-          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderSections('desktop')}</div>
+          <div className="max-h-[calc(100vh-11rem)] overflow-y-auto pr-2">{renderSections()}</div>
         </div>
       </nav>
     </>
