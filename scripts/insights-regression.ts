@@ -773,9 +773,15 @@ async function runChecks() {
     // pin the resulting corrections so a future edit can't silently
     // reintroduce the originals.
     check(
-      'the RPG example requests PCML v7 so its VARCHAR parameters describe correctly to IWS',
+      'the RPG example explicitly selects PCML v7 for a cleaner native varchar representation -- not described as required for these simple top-level parameters, which would already describe correctly at the older default version too',
       /pgminfo\(\*pcml\s*:\s*\*module\s*:\s*\*v7\)/.test(restMarkdown)
     )
+    check(
+      'the article accurately scopes what PCML v7 actually changes (varying-length representation, plus removing a restriction on arrays/subfields), not an overclaimed universal requirement for VARCHAR parameters',
+      /removes an older restriction on varying-length fields nested inside arrays or data structures/.test(restMarkdown) &&
+        /would already describe correctly without `\*V7`/.test(restMarkdown)
+    )
+    check('the article cites the direct IBM PGMINFO keyword documentation as a source', restMarkdown.includes('topic=keywords-pgminfopcml-no-dclcase-module-vx'))
     check(
       'the diagnostic-message host variable uses the real documented 32740 limit, not an arbitrary smaller size',
       /sqlMessage\s+varchar\(32740\)/.test(restMarkdown)

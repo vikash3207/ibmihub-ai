@@ -193,7 +193,7 @@ CRTSQLRPGI OBJ(MYLIB/GETORDER) SRCFILE(MYLIB/QRPGLESRC) SRCMBR(GETORDER) COMMIT(
 
 ### Why `PGMINFO(*PCML : *MODULE : *V7)` Matters
 
-Program Call Markup Language (PCML) describes the callable program interface: parameter names, types, lengths, and structure. `PGMINFO(*PCML : *MODULE)` embeds that PCML description directly into the compiled module, so IWS has metadata it can read when deploying the program — you do not have to hand-author a separate `.pcml` file to get started. The `*V7` option asks for PCML version 7.0, needed for the compiler to describe varying-length (`VARCHAR`) parameters correctly; this interface uses several, so it belongs on every `PGMINFO` here, not only when a problem appears.
+Program Call Markup Language (PCML) describes the callable program interface: parameter names, types, lengths, and structure. `PGMINFO(*PCML : *MODULE)` embeds that PCML description directly into the compiled module, so IWS has metadata it can read when deploying the program — you do not have to hand-author a separate `.pcml` file to get started. The `*V7` option selects PCML version 7.0, which changes how varying-length fields are represented (a native `varchar` type, instead of the length-and-data structure earlier PCML versions decompose it into) and removes an older restriction on varying-length fields nested inside arrays or data structures. This interface's parameters are all simple, top-level `VARCHAR` fields — not array elements or subfields — so they would already describe correctly without `*V7`. The example asks for it anyway because the plain `PGMINFO(*PCML : *MODULE)` form defaults to an older PCML version rather than tracking the target release, and there's no downside to requesting the newer, more direct representation up front.
 
 In this interface:
 
@@ -511,6 +511,7 @@ The technical claims in this article — including PCML's role, `CRTSQLRPGI` and
 - [IBM: Building a REST service with IWS — Part 3](https://www.ibm.com/support/pages/system/files/inline-files/IWS-Building-REST-Service-Part-3_0.pdf)
 - [IBM: Creating REST APIs based on SQL statements](https://www.ibm.com/support/pages/system/files/inline-files/IWS-REST-Based-On-SQL.pdf)
 - [IBM: Create Bound RPG Program and PCML](https://www.ibm.com/docs/en/i/7.5.0?topic=c-create-bound-rpg-program)
+- [IBM: PGMINFO keyword (Control specification)](https://www.ibm.com/docs/en/i/7.4.0?topic=keywords-pgminfopcml-no-dclcase-module-vx)
 - [IBM: GET DIAGNOSTICS](https://www.ibm.com/docs/en/i/7.5.0?topic=statements-get-diagnostics)
 - [IBM: Creating a row change timestamp column](https://www.ibm.com/docs/en/ssw_ibm_i_latest/sqlp/rbafysqlprcts.htm)
 
