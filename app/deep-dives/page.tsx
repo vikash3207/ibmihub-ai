@@ -5,7 +5,6 @@ import { SiteFooter } from '@/components/site-footer'
 import { DeepDiveBrowser } from '@/components/deep-dive-browser'
 import { SectionHero } from '@/components/section-hero'
 import { SectionFeatureCard } from '@/components/section-feature-card'
-import { Card } from '@/components/ui/card'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { DEEP_DIVES_HERO_THEME, DEEP_DIVES_PILLAR_THEMES } from '@/lib/section-theme'
 
@@ -35,20 +34,22 @@ const PILLARS = [
 ]
 
 /**
- * Deep Dives listing page (visually upgraded -- Site-wide Navigation and
- * Section Landing Page Visual Upgrade; framework originally PR #154). The
- * third learning pillar alongside the linear Beginner/Advanced lesson path:
- * standalone, non-linear, professional-grade topic guides. Catalog
- * publication status, filtering behavior, and card data are entirely
- * untouched by this pass -- only <SectionHero>/<SectionFeatureCard> wrap
- * the same <DeepDiveBrowser deepDives={DEEP_DIVES} /> this page already
- * rendered, and DeepDiveBrowser's own styling only gained hover/focus
- * polish (see that file), never new logic.
+ * Deep Dives listing page. The third learning pillar alongside the linear
+ * Beginner/Advanced lesson path: standalone, non-linear, professional-grade
+ * topic guides.
  *
  * Deliberately dark + indigo/violet (via DEEP_DIVES_HERO_THEME) rather than
  * IBM i Insights' violet/cyan, so the two "third pillar" pages stay visually
  * distinct: Deep Dives reads as a structured professional reference,
  * Insights as editorial perspective -- see each page's own hero copy.
+ *
+ * The explanatory "Deep Dives don't need to be read in order..." card that
+ * used to sit between the pillar row and <DeepDiveBrowser> is gone (Deep
+ * Dives, IBM i Insights and Reader-Experience Polish) -- it repeated what
+ * the pillars above already say, and its one non-redundant point ("Coming
+ * soon" = planned, not published) now lives in DeepDiveBrowser's own
+ * "Planned topics" disclosure instead. This also brings the real,
+ * published cards higher on the page.
  */
 export default function DeepDivesPage() {
   return (
@@ -74,17 +75,7 @@ export default function DeepDivesPage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16 space-y-10">
-          <Card variant="muted" className="p-6">
-            <p className="text-sm text-slate-700 leading-relaxed">
-              Unlike the IBM&nbsp;i Fundamentals path, Deep Dives don&apos;t need to be read in
-              order. Jump straight to the topic you need — whether you&apos;re debugging a
-              production issue, prepping for an interview, or want a deeper explanation than a
-              regular lesson covers. New Deep Dives are added over time; topics marked
-              &ldquo;Coming soon&rdquo; are planned but not published yet.
-            </p>
-          </Card>
-
+        <div className="mx-auto max-w-5xl px-4 sm:px-6 py-12 sm:py-16">
           <DeepDiveBrowser deepDives={DEEP_DIVES} />
         </div>
       </main>
