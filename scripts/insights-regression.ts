@@ -20,16 +20,19 @@
  * Should Know" (content/insights/db2-for-i-qsys2-services-developers-
  * should-know.md); PR #206 published the fourth, "Building REST APIs
  * from IBM i Applications" (content/insights/building-rest-apis-from-ibm-i-
- * applications.md); and this PR published the fifth, "Practical AI-Assisted
+ * applications.md); PR #207 published the fifth, "Practical AI-Assisted
  * Development for RPG Programmers" (content/insights/practical-ai-assisted-
- * development-for-rpg-programmers.md). Sections below that once asserted
- * "exactly one Insight"/"exactly one Markdown file"/etc. now assert five,
- * and the figure-embedding checks (section 10) loop generically over every
+ * development-for-rpg-programmers.md); and this PR published the sixth,
+ * "IBM i Application Monitoring and Production Troubleshooting"
+ * (content/insights/ibm-i-application-monitoring-and-production-
+ * troubleshooting.md). Sections below that once asserted "exactly one
+ * Insight"/"exactly one Markdown file"/etc. now assert six, and the
+ * figure-embedding checks (section 10) loop generically over every
  * published Insight with a Markdown file rather than hardcoding a single
- * slug -- a sixth Insight only needs its own entries in these arrays, not
+ * slug -- a seventh Insight only needs its own entries in these arrays, not
  * a rewrite of the loop logic. Article-specific fact/content checks
- * (sections 11, 11b, 11c, 11d, 11e, and 12) stay scoped to the article they
- * verify, with a matching subsection added per article rather than
+ * (sections 11, 11b, 11c, 11d, 11e, 11f, and 12) stay scoped to the article
+ * they verify, with a matching subsection added per article rather than
  * generalized, since their assertions are inherently about that one
  * article's specific claims.
  *
@@ -53,7 +56,8 @@ const RPG_SQL_APIS_SLUG = 'modernizing-rpg-applications-with-sql-and-apis'
 const DB2_QSYS2_SLUG = 'db2-for-i-qsys2-services-developers-should-know'
 const REST_APIS_SLUG = 'building-rest-apis-from-ibm-i-applications'
 const AI_ASSISTED_RPG_SLUG = 'practical-ai-assisted-development-for-rpg-programmers'
-const PUBLISHED_SLUGS = [LAUNCH_SLUG, RPG_SQL_APIS_SLUG, DB2_QSYS2_SLUG, REST_APIS_SLUG, AI_ASSISTED_RPG_SLUG]
+const APP_MONITORING_SLUG = 'ibm-i-application-monitoring-and-production-troubleshooting'
+const PUBLISHED_SLUGS = [LAUNCH_SLUG, RPG_SQL_APIS_SLUG, DB2_QSYS2_SLUG, REST_APIS_SLUG, AI_ASSISTED_RPG_SLUG, APP_MONITORING_SLUG]
 
 let failures = 0
 let passed = 0
@@ -102,12 +106,12 @@ const SYNTHETIC_INSIGHT: Insight = {
 
 async function runChecks() {
   // ---------------------------------------------------------------------------
-  section('1. The real catalog publishes all five Insights, each well-formed')
+  section('1. The real catalog publishes all six Insights, each well-formed')
   // ---------------------------------------------------------------------------
 
-  check('content/insights/catalog.ts has exactly five entries', INSIGHTS.length === 5, `got ${INSIGHTS.length}`)
-  check('getPublishedInsights() on the real catalog returns all five entries', getPublishedInsights(INSIGHTS).length === 5)
-  check('all five expected slugs are present in the catalog', PUBLISHED_SLUGS.every((slug) => INSIGHTS.some((i) => i.slug === slug)))
+  check('content/insights/catalog.ts has exactly six entries', INSIGHTS.length === 6, `got ${INSIGHTS.length}`)
+  check('getPublishedInsights() on the real catalog returns all six entries', getPublishedInsights(INSIGHTS).length === 6)
+  check('all six expected slugs are present in the catalog', PUBLISHED_SLUGS.every((slug) => INSIGHTS.some((i) => i.slug === slug)))
   check(
     'getFeaturedInsight() on the real catalog returns the launch article (the only one marked featured: true)',
     getFeaturedInsight(INSIGHTS)?.slug === LAUNCH_SLUG
@@ -137,8 +141,8 @@ async function runChecks() {
   const insightsContentDir = resolve(__dirname, '..', 'content', 'insights')
   const markdownFiles = readdirSync(insightsContentDir).filter((f) => f.endsWith('.md'))
   check(
-    'content/insights/ has exactly five Markdown files, matching all catalog slugs',
-    markdownFiles.length === 5 && PUBLISHED_SLUGS.every((slug) => markdownFiles.includes(`${slug}.md`)),
+    'content/insights/ has exactly six Markdown files, matching all catalog slugs',
+    markdownFiles.length === 6 && PUBLISHED_SLUGS.every((slug) => markdownFiles.includes(`${slug}.md`)),
     `found: ${markdownFiles.join(', ')}`
   )
 
@@ -234,10 +238,10 @@ async function runChecks() {
     check('sitemap.ts includes a static /insights listing route', sitemapSrc.includes('${SITE_URL}/insights`'))
     check('sitemap.ts includes an insightRoutes block in the returned array', sitemapSrc.includes('insightRoutes'))
     check(
-      'all five published articles are eligible, so sitemap.ts (which filters with isInsightAvailable) will include them',
+      'all six published articles are eligible, so sitemap.ts (which filters with isInsightAvailable) will include them',
       PUBLISHED_SLUGS.every((slug) => INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === slug))
     )
-    check('exactly five Insights are eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 5)
+    check('exactly six Insights are eligible for the sitemap right now', INSIGHTS.filter(isInsightAvailable).length === 6)
 
     const robotsSrc = readRepoFile('app/robots.ts')
     check("robots.ts allows '/insights'", /allow:\s*\[[^\]]*'\/insights'/.test(robotsSrc))
@@ -330,19 +334,20 @@ async function runChecks() {
 
     // With real Insights now published, this listing page should actually
     // render at build time: the launch article as the featured card
-    // (array position 0), the second through fifth articles in the grid
+    // (array position 0), the second through sixth articles in the grid
     // alongside it.
     check(
-      'all five published articles render on the listing page (featured card + grid)',
+      'all six published articles render on the listing page (featured card + grid)',
       (() => {
         const published = getPublishedInsights(INSIGHTS)
         return (
-          published.length === 5 &&
+          published.length === 6 &&
           published[0].slug === LAUNCH_SLUG &&
           published[1].slug === RPG_SQL_APIS_SLUG &&
           published[2].slug === DB2_QSYS2_SLUG &&
           published[3].slug === REST_APIS_SLUG &&
-          published[4].slug === AI_ASSISTED_RPG_SLUG
+          published[4].slug === AI_ASSISTED_RPG_SLUG &&
+          published[5].slug === APP_MONITORING_SLUG
         )
       })()
     )
@@ -357,8 +362,8 @@ async function runChecks() {
     check('generateStaticParams() only ever includes available Insights', /INSIGHTS\.filter\(isInsightAvailable\)/.test(detailSrc))
     check('an unresolved slug calls notFound()', /if \(!insight\) \{[\s\S]{0,40}notFound\(\)/.test(detailSrc))
     check(
-      'generateStaticParams() now produces exactly five routes, one per published article',
-      INSIGHTS.filter(isInsightAvailable).length === 5 &&
+      'generateStaticParams() now produces exactly six routes, one per published article',
+      INSIGHTS.filter(isInsightAvailable).length === 6 &&
         PUBLISHED_SLUGS.every((slug) => INSIGHTS.filter(isInsightAvailable).some((i) => i.slug === slug))
     )
     check('the removed (older, unrelated) article-specific diagram component is not reintroduced', !detailSrc.includes('architecture-diagram'))
@@ -941,6 +946,108 @@ async function runChecks() {
   }
 
   // ---------------------------------------------------------------------------
+  section('11f. Sixth Insight ("IBM i Application Monitoring and Production Troubleshooting"): diagram components and content checks')
+  // ---------------------------------------------------------------------------
+
+  {
+    const monitoringFiguresSrc = readRepoFile('components/insights/app-monitoring-figures.tsx')
+    const figureWrapperSrc = readRepoFile('components/insights/insight-figure.tsx')
+    const monitoringMarkdown = readFileSync(resolve(__dirname, '..', 'content', 'insights', `${APP_MONITORING_SLUG}.md`), 'utf-8')
+
+    check('every InsightFigure call in the new figure file passes a non-empty caption', !/caption=""/.test(monitoringFiguresSrc))
+    check('no figure uses an <img> tag or an external image URL', !/<img[\s>]/i.test(monitoringFiguresSrc) && !/https?:\/\/\S+\.(png|jpe?g|svg|webp|gif)/i.test(monitoringFiguresSrc))
+    check('none of the three figures opt into the horizontally-scrollable viewport (plain HTML/CSS, not a fixed-width drawing)', !/^\s*scrollable(\s*=|\s*$)/m.test(monitoringFiguresSrc))
+    check('the one-time diagram entrance uses the shared reduced-motion-safe class', monitoringFiguresSrc.includes('insight-figure-enter'))
+    check('the shared figure wrapper renders a real <figure>/<figcaption> pair (semantic, not div soup)', figureWrapperSrc.includes('<figure') && figureWrapperSrc.includes('<figcaption'))
+    check('the registry export is nested by slug, matching the shared INSIGHT_FIGURE_REGISTRY shape', /APP_MONITORING_FIGURE_REGISTRY: Record<string, Record<string, ComponentType>>/.test(monitoringFiguresSrc))
+
+    // The incident-lifecycle and layer-correlation figures reuse the
+    // icon-column/connector-line/card layout and the progressively-inset
+    // layers layout proven safe by prior articles -- explicitly NOT the
+    // -translate-x/negative-margin approach that caused the original overlap.
+    check(
+      'the incident-lifecycle figure uses the proven-safe icon-column/connector-line/card layout, not a negative-margin hack',
+      /flex flex-col items-center/.test(monitoringFiguresSrc) &&
+        /min-w-0 flex-1 rounded-xl border/.test(monitoringFiguresSrc) &&
+        !/-translate-x/.test(monitoringFiguresSrc)
+    )
+
+    // Figure numbers must ascend in the order the [[FIGURE:...]] markers
+    // appear in the Markdown, same discipline as sections 11/11b/11c/11d/11e above.
+    {
+      const markerOrder = [...monitoringMarkdown.matchAll(/\[\[FIGURE:([a-z0-9-]+)\]\]/g)].map((m) => m[1])
+      const numberByComponent = new Map<string, number>()
+      for (const chunk of monitoringFiguresSrc.split(/(?=export function )/)) {
+        const name = chunk.match(/^export function (\w+)\(/)?.[1]
+        const num = chunk.match(/number=\{(\d+)\}/)?.[1]
+        if (name && num) numberByComponent.set(name, Number(num))
+      }
+      const registryBlock = monitoringFiguresSrc.slice(monitoringFiguresSrc.indexOf('APP_MONITORING_FIGURE_REGISTRY'))
+      const componentByMarker = new Map<string, string>()
+      for (const m of registryBlock.matchAll(/'?([a-z0-9-]+)'?\s*:\s*(\w+Figure)\b/g)) {
+        componentByMarker.set(m[1], m[2])
+      }
+      const numbersInReadingOrder = markerOrder
+        .map((marker) => numberByComponent.get(componentByMarker.get(marker) ?? ''))
+        .filter((n): n is number => typeof n === 'number')
+
+      check(
+        'every figure marker resolves to a "Figure N" label',
+        numbersInReadingOrder.length === markerOrder.length,
+        `resolved ${numbersInReadingOrder.length} of ${markerOrder.length} markers`
+      )
+      check(
+        'figure numbers ascend in the order a reader scrolls past them',
+        numbersInReadingOrder.every((n, i) => i === 0 || n > numbersInReadingOrder[i - 1]),
+        `reading order gives: ${numbersInReadingOrder.join(', ')}`
+      )
+      check(
+        'figure numbers start at 1 and have no gaps',
+        numbersInReadingOrder.every((n, i) => n === i + 1),
+        `got: ${numbersInReadingOrder.join(', ')}`
+      )
+    }
+
+    // Content-accuracy guardrails: this article was written from a prepared
+    // source document and fact-checked (every QSYS2/Db2-for-i SQL service's
+    // columns and parameters, WRKOBJLCK/WRKUSRJOB behavior, SELF's authority
+    // requirement, and GET DIAGNOSTICS syntax) against IBM's official
+    // documentation and reputable secondary sources before publishing. These
+    // checks pin the resulting claims and the two commands added beyond the
+    // source document so a future edit can't silently drop them.
+    check('the article explicitly covers WRKUSRJOB as a way to find jobs by user profile', /WRKUSRJOB/.test(monitoringMarkdown))
+    check(
+      'the article explicitly distinguishes WRKOBJLCK (object-level locks) from DSPRCDLCK (record-level locks)',
+      /WRKOBJLCK/.test(monitoringMarkdown) && /OBJECT_LOCK_INFO/.test(monitoringMarkdown) && /object-level locks/i.test(monitoringMarkdown)
+    )
+    check(
+      'the article explicitly distinguishes monitoring, troubleshooting, recovery, and root-cause analysis',
+      /\*\*Monitoring\*\*/.test(monitoringMarkdown) &&
+        /\*\*Troubleshooting\*\*/.test(monitoringMarkdown) &&
+        /\*\*Recovery\*\*/.test(monitoringMarkdown) &&
+        /\*\*Root-cause analysis\*\*/.test(monitoringMarkdown)
+    )
+    check(
+      'the article states SELF\'s precise authority requirement (*ALLOBJ or QIBM_DB_SQLADM), not just "authority-dependent"',
+      /QIBM_DB_SQLADM/.test(monitoringMarkdown)
+    )
+    check(
+      'the article includes a standalone "evidence to capture before any disruptive action" checklist',
+      /## Evidence to Capture Before Any Disruptive Action/.test(monitoringMarkdown)
+    )
+    check(
+      'the article never recommends ending a job, releasing a lock, or changing a production resource without authorization and impact analysis',
+      /Never end a job, release a lock, or change a production resource/.test(monitoringMarkdown)
+    )
+    check('the article cites the WRKOBJLCK command documentation as a source', monitoringMarkdown.includes('considerations-work-object-lock-wrkobjlck-command'))
+    check('the article cites the OBJECT_LOCK_INFO view documentation as a source', monitoringMarkdown.includes('topic=services-object-lock-info-view'))
+    check('the article includes a Sources and further reading section', /### Sources and further reading/.test(monitoringMarkdown))
+    check('every cl/sql/rpg/text/json fenced code block has a recognized language tag Insights code styling already covers', ['```cl', '```sql', '```rpg', '```text', '```json'].every((tag) => monitoringMarkdown.includes(tag)))
+    check('the article never claims a live IBM i connection or real customer/production data', !/real (customer|production) data/i.test(monitoringMarkdown))
+    check('the article never displays a publication date in its body', !/\bpublished on\b/i.test(monitoringMarkdown) && !/\d{4}-\d{2}-\d{2}/.test(monitoringMarkdown))
+  }
+
+  // ---------------------------------------------------------------------------
   section('12. Sources attribution (IBM i Insights Attribution Cleanup and Date Display Removal)')
   // ---------------------------------------------------------------------------
 
@@ -1037,6 +1144,7 @@ async function runChecks() {
       'components/insights/db2-qsys2-figures.tsx': readRepoFile('components/insights/db2-qsys2-figures.tsx'),
       'components/insights/rest-apis-figures.tsx': readRepoFile('components/insights/rest-apis-figures.tsx'),
       'components/insights/ai-assisted-rpg-figures.tsx': readRepoFile('components/insights/ai-assisted-rpg-figures.tsx'),
+      'components/insights/app-monitoring-figures.tsx': readRepoFile('components/insights/app-monitoring-figures.tsx'),
       'components/insights/insight-figure-registry.ts': readRepoFile('components/insights/insight-figure-registry.ts'),
       'app/insights/page.tsx': readRepoFile('app/insights/page.tsx'),
       'app/insights/[slug]/page.tsx': readRepoFile('app/insights/[slug]/page.tsx'),
