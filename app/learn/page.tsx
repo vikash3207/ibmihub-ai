@@ -7,6 +7,7 @@ import { getCompletionRecordsForUser } from '@/lib/progress'
 import { calculateOverallProgress, selectContinueLesson, getTopicLabelForLesson } from '@/lib/dashboard-metrics'
 import { IBM_I_FUNDAMENTALS_PATH_NAME } from '@/lib/config'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
+import { isDeepDiveAvailable } from '@/lib/deep-dives'
 import { buttonVariants } from '@/components/ui/button'
 import { ProgressBar } from '@/components/ui/progress-bar'
 import { PublicBetaNotice } from '@/components/public-beta-notice'
@@ -60,6 +61,15 @@ export default async function LearnPage() {
   const continueTopicLabel = continueLesson ? getTopicLabelForLesson(continueLesson) : undefined
 
   const isReturningLearner = Boolean(user) && overall.completedCount > 0
+
+  // DEEP_DIVES.length counts every catalog entry, including `planned` and
+  // `review-ready` ones that have no real, readable content yet -- only
+  // `published` entries are actually available to a visitor who clicks
+  // through. isDeepDiveAvailable() (lib/deep-dives.ts) is the single
+  // existing source of truth for that distinction, already used by the
+  // Deep Dives listing page itself; reused here rather than a second
+  // status check.
+  const publishedDeepDiveCount = DEEP_DIVES.filter(isDeepDiveAvailable).length
 
   return (
     <>
@@ -178,7 +188,7 @@ export default async function LearnPage() {
           <span className="min-w-0 flex-1">
             <span className="block text-sm font-semibold text-slate-900">Already know the basics?</span>
             <span className="block text-xs text-slate-500">
-              Browse {DEEP_DIVES.length} standalone Deep Dive{DEEP_DIVES.length === 1 ? '' : 's'} -- no fixed order required.
+              Browse {publishedDeepDiveCount} published Deep Dive{publishedDeepDiveCount === 1 ? '' : 's'} -- no fixed order required.
             </span>
           </span>
           <ArrowRight

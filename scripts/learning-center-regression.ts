@@ -25,6 +25,7 @@ import { resolve } from 'path'
 import type { Lesson } from '../lib/lessons'
 import { calculateOverallProgress, selectContinueLesson, getTopicLabelForLesson } from '../lib/dashboard-metrics'
 import { TOPIC_FILTERS, getTopicById } from '../lib/topics'
+import { isDeepDiveAvailable, type DeepDive } from '../lib/deep-dives'
 
 let failures = 0
 let passed = 0
@@ -266,6 +267,76 @@ async function main() {
     check(
       'the lesson reader page still derives its sidebar topic the same way (untouched)',
       lessonPageSrc.includes('getTopicById(topicParam) ?? getTopicForLesson(lesson)')
+    )
+  }
+
+  // ---------------------------------------------------------------------------
+  section('9. Deep Dives teaser: an accurate "published" count, not the raw catalog size')
+  // ---------------------------------------------------------------------------
+  //
+  // Independent review flagged that app/learn/page.tsx's secondary Deep
+  // Dives card read DEEP_DIVES.length -- the size of the WHOLE catalog,
+  // including `planned`/`review-ready` entries with no real content yet --
+  // and presented it as "Browse N standalone Deep Dives", implying all N
+  // were available to read right now. isDeepDiveAvailable() (lib/deep-dives.ts)
+  // is the existing, single source of truth for "published" already used by
+  // the Deep Dives listing page itself; app/learn/page.tsx now filters
+  // through it instead of a second/raw count.
+
+  {
+    function deepDive(status: DeepDive['status'], overrides: Partial<DeepDive> = {}): DeepDive {
+      return {
+        slug: `dd-${status}-${Math.random().toString(36).slice(2, 8)}`,
+        title: 'A Deep Dive',
+        description: 'Description',
+        category: 'rpgle',
+        status,
+        tags: [],
+        ...overrides,
+      }
+    }
+
+    // Real function execution against a small mixed-status fixture, not
+    // just source-text matching -- proves planned/review-ready entries are
+    // actually excluded, not merely that the right function name appears.
+    const mixedCatalog: DeepDive[] = [
+      deepDive('published'),
+      deepDive('published'),
+      deepDive('planned'),
+      deepDive('review-ready'),
+      deepDive('planned'),
+    ]
+    const availableCount = mixedCatalog.filter(isDeepDiveAvailable).length
+    check('isDeepDiveAvailable() counts only published entries (2 of 5 in a mixed fixture)', availableCount === 2)
+    check('a `planned` entry is never counted as available', !isDeepDiveAvailable(deepDive('planned')))
+    check('a `review-ready` entry is never counted as available (still not real, readable content)', !isDeepDiveAvailable(deepDive('review-ready')))
+    check('a `published` entry is counted as available', isDeepDiveAvailable(deepDive('published')))
+
+    // Singular/plural copy, exercised against the same helper rather than
+    // assumed.
+    const onePublished = [deepDive('published'), deepDive('planned')].filter(isDeepDiveAvailable).length
+    check('a single available entry resolves to count 1 (singular copy branch)', onePublished === 1)
+
+    const learnPageSrc = readRepoFile('app/learn/page.tsx')
+    check(
+      'the singular/plural branch is keyed off the computed count (publishedDeepDiveCount === 1 ? \'\' : \'s\')',
+      learnPageSrc.includes("publishedDeepDiveCount === 1 ? '' : 's'")
+    )
+    check(
+      "app/learn/page.tsx imports isDeepDiveAvailable from lib/deep-dives.ts, not a second status check",
+      /import \{ isDeepDiveAvailable \} from '@\/lib\/deep-dives'/.test(learnPageSrc)
+    )
+    check(
+      'the published count is derived by filtering DEEP_DIVES through isDeepDiveAvailable',
+      /const publishedDeepDiveCount = DEEP_DIVES\.filter\(isDeepDiveAvailable\)\.length/.test(learnPageSrc)
+    )
+    check(
+      'the Deep Dives teaser copy uses the computed published count, not raw DEEP_DIVES.length',
+      learnPageSrc.includes('Browse {publishedDeepDiveCount} published Deep Dive{publishedDeepDiveCount === 1')
+    )
+    check(
+      'DEEP_DIVES.length is no longer used for the "published Deep Dives" user-facing claim',
+      !/Browse \{DEEP_DIVES\.length\}/.test(learnPageSrc)
     )
   }
 

@@ -337,7 +337,17 @@ async function main() {
     // the count-only getPublishedLessonCount() -- same underlying query, still
     // never a hardcoded number (lessons.length replaces the old published count).
     check('Learning Center still derives its lesson count from getPublishedLessons(), not a hardcoded number', learnSrc.includes('getPublishedLessons()'))
-    check('Learning Center still derives its Deep Dives count from DEEP_DIVES.length, not a hardcoded number', learnSrc.includes('DEEP_DIVES.length'))
+    // Raw DEEP_DIVES.length counts planned/review-ready entries too, which
+    // introduced an inaccurate "N standalone Deep Dives" claim (fixed by
+    // review) -- the Learning Center now filters through the catalog's own
+    // isDeepDiveAvailable() first. Deeper coverage (mixed-status fixture
+    // execution) lives in scripts/learning-center-regression.ts
+    // (test:learning-center); this check only confirms the raw, unfiltered
+    // count is not what reaches the page's copy.
+    check(
+      "Learning Center derives its Deep Dives count from DEEP_DIVES filtered through isDeepDiveAvailable(), not raw DEEP_DIVES.length",
+      learnSrc.includes('DEEP_DIVES.filter(isDeepDiveAvailable).length') && !/Browse \{DEEP_DIVES\.length\}/.test(learnSrc)
+    )
 
     const dashboardSrc = readRepoFile('app/(authenticated)/dashboard/page.tsx')
     check('Dashboard still calls the real metric functions, not reimplemented inline math', [
