@@ -130,7 +130,7 @@ This SQLRPGLE program retrieves one order. It has a small interface designed for
 ctl-opt dftactgrp(*no)
         actgrp('ORDERAPI')
         option(*srcstmt : *nodebugio)
-        pgminfo(*pcml : *module : *v7);
+        pgminfo(*pcml : *module);
 
 dcl-pi *n;
    inOrderId       packed(9 : 0) const;
@@ -191,9 +191,11 @@ Compile it as an SQL RPG program:
 CRTSQLRPGI OBJ(MYLIB/GETORDER) SRCFILE(MYLIB/QRPGLESRC) SRCMBR(GETORDER) COMMIT(*NONE) DBGVIEW(*SOURCE)
 ```
 
-### Why `PGMINFO(*PCML : *MODULE : *V7)` Matters
+### Why `PGMINFO(*PCML : *MODULE)` Matters
 
-Program Call Markup Language (PCML) describes the callable program interface: parameter names, types, lengths, and structure. `PGMINFO(*PCML : *MODULE)` embeds that PCML description directly into the compiled module, so IWS has metadata it can read when deploying the program — you do not have to hand-author a separate `.pcml` file to get started. The `*V7` option selects PCML version 7.0, which changes how varying-length fields are represented (a native `varchar` type, instead of the length-and-data structure earlier PCML versions decompose it into) and removes an older restriction on varying-length fields nested inside arrays or data structures. This interface's parameters are all simple, top-level `VARCHAR` fields — not array elements or subfields — so they would already describe correctly without `*V7`. The example asks for it anyway because the plain `PGMINFO(*PCML : *MODULE)` form defaults to an older PCML version rather than tracking the target release, and there's no downside to requesting the newer, more direct representation up front.
+Program Call Markup Language (PCML) describes the callable program interface: parameter names, types, lengths, and structure. `PGMINFO(*PCML : *MODULE)` embeds that PCML description directly into the compiled module, so IWS has metadata it can read when deploying the program — you do not have to hand-author a separate `.pcml` file to get started. Left unqualified like this, the compiler selects a PCML version based on the module's target release, and that default already describes this interface's plain, top-level `VARCHAR` parameters correctly — there is no reason to pin a specific version for an interface this simple.
+
+A later PCML version, such as `*V7`, changes how varying-length fields are represented (a native `varchar` type, instead of the length-and-data structure earlier versions decompose it into) and removes an older restriction on varying-length fields nested inside arrays or data structures. If a future revision of this interface adds an array or a data structure containing a `VARCHAR` field, pinning `PGMINFO(*PCML : *MODULE : *V7)` (or a newer version) becomes the right choice — and worth doing deliberately, since pinning a specific version also means giving up whatever newer PCML features a later version adds until the pin is updated.
 
 In this interface:
 

@@ -773,13 +773,24 @@ async function runChecks() {
     // pin the resulting corrections so a future edit can't silently
     // reintroduce the originals.
     check(
-      'the RPG example explicitly selects PCML v7 for a cleaner native varchar representation -- not described as required for these simple top-level parameters, which would already describe correctly at the older default version too',
-      /pgminfo\(\*pcml\s*:\s*\*module\s*:\s*\*v7\)/.test(restMarkdown)
+      'the RPG example uses the plain, unqualified PGMINFO(*PCML : *MODULE) -- no *V7 (or any other version) pinned for this simple, no-array/no-subfield interface',
+      (() => {
+        // Scoped to the ```rpg fenced code block specifically: the
+        // explanatory prose right after it legitimately *mentions*
+        // PGMINFO(*PCML : *MODULE : *V7) as a hypothetical future choice,
+        // which a whole-document check would wrongly flag as "still pinned".
+        const rpgBlock = restMarkdown.match(/```rpg\n([\s\S]*?)```/)?.[1] ?? ''
+        return /pgminfo\(\*pcml\s*:\s*\*module\)/.test(rpgBlock) && !/pgminfo\(\*pcml\s*:\s*\*module\s*:\s*\*v\d\)/i.test(rpgBlock)
+      })()
     )
     check(
-      'the article accurately scopes what PCML v7 actually changes (varying-length representation, plus removing a restriction on arrays/subfields), not an overclaimed universal requirement for VARCHAR parameters',
+      'the article explains the compiler selects a PCML version by default based on the target release, rather than claiming a specific version is required',
+      /the compiler selects a PCML version based on the module's target release/.test(restMarkdown)
+    )
+    check(
+      'the article accurately scopes what a later PCML version like *V7 actually changes (varying-length representation, plus removing a restriction on arrays/subfields) and frames pinning one as an intentional trade-off, not an overclaimed universal requirement for VARCHAR parameters',
       /removes an older restriction on varying-length fields nested inside arrays or data structures/.test(restMarkdown) &&
-        /would already describe correctly without `\*V7`/.test(restMarkdown)
+        /giving up whatever newer PCML features a later version adds/.test(restMarkdown)
     )
     check('the article cites the direct IBM PGMINFO keyword documentation as a source', restMarkdown.includes('topic=keywords-pgminfopcml-no-dclcase-module-vx'))
     check(
