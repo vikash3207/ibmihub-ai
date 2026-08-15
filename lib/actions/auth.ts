@@ -105,7 +105,11 @@ export async function signUp(formData: FormData) {
 
   const email = normalizeEmail(formData.get('email'))
   const password = formData.get('password') as string
-  const next = (formData.get('next') as string) || '/'
+  // The hidden `next` field originates from a query-string value the sign-up
+  // page received -- constrained to an internal path here (not just on the
+  // page's own display) so a crafted form post can't turn this into an open
+  // redirect via emailRedirectTo's `after=` or the final onboarding redirect.
+  const next = safeInternalPath(formData.get('next') as string | null, '/')
 
   const signUpUrl = (message: string) =>
     `/auth/sign-up?next=${encodeURIComponent(next)}&error=${encodeURIComponent(message)}`
@@ -152,7 +156,9 @@ export async function login(formData: FormData) {
 
   const email = normalizeEmail(formData.get('email'))
   const password = formData.get('password') as string
-  const next = (formData.get('next') as string) || '/'
+  // Same open-redirect constraint as signUp() above -- this is the value
+  // that reaches the final `redirect(next)` below.
+  const next = safeInternalPath(formData.get('next') as string | null, '/')
 
   const loginUrl = (message: string) =>
     `/auth/login?next=${encodeURIComponent(next)}&error=${encodeURIComponent(message)}`
@@ -379,5 +385,5 @@ export async function saveOnboardingResponse(
     .eq('id', user.id)
 
   revalidatePath('/', 'layout')
-  redirect(next || '/')
+  redirect(safeInternalPath(next, '/'))
 }

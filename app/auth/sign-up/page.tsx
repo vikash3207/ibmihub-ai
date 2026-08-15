@@ -4,6 +4,8 @@ import { signUp } from '@/lib/actions/auth'
 import { AuthCard } from '@/components/auth-card'
 import { CaptchaProtectedSubmit } from '@/components/auth/captcha-protected-submit'
 import { isTurnstileEnforcementEnabled } from '@/lib/turnstile'
+import { safeInternalPath } from '@/lib/auth-redirect'
+import { authCopyFor } from '@/lib/auth-destination-content'
 
 // Not useful search-result content, and excluded from app/sitemap.ts --
 // explicitly opt out of indexing rather than relying only on robots.txt.
@@ -16,11 +18,21 @@ interface Props {
   searchParams: Promise<{ next?: string; error?: string }>
 }
 
+const GENERIC_SIGNUP_SUBTITLE =
+  'Save your progress and unlock the AI Tutor, Practice questions, the Practice Lab, the SQL Console, and your dashboard.'
+
 export default async function SignUpPage({ searchParams }: Props) {
-  const { next = '/', error } = await searchParams
+  const { next: rawNext = '/', error } = await searchParams
+  // Validated once here, then reused for both the copy lookup and the
+  // hidden form field -- the raw query-string value is never rendered.
+  const next = safeInternalPath(rawNext, '/')
+  const destinationCopy = authCopyFor(next)
 
   return (
-    <AuthCard title="Create your account" subtitle="Save your progress and access the AI Tutor.">
+    <AuthCard
+      title={destinationCopy?.signupHeading ?? 'Create your account'}
+      subtitle={destinationCopy?.signupSubtitle ?? GENERIC_SIGNUP_SUBTITLE}
+    >
       {error && (
         <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error}
