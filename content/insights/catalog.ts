@@ -11,8 +11,9 @@
  * catalog correctly, that path just isn't exercised by the real data
  * anymore. The second (PR #202): "Modernizing RPG Applications with SQL and
  * APIs". The third (PR #203): "Db2 for i and QSYS2 Services Every Developer
- * Should Know". The fourth (this PR): "Building REST APIs from IBM i
- * Applications" -- entries are appended in publication order, and the
+ * Should Know". The fourth (PR #206): "Building REST APIs from IBM i
+ * Applications". The fifth (this PR): "Practical AI-Assisted Development for
+ * RPG Programmers" -- entries are appended in publication order, and the
  * listing page's "featured" treatment is positional (array index 0 after
  * filtering to published), not driven by the `featured` flag, so none of
  * these later entries carries one.
@@ -100,5 +101,18 @@ export const INSIGHTS: Insight[] = [
     status: 'published',
     relatedDeepDiveSlugs: ['sql-on-ibm-i', 'apis-and-external-integration-on-ibm-i'],
     relatedLessonSlugs: ['exposing-ibm-i-logic-as-an-api', 'rest-api-concepts-for-ibm-i-developers', 'securing-ibm-i-apis-at-a-beginner-level'],
+  },
+  {
+    slug: 'practical-ai-assisted-development-for-rpg-programmers',
+    title: 'Practical AI-Assisted Development for RPG Programmers',
+    description:
+      'A practical, balanced guide to using AI assistants for RPG work — understanding legacy code, generating and modernizing RPGLE and SQLRPGLE, reviewing embedded SQL, and building a safe context-to-verification workflow without surrendering engineering judgment.',
+    category: 'ai-emerging-tech',
+    tags: ['IBM i', 'RPGLE', 'SQLRPGLE', 'AI Coding Assistants', 'Code Review', 'Modernization'],
+    publishedAt: '2026-08-15',
+    readingTimeMinutes: 19,
+    status: 'published',
+    relatedDeepDiveSlugs: ['embedded-sql-in-rpgle', 'sql-error-handling-on-ibm-i'],
+    relatedLessonSlugs: ['compile-errors-vs-runtime-errors', 'modern-ibm-i-development-overview', 'debugging-rpgle-programs'],
   },
 ]

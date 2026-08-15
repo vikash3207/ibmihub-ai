@@ -790,6 +790,7 @@ const INSIGHT_SCENARIOS: Scenario[] = [
   { query: 'How do I generate JSON or call a REST API from RPG?', pool: insightChunks, expectSlugOneOf: ['modernizing-rpg-applications-with-sql-and-apis'] },
   { query: 'Which QSYS2 service shows job log messages as rows?', pool: insightChunks, expectSlugOneOf: ['db2-for-i-qsys2-services-developers-should-know'] },
   { query: 'How do I deploy an RPG program as a REST API using Integrated Web Services and PCML?', pool: insightChunks, expectSlugOneOf: ['building-rest-apis-from-ibm-i-applications'] },
+  { query: 'What is a safe workflow for AI-assisted RPG development?', pool: insightChunks, expectSlugOneOf: ['practical-ai-assisted-development-for-rpg-programmers'] },
 ]
 
 const DEEP_DIVE_SCENARIOS: Scenario[] = [
