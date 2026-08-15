@@ -302,8 +302,16 @@ async function main() {
     check('Deep Dives page still renders the real catalog, not a hand-picked subset', deepDivesPageSrc.includes('deepDives={DEEP_DIVES}'))
     check('Deep Dives page still imports DEEP_DIVES from the untouched catalog module', deepDivesPageSrc.includes("from '@/content/deep-dives/catalog'"))
 
+    // DeepDiveBrowser now derives availability from the shared
+    // isDeepDiveAvailable() helper (lib/deep-dives.ts) instead of inlining
+    // `deepDive.status === 'published'` itself (Deep Dives, IBM i Insights
+    // and Reader-Experience Polish -- fixes the exact "duplicated status
+    // check" that helper exists to prevent). Still ultimately the same
+    // status field, just through the one shared function every other
+    // Deep Dive status check in the app already uses. Deeper coverage lives
+    // in scripts/reader-experience-regression.ts (test:reader-experience).
     const browserSrc = readRepoFile('components/deep-dive-browser.tsx')
-    check('DeepDiveBrowser still derives "Available"/"Coming soon" from deepDive.status, not new logic', browserSrc.includes("deepDive.status === 'published'"))
+    check('DeepDiveBrowser derives availability via the shared isDeepDiveAvailable() helper, not an inline status check', browserSrc.includes('isDeepDiveAvailable(') && !browserSrc.includes("deepDive.status === 'published'"))
 
     // These two checks used to assert the Insights catalog was still empty
     // and untouched by *this* (site-wide nav visual upgrade) PR -- true at
