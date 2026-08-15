@@ -23,6 +23,8 @@ import type { AiTutorContext } from '@/components/ai-tutor/types'
 import { DEEP_DIVE_CATEGORIES, DEEP_DIVE_ACCENT_CLASSES, getDeepDiveAccent } from '@/lib/deep-dive-categories'
 import { getPublishedLessonBySlugOrNull } from '@/lib/lessons'
 import { SITE_NAME, SITE_URL } from '@/lib/config'
+import { buildReaderBreadcrumbStructuredData } from '@/lib/reader-breadcrumb'
+import { ReaderBreadcrumb } from '@/components/reader-breadcrumb'
 import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { buttonVariants } from '@/components/ui/button'
@@ -170,16 +172,20 @@ export default async function DeepDivePage({ params }: Props) {
   return (
     <div className="min-h-screen flex flex-col bg-white">
       <StructuredData data={buildDeepDiveStructuredData(deepDive, seoDescription)} />
+      <StructuredData
+        data={buildReaderBreadcrumbStructuredData(
+          { name: 'Deep Dives', path: '/deep-dives' },
+          { name: deepDive.title, path: `/deep-dives/${deepDive.slug}` }
+        )}
+      />
       <RegisterAiTutorPageContext context={aiTutorContext} />
       <SiteHeader />
 
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
-          <Link href="/deep-dives" className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-blue-600">
-            <span aria-hidden="true">&larr;</span> All Deep Dives
-          </Link>
+          <ReaderBreadcrumb sectionLabel="Deep Dives" sectionHref="/deep-dives" currentLabel={deepDive.title} />
 
-          <div className="mt-6 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:gap-10">
+          <div className="mt-2 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:gap-10">
             <DeepDiveToc items={toc} />
 
             <article className={`max-w-3xl space-y-8 rounded-2xl border-t-4 bg-white p-6 shadow-sm sm:p-8 ${accentClasses.topBorder}`}>
@@ -226,6 +232,9 @@ export default async function DeepDivePage({ params }: Props) {
               )}
 
               <div className="flex flex-wrap gap-3 border-t border-slate-100 pt-6">
+                <Link href="/deep-dives" className={buttonVariants({ variant: 'secondary' })}>
+                  &larr; All Deep Dives
+                </Link>
                 <Link href="/practice-lab/sql" className={buttonVariants({ variant: 'secondary' })}>
                   Try the SQL Practice Console
                 </Link>

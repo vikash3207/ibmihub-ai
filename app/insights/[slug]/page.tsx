@@ -15,6 +15,7 @@ import { StructuredData } from '@/components/structured-data'
 import { INSIGHT_CATEGORIES, INSIGHT_ACCENT_CLASSES, getInsightAccent } from '@/lib/insight-categories'
 import { buildInsightStructuredData, buildBreadcrumbStructuredData } from '@/lib/insight-structured-data'
 import { splitInsightHtmlOnFigureMarkers } from '@/lib/insight-render'
+import { ReaderBreadcrumb } from '@/components/reader-breadcrumb'
 import { INSIGHT_FIGURE_REGISTRY } from '@/components/insights/insight-figure-registry'
 import { DEEP_DIVES } from '@/content/deep-dives/catalog'
 import { isDeepDiveAvailable } from '@/lib/deep-dives'
@@ -142,25 +143,7 @@ export default async function InsightPage({ params }: Props) {
 
       <main className="flex-1">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
-          <nav aria-label="Breadcrumb" className="mb-6 flex flex-wrap items-center gap-1.5 text-sm text-slate-500">
-            <Link
-              href="/"
-              className="rounded hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-            >
-              Home
-            </Link>
-            <span aria-hidden="true">/</span>
-            <Link
-              href="/insights"
-              className="rounded hover:text-blue-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-            >
-              IBM i Insights
-            </Link>
-            <span aria-hidden="true">/</span>
-            <span className="font-medium text-slate-700" aria-current="page">
-              {insight.title}
-            </span>
-          </nav>
+          <ReaderBreadcrumb sectionLabel="IBM i Insights" sectionHref="/insights" currentLabel={insight.title} />
 
           <div className="mt-2 lg:grid lg:grid-cols-[240px_minmax(0,1fr)] lg:items-start lg:gap-10">
             <DeepDiveToc items={toc} variant="insight" />
