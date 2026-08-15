@@ -10,11 +10,22 @@
  * app/insights/page.tsx and lib/insights.ts both still handle a fully empty
  * catalog correctly, that path just isn't exercised by the real data
  * anymore. The second (PR #202): "Modernizing RPG Applications with SQL and
- * APIs". The third (this PR): "Db2 for i and QSYS2 Services Every Developer
- * Should Know" -- entries are appended in publication order, and the
+ * APIs". The third (PR #203): "Db2 for i and QSYS2 Services Every Developer
+ * Should Know". The fourth (this PR): "Building REST APIs from IBM i
+ * Applications" -- entries are appended in publication order, and the
  * listing page's "featured" treatment is positional (array index 0 after
- * filtering to published), not driven by the `featured` flag, so neither of
+ * filtering to published), not driven by the `featured` flag, so none of
  * these later entries carries one.
+ *
+ * The fourth entry deliberately covers only *exposing* IBM i logic as a
+ * REST API (the server side) -- the second entry ("Modernizing RPG
+ * Applications with SQL and APIs") already touches both exposing and
+ * consuming lightly, but this article goes deep on one direction only. Its
+ * own body links to the second entry for the consuming side, rather than
+ * the catalog trying to express that relationship (Insight has no
+ * relatedInsightSlugs field -- only relatedDeepDiveSlugs/relatedLessonSlugs
+ * -- so a same-type cross-reference is a plain Markdown link in the body,
+ * not catalog metadata).
  *
  * `category: 'operations-performance'` on the QSYS2 entry is a deliberate
  * mapping, not a literal match: the source brief suggested a "Db2 for i"
@@ -76,5 +87,18 @@ export const INSIGHTS: Insight[] = [
     status: 'published',
     relatedDeepDiveSlugs: ['sql-on-ibm-i', 'journaling-in-real-applications'],
     relatedLessonSlugs: ['acs-run-sql-scripts-for-ibm-i-developers', 'sql-indexes-and-views-on-db2-for-i', 'viewing-journal-entries-basics'],
+  },
+  {
+    slug: 'building-rest-apis-from-ibm-i-applications',
+    title: 'Building REST APIs from IBM i Applications',
+    description:
+      'A practical guide to exposing RPG and Db2 for i business logic as REST APIs using Integrated Web Services — resource design, RPG service boundaries, PCML, JSON contracts, errors, security, transactions, and production readiness.',
+    category: 'apis-integration',
+    tags: ['IBM i', 'REST APIs', 'RPGLE', 'Integrated Web Services', 'Db2 for i', 'Security'],
+    publishedAt: '2026-08-15',
+    readingTimeMinutes: 19,
+    status: 'published',
+    relatedDeepDiveSlugs: ['sql-on-ibm-i', 'apis-and-external-integration-on-ibm-i'],
+    relatedLessonSlugs: ['exposing-ibm-i-logic-as-an-api', 'rest-api-concepts-for-ibm-i-developers', 'securing-ibm-i-apis-at-a-beginner-level'],
   },
 ]
