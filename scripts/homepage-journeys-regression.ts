@@ -132,11 +132,14 @@ async function main() {
     check('5250-style Practice Lab is mentioned', page.includes('5250-style'))
     check('ACS-style SQL Console is mentioned', page.includes('SQL Console') || page.includes('ACS-style SQL'))
     // IBM i Practice Hub: Journey 3's body copy broadened from "practice
-    // questions" specifically to cover guided practice, quick quizzes, and
-    // interview preparation -- the hub is no longer just a question browser.
+    // questions" specifically to cover guided practice and quick quizzes --
+    // the hub is no longer just a question browser. Interview prep is
+    // explicitly labeled "coming soon" here (follow-up correction), never
+    // listed as an unqualified peer of the real, working features -- there
+    // is no session/route for it yet.
     check('Guided practice is mentioned', page.includes('guided practice'))
     check('Quick quizzes are mentioned', page.includes('quick quizzes'))
-    check('Interview preparation is mentioned', page.includes('technical interviews'))
+    check('Interview preparation is mentioned, explicitly as coming soon (never marketed as available today)', page.includes('Interview prep is coming soon'))
   }
 
   // ---------------------------------------------------------------------------

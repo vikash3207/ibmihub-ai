@@ -331,7 +331,10 @@ async function main() {
     // visitor now sees a public preview (<PracticePreview>) instead of being
     // redirected straight to login -- deeper coverage of that preview lives
     // in scripts/protected-preview-regression.ts (test:protected-preview).
-    check('an unauthenticated visitor now sees <PracticePreview> instead of a login redirect', practiceSrc.includes('return <PracticePreview />'))
+    // IBM i Practice Hub (follow-up correction): the preview now takes a
+    // computed `signedOutNext` prop (preserving a legacy topic destination
+    // through login/sign-up) rather than being rendered with no props.
+    check('an unauthenticated visitor now sees <PracticePreview> instead of a login redirect', practiceSrc.includes('<PracticePreview signedOutNext='))
     // IBM i Practice Hub: INTRO_NOTICE now lives on the relocated Guided
     // Practice route (app/(authenticated)/practice/guided/page.tsx), not the
     // hub landing page itself -- /practice is now a landing page with three

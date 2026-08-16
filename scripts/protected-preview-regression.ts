@@ -141,21 +141,34 @@ async function main() {
   // ---------------------------------------------------------------------------
 
   {
-    const files = [
-      'app/(authenticated)/ai-tutor/page.tsx',
-      'app/(authenticated)/practice/page.tsx',
-      'app/(authenticated)/practice-lab/page.tsx',
-    ]
-    for (const file of files) {
+    // IBM i Practice Hub (follow-up correction): Practice's signed-out
+    // preview no longer reuses FeaturePreviewShell -- review found it read
+    // as visually weaker than the authenticated hub's dark, full-bleed
+    // SectionHero, when the two were actually just different, valid states.
+    // Practice now builds its own hero directly from SectionHero +
+    // PreviewAuthCta so both auth states share one visual identity; AI Tutor
+    // and Practice Lab keep FeaturePreviewShell unchanged, so this suite
+    // still enforces shared-shell reuse for exactly those two.
+    const sharedShellFiles = ['app/(authenticated)/ai-tutor/page.tsx', 'app/(authenticated)/practice-lab/page.tsx']
+    for (const file of sharedShellFiles) {
       const src = readRepoFile(file)
       check(`${file} imports the shared FeaturePreviewShell`, /from '@\/components\/feature-preview\/feature-preview-shell'/.test(src))
       check(`${file} imports the shared PreviewAuthCta`, /from '@\/components\/feature-preview\/preview-auth-cta'/.test(src))
       check(`${file} no longer redirects an unauthenticated visitor to login`, !/if \(!user\) \{\s*redirect\(/.test(src))
     }
 
+    const practiceSrcForShell = readRepoFile('app/(authenticated)/practice/page.tsx')
+    check(
+      'app/(authenticated)/practice/page.tsx deliberately does NOT import FeaturePreviewShell (builds its own SectionHero-based preview instead, so only Practice\'s identity changed)',
+      !/from '@\/components\/feature-preview\/feature-preview-shell'/.test(practiceSrcForShell)
+    )
+    check('app/(authenticated)/practice/page.tsx imports the shared PreviewAuthCta', /from '@\/components\/feature-preview\/preview-auth-cta'/.test(practiceSrcForShell))
+    check('app/(authenticated)/practice/page.tsx no longer redirects an unauthenticated visitor to login', !/if \(!user\) \{\s*redirect\(/.test(practiceSrcForShell))
+
     const shellSrc = readRepoFile('components/feature-preview/feature-preview-shell.tsx')
     check('FeaturePreviewShell is defined exactly once', (shellSrc.match(/export function FeaturePreviewShell/g) ?? []).length === 1)
     check('FeaturePreviewShell is a server component (no "use client")', !shellSrc.includes("'use client'"))
+    check('FeaturePreviewShell itself is untouched by the Practice Hub change (no Practice-specific copy leaked into the shared shell)', !shellSrc.includes('Practice Hub'))
   }
 
   // ---------------------------------------------------------------------------
@@ -172,7 +185,12 @@ async function main() {
     )
 
     const practiceSrc = readRepoFile('app/(authenticated)/practice/page.tsx')
-    const practicePreviewBody = sliceBetween(practiceSrc, 'function PracticePreview', 'export default async function PracticePage')
+    // IBM i Practice Hub (follow-up correction): PracticePage (the
+    // authenticated branch) is now defined before PracticePreview in this
+    // file, so PracticePreview's own body is isolated by slicing to the
+    // next function declared after it (PracticeModeCard) rather than to
+    // PracticePage, which now precedes it.
+    const practicePreviewBody = sliceBetween(practiceSrc, 'function PracticePreview', 'function PracticeModeCard')
     // IBM i Practice Hub: <PracticeBrowser> now renders on the relocated
     // Guided Practice route, not the hub landing page itself -- the hub
     // page's authenticated branch renders three "Test Your Knowledge" cards
@@ -198,7 +216,16 @@ async function main() {
 
   {
     check('AI Tutor preview CTA targets /ai-tutor', readRepoFile('app/(authenticated)/ai-tutor/page.tsx').includes('<PreviewAuthCta next="/ai-tutor"'))
-    check('Practice preview CTA targets /practice', readRepoFile('app/(authenticated)/practice/page.tsx').includes('<PreviewAuthCta next="/practice"'))
+    // IBM i Practice Hub (follow-up correction): Practice's `next` is no
+    // longer a hardcoded literal -- a legacy /practice?topic=<id> visit must
+    // survive login/sign-up as the exact post-auth destination, so the CTA
+    // now takes a computed `signedOutNext` (which itself defaults to
+    // '/practice' when there's no legacy topic -- see the Practice Hub
+    // regression suite's legacy-topic section for that default's coverage).
+    check(
+      'Practice preview CTA targets the real, possibly-topic-specific Practice destination (computed, not a hardcoded /practice literal)',
+      readRepoFile('app/(authenticated)/practice/page.tsx').includes('<PreviewAuthCta next={signedOutNext}')
+    )
     check('Practice Lab preview CTA targets /practice-lab', readRepoFile('app/(authenticated)/practice-lab/page.tsx').includes('<PreviewAuthCta next="/practice-lab"'))
 
     const ctaSrc = readRepoFile('components/feature-preview/preview-auth-cta.tsx')
