@@ -86,7 +86,7 @@ export function ProfileForm({ email, initialFirstName, initialLastName, initialC
 
       <div>
         <label htmlFor="contactNumber" className="block text-sm font-medium text-slate-700 mb-1">
-          Contact number <span className="text-slate-400">(optional)</span>
+          Contact number <span className="text-slate-500">(optional)</span>
         </label>
         <input
           id="contactNumber"

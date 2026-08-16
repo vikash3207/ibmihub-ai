@@ -110,7 +110,7 @@ export default async function ResetPasswordPage({ searchParams }: Props) {
         {/* Short opaque tokens, shown so the cause can be identified without
             server logs. They name a branch and nothing more -- no code,
             token, cookie, email or Supabase message. */}
-        {reference && <p className="mt-4 text-center text-xs text-slate-400">Reference: {reference}</p>}
+        {reference && <p className="mt-4 text-center text-xs text-slate-500">Reference: {reference}</p>}
         <RecoveryFragmentNotice />
       </AuthCard>
     )

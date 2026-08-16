@@ -44,7 +44,7 @@ export function SiteFooter() {
 
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Product</p>
-            <nav className="mt-3 flex flex-col gap-2.5">
+            <nav aria-label="Product links" className="mt-3 flex flex-col gap-2.5">
               {PRODUCT_LINKS.map((link) => (
                 <Link
                   key={link.href}
@@ -59,7 +59,7 @@ export function SiteFooter() {
 
           <div>
             <p className="text-xs font-bold uppercase tracking-wide text-slate-500">Company</p>
-            <nav className="mt-3 flex flex-col gap-2.5">
+            <nav aria-label="Company links" className="mt-3 flex flex-col gap-2.5">
               {COMPANY_LINKS.map((link) => (
                 <Link
                   key={link.href}

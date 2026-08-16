@@ -34,7 +34,7 @@ export default async function SignUpPage({ searchParams }: Props) {
       subtitle={destinationCopy?.signupSubtitle ?? GENERIC_SIGNUP_SUBTITLE}
     >
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}

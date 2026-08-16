@@ -28,7 +28,7 @@ export default function ContactPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <SectionHero
           icon={Mail}
           badgeLabel="We read every message"
@@ -55,7 +55,7 @@ export default function ContactPage() {
                 >
                   {SUPPORT_EMAIL}
                 </a>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Use for</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1.5">Use for</p>
                 <ul className="space-y-1 text-sm text-slate-600">
                   <li>Login or account help</li>
                   <li>Bugs and technical issues</li>
@@ -77,7 +77,7 @@ export default function ContactPage() {
                 >
                   {CONTACT_EMAIL}
                 </a>
-                <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1.5">Use for</p>
+                <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1.5">Use for</p>
                 <ul className="space-y-1 text-sm text-slate-600">
                   <li>Feedback</li>
                   <li>Content suggestions</li>

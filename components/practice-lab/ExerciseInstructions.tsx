@@ -32,7 +32,7 @@ export function ExerciseInstructions({
 
       {learningObjectives.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">You&apos;ll practice</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">You&apos;ll practice</p>
           <ul className="mt-1 list-disc space-y-0.5 pl-5 text-sm text-slate-600">
             {learningObjectives.map((objective) => (
               <li key={objective}>{objective}</li>
@@ -57,7 +57,7 @@ export function ExerciseInstructions({
 
       {relatedLessons.length > 0 && (
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">Related lessons</p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Related lessons</p>
           <ul className="mt-1 space-y-0.5">
             {relatedLessons.map((lesson) => (
               <li key={lesson.slug}>
@@ -73,7 +73,7 @@ export function ExerciseInstructions({
         </div>
       )}
 
-      <p className="text-xs text-slate-400">AI Tutor assistance for this exercise is planned for a future update.</p>
+      <p className="text-xs text-slate-500">AI Tutor assistance for this exercise is planned for a future update.</p>
     </div>
   )
 }

@@ -15,6 +15,7 @@ import { EmbeddedAiTutorPanel } from '@/components/ai-tutor/embedded-ai-tutor-pa
 import { AiTutorContentShift } from '@/components/ai-tutor/ai-tutor-content-shift'
 import { RouteProgressBar } from '@/components/route-progress-bar'
 import { GoogleAnalyticsScripts, GoogleAnalyticsPageViews } from '@/components/analytics/google-analytics'
+import { SkipLink } from '@/components/skip-link'
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' })
 
@@ -64,6 +65,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={`h-full ${inter.variable}`}>
       <body className="h-full bg-slate-50 text-slate-900 antialiased font-sans">
+        <SkipLink />
         {/*
           Mounted at the root, not in app/learn/layout.tsx or
           app/(authenticated)/layout.tsx: those are sibling route-group

@@ -187,7 +187,7 @@ export default async function DashboardPage() {
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
               {overall.completedCount}
-              <span className="text-base font-medium text-slate-400"> / {overall.totalCount}</span>
+              <span className="text-base font-medium text-slate-500"> / {overall.totalCount}</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">Currently published lessons</p>
           </Card>
@@ -217,7 +217,7 @@ export default async function DashboardPage() {
             </p>
             <p className="mt-2 text-2xl font-bold tabular-nums text-slate-900">
               {topicSummary.startedCount}
-              <span className="text-base font-medium text-slate-400"> / {topicSummary.totalCount}</span>
+              <span className="text-base font-medium text-slate-500"> / {topicSummary.totalCount}</span>
             </p>
             <p className="mt-1 text-xs text-slate-500">
               {topicSummary.completedCount > 0
@@ -227,7 +227,7 @@ export default async function DashboardPage() {
           </Card>
         </div>
 
-        <p className="mt-3 text-xs text-slate-400">
+        <p className="mt-3 text-xs text-slate-500">
           Progress reflects lessons you marked complete. It measures how much of the curriculum you
           have worked through, not a skill assessment.
         </p>
@@ -396,7 +396,7 @@ export default async function DashboardPage() {
                       <span className="block text-sm font-medium text-slate-900">{definition.name}</span>
                       <span className="block text-xs text-slate-500">{definition.condition}</span>
                     </span>
-                    <time dateTime={achievement.earnedAt} className="shrink-0 text-xs text-slate-400">
+                    <time dateTime={achievement.earnedAt} className="shrink-0 text-xs text-slate-500">
                       {formatCompletionDate(achievement.earnedAt, locale)}
                     </time>
                   </li>
@@ -440,7 +440,7 @@ export default async function DashboardPage() {
                         {topicLabel && <span className="block text-xs text-slate-500">{topicLabel}</span>}
                       </span>
                     </span>
-                    <time dateTime={record.completedAt} className="shrink-0 text-xs text-slate-400">
+                    <time dateTime={record.completedAt} className="shrink-0 text-xs text-slate-500">
                       {formatCompletionDate(record.completedAt, locale)}
                     </time>
                   </Link>

@@ -334,9 +334,9 @@ export function AutonomyRiskFigure() {
                   </span>
                   <p className="text-sm font-bold text-slate-900">{tier.title}</p>
                 </div>
-                <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">Examples</p>
+                <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">Examples</p>
                 <p className="text-xs text-slate-600">{tier.examples}</p>
-                <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">Required oversight</p>
+                <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">Required oversight</p>
                 <p className="text-xs text-slate-600">{tier.oversight}</p>
               </div>
             </div>

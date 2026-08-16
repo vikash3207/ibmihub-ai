@@ -102,12 +102,12 @@ export function LessonSidebar({
       </Link>
 
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">{topicLabel}</p>
-        <p className="text-xs text-slate-400">
+        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">{topicLabel}</p>
+        <p className="text-xs text-slate-500">
           {currentIndex >= 0 ? currentIndex + 1 : '?'} of {items.length} in this topic
         </p>
         {categoryLabel && (
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="mt-1 text-xs text-slate-500">
             {categoryLabel}
             {categorySubLabel ? ` · ${categorySubLabel}` : ''}
           </p>

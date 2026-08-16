@@ -275,7 +275,7 @@ export default async function LandingPage() {
         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-32 bg-gradient-to-b from-transparent to-slate-50" />
       </section>
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         {/* -- Public beta notice ------------------------------------------
             The homepage's one, unobtrusive beta message (Homepage Hierarchy
             and Signed-Out Feature Discovery) -- the previous large, detailed
@@ -484,7 +484,7 @@ export default async function LandingPage() {
                     <h3 className="font-semibold text-slate-900">{bucket.title}</h3>
                   </div>
                   <p className="text-sm text-slate-600 leading-relaxed mb-3">{bucket.body}</p>
-                  <p className="text-xs font-medium text-slate-400">
+                  <p className="text-xs font-medium text-slate-500">
                     {bucket.count} lesson{bucket.count === 1 ? '' : 's'}
                   </p>
                 </Card>
@@ -511,7 +511,7 @@ export default async function LandingPage() {
                   <p className="text-sm font-semibold text-slate-900">AI Tutor</p>
                   <p className="text-xs text-slate-500">Educational guidance for IBM&nbsp;i concepts</p>
                 </div>
-                <span className="ml-auto text-[11px] font-medium text-slate-400">Product preview</span>
+                <span className="ml-auto text-[11px] font-medium text-slate-500">Product preview</span>
               </div>
 
               <div className="space-y-3">

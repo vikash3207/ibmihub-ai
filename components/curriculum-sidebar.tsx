@@ -134,7 +134,7 @@ export function CurriculumSidebar({ lessons, activeTopicId, completedSet }: Curr
                             fits "288" with room to spare, text-right keeps
                             every title starting at the same x regardless of
                             digit count. */}
-                        <span className="flex w-7 shrink-0 items-center justify-end tabular-nums text-slate-400">
+                        <span className="flex w-7 shrink-0 items-center justify-end tabular-nums text-slate-500">
                           {completedSet.has(lesson.id) ? (
                             <Check className="h-3 w-3 text-emerald-500" aria-hidden="true" />
                           ) : (

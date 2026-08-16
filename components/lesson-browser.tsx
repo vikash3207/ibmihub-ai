@@ -152,7 +152,7 @@ function LessonRow({
         </span>
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2 flex-wrap">
-            <span className="font-semibold text-slate-900">{lesson.title}</span>
+            <span className="break-words font-semibold text-slate-900">{lesson.title}</span>
             {isCompleted && (
               <Badge variant="success">
                 <Check className="h-3 w-3" aria-hidden="true" />
@@ -160,7 +160,7 @@ function LessonRow({
               </Badge>
             )}
           </span>
-          <span className="block text-sm text-slate-600 mt-1">{lesson.short_description}</span>
+          <span className="mt-1 block break-words text-sm text-slate-600">{lesson.short_description}</span>
           {categoryLabel && (
             <span
               className={cn(

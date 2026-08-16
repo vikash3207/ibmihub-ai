@@ -104,7 +104,7 @@ export function LimitReachedDialog() {
             type="button"
             onClick={dismissLimitReached}
             aria-label="Close"
-            className="-mr-1 -mt-1 rounded-lg p-1.5 text-slate-400 transition-colors motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
+            className="-mr-1 -mt-1 rounded-lg p-1.5 text-slate-500 transition-colors motion-reduce:transition-none hover:bg-slate-100 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600"
           >
             <X className="h-4 w-4" aria-hidden="true" />
           </button>

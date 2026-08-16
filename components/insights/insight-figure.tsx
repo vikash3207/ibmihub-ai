@@ -66,7 +66,7 @@ export function InsightFigure({ number, title, caption, accent, scrollable = fal
           <h3 className="text-sm font-semibold text-slate-900 sm:text-base">{title}</h3>
         </div>
         {scrollable && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-400 sm:hidden">
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-slate-500 sm:hidden">
             <MoveHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
             Scroll to see all
           </span>
@@ -84,7 +84,7 @@ export function InsightFigure({ number, title, caption, accent, scrollable = fal
       </div>
 
       {scrollable && (
-        <p className="hidden items-center gap-1.5 px-5 pb-1 text-xs text-slate-400 sm:flex sm:px-6">
+        <p className="hidden items-center gap-1.5 px-5 pb-1 text-xs text-slate-500 sm:flex sm:px-6">
           <MoveHorizontal className="h-3.5 w-3.5" aria-hidden="true" />
           Scroll horizontally within the diagram to see the full flow.
         </p>

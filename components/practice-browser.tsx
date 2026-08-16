@@ -70,7 +70,7 @@ function QuestionCard({
         )}
         aria-hidden="true"
       />
-      <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mb-1">{question.title}</p>
+      <p className="text-xs font-medium uppercase tracking-wide text-slate-500 mb-1">{question.title}</p>
       <p className="whitespace-pre-wrap text-sm font-medium text-slate-900 mb-3">{question.question}</p>
 
       {isMultipleChoice ? (
