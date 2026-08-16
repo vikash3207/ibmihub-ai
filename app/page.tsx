@@ -424,8 +424,9 @@ export default async function LandingPage() {
               </div>
               <h3 className="font-semibold text-slate-900 mb-2">Want hands-on practice?</h3>
               <p className="text-sm text-slate-600 leading-relaxed mb-4 flex-1">
-                Check your understanding with practice questions, then get hands-on in a simulated
-                5250-style command environment and an ACS-style SQL console --{' '}
+                Reinforce concepts with guided practice, test yourself with quick quizzes, prepare for
+                technical interviews, and get hands-on in a simulated 5250-style command environment and
+                an ACS-style SQL console --{' '}
                 <strong className="font-semibold text-slate-800">
                   safe learning simulations, not a connection to a real IBM&nbsp;i system.
                 </strong>
