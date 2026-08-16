@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
+import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ClipboardCheck } from 'lucide-react'
+import { ArrowLeft, ClipboardCheck } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { PRACTICE_QUESTIONS, PRACTICE_TOPICS } from '@/content/practice/questions'
@@ -77,8 +78,20 @@ export default async function GuidedPracticePage({ searchParams }: Props) {
       />
 
       <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-3xl px-4 sm:px-6">
-        <div className="rounded-2xl border border-emerald-100 bg-white p-4 text-sm text-slate-700 leading-relaxed shadow-sm">
-          {INTRO_NOTICE}
+        {/* Lives on the same solid white card as the notice below it (not
+            directly on the hero's fade-to-white zone, whose exact
+            background at this scroll position is ambiguous) so its
+            contrast against its background is always guaranteed, not
+            dependent on gradient position. */}
+        <div className="rounded-2xl border border-emerald-100 bg-white p-4 shadow-sm">
+          <Link
+            href="/practice"
+            className="mb-2 inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1 rounded"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+            Practice Hub
+          </Link>
+          <p className="text-sm leading-relaxed text-slate-700">{INTRO_NOTICE}</p>
         </div>
       </div>
 
