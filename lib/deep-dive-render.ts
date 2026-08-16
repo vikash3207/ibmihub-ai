@@ -20,13 +20,38 @@ export interface DeepDiveTocItem {
 
 const HEADING_PATTERN = /<h([23])>([\s\S]*?)<\/h\1>/g
 
+/**
+ * Decodes every character reference form rehype-stringify can actually
+ * produce inside heading text, not just named ones.
+ *
+ * Root cause of a real, live bug (Deep Dives, IBM i Insights and
+ * Reader-Experience Polish): rehype-stringify's default entity encoder does
+ * NOT use named references for `<`/`&` in text content -- it emits hex
+ * numeric character references instead (confirmed directly against this
+ * pipeline: a heading containing a literal `<` renders as `<h3>...&#x3C;...</h3>`,
+ * never `&lt;`). The previous version of this function only handled a
+ * hardcoded list of named entities, so any heading with a literal `<` or `&`
+ * (e.g. a Deep Dive section titled `Why \`SqlCode < 0\` alone is
+ * insufficient`) left the raw text "&#x3C;" in the extracted TOC title --
+ * and since that title is later interpolated as plain JSX text (which does
+ * not itself interpret HTML entities), the literal string "&#x3C;" rendered
+ * visibly in the sidebar instead of "<". The heading anchor id was affected
+ * too (slugify() stripped the entity's punctuation into an "x3c" fragment).
+ *
+ * Numeric references are decoded generically (any codepoint, not a fixed
+ * list) before the small set of named ones this pipeline can also emit, so
+ * this stays correct even if remark/rehype's own encoding choices change --
+ * fixed at this rendering layer, not with a page-level string replacement.
+ */
 function decodeEntities(text: string): string {
   return text
+    .replace(/&#x([0-9a-fA-F]+);/g, (_match, hex: string) => String.fromCodePoint(parseInt(hex, 16)))
+    .replace(/&#(\d+);/g, (_match, dec: string) => String.fromCodePoint(parseInt(dec, 10)))
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, '"')
-    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&apos;/g, "'")
 }
 
 function stripTags(html: string): string {
@@ -85,6 +110,95 @@ export function addDeepDiveHeadingAnchors(html: string): { html: string; toc: De
   })
 
   return { html: withAnchors, toc }
+}
+
+export interface DeepDiveTocGroup {
+  heading: DeepDiveTocItem
+  children: DeepDiveTocItem[]
+}
+
+/**
+ * Groups a flat h2/h3 TOC list into { heading, children } pairs (Deep
+ * Dives, IBM i Insights and Reader-Experience Polish -- TOC simplification).
+ * Lives here (a plain, framework-free module already imported by
+ * scripts/deep-dive-toc-regression.ts) rather than inside
+ * components/deep-dive-toc.tsx, which is a 'use client' component -- same
+ * "pure logic stays out of the client component" convention lib/nav-links.ts
+ * already documents for the same reason: it keeps this function safely,
+ * directly importable from a standalone regression script.
+ *
+ * Every h2 becomes its own group, in order; every h3 joins the most recent
+ * h2's `children`. An h3 with no preceding h2 (not expected from real
+ * article content -- addDeepDiveHeadingAnchors() above only ever sees a
+ * real article's own heading order -- but not impossible for a hand-built
+ * item list in a test) becomes its own top-level group rather than being
+ * silently dropped, so no real heading can ever disappear from the TOC.
+ */
+export function groupTocItems(items: DeepDiveTocItem[]): DeepDiveTocGroup[] {
+  const groups: DeepDiveTocGroup[] = []
+  for (const item of items) {
+    if (item.level === 2) {
+      groups.push({ heading: item, children: [] })
+      continue
+    }
+    const lastGroup = groups[groups.length - 1]
+    if (lastGroup) {
+      lastGroup.children.push(item)
+    } else {
+      groups.push({ heading: item, children: [] })
+    }
+  }
+  return groups
+}
+
+/**
+ * Which group's children should currently be expanded (Deep Dives, IBM i
+ * Insights and Reader-Experience Polish -- follow-up fix). A review found
+ * the original grouping fell back to "every group expanded" whenever
+ * `activeId` was still null -- true on first paint, and permanently true if
+ * no heading ever happened to intersect the observer's active band. That
+ * defeated the whole point of grouping a long TOC.
+ *
+ * One rule now covers every case the caller needs (initial load, a
+ * hash-targeted heading, and live scroll tracking all just become a
+ * different `activeId` input to this same function):
+ *  - `activeId` names a real heading (h2 or h3) that belongs to one of
+ *    `groups` -> that heading's OWNING group (its own group if it's an h2,
+ *    its parent's group if it's an h3).
+ *  - Anything else (null, or an id that matches nothing -- an unknown hash,
+ *    for instance) -> the first group, so there is always exactly one
+ *    expanded group, never zero and never "all of them".
+ *  - No groups at all -> null (nothing to expand).
+ *
+ * Pure and side-effect free so it can be unit-tested directly against
+ * synthetic group lists, the same reasoning groupTocItems() above already
+ * documents.
+ */
+export function resolveExpandedGroupId(groups: DeepDiveTocGroup[], activeId: string | null): string | null {
+  if (groups.length === 0) return null
+
+  if (activeId) {
+    const owningGroup = groups.find((group) => group.heading.id === activeId || group.children.some((child) => child.id === activeId))
+    if (owningGroup) return owningGroup.heading.id
+  }
+
+  return groups[0].heading.id
+}
+
+/**
+ * Resolves a URL fragment (e.g. `location.hash`, with or without its
+ * leading "#") to a real heading id from `items`, or null if the fragment
+ * is empty or doesn't match any known heading -- an unknown/stale hash must
+ * fall back safely, never be trusted as-is. Deliberately takes the hash as
+ * a plain string rather than reading `window.location` itself, so it stays
+ * pure and testable without a DOM; the one caller in
+ * components/deep-dive-toc.tsx is what actually reads `window.location.hash`.
+ */
+export function resolveHashHeadingId(items: DeepDiveTocItem[], hash: string | null | undefined): string | null {
+  if (!hash) return null
+  const id = hash.startsWith('#') ? hash.slice(1) : hash
+  if (!id) return null
+  return items.some((item) => item.id === id) ? id : null
 }
 
 /**

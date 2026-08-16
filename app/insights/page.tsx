@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { ArrowRight, Lightbulb, PenTool, Rocket, TrendingUp, Wrench } from 'lucide-react'
+import { ArrowRight, Lightbulb, PenTool } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 import { SiteFooter } from '@/components/site-footer'
 import { Badge } from '@/components/ui/badge'
@@ -38,44 +38,6 @@ export const metadata: Metadata = {
 }
 
 /**
- * Each pillar's accent is a full, static Tailwind class string per key --
- * not string-interpolated (e.g. `from-${color}-500`) -- so Tailwind's JIT
- * scanner (which only greps ./app, ./components, ./pages -- see
- * tailwind.config.ts) can see them and generate the corresponding CSS at
- * build time. Same pattern as lib/deep-dive-categories.ts's
- * DEEP_DIVE_ACCENT_CLASSES.
- */
-const POSITIONING_POINTS = [
-  {
-    icon: Wrench,
-    title: 'Practical',
-    body: 'Grounded in real production concerns — not theory, not a certification checklist.',
-    cardWash: 'from-blue-50 via-white to-cyan-50/50',
-    border: 'border-blue-100',
-    hoverBorder: 'hover:border-blue-300',
-    accent: 'from-blue-500 to-cyan-500',
-  },
-  {
-    icon: Rocket,
-    title: 'Modern techniques',
-    body: 'How to connect IBM i to the tools and integration patterns modern applications expect.',
-    cardWash: 'from-indigo-50 via-white to-violet-50/50',
-    border: 'border-indigo-100',
-    hoverBorder: 'hover:border-indigo-300',
-    accent: 'from-indigo-500 to-violet-500',
-  },
-  {
-    icon: TrendingUp,
-    title: 'Emerging trends',
-    body: 'Where the platform is heading, and what is genuinely worth your attention today.',
-    cardWash: 'from-cyan-50 via-white to-emerald-50/50',
-    border: 'border-cyan-100',
-    hoverBorder: 'hover:border-emerald-300',
-    accent: 'from-cyan-500 to-emerald-500',
-  },
-] as const
-
-/**
  * IBM i Insights listing page. A third, separate public content type
  * alongside the linear IBM i Fundamentals path and the non-linear Deep Dive
  * reference guides -- not a fourth "way to learn" and not a Deep Dive
@@ -111,6 +73,14 @@ const POSITIONING_POINTS = [
  * published article (array position 0 of `publishedInsights`) and is never
  * recalculated per category -- filtering shows a plain grid instead, so a
  * category filter can never invent a new "featured" article.
+ *
+ * The three-card "Practical / Modern techniques / Emerging trends"
+ * positioning row that used to sit between the hero and ExploreInsightsNav
+ * is gone (Deep Dives, IBM i Insights and Reader-Experience Polish) -- it
+ * restated the hero's own tagline ("Practical ideas, modern techniques, and
+ * emerging trends") almost word for word. Removing it brings the featured
+ * article higher on the page without touching the hero itself, the
+ * featured-card treatment, or ExploreInsightsNav.
  */
 interface InsightsPageProps {
   searchParams: Promise<{ category?: string }>
@@ -137,7 +107,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
       <SiteHeader />
 
       <main className="flex-1">
-        <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-28 sm:pb-32">
+        <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-24 sm:pb-28">
           {/* Faint technical grid -- pure CSS, no images */}
           <div
             className="pointer-events-none absolute inset-0 opacity-[0.05] [background-image:linear-gradient(to_right,white_1px,transparent_1px),linear-gradient(to_bottom,white_1px,transparent_1px)] [background-size:44px_44px]"
@@ -215,39 +185,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
           />
         </section>
 
-        {/* Positioning cards overlap the hero's fade zone (relative z-10 + negative
-            margin) so the page reads as one continuous composition rather than a
-            hard seam between a dark hero and a plain white body. */}
-        <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-5xl px-4 sm:px-6">
-          <div className="grid gap-5 sm:grid-cols-3">
-            {POSITIONING_POINTS.map((point) => (
-              <div
-                key={point.title}
-                className={cn(
-                  'group relative overflow-hidden rounded-2xl border bg-gradient-to-b p-6 shadow-md transition-all duration-300',
-                  'hover:-translate-y-1 hover:shadow-xl motion-reduce:transition-none motion-reduce:hover:translate-y-0',
-                  point.border,
-                  point.hoverBorder,
-                  point.cardWash
-                )}
-              >
-                <div className={cn('absolute inset-x-0 top-0 h-1 bg-gradient-to-r', point.accent)} aria-hidden="true" />
-                <div
-                  className={cn(
-                    'mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br text-white shadow-sm transition-transform duration-300 group-hover:scale-110 motion-reduce:transition-none motion-reduce:group-hover:scale-100',
-                    point.accent
-                  )}
-                >
-                  <point.icon className="h-6 w-6" aria-hidden="true" />
-                </div>
-                <h2 className="text-lg font-bold text-slate-900 mb-1.5">{point.title}</h2>
-                <p className="text-sm text-slate-600 leading-relaxed">{point.body}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 py-14 sm:py-20">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 pt-12 pb-14 sm:pt-16 sm:pb-20">
           {publishedInsights.length === 0 ? (
             // Empty state -- deliberately no article cards, no sample/placeholder
             // content, and no publication-date or cadence claims. Kept as the

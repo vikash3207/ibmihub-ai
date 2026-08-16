@@ -1224,9 +1224,19 @@ async function runChecks() {
         (listingSrc.includes('buttonVariants(') && (listingSrc.match(/href="\/(deep-dives|learn)"/g) ?? []).length >= 2)
     )
     check('the retained InsightCard link carries focus-visible styling', /focus-visible:ring-2/.test(cardSrc))
+    // The breadcrumb markup itself moved into the shared
+    // components/reader-breadcrumb.tsx (Deep Dives, IBM i Insights and
+    // Reader-Experience Polish -- both readers now render the same
+    // component instead of the Insight page hand-rolling its own nav), so
+    // the focus-visible styling now lives there, not inline in this page.
+    const breadcrumbComponentSrc = readRepoFile('components/reader-breadcrumb.tsx')
     check(
-      'the detail page\'s breadcrumb links carry focus-visible styling',
-      /Breadcrumb"[\s\S]{0,300}focus-visible:ring-2/.test(detailSrc)
+      'the detail page renders the shared ReaderBreadcrumb component',
+      detailSrc.includes('<ReaderBreadcrumb')
+    )
+    check(
+      "ReaderBreadcrumb's own links carry focus-visible styling",
+      /Breadcrumb"[\s\S]{0,300}focus-visible:ring-2/.test(breadcrumbComponentSrc)
     )
     check(
       'the detail page\'s related-lessons links carry focus-visible styling',
@@ -1272,12 +1282,18 @@ async function runChecks() {
       'card hover elevation respects prefers-reduced-motion (motion-reduce:transition-none present)',
       listingSrc.includes('motion-reduce:transition-none')
     )
-    check('each positioning card has its own distinct gradient accent (3 unique accent class pairs)', new Set([...listingSrc.matchAll(/accent: '([^']+)'/g)].map((m) => m[1])).size === 3)
+    // The "Practical / Modern techniques / Emerging trends" POSITIONING_POINTS
+    // row (previously checked here for 3 distinct accents) is gone (Deep
+    // Dives, IBM i Insights and Reader-Experience Polish) -- it restated the
+    // hero's own tagline almost word for word; removing it brings the
+    // featured article higher on the page. Deeper coverage of that removal
+    // lives in scripts/reader-experience-regression.ts (test:reader-experience).
+    check('the redundant POSITIONING_POINTS row is gone from the listing page', !listingSrc.includes('POSITIONING_POINTS'))
     check('the h1 "IBM i Insights" appears exactly once (single top-level heading)', (listingSrc.match(/<h1[^>]*>/g) ?? []).length === 1)
-    // Exactly 2 literal <h2> occurrences in source: one JSX element mapped over
-    // the 3 positioning cards (so it renders 3 times, but appears once in
-    // source) plus the empty-state's own heading -- both one level below h1.
-    check('the positioning-card and empty-state headings are h2, one level below h1 (no skipped heading level)', (listingSrc.match(/<h2[^>]*>/g) ?? []).length === 2)
+    // Exactly 1 literal <h2> occurrence in source now: only the empty-state's
+    // own heading remains (the positioning cards' h2 is gone) -- still one
+    // level below h1, no skipped heading level.
+    check('the empty-state heading is h2, one level below h1 (no skipped heading level)', (listingSrc.match(/<h2[^>]*>/g) ?? []).length === 1)
   }
 
   // ---------------------------------------------------------------------------

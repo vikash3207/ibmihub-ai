@@ -18,6 +18,7 @@
  */
 import { SITE_NAME, SITE_URL } from './config'
 import type { Insight } from './insights'
+import { buildReaderBreadcrumbStructuredData } from './reader-breadcrumb'
 
 export function buildInsightStructuredData(insight: Insight) {
   const url = `${SITE_URL}/insights/${insight.slug}`
@@ -37,13 +38,8 @@ export function buildInsightStructuredData(insight: Insight) {
 }
 
 export function buildBreadcrumbStructuredData(insight: Insight) {
-  return {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
-    itemListElement: [
-      { '@type': 'ListItem', position: 1, name: 'Home', item: SITE_URL },
-      { '@type': 'ListItem', position: 2, name: 'IBM i Insights', item: `${SITE_URL}/insights` },
-      { '@type': 'ListItem', position: 3, name: insight.title, item: `${SITE_URL}/insights/${insight.slug}` },
-    ],
-  }
+  return buildReaderBreadcrumbStructuredData(
+    { name: 'IBM i Insights', path: '/insights' },
+    { name: insight.title, path: `/insights/${insight.slug}` }
+  )
 }
