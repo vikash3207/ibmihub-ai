@@ -11,10 +11,20 @@
  */
 
 export type PracticeQuestionType = 'multiple-choice' | 'scenario'
-/** 'intermediate' added alongside the professional-depth practice topics
- *  (Advanced RPGLE/ILE, Integration, Advanced SQL, Security, Journaling,
- *  Save/Restore) -- existing 'beginner' questions and topics are unaffected. */
-export type PracticeDifficulty = 'beginner' | 'intermediate'
+/**
+ * 'intermediate' added alongside the professional-depth practice topics
+ * (Advanced RPGLE/ILE, Integration, Advanced SQL, Security, Journaling,
+ * Save/Restore) -- existing 'beginner' questions and topics are unaffected.
+ * 'advanced' added for the Practice Hub (Guided Practice, Quick Quizzes and
+ * Interview Preparation) -- this type is shared with
+ * content/practice/interview-questions.ts's InterviewQuestion, whose 60-
+ * question bank genuinely spans all three levels; no existing
+ * PracticeQuestion record uses 'advanced' today (this catalog's own content
+ * only ever reached 'intermediate' depth), so the session builder does not
+ * offer an Advanced level for Guided Practice/Quick Quiz -- see
+ * lib/practice-session.ts's own comment for why.
+ */
+export type PracticeDifficulty = 'beginner' | 'intermediate' | 'advanced'
 
 export interface PracticeTopic {
   id: string
@@ -33,6 +43,13 @@ export interface PracticeQuestion {
   /** For multiple-choice, one of options verbatim. For scenario, a short model answer. */
   correctAnswer: string
   explanation: string
+  /**
+   * A short, optional nudge shown before the answer is revealed -- Guided
+   * Practice only (Quick Quiz never shows this, so it can't leak the
+   * answer ahead of scoring). Added to a handful of questions where a hint
+   * is genuinely useful, not backfilled onto all 169 existing questions.
+   */
+  hint?: string
   relatedLessonSlugs: string[]
   tags: string[]
   difficulty: PracticeDifficulty
