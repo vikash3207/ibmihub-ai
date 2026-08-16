@@ -6,6 +6,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { SubmitButton } from '@/components/ui/submit-button'
 import { SiteNavLinks } from '@/components/site-nav-links'
 import { MobileNav } from '@/components/site-mobile-nav'
+import { SearchTrigger } from '@/components/search-trigger'
 import { SiteLogoIcon } from '@/components/brand/site-logo-icon'
 import { AuthStateBroadcaster } from '@/components/auth/auth-state-broadcaster'
 import { UserMenu } from '@/components/user-menu'
@@ -58,6 +59,7 @@ export async function SiteHeader() {
         <SiteNavLinks isLoggedIn={Boolean(user)} />
 
         <div className="hidden lg:flex items-center gap-3">
+          <SearchTrigger />
           {user ? (
             <>
               {/* Beside, not instead of, the existing Log out control below --
@@ -89,6 +91,7 @@ export async function SiteHeader() {
           )}
         </div>
 
+        <SearchTrigger variant="icon-only" className="lg:hidden" />
         <MobileNav isLoggedIn={Boolean(user)} />
       </div>
     </header>

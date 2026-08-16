@@ -27,7 +27,8 @@
     "test:homepage": "npx tsx scripts/homepage-journeys-regression.ts",
     "test:protected-preview": "npx tsx scripts/protected-preview-regression.ts",
     "test:learning-center": "npx tsx scripts/learning-center-regression.ts",
-    "test:reader-experience": "npx tsx scripts/reader-experience-regression.ts"
+    "test:reader-experience": "npx tsx scripts/reader-experience-regression.ts",
+    "test:search": "npx tsx scripts/search-regression.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.110.0",
