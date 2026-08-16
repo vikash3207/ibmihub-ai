@@ -853,7 +853,7 @@ export function McpWorkflowComparisonFigure() {
           <ol className="space-y-2 text-sm text-slate-700">
             {TRADITIONAL_STEPS.map((step, i) => (
               <li key={step} className="flex gap-2">
-                <span className="font-semibold text-slate-400">{i + 1}.</span>
+                <span className="font-semibold text-slate-500">{i + 1}.</span>
                 {step}
               </li>
             ))}

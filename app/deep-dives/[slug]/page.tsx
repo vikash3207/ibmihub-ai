@@ -181,7 +181,7 @@ export default async function DeepDivePage({ params }: Props) {
       <RegisterAiTutorPageContext context={aiTutorContext} />
       <SiteHeader />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 py-10 sm:py-14">
           <ReaderBreadcrumb sectionLabel="Deep Dives" sectionHref="/deep-dives" currentLabel={deepDive.title} />
 

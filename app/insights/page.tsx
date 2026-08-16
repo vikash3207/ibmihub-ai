@@ -106,7 +106,7 @@ export default async function InsightsPage({ searchParams }: InsightsPageProps) 
     <div className="min-h-screen flex flex-col bg-white">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <section className="relative overflow-hidden bg-slate-950 pt-16 sm:pt-20 pb-24 sm:pb-28">
           {/* Faint technical grid -- pure CSS, no images */}
           <div

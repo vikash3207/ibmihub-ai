@@ -13,7 +13,7 @@ interface AuthCardProps {
 /** Shared shell for the auth (login/sign-up/password) and onboarding pages. */
 export function AuthCard({ title, subtitle, wide, children }: AuthCardProps) {
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <main id="main-content" className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <div className={cn('w-full bg-white rounded-2xl shadow-sm border border-slate-100 p-8', wide ? 'max-w-lg' : 'max-w-sm')}>
         <Link href="/" className="mb-6 flex items-center gap-2 font-semibold text-slate-900">
           <SiteLogoIcon size={28} className="shrink-0" />

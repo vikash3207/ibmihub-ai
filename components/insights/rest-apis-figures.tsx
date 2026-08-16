@@ -89,9 +89,9 @@ export function ApproachComparisonFigure() {
                 <card.icon className="h-4 w-4" aria-hidden="true" />
               </span>
               <p className="text-sm font-bold text-slate-900">{card.title}</p>
-              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">Best fit</p>
+              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">Best fit</p>
               <p className="text-xs text-slate-600">{card.bestFit}</p>
-              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-400">Trade-off</p>
+              <p className="mt-1.5 text-[11px] font-medium uppercase tracking-wide text-slate-500">Trade-off</p>
               <p className="text-xs text-slate-600">{card.tradeOff}</p>
             </div>
           ))}

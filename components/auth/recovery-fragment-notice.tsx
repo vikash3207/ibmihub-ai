@@ -50,7 +50,7 @@ export function RecoveryFragmentNotice() {
   if (kind === 'unknown' || kind === 'none') return null
 
   return (
-    <p className="mt-1 text-center text-xs text-slate-400">
+    <p className="mt-1 text-center text-xs text-slate-500">
       Reference: fragment/{kind}
     </p>
   )

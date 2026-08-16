@@ -96,7 +96,7 @@ export function EmbeddedAiTutorPanel() {
                 onClick={newChat}
                 title="Start a new chat"
                 aria-label="Start a new chat"
-                className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
+                className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
               >
                 <RotateCcw className="h-4 w-4" aria-hidden="true" />
               </button>
@@ -106,7 +106,7 @@ export function EmbeddedAiTutorPanel() {
               onClick={closePanel}
               title="Close"
               aria-label="Close AI Tutor"
-              className="rounded-lg p-1.5 text-slate-400 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
+              className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-600"
             >
               <X className="h-4 w-4" aria-hidden="true" />
             </button>

@@ -56,7 +56,7 @@ export default function DeepDivesPage() {
     <div className="min-h-screen flex flex-col bg-white">
       <SiteHeader />
 
-      <main className="flex-1">
+      <main id="main-content" className="flex-1">
         <SectionHero
           icon={Sparkles}
           badgeLabel="Professional IBM i reference guides"

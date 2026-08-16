@@ -90,7 +90,7 @@ export default async function OnboardingPage({ searchParams }: Props) {
               const nextPath = formData.get('next') as string
               await saveOnboardingResponse(null, true, nextPath)
             }}
-            className="text-sm text-slate-400 hover:text-slate-600 underline"
+            className="text-sm text-slate-500 hover:text-slate-700 underline"
           >
             Skip for now
           </button>

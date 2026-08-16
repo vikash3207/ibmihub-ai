@@ -210,7 +210,7 @@ function DeepDiveCard({ deepDive }: { deepDive: DeepDive }) {
       <h3 className="font-semibold text-slate-900">{deepDive.title}</h3>
       <p className="mt-1.5 flex-1 text-sm text-slate-600 leading-relaxed">{deepDive.description}</p>
 
-      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+      <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
         {deepDive.estimatedReadTime && (
           <span className="inline-flex items-center gap-1">
             <Clock className="h-3 w-3" aria-hidden="true" />

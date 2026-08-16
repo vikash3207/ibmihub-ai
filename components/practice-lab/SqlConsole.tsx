@@ -94,13 +94,13 @@ export function SqlConsole({ exercise, relatedLessons }: Props) {
 
       <div className="space-y-3 rounded-2xl border border-slate-100 bg-white p-4">
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Sample table: {CUSTOMER_TABLE_NAME}
           </p>
           <p className="font-mono text-xs text-slate-600">{CUSTOMER_COLUMNS.join(', ')}</p>
         </div>
         <div>
-          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+          <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-500">
             Sample table: {ORDHDR_TABLE_NAME}
           </p>
           <p className="font-mono text-xs text-slate-600">{ORDHDR_COLUMNS.join(', ')}</p>

@@ -262,9 +262,9 @@ export function TraditionalVsSqlFigure() {
                 <group.icon className="h-4 w-4" aria-hidden="true" />
               </span>
               <p className="text-sm font-bold text-slate-900">{group.title}</p>
-              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-slate-400">Traditionally</p>
+              <p className="mt-1 text-[11px] font-medium uppercase tracking-wide text-slate-500">Traditionally</p>
               <p className="text-xs text-slate-600">{group.traditional}</p>
-              <p className="mt-2 text-[11px] font-medium uppercase tracking-wide text-slate-400">SQL services</p>
+              <p className="mt-2 text-[11px] font-medium uppercase tracking-wide text-slate-500">SQL services</p>
               <ul className="mt-0.5 space-y-0.5">
                 {group.services.map((s) => (
                   <li key={s} className="truncate font-mono text-[11px] text-slate-700">
