@@ -131,7 +131,12 @@ async function main() {
     check('Progress tracking is represented via the hero product-preview panel', page.includes('Path progress'))
     check('5250-style Practice Lab is mentioned', page.includes('5250-style'))
     check('ACS-style SQL Console is mentioned', page.includes('SQL Console') || page.includes('ACS-style SQL'))
-    check('Practice questions are mentioned', page.includes('practice questions'))
+    // IBM i Practice Hub: Journey 3's body copy broadened from "practice
+    // questions" specifically to cover guided practice, quick quizzes, and
+    // interview preparation -- the hub is no longer just a question browser.
+    check('Guided practice is mentioned', page.includes('guided practice'))
+    check('Quick quizzes are mentioned', page.includes('quick quizzes'))
+    check('Interview preparation is mentioned', page.includes('technical interviews'))
   }
 
   // ---------------------------------------------------------------------------

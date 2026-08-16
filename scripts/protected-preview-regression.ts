@@ -173,7 +173,13 @@ async function main() {
 
     const practiceSrc = readRepoFile('app/(authenticated)/practice/page.tsx')
     const practicePreviewBody = sliceBetween(practiceSrc, 'function PracticePreview', 'export default async function PracticePage')
-    check('Practice still renders <PracticeBrowser> for a signed-in user', practiceSrc.includes('<PracticeBrowser'))
+    // IBM i Practice Hub: <PracticeBrowser> now renders on the relocated
+    // Guided Practice route, not the hub landing page itself -- the hub
+    // page's authenticated branch renders three "Test Your Knowledge" cards
+    // (one of which links to /practice/guided) instead of the browser
+    // directly.
+    const guidedPracticeSrc = readRepoFile('app/(authenticated)/practice/guided/page.tsx')
+    check('Guided Practice still renders <PracticeBrowser> for a signed-in user', guidedPracticeSrc.includes('<PracticeBrowser'))
     check(
       'Practice preview body renders no <PracticeBrowser> (no real question data before auth)',
       practicePreviewBody.length > 0 && !practicePreviewBody.includes('<PracticeBrowser')
