@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import type { Metadata } from 'next'
-import { AlertTriangle } from 'lucide-react'
+import { AlertTriangle, ArrowLeft } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { getPublishedLessons } from '@/lib/lessons'
 import { PRACTICE_QUESTIONS } from '@/content/practice/questions'
@@ -82,6 +82,16 @@ export default async function QuizSessionPage({ searchParams }: Props) {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-10 sm:px-6 sm:py-14">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+        <h1 className="text-xl font-bold text-slate-900">Quick Quiz</h1>
+        <Link
+          href="/practice/quiz/builder"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1 rounded"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" aria-hidden="true" />
+          Quiz Builder
+        </Link>
+      </div>
       <QuizSession questions={result.questions} lessonTitleBySlug={lessonTitleBySlug} />
     </div>
   )
