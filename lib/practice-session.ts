@@ -1,28 +1,41 @@
 /**
- * Practice Hub session logic (Guided Practice, Quick Quizzes and Interview
- * Preparation) -- pure, framework-free module, no fetching, no `server-only`
- * import, same "pure logic outside any server-only/client boundary"
- * convention lib/search.ts and lib/deep-dive-render.ts already establish for
- * this codebase, so it's directly exercised by scripts/practice-hub-
- * regression.ts against synthetic fixtures.
+ * Practice Hub session logic (Guided Practice and Quick Quizzes -- Interview
+ * Prep's selection/scoring logic is deliberately NOT included here yet; it
+ * remains a "Coming soon" landing-page card with no route or session in
+ * this PR, and adding selection/scoring helpers for content that doesn't
+ * exist would be premature). Pure, framework-free module, no fetching, no
+ * `server-only` import, same "pure logic outside any server-only/client
+ * boundary" convention lib/search.ts and lib/deep-dive-render.ts already
+ * establish for this codebase, so it's directly exercised by
+ * scripts/practice-hub-regression.ts against both the real production
+ * catalog and synthetic fixtures.
  *
  * There is no persistence layer for Practice today (confirmed by audit: no
  * Supabase table, PracticeBrowser's state was always local `useState`), so
  * a session's *composition* (which questions, in what order) is entirely a
  * pure function of its URL query params -- deterministic via a seeded
- * shuffle, never randomized in a way that would make a refresh, Back/
- * Forward, or hydration replace the question set. Two ways a caller can
- * arrive at a seed:
- *  - No `seed` param at all: deriveDefaultSeed() turns the rest of the
- *    params into one deterministically, so a bare/shared/bookmarked URL is
- *    stable and reproducible on every load.
- *  - An explicit `seed` param (e.g. Date.now(), set by a "Start another
- *    session"/"Retry" action): gives a genuinely different question order
- *    or selection on demand, without needing any storage.
+ * shuffle, never randomized in a way that would make a refresh or Back/
+ * Forward replace the question set. Two ways a caller arrives at a seed:
+ *  - The normal flow: components/practice/session-builder-form.tsx attaches
+ *    a fresh, explicit `seed` (Date.now(), set client-side right before the
+ *    native form submission proceeds) every time the builder is submitted --
+ *    so landing on the builder fresh (from the hub, "Adjust quiz settings",
+ *    or "Start another quiz") and submitting again always produces a new
+ *    seed, and therefore normally a different selection/order. Once that
+ *    seed is baked into the resulting session URL, reloading, sharing, or
+ *    navigating Back/Forward to that exact URL reproduces the identical
+ *    question set -- the seed, not any client state, is what's stable.
+ *  - The fallback: a URL that arrives with no `seed` at all (an old
+ *    pre-this-behavior bookmark, a manually-edited/malformed URL, or a
+ *    no-JS form submission, where the hidden seed field never gets filled
+ *    in) -- deriveDefaultSeed() turns the rest of the params into one
+ *    deterministically, so the page still renders a valid, stable session
+ *    rather than erroring, just without the "always fresh on submit"
+ *    property the normal flow provides.
  */
 
 import type { PracticeQuestion, PracticeDifficulty } from '@/content/practice/questions'
-import { resolveTopicGroup, topicIdsForGroup } from './practice-topic-groups'
+import { PRACTICE_TOPIC_GROUPS, resolveTopicGroup, topicIdsForGroup } from './practice-topic-groups'
 
 export type PracticeMode = 'guided' | 'quiz' | 'interview'
 export type SessionLevel = 'beginner' | 'intermediate' | 'advanced' | 'mixed'
@@ -136,8 +149,15 @@ export function normalizeSessionParams(raw: RawSessionParams): NormalizedSession
   const requestedLength = Number(raw.length)
   const length: SessionLength = isValidLength(requestedLength, mode) ? requestedLength : DEFAULT_LENGTH[mode]
 
+  // Canonicalize to a safe (non-negative, integer, bounded) seed so a
+  // malformed/fractional/huge query-string value can never produce a
+  // surprising or unstable seed -- Number.MAX_SAFE_INTEGER keeps it well
+  // within what mulberry32's internal `| 0` bitwise coercion treats
+  // consistently across runs.
   const parsedSeed = raw.seed ? Number(raw.seed) : NaN
-  const seed = Number.isFinite(parsedSeed) ? parsedSeed : deriveDefaultSeed([mode, topicGroupId ?? 'all', level, String(length)])
+  const seed = Number.isFinite(parsedSeed)
+    ? Math.min(Math.abs(Math.trunc(parsedSeed)), Number.MAX_SAFE_INTEGER)
+    : deriveDefaultSeed([mode, topicGroupId ?? 'all', level, String(length)])
 
   return { mode, topicGroupId, level, length, seed }
 }
@@ -160,20 +180,17 @@ function matchesLevel(difficulty: PracticeDifficulty, level: SessionLevel): bool
 }
 
 /**
- * Core selection algorithm shared by Guided Practice, Quick Quiz, and
- * Interview Prep -- filters by topic group + level, optionally by a mode-
- * specific eligibility predicate, de-duplicates by id (defensive: a session
- * must never show the same question twice even if the source catalog ever
- * had an accidental duplicate id), then takes exactly `length` questions via
- * a seeded shuffle. Never silently returns fewer questions while claiming a
- * full-length session -- an insufficient pool is reported explicitly so the
- * caller can show a clear recovery state instead.
+ * The eligible, de-duplicated pool for a topic-group + level (+ optional
+ * mode-specific eligibility predicate) combination -- the shared core both
+ * selectSessionQuestions() and countEligibleQuestions() build on, so the
+ * exact same filtering logic backs both "give me N questions" and "how many
+ * are there", and the two can never quietly drift apart.
  */
-export function selectSessionQuestions<T extends SelectableQuestion>(
-  { topicGroupId, level, length, seed }: Pick<NormalizedSessionParams, 'topicGroupId' | 'level' | 'length' | 'seed'>,
+function getEligiblePool<T extends SelectableQuestion>(
+  { topicGroupId, level }: Pick<NormalizedSessionParams, 'topicGroupId' | 'level'>,
   allQuestions: T[],
   isEligible?: (question: T) => boolean
-): SessionBuildResult<T> {
+): T[] {
   const topicIds = topicIdsForGroup(topicGroupId)
 
   let pool = allQuestions.filter((q) => (topicIds ? topicIds.includes(q.topicId) : true) && matchesLevel(q.difficulty, level))
@@ -186,11 +203,40 @@ export function selectSessionQuestions<T extends SelectableQuestion>(
     return true
   })
 
-  if (pool.length < length) {
-    return { status: 'insufficient', available: pool.length, requested: length }
+  return pool
+}
+
+/**
+ * Core selection algorithm shared by Guided Practice and Quick Quiz --
+ * takes exactly `length` questions from the eligible pool via a seeded
+ * shuffle. Never silently returns fewer questions while claiming a full-
+ * length session -- an insufficient pool is reported explicitly (this is
+ * the server-side fallback that still applies for a manually edited,
+ * malformed, or JS-disabled URL even though the builder's own client-side
+ * availability matrix should normally prevent ever submitting one) so the
+ * caller can show a clear recovery state instead.
+ */
+export function selectSessionQuestions<T extends SelectableQuestion>(
+  params: Pick<NormalizedSessionParams, 'topicGroupId' | 'level' | 'length' | 'seed'>,
+  allQuestions: T[],
+  isEligible?: (question: T) => boolean
+): SessionBuildResult<T> {
+  const pool = getEligiblePool(params, allQuestions, isEligible)
+
+  if (pool.length < params.length) {
+    return { status: 'insufficient', available: pool.length, requested: params.length }
   }
 
-  return { status: 'ok', questions: seededShuffle(pool, seed).slice(0, length) }
+  return { status: 'ok', questions: seededShuffle(pool, params.seed).slice(0, params.length) }
+}
+
+/** The exact count of eligible questions for a topic-group + level combination -- the same filtering selectSessionQuestions() uses, without a length requirement. Powers buildQuizAvailabilityMatrix() below. */
+export function countEligibleQuestions<T extends SelectableQuestion>(
+  params: Pick<NormalizedSessionParams, 'topicGroupId' | 'level'>,
+  allQuestions: T[],
+  isEligible?: (question: T) => boolean
+): number {
+  return getEligiblePool(params, allQuestions, isEligible).length
 }
 
 /** Quick Quiz can only auto-grade multiple-choice questions -- 'scenario' questions have a free-text model answer, not a single verbatim correct string, so they stay Guided-Practice-only. No new stored field needed; this is a pure derivation from the existing `type`. */
@@ -206,11 +252,48 @@ export function buildGuidedOrQuizSession(
   return selectSessionQuestions(params, allQuestions, mode === 'quiz' ? isQuizEligible : undefined)
 }
 
-export function buildInterviewSession<T extends SelectableQuestion>(
-  params: Pick<NormalizedSessionParams, 'topicGroupId' | 'level' | 'length' | 'seed'>,
-  allQuestions: T[]
-): SessionBuildResult<T> {
-  return selectSessionQuestions(params, allQuestions)
+// ---------------------------------------------------------------------------
+// Quiz availability matrix -- lets the builder disable/omit combinations
+// that can never succeed, instead of only rejecting them after submission.
+// ---------------------------------------------------------------------------
+
+/** The non-'advanced' levels Quick Quiz actually offers -- see isValidLevel()'s own comment for why 'advanced' is interview-only. */
+export const QUIZ_LEVELS: Array<Exclude<SessionLevel, 'advanced'>> = ['beginner', 'intermediate', 'mixed']
+
+/** The key used for "All Topics" (no topic filter) in a QuizAvailabilityMatrix -- the empty string, matching the actual `topicGroup=` query-param value an "All Topics" selection submits. */
+export const ALL_TOPICS_KEY = ''
+
+export interface QuizAvailabilityEntry {
+  count: number
+  supportsLength: Record<SessionLength, boolean>
+}
+
+/** topicGroupId (or ALL_TOPICS_KEY) -> level -> availability. */
+export type QuizAvailabilityMatrix = Record<string, Record<Exclude<SessionLevel, 'advanced'>, QuizAvailabilityEntry>>
+
+/**
+ * Computes real, current availability for every topic-group x level
+ * combination the Quick Quiz builder can offer, straight from the live
+ * PRACTICE_QUESTIONS catalog -- never a hardcoded count that could drift
+ * out of sync with the actual content. Small and fully serializable (13
+ * topic groups + "All Topics", x 3 levels, x a `{count, supportsLength}`
+ * each) -- safe to pass to a client component without shipping the
+ * underlying question content itself.
+ */
+export function buildQuizAvailabilityMatrix(allQuestions: PracticeQuestion[]): QuizAvailabilityMatrix {
+  const groupIds = [ALL_TOPICS_KEY, ...PRACTICE_TOPIC_GROUPS.map((g) => g.id)]
+  const matrix = {} as QuizAvailabilityMatrix
+
+  for (const groupId of groupIds) {
+    const perLevel = {} as QuizAvailabilityMatrix[string]
+    for (const level of QUIZ_LEVELS) {
+      const count = countEligibleQuestions({ topicGroupId: groupId || null, level }, allQuestions, isQuizEligible)
+      perLevel[level] = { count, supportsLength: { 1: false, 5: count >= 5, 10: count >= 10 } }
+    }
+    matrix[groupId] = perLevel
+  }
+
+  return matrix
 }
 
 // ---------------------------------------------------------------------------
@@ -241,60 +324,4 @@ export function scoreQuiz(questions: PracticeQuestion[], answers: Record<string,
 export function selectRetryQuestions(questions: PracticeQuestion[], result: QuizResult): PracticeQuestion[] {
   const incorrectIds = new Set(result.results.filter((r) => !r.correct).map((r) => r.questionId))
   return questions.filter((q) => incorrectIds.has(q.id))
-}
-
-// ---------------------------------------------------------------------------
-// Interview self-assessment (never a numeric score)
-// ---------------------------------------------------------------------------
-
-export type InterviewAssessment = 'needs-review' | 'partial' | 'confident'
-
-export interface InterviewSummary {
-  reviewed: number
-  byBucket: Record<InterviewAssessment, number>
-  /** topicIds the learner marked Confident on every reviewed question for that topic within this session. */
-  topicsConfident: string[]
-  /** topicIds with at least one Needs review/Partially covered mark in this session. */
-  topicsNeedingReview: string[]
-}
-
-/**
- * Deliberately produces only categorical buckets and topic lists -- never a
- * percentage or "readiness" number. A small self-reported sample must not
- * be dressed up as a measured score or a certification claim.
- */
-export function summarizeInterview<T extends SelectableQuestion>(
-  questions: T[],
-  assessments: Record<string, InterviewAssessment>
-): InterviewSummary {
-  const byBucket: Record<InterviewAssessment, number> = { 'needs-review': 0, partial: 0, confident: 0 }
-  const confidentTopics = new Set<string>()
-  const needsReviewTopics = new Set<string>()
-  let reviewed = 0
-
-  for (const q of questions) {
-    const assessment = assessments[q.id]
-    if (!assessment) continue
-    reviewed += 1
-    byBucket[assessment] += 1
-    if (assessment === 'confident') {
-      confidentTopics.add(q.topicId)
-    } else {
-      needsReviewTopics.add(q.topicId)
-    }
-  }
-
-  // A topic only counts as "confident" overall if nothing in this session
-  // marked it otherwise -- one weak answer should surface the topic as
-  // needing review, not be masked by a stronger answer elsewhere.
-  for (const topicId of needsReviewTopics) {
-    confidentTopics.delete(topicId)
-  }
-
-  return {
-    reviewed,
-    byBucket,
-    topicsConfident: Array.from(confidentTopics),
-    topicsNeedingReview: Array.from(needsReviewTopics),
-  }
 }
