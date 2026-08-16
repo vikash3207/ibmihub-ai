@@ -17,6 +17,7 @@ import type { DeepDive } from './deep-dives'
 import type { Insight } from './insights'
 import { getDeepDiveCategoryLabel } from './deep-dive-categories'
 import { getInsightCategoryLabel } from './insight-categories'
+import { getMasterCategoryLabel } from './master-categories'
 
 export type SearchResultType = 'lesson' | 'deep-dive' | 'insight'
 
@@ -25,7 +26,17 @@ export interface SearchableItem {
   slug: string
   title: string
   description: string
+  /** Always a display-ready human label (or null) -- never a raw internal id/slug. */
   category: string | null
+  /**
+   * Secondary, more specific context shown alongside `category` -- only
+   * lessons have one today (a lesson's masterSubcategory, e.g. "What IBM i
+   * Is" under the "IBM i Platform Fundamentals" master category; already a
+   * human-readable string in content/lessons/metadata.ts, no id lookup
+   * needed). Deep Dives/Insights have no equivalent second tier, so this is
+   * always null for them -- one shared shape, not a lesson-only type.
+   */
+  subcategory: string | null
   tags: string[]
   url: string
 }
@@ -36,7 +47,14 @@ export function lessonToSearchable(lesson: Lesson): SearchableItem {
     slug: lesson.slug,
     title: lesson.title,
     description: lesson.short_description,
-    category: lesson.master_subcategory ?? lesson.master_category_id ?? null,
+    // getMasterCategoryLabel() is the one existing master-category-id ->
+    // label mapping (lib/master-categories.ts, already used by
+    // lesson-browser.tsx/curriculum-sidebar.tsx) -- reused here rather than
+    // re-deriving a label, and it safely returns undefined (normalized to
+    // null) for a missing/unknown id instead of ever exposing the raw
+    // "ibm-i-platform-fundamentals"-style slug as display text.
+    category: getMasterCategoryLabel(lesson.master_category_id) ?? null,
+    subcategory: lesson.master_subcategory ?? null,
     tags: lesson.tags ?? [],
     url: `/learn/ibm-i-fundamentals/${lesson.slug}`,
   }
@@ -49,6 +67,7 @@ export function deepDiveToSearchable(deepDive: DeepDive): SearchableItem {
     title: deepDive.title,
     description: deepDive.description,
     category: getDeepDiveCategoryLabel(deepDive.category),
+    subcategory: null,
     tags: deepDive.tags,
     url: `/deep-dives/${deepDive.slug}`,
   }
@@ -61,6 +80,7 @@ export function insightToSearchable(insight: Insight): SearchableItem {
     title: insight.title,
     description: insight.description,
     category: getInsightCategoryLabel(insight.category),
+    subcategory: null,
     tags: insight.tags,
     url: `/insights/${insight.slug}`,
   }
@@ -77,6 +97,30 @@ const MAX_QUERY_LENGTH = 200
 /** Trim, collapse internal whitespace, and lowercase -- always bounded by MAX_QUERY_LENGTH first. */
 export function normalizeQuery(raw: string): string {
   return raw.slice(0, MAX_QUERY_LENGTH).trim().replace(/\s+/g, ' ').toLowerCase()
+}
+
+/**
+ * Next.js hands a Server Component's `searchParams` value for a repeated
+ * key (e.g. `/search?q=sql&q=rpgle`) back as a `string[]`, not a `string` --
+ * a plain `q?: string` page-prop type doesn't reflect that, and passing an
+ * array straight into a string-only helper like normalizeQuery() would
+ * throw calling `.trim()` on it. This safely reduces every shape the
+ * framework can hand back (a string, an array, an empty array, or
+ * undefined/a missing param) to one bounded string: a plain string is used
+ * as-is; an array deterministically uses its first entry (never
+ * concatenated -- that could turn two already-long values into one
+ * unnecessarily expensive query) if that entry is itself a usable string,
+ * or an empty string otherwise. The result still needs normalizeQuery()
+ * applied on top of this for trimming/casing/length -- this function only
+ * settles the *shape*, not the content.
+ */
+export function extractQueryParam(value: string | string[] | undefined): string {
+  if (typeof value === 'string') return value
+  if (Array.isArray(value)) {
+    const first = value[0]
+    return typeof first === 'string' ? first : ''
+  }
+  return ''
 }
 
 /**
@@ -97,8 +141,9 @@ export function scoreItem(item: SearchableItem, normalizedQuery: string): Search
   if (title.includes(normalizedQuery)) return 3
 
   const categoryMatch = item.category?.toLowerCase().includes(normalizedQuery) ?? false
+  const subcategoryMatch = item.subcategory?.toLowerCase().includes(normalizedQuery) ?? false
   const tagMatch = item.tags.some((tag) => tag.toLowerCase().includes(normalizedQuery))
-  if (categoryMatch || tagMatch) return 4
+  if (categoryMatch || subcategoryMatch || tagMatch) return 4
 
   if (item.description.toLowerCase().includes(normalizedQuery)) return 5
 

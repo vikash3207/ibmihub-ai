@@ -7,7 +7,7 @@ import { SiteLogoIcon } from '@/components/brand/site-logo-icon'
 
 export default function NotFound() {
   return (
-    <main className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
+    <main id="main-content" className="min-h-screen bg-slate-50 flex items-center justify-center px-4">
       <Card className="w-full max-w-sm text-center p-8">
         <Link href="/" className="mb-6 inline-flex items-center gap-2 font-semibold text-slate-900">
           <SiteLogoIcon size={28} className="shrink-0" />

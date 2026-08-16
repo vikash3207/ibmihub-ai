@@ -15,6 +15,7 @@ import {
   insightToSearchable,
   searchContent,
   normalizeQuery,
+  extractQueryParam,
   highlightMatch,
   type SearchableItem,
   type SearchResultType,
@@ -36,7 +37,10 @@ export const metadata: Metadata = {
 }
 
 interface SearchPageProps {
-  searchParams: Promise<{ q?: string }>
+  // `q` can arrive as a string[] for a repeated ?q=a&q=b query string --
+  // extractQueryParam() (lib/search.ts) is what actually narrows this to a
+  // single, safe string below.
+  searchParams: Promise<{ q?: string | string[] }>
 }
 
 const TYPE_META: Record<SearchResultType, { label: string; icon: typeof BookOpen; badgeClasses: string; ring: string }> = {
@@ -86,7 +90,12 @@ function ResultCard({ item, normalizedQuery }: { item: SearchableItem; normalize
           <Icon className="h-3 w-3" aria-hidden="true" />
           {meta.label}
         </span>
-        {item.category && <span className="text-xs text-slate-500">{item.category}</span>}
+        {item.category && (
+          <span className="text-xs text-slate-500">
+            {item.category}
+            {item.subcategory ? ` · ${item.subcategory}` : ''}
+          </span>
+        )}
       </div>
       <h3 className="text-base font-bold text-slate-900">
         {titleSegments.map((segment, index) =>
@@ -139,20 +148,32 @@ function NoResultsState({ query }: { query: string }) {
   )
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const { q: rawQuery = '' } = await searchParams
-  const boundedQuery = displayQuery(rawQuery)
-  const normalizedQuery = normalizeQuery(rawQuery)
-  const hasQuery = normalizedQuery.length > 0
-
+/**
+ * Fetches every published catalog and runs the search -- only called when
+ * there's an actual query (see hasQuery below). An empty/whitespace-only
+ * query renders pure guidance copy and never needs this data at all, so
+ * getPublishedLessons() (a real Supabase round trip) and the Deep
+ * Dive/Insight status filtering only run when their result could actually
+ * be shown.
+ */
+async function getSearchResults(rawQuery: string): Promise<SearchableItem[]> {
   const lessons = await getPublishedLessons()
   const items: SearchableItem[] = [
     ...lessons.map(lessonToSearchable),
     ...DEEP_DIVES.filter(isDeepDiveAvailable).map(deepDiveToSearchable),
     ...INSIGHTS.filter(isInsightAvailable).map(insightToSearchable),
   ]
+  return searchContent(items, rawQuery)
+}
 
-  const results = hasQuery ? searchContent(items, rawQuery) : []
+export default async function SearchPage({ searchParams }: SearchPageProps) {
+  const { q: rawQueryParam } = await searchParams
+  const rawQuery = extractQueryParam(rawQueryParam)
+  const boundedQuery = displayQuery(rawQuery)
+  const normalizedQuery = normalizeQuery(rawQuery)
+  const hasQuery = normalizedQuery.length > 0
+
+  const results = hasQuery ? await getSearchResults(rawQuery) : []
 
   return (
     <div className="flex min-h-screen flex-col bg-white">

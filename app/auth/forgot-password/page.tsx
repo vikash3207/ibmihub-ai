@@ -22,13 +22,13 @@ export default async function ForgotPasswordPage({ searchParams }: Props) {
   return (
     <AuthCard title="Reset your password" subtitle="Enter your email address and we'll send you a reset link.">
       {message && (
-        <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
+        <div role="status" className="mb-4 rounded-lg bg-green-50 border border-green-200 px-4 py-3 text-sm text-green-700">
           {message}
         </div>
       )}
 
       {error && (
-        <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+        <div role="alert" className="mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
           {error}
         </div>
       )}

@@ -26,6 +26,7 @@ import {
   deepDiveToSearchable,
   insightToSearchable,
   normalizeQuery,
+  extractQueryParam,
   scoreItem,
   searchContent,
   highlightMatch,
@@ -128,16 +129,35 @@ async function main() {
   // ---------------------------------------------------------------------------
 
   {
-    const lessonItem = lessonToSearchable(lessonFixture())
-    check('lessonToSearchable builds the correct detail URL', lessonItem.url === '/learn/ibm-i-fundamentals/what-is-ibm-i')
-    check('lessonToSearchable type is "lesson"', lessonItem.type === 'lesson')
+    // Fixture has both a master_category_id ("ibm-i-platform-fundamentals",
+    // an internal slug) and a master_subcategory ("What IBM i Is", already
+    // human-readable text in content/lessons/metadata.ts).
+    const bothTaxonomyLesson = lessonToSearchable(lessonFixture({ master_category_id: 'ibm-i-platform-fundamentals', master_subcategory: 'What IBM i Is' }))
+    check('lessonToSearchable builds the correct detail URL', bothTaxonomyLesson.url === '/learn/ibm-i-fundamentals/what-is-ibm-i')
+    check('lessonToSearchable type is "lesson"', bothTaxonomyLesson.type === 'lesson')
     check(
-      'lessonToSearchable falls back to master_category_id when master_subcategory is null',
-      lessonItem.category === 'ibm-i-platform-fundamentals'
+      'lessonToSearchable resolves the human master-category label via getMasterCategoryLabel(), not the raw slug',
+      bothTaxonomyLesson.category === 'IBM i Platform Fundamentals'
+    )
+    check('lessonToSearchable never exposes the raw internal category id as display text', bothTaxonomyLesson.category !== 'ibm-i-platform-fundamentals')
+    check('lessonToSearchable carries the subcategory as its own field, not merged into category', bothTaxonomyLesson.subcategory === 'What IBM i Is')
+
+    const noSubcategoryLesson = lessonToSearchable(lessonFixture({ master_category_id: 'rpg-programming', master_subcategory: null }))
+    check(
+      'a lesson with a master category but no subcategory still resolves the human category label (the master category is never omitted)',
+      noSubcategoryLesson.category === 'RPG Programming'
+    )
+    check('a lesson with no subcategory has a null subcategory field, not a raw fallback', noSubcategoryLesson.subcategory === null)
+
+    const unknownCategoryLesson = lessonToSearchable(lessonFixture({ master_category_id: 'not-a-real-category-id', master_subcategory: null }))
+    check(
+      'an unknown/unrecognized master_category_id falls back to null, never exposing the unrecognized raw id as display text',
+      unknownCategoryLesson.category === null
     )
 
     const noCategoryLesson = lessonToSearchable(lessonFixture({ master_category_id: null, master_subcategory: null }))
     check('lessonToSearchable falls back to null category rather than crashing when both taxonomy fields are absent', noCategoryLesson.category === null)
+    check('lessonToSearchable falls back to null subcategory when absent', noCategoryLesson.subcategory === null)
 
     const noTagsLesson = lessonToSearchable(lessonFixture({ tags: null }))
     check('lessonToSearchable falls back to an empty tags array when tags is null, not a crash', Array.isArray(noTagsLesson.tags) && noTagsLesson.tags.length === 0)
@@ -145,12 +165,31 @@ async function main() {
     const deepDiveItem = deepDiveToSearchable(deepDiveFixture())
     check('deepDiveToSearchable builds the correct detail URL', deepDiveItem.url === '/deep-dives/sql-error-handling-on-ibm-i')
     check('deepDiveToSearchable type is "deep-dive"', deepDiveItem.type === 'deep-dive')
-    check('deepDiveToSearchable resolves a human category label, not the raw category id', deepDiveItem.category === 'SQL / Db2 for i')
+    check('deepDiveToSearchable resolves a human category label, not the raw category id (unchanged by this follow-up)', deepDiveItem.category === 'SQL / Db2 for i')
+    check('deepDiveToSearchable has no subcategory (Deep Dives have no second taxonomy tier)', deepDiveItem.subcategory === null)
 
     const insightItem = insightToSearchable(insightFixture())
     check('insightToSearchable builds the correct detail URL', insightItem.url === '/insights/ibm-i-mcp-server')
     check('insightToSearchable type is "insight"', insightItem.type === 'insight')
-    check('insightToSearchable resolves a human category label, not the raw category id', insightItem.category === 'AI & Emerging Tech')
+    check('insightToSearchable resolves a human category label, not the raw category id (unchanged by this follow-up)', insightItem.category === 'AI & Emerging Tech')
+    check('insightToSearchable has no subcategory (Insights have no second taxonomy tier)', insightItem.subcategory === null)
+  }
+
+  // ---------------------------------------------------------------------------
+  section('1b. Lesson category/subcategory: real matching against the human labels, not raw ids')
+  // ---------------------------------------------------------------------------
+
+  {
+    const lessonItem = lessonToSearchable(lessonFixture({ master_category_id: 'rpg-programming', master_subcategory: 'What RPGLE Is' }))
+
+    const byMasterCategory = searchContent([lessonItem], 'RPG Programming')
+    check('a query for the human master-category name ("RPG Programming") matches the lesson', byMasterCategory.length === 1)
+
+    const bySubcategory = searchContent([lessonItem], 'What RPGLE Is')
+    check('a query for the lesson\'s subcategory ("What RPGLE Is") also matches the same lesson', bySubcategory.length === 1)
+
+    const byRawSlug = searchContent([lessonItem], 'rpg-programming')
+    check('a query for the raw internal category slug does NOT match (the slug is never stored as searchable text)', byRawSlug.length === 0)
   }
 
   // ---------------------------------------------------------------------------
@@ -170,6 +209,43 @@ async function main() {
   }
 
   // ---------------------------------------------------------------------------
+  section('2b. extractQueryParam: safely narrows the string | string[] | undefined Next.js can hand back')
+  // ---------------------------------------------------------------------------
+
+  {
+    check('a normal string query passes through unchanged', extractQueryParam('sql') === 'sql')
+    check('a repeated ?q=sql&q=rpgle query (a string[]) deterministically uses the first value', extractQueryParam(['sql', 'rpgle']) === 'sql')
+    check('an empty array falls back to an empty string, not a crash', extractQueryParam([]) === '')
+    check('an array whose first value is itself an empty string falls back to an empty string', extractQueryParam(['']) === '')
+    check('an undefined value (missing ?q= entirely) falls back to an empty string', extractQueryParam(undefined) === '')
+
+    const longValueInArray = extractQueryParam(['a'.repeat(5000), 'sql'])
+    check('extractQueryParam alone does not truncate -- that is normalizeQuery\'s job, applied next', longValueInArray.length === 5000)
+    check(
+      'a very long value inside a repeated-parameter array is still safely bounded once normalizeQuery runs on the extracted result',
+      normalizeQuery(longValueInArray).length === 200
+    )
+
+    const specialCharsResult = extractQueryParam(['<script>alert(1)</script>', 'sql'])
+    check('special characters inside a repeated parameter are preserved as plain text by extraction (never crash, never interpreted)', specialCharsResult === '<script>alert(1)</script>')
+
+    check('extractQueryParam never concatenates multiple values into one (would silently make an already-long query even longer)', extractQueryParam(['sql', 'rpgle', 'cl']) === 'sql')
+
+    // The full pipeline (extract -> normalize -> score/search) must never
+    // throw for any shape Next.js could hand back.
+    let pipelineThrew = false
+    try {
+      const shapes: Array<string | string[] | undefined> = ['sql', ['sql', 'rpgle'], [], [''], undefined, ['a'.repeat(5000)]]
+      for (const value of shapes) {
+        normalizeQuery(extractQueryParam(value))
+      }
+    } catch {
+      pipelineThrew = true
+    }
+    check('the full extract -> normalize pipeline never throws for any shape Next.js can hand back for a repeated query param', !pipelineThrew)
+  }
+
+  // ---------------------------------------------------------------------------
   section('3. scoreItem: deterministic, explainable rank tiers')
   // ---------------------------------------------------------------------------
 
@@ -180,6 +256,7 @@ async function main() {
       title: 'SQL Error Handling on IBM i',
       description: 'A deep dive into SQLCODE, SQLSTATE, and GET DIAGNOSTICS.',
       category: 'SQL / Db2 for i',
+      subcategory: null,
       tags: ['sql', 'error-handling'],
       url: '/deep-dives/sql-error-handling-on-ibm-i',
     }
@@ -193,6 +270,9 @@ async function main() {
     check('no match returns null', scoreItem(item, 'cobol') === null)
     check('an empty normalized query returns null (never a false match)', scoreItem(item, '') === null)
     check('matching is case-insensitive regardless of the item title\'s own casing', scoreItem(item, normalizeQuery('SQL ERROR')) === 2)
+
+    const itemWithSubcategory: SearchableItem = { ...item, category: null, subcategory: 'Error Handling Fundamentals' }
+    check('a subcategory-only match is also tier 4, same as a category match', scoreItem(itemWithSubcategory, 'error handling fundamentals') === 4)
   }
 
   // ---------------------------------------------------------------------------
@@ -201,9 +281,9 @@ async function main() {
 
   {
     const items: SearchableItem[] = [
-      { type: 'lesson', slug: 'sql-basics', title: 'SQL Basics', description: 'Intro to SQL.', category: 'SQL', tags: ['sql'], url: '/learn/ibm-i-fundamentals/sql-basics' },
-      { type: 'deep-dive', slug: 'sql-error-handling', title: 'SQL Error Handling', description: 'Advanced SQL error handling.', category: 'SQL / Db2 for i', tags: ['sql'], url: '/deep-dives/sql-error-handling' },
-      { type: 'insight', slug: 'sql-performance', title: 'SQL Performance', description: 'Tuning SQL performance.', category: 'Operations & Performance', tags: ['sql'], url: '/insights/sql-performance' },
+      { type: 'lesson', slug: 'sql-basics', title: 'SQL Basics', description: 'Intro to SQL.', category: 'SQL', subcategory: null, tags: ['sql'], url: '/learn/ibm-i-fundamentals/sql-basics' },
+      { type: 'deep-dive', slug: 'sql-error-handling', title: 'SQL Error Handling', description: 'Advanced SQL error handling.', category: 'SQL / Db2 for i', subcategory: null, tags: ['sql'], url: '/deep-dives/sql-error-handling' },
+      { type: 'insight', slug: 'sql-performance', title: 'SQL Performance', description: 'Tuning SQL performance.', category: 'Operations & Performance', subcategory: null, tags: ['sql'], url: '/insights/sql-performance' },
     ]
 
     check('an empty query returns no results (the empty-query guidance state, never the full catalog)', searchContent(items, '').length === 0)
@@ -222,8 +302,8 @@ async function main() {
     // Deterministic tie-break: two items in the same rank tier sort
     // alphabetically by title, not by input array order.
     const tieItems: SearchableItem[] = [
-      { type: 'lesson', slug: 'b', title: 'Zebra Topic', description: 'contains zzz-term', category: null, tags: [], url: '/b' },
-      { type: 'lesson', slug: 'a', title: 'Alpha Topic', description: 'contains zzz-term', category: null, tags: [], url: '/a' },
+      { type: 'lesson', slug: 'b', title: 'Zebra Topic', description: 'contains zzz-term', category: null, subcategory: null, tags: [], url: '/b' },
+      { type: 'lesson', slug: 'a', title: 'Alpha Topic', description: 'contains zzz-term', category: null, subcategory: null, tags: [], url: '/a' },
     ]
     const tieResults = searchContent(tieItems, 'zzz-term')
     check('same-tier ties break alphabetically by title, deterministically', tieResults[0]?.slug === 'a' && tieResults[1]?.slug === 'b')
@@ -232,8 +312,8 @@ async function main() {
     // if the query were interpreted as a RegExp, "a.b" would match "axb" via
     // the "." wildcard. Confirm it does NOT.
     const regexRiskItems: SearchableItem[] = [
-      { type: 'lesson', slug: 'literal-dot', title: 'a.b', description: '', category: null, tags: [], url: '/literal-dot' },
-      { type: 'lesson', slug: 'would-match-if-regex', title: 'axb', description: '', category: null, tags: [], url: '/would-match-if-regex' },
+      { type: 'lesson', slug: 'literal-dot', title: 'a.b', description: '', category: null, subcategory: null, tags: [], url: '/literal-dot' },
+      { type: 'lesson', slug: 'would-match-if-regex', title: 'axb', description: '', category: null, subcategory: null, tags: [], url: '/would-match-if-regex' },
     ]
     const regexResults = searchContent(regexRiskItems, 'a.b')
     check(
@@ -244,7 +324,7 @@ async function main() {
     // A pathologically long query must not throw and must still return a
     // sensible (bounded) result -- exercises the full pipeline, not just
     // normalizeQuery() in isolation.
-    const longQueryItems: SearchableItem[] = [{ type: 'lesson', slug: 'x', title: 'a'.repeat(300), description: '', category: null, tags: [], url: '/x' }]
+    const longQueryItems: SearchableItem[] = [{ type: 'lesson', slug: 'x', title: 'a'.repeat(300), description: '', category: null, subcategory: null, tags: [], url: '/x' }]
     let longQueryThrew = false
     let longQueryResults: SearchableItem[] = []
     try {
@@ -340,6 +420,36 @@ async function main() {
   }
 
   // ---------------------------------------------------------------------------
+  section('8b. /search page: repeated ?q= parameters, and no database work for an empty query')
+  // ---------------------------------------------------------------------------
+
+  {
+    const searchPageSrc = readRepoFile('app/search/page.tsx')
+
+    check('searchParams accepts the string[] shape Next.js hands back for a repeated ?q= key, not just a plain string', /q\?:\s*string\s*\|\s*string\[\]/.test(searchPageSrc))
+    check('the page extracts the query via extractQueryParam(), not a raw destructure assuming a plain string', /extractQueryParam\(rawQueryParam\)/.test(searchPageSrc))
+
+    // Confirm getPublishedLessons() is only called from inside
+    // getSearchResults() -- never unconditionally in the exported SearchPage
+    // component itself -- by splitting the source at the component boundary
+    // and checking each half independently.
+    const componentBoundary = searchPageSrc.indexOf('export default async function SearchPage')
+    check('found the SearchPage component boundary to split the source on', componentBoundary > -1)
+    const beforeComponent = searchPageSrc.slice(0, componentBoundary)
+    const componentBody = searchPageSrc.slice(componentBoundary)
+
+    check('getPublishedLessons() is called inside the extracted getSearchResults() helper (module scope, before the component)', beforeComponent.includes('getPublishedLessons()'))
+    check(
+      'getPublishedLessons() is NOT called directly inside the SearchPage component body -- only indirectly, behind the hasQuery gate',
+      !componentBody.includes('getPublishedLessons()')
+    )
+    check(
+      'the lesson/catalog fetch only runs behind the hasQuery gate (a ternary, not an unconditional call before the empty-query branch)',
+      /hasQuery\s*\?\s*await getSearchResults\(rawQuery\)\s*:\s*\[\]/.test(componentBody)
+    )
+  }
+
+  // ---------------------------------------------------------------------------
   section('9. Search entry point: accessible, works signed-out and authenticated')
   // ---------------------------------------------------------------------------
 
@@ -371,6 +481,11 @@ async function main() {
     const rootLayoutSrc = readRepoFile('app/layout.tsx')
     check('SkipLink is mounted in the root layout, before the rest of the page content', rootLayoutSrc.includes('<SkipLink />'))
 
+    // Every top-level page shell / shared layout that ever renders its own
+    // <main> in this codebase -- confirmed exhaustively by grepping the
+    // whole tree for a real (non-comment) `<main` tag, not assumed. A
+    // follow-up review found two of these (legal-page-layout.tsx,
+    // not-found.tsx) still missing the target after the first pass.
     const mainContentFiles = [
       'app/page.tsx',
       'app/deep-dives/page.tsx',
@@ -382,10 +497,44 @@ async function main() {
       'app/learn/layout.tsx',
       'app/(authenticated)/layout.tsx',
       'components/auth-card.tsx',
+      'components/legal-page-layout.tsx',
+      'app/not-found.tsx',
     ]
     for (const file of mainContentFiles) {
       const src = readRepoFile(file)
       check(`${file} has a <main id="main-content"> landmark for the skip link to target`, /<main id="main-content"/.test(src))
+    }
+
+    // No file above defines the id more than once, and no page nested
+    // inside app/learn/layout.tsx or app/(authenticated)/layout.tsx (whose
+    // shared <main id="main-content"> already covers every route under it)
+    // renders a second, competing <main> of its own -- which would produce
+    // two id="main-content" elements on the same rendered page.
+    for (const file of mainContentFiles) {
+      const src = readRepoFile(file)
+      const occurrences = (src.match(/id="main-content"/g) ?? []).length
+      check(`${file} defines id="main-content" exactly once, never duplicated within the same file`, occurrences === 1, String(occurrences))
+    }
+
+    const pagesNestedUnderSharedLayouts = [
+      'app/learn/page.tsx',
+      'app/learn/ibm-i-fundamentals/page.tsx',
+      'app/learn/ibm-i-fundamentals/[slug]/page.tsx',
+      'app/(authenticated)/dashboard/page.tsx',
+      'app/(authenticated)/dashboard/achievements/page.tsx',
+      'app/(authenticated)/practice/page.tsx',
+      'app/(authenticated)/practice-lab/page.tsx',
+      'app/(authenticated)/practice-lab/5250/page.tsx',
+      'app/(authenticated)/practice-lab/5250/[exerciseSlug]/page.tsx',
+      'app/(authenticated)/practice-lab/sql/page.tsx',
+      'app/(authenticated)/practice-lab/sql/[exerciseSlug]/page.tsx',
+      'app/(authenticated)/ai-tutor/page.tsx',
+      'app/(authenticated)/onboarding/page.tsx',
+      'app/(authenticated)/profile/page.tsx',
+    ]
+    for (const file of pagesNestedUnderSharedLayouts) {
+      const src = stripComments(readRepoFile(file))
+      check(`${file} renders inside its shared layout's <main> and does not define a second, duplicate <main> of its own`, !/<main[\s>]/.test(src))
     }
 
     const footerSrc = readRepoFile('components/site-footer.tsx')
@@ -396,6 +545,10 @@ async function main() {
     const signUpSrc = readRepoFile('app/auth/sign-up/page.tsx')
     check('the login page error banner is announced to screen readers (role="alert")', /role="alert"/.test(loginSrc))
     check('the sign-up page error banner is announced to screen readers (role="alert")', /role="alert"/.test(signUpSrc))
+
+    const forgotPasswordSrc = readRepoFile('app/auth/forgot-password/page.tsx')
+    check('the forgot-password page error banner is announced to screen readers (role="alert")', /role="alert"/.test(forgotPasswordSrc))
+    check('the forgot-password page success message uses role="status", not role="alert" (informational, not an error)', /role="status"/.test(forgotPasswordSrc))
   }
 
   console.log(`\n${'-'.repeat(60)}`)
