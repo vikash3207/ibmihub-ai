@@ -249,7 +249,7 @@ export default async function LessonPage({ params, searchParams }: Props) {
 
       {practiceTopicId && (
         <Link
-          href={`/practice?topic=${encodeURIComponent(practiceTopicId)}`}
+          href={`/practice/guided?topic=${encodeURIComponent(practiceTopicId)}`}
           className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-blue-600 transition-colors active:bg-blue-100/60 hover:border-blue-300 hover:bg-blue-50/50 hover:text-blue-800"
         >
           <ClipboardCheck className="h-4 w-4" aria-hidden="true" />
