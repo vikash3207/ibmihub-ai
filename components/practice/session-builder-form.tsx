@@ -3,7 +3,15 @@
 import { useRef, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { PRACTICE_TOPIC_GROUPS } from '@/lib/practice-topic-groups'
-import { ALL_TOPICS_KEY, QUIZ_LEVELS, type QuizAvailabilityMatrix, type SessionLength, type SessionLevel } from '@/lib/practice-session'
+import {
+  ALL_TOPICS_KEY,
+  isConfigRunnable,
+  isLevelRunnable,
+  isTopicRunnable,
+  type QuizAvailabilityMatrix,
+  type SessionLength,
+  type SessionLevel,
+} from '@/lib/practice-session'
 import { cn } from '@/lib/utils'
 
 interface LevelOption {
@@ -39,6 +47,17 @@ interface SessionBuilderFormProps {
  * a `{count, supportsLength}` each) -- deliberately NOT the underlying
  * question content, so no meaningful client payload is added.
  *
+ * "Available" means *runnable*, not merely non-empty: a topic/level with
+ * fewer eligible questions than the shortest offered session length (e.g.
+ * SQLRPGLE's real inventory never reaches 5) is still a selectable dead end
+ * if only `count > 0` gates it -- every combination would leave every
+ * length, and Start, disabled. Topic/level/full-config availability is
+ * always derived through lib/practice-session.ts's isTopicRunnable() /
+ * isLevelRunnable() / isConfigRunnable() (never a local `count > 0`/
+ * `count === 0` check re-derived here), so this form, its own
+ * auto-correction below, and the regression suite can never quietly drift
+ * apart on what "available" means.
+ *
  * Every option is a real native `<input type="radio">` (visually hidden,
  * paired with a styled sibling <span> via the `peer` pattern) rather than a
  * hand-rolled ARIA widget -- grouping same-`name` radios gets correct
@@ -59,25 +78,36 @@ export function SessionBuilderForm({ action, submitLabel, levels, lengths, matri
   const [length, setLength] = useState<SessionLength>(lengths[0].value)
   const seedInputRef = useRef<HTMLInputElement>(null)
 
+  // The exact set of lengths this builder instance offers (e.g. Quick
+  // Quiz's [5, 10]) -- "runnable" is always relative to this set, never a
+  // bare `count > 0`, since a topic/level with fewer eligible questions
+  // than the shortest offered length is still a dead end.
+  const offeredLengths = lengths.map((l) => l.value)
+
   const availabilityForTopic = matrix[topicGroupId] ?? ({} as QuizAvailabilityMatrix[string])
   const currentAvailability = availabilityForTopic[level as Exclude<SessionLevel, 'advanced'>]
-  const canSubmit = currentAvailability?.supportsLength[length] ?? false
+  const canSubmit = isConfigRunnable(currentAvailability, length)
 
   function handleTopicChange(newTopicGroupId: string) {
     setTopicGroupId(newTopicGroupId)
     const availability = matrix[newTopicGroupId] ?? ({} as QuizAvailabilityMatrix[string])
 
-    // If the currently selected level has no eligible questions at all for
-    // the new topic, move to the first level from the caller's own list
-    // that does -- never leave the form pointed at a guaranteed-empty level.
-    const stillHasLevel = (availability[level as Exclude<SessionLevel, 'advanced'>]?.count ?? 0) > 0
-    const nextLevel = stillHasLevel ? level : levels.find((l) => (availability[l.value as Exclude<SessionLevel, 'advanced'>]?.count ?? 0) > 0)?.value
+    // If the currently selected level can't run a session at all for the
+    // new topic, move to the first level from the caller's own list that
+    // can -- never leave the form pointed at a level that's guaranteed to
+    // fail. If no level is runnable for this topic (e.g. SQLRPGLE, whose
+    // topic pill is itself disabled and therefore unreachable via real
+    // interaction), the selection is left as-is: canSubmit correctly goes
+    // false and the "not enough questions" alert explains why, rather than
+    // this silently picking some other dead-end configuration.
+    const stillRunnable = isLevelRunnable(availability[level as Exclude<SessionLevel, 'advanced'>], offeredLengths)
+    const nextLevel = stillRunnable ? level : levels.find((l) => isLevelRunnable(availability[l.value as Exclude<SessionLevel, 'advanced'>], offeredLengths))?.value
     const resolvedLevel = nextLevel ?? level
     if (resolvedLevel !== level) setLevel(resolvedLevel)
 
     const resolvedAvailability = availability[resolvedLevel as Exclude<SessionLevel, 'advanced'>]
-    if (!resolvedAvailability?.supportsLength[length]) {
-      const nextLength = lengths.find((l) => resolvedAvailability?.supportsLength[l.value])
+    if (!isConfigRunnable(resolvedAvailability, length)) {
+      const nextLength = lengths.find((l) => isConfigRunnable(resolvedAvailability, l.value))
       if (nextLength) setLength(nextLength.value)
     }
   }
@@ -85,8 +115,8 @@ export function SessionBuilderForm({ action, submitLabel, levels, lengths, matri
   function handleLevelChange(newLevel: SessionLevel) {
     setLevel(newLevel)
     const availability = availabilityForTopic[newLevel as Exclude<SessionLevel, 'advanced'>]
-    if (!availability?.supportsLength[length]) {
-      const nextLength = lengths.find((l) => availability?.supportsLength[l.value])
+    if (!isConfigRunnable(availability, length)) {
+      const nextLength = lengths.find((l) => isConfigRunnable(availability, l.value))
       if (nextLength) setLength(nextLength.value)
     }
   }
@@ -113,18 +143,19 @@ export function SessionBuilderForm({ action, submitLabel, levels, lengths, matri
             label="All Topics"
             checked={topicGroupId === ALL_TOPICS_KEY}
             onChange={() => handleTopicChange(ALL_TOPICS_KEY)}
+            disabled={!isTopicRunnable(matrix[ALL_TOPICS_KEY], offeredLengths)}
           />
           {PRACTICE_TOPIC_GROUPS.map((group) => {
-            const hasAnyQuestions = QUIZ_LEVELS.some((lvl) => (matrix[group.id]?.[lvl]?.count ?? 0) > 0)
+            const topicRunnable = isTopicRunnable(matrix[group.id], offeredLengths)
             return (
               <PillRadio
                 key={group.id}
                 name="topicGroup"
                 value={group.id}
-                label={group.label}
+                label={topicRunnable ? group.label : `${group.label} (not enough questions)`}
                 checked={topicGroupId === group.id}
                 onChange={() => handleTopicChange(group.id)}
-                disabled={!hasAnyQuestions}
+                disabled={!topicRunnable}
               />
             )
           })}
@@ -135,16 +166,18 @@ export function SessionBuilderForm({ action, submitLabel, levels, lengths, matri
         <legend className="mb-3 text-sm font-semibold text-slate-900">Level</legend>
         <div className="flex flex-wrap gap-2">
           {levels.map((lvl) => {
-            const count = availabilityForTopic[lvl.value as Exclude<SessionLevel, 'advanced'>]?.count ?? 0
+            const entry = availabilityForTopic[lvl.value as Exclude<SessionLevel, 'advanced'>]
+            const count = entry?.count ?? 0
+            const levelRunnable = isLevelRunnable(entry, offeredLengths)
             return (
               <PillRadio
                 key={lvl.value}
                 name="level"
                 value={lvl.value}
-                label={`${lvl.label} (${count})`}
+                label={levelRunnable ? `${lvl.label} (${count})` : `${lvl.label} (${count} -- not enough for a quiz)`}
                 checked={level === lvl.value}
                 onChange={() => handleLevelChange(lvl.value)}
-                disabled={count === 0}
+                disabled={!levelRunnable}
               />
             )
           })}
@@ -155,7 +188,7 @@ export function SessionBuilderForm({ action, submitLabel, levels, lengths, matri
         <legend className="mb-3 text-sm font-semibold text-slate-900">Session length</legend>
         <div className="flex flex-wrap gap-2">
           {lengths.map((len) => {
-            const supported = currentAvailability?.supportsLength[len.value] ?? false
+            const supported = isConfigRunnable(currentAvailability, len.value)
             return (
               <PillRadio
                 key={len.value}

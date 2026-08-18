@@ -14,10 +14,13 @@
  * Three existing topic ids are deliberately left out of every group's
  * `topicIds` list: `mini-projects` and `mixed-review` are cross-topic
  * review sets, not a single topic; `interview-readiness` is conceptually
- * superseded by the new, dedicated Interview Prep mode (content/practice/
- * interview-questions.ts). None of the three are deleted -- their questions
- * remain fully reachable through the "All Topics" selection (topicGroupId
- * `null`), which is not filtered by this module at all.
+ * owned by the planned Interview Prep mode (content/practice/
+ * interview-questions.ts) rather than Guided Practice/Quick Quiz's
+ * topic-group picker -- Interview Prep itself is a "Coming soon" capability
+ * with no published content or session yet, not a completed replacement.
+ * None of the three are deleted -- their questions remain fully reachable
+ * through the "All Topics" selection (topicGroupId `null`), which is not
+ * filtered by this module at all.
  *
  * No dependency on lib/lessons.ts or any server-only module, so this file
  * is safe to import from client components, matching the same reasoning
@@ -39,8 +42,12 @@ export const PRACTICE_TOPIC_GROUPS: PracticeTopicGroup[] = [
     topicIds: ['ibm-i-fundamentals', 'commands-5250'],
   },
   {
+    // id kept as-is (already a live topicGroup= query-param value) even
+    // though the label was corrected -- the real questions tagged
+    // 'libraries-and-objects' cover libraries/library-lists/object types
+    // only, nothing IFS-specific, so the visible label no longer claims IFS.
     id: 'libraries-objects-ifs',
-    label: 'Libraries, Objects and IFS',
+    label: 'Libraries and Objects',
     topicIds: ['libraries-and-objects'],
   },
   {

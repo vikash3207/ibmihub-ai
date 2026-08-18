@@ -91,9 +91,12 @@ export function isValidMode(value: string | null | undefined): value is Practice
  * 'advanced' is only ever valid for 'interview' -- content/practice/
  * questions.ts's 169 records top out at 'intermediate' today (confirmed by
  * audit), so offering Advanced for Guided Practice/Quick Quiz would always
- * hit the zero-inventory case. The new 60-question interview bank is
- * authored across all three real levels by design, so Interview Prep gets
- * the full range.
+ * hit the zero-inventory case. Interview Prep itself has no published
+ * content yet either (content/practice/interview-questions.ts's catalog is
+ * intentionally empty -- see that file's header) -- 'advanced' is reserved
+ * for interview mode so a future, separately reviewed content pass doesn't
+ * need a validation change to use it, not because a full-range bank already
+ * exists today.
  */
 export function isValidLevel(value: string | null | undefined, mode: PracticeMode): value is SessionLevel {
   if (value === 'mixed' || value === 'beginner' || value === 'intermediate') return true
@@ -294,6 +297,36 @@ export function buildQuizAvailabilityMatrix(allQuestions: PracticeQuestion[]): Q
   }
 
   return matrix
+}
+
+/**
+ * Whether a single level's availability entry can actually run a session at
+ * one of the lengths the caller offers -- having *some* eligible questions
+ * is not enough (e.g. 3 eligible questions is still zero when the builder
+ * only ever offers 5- or 10-question sessions). This is the single source
+ * of truth for "runnable" -- the builder form, its auto-correction, and the
+ * regression suite all call this (or isTopicRunnable/isConfigRunnable
+ * below) instead of re-deriving their own count-based check, so the three
+ * can never quietly drift apart.
+ */
+export function isLevelRunnable(entry: QuizAvailabilityEntry | undefined, offeredLengths: SessionLength[]): boolean {
+  if (!entry) return false
+  return offeredLengths.some((length) => entry.supportsLength[length])
+}
+
+/**
+ * Whether a topic (or "All Topics") has at least one level that's runnable
+ * at one of the offered lengths. A topic is never "available" merely
+ * because it contains one or more questions -- see isLevelRunnable().
+ */
+export function isTopicRunnable(perLevel: QuizAvailabilityMatrix[string] | undefined, offeredLengths: SessionLength[]): boolean {
+  if (!perLevel) return false
+  return QUIZ_LEVELS.some((level) => isLevelRunnable(perLevel[level], offeredLengths))
+}
+
+/** Whether one exact topic+level+length combination can actually start a session. */
+export function isConfigRunnable(entry: QuizAvailabilityEntry | undefined, length: SessionLength): boolean {
+  return entry?.supportsLength[length] ?? false
 }
 
 // ---------------------------------------------------------------------------
