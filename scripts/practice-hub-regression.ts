@@ -36,11 +36,16 @@ import {
   buildGuidedOrQuizSession,
   buildQuizAvailabilityMatrix,
   countEligibleQuestions,
+  isTopicRunnable,
+  isLevelRunnable,
+  isConfigRunnable,
   QUIZ_LEVELS,
   ALL_TOPICS_KEY,
   seededShuffle,
   scoreQuiz,
   selectRetryQuestions,
+  type SessionLevel,
+  type SessionLength,
 } from '../lib/practice-session'
 
 let failures = 0
@@ -331,16 +336,17 @@ async function main() {
       `${unsupported10} of ${total} combinations`
     )
 
-    // Every combination the matrix marks as supported must actually succeed
-    // via the real session-building function, for both lengths -- proving
-    // the builder's own availability signal is never optimistic.
+    // Every combination the matrix marks as supported at an exact length
+    // must actually succeed via the real session-building function --
+    // proving a length pill is never enabled optimistically (review item 3:
+    // "every enabled length can produce a session").
     let attempted = 0
     let allSupportedSucceed = true
     for (const groupId of groupIds) {
       for (const level of QUIZ_LEVELS) {
         const entry = matrix[groupId][level]
         for (const length of [5, 10] as const) {
-          if (!entry.supportsLength[length]) continue
+          if (!isConfigRunnable(entry, length)) continue
           attempted += 1
           const result = buildGuidedOrQuizSession('quiz', { topicGroupId: groupId || null, level, length, seed: 7 }, PRACTICE_QUESTIONS)
           if (result.status !== 'ok' || result.questions.length !== length) {
@@ -350,19 +356,139 @@ async function main() {
       }
     }
     check(
-      'every matrix-marked-supported combination actually produces a session of the advertised length (no combination is ever presented as startable but fails)',
+      'every isConfigRunnable()-true combination actually produces a session of the advertised length (no length is ever presented as startable but fails)',
       allSupportedSucceed && attempted > 0,
       `${attempted} supported combinations checked`
     )
 
+    // "Available" means runnable, not merely non-empty: a topic/level with
+    // fewer eligible questions than the shortest offered length (5) is
+    // still a selectable dead end under a bare `count > 0` check -- the
+    // review's exact concern. Cross-check isTopicRunnable()/isLevelRunnable()
+    // against an independent, direct computation over supportsLength for
+    // every real combination, rather than trusting the helpers' own
+    // internal logic circularly.
+    const offeredLengths = [5, 10] as const
+    let topicRunnableMismatches = 0
+    let levelRunnableMismatches = 0
+    let enabledTopicsWithNoRunnableLevel = 0
+    let enabledLevelsWithNoRunnableLength = 0
+
+    for (const groupId of groupIds) {
+      const perLevel = matrix[groupId]
+      const independentTopicRunnable = QUIZ_LEVELS.some((level) => offeredLengths.some((length) => perLevel[level].supportsLength[length]))
+      if (isTopicRunnable(perLevel, [...offeredLengths]) !== independentTopicRunnable) topicRunnableMismatches += 1
+      if (isTopicRunnable(perLevel, [...offeredLengths]) && !independentTopicRunnable) enabledTopicsWithNoRunnableLevel += 1
+
+      for (const level of QUIZ_LEVELS) {
+        const entry = perLevel[level]
+        const independentLevelRunnable = offeredLengths.some((length) => entry.supportsLength[length])
+        if (isLevelRunnable(entry, [...offeredLengths]) !== independentLevelRunnable) levelRunnableMismatches += 1
+        if (isLevelRunnable(entry, [...offeredLengths]) && !independentLevelRunnable) enabledLevelsWithNoRunnableLength += 1
+      }
+    }
+
+    check(
+      'isTopicRunnable() exactly matches an independent per-level/per-length computation for every real topic group (review item 1)',
+      topicRunnableMismatches === 0 && enabledTopicsWithNoRunnableLevel === 0,
+      `${topicRunnableMismatches} mismatches`
+    )
+    check(
+      'isLevelRunnable() exactly matches an independent per-length computation for every real topic-group/level combination (review item 2)',
+      levelRunnableMismatches === 0 && enabledLevelsWithNoRunnableLength === 0,
+      `${levelRunnableMismatches} mismatches`
+    )
+
+    // The exact real-catalog cases the review named, computed from the real
+    // catalog (never hardcoded) and cross-checked against the independent
+    // count -- review items 4 and 5.
+    const sqlrpgleCounts = QUIZ_LEVELS.map((level) => countEligibleQuestions({ topicGroupId: 'sqlrpgle', level }, PRACTICE_QUESTIONS, isQuizEligible))
+    check(
+      'SQLRPGLE genuinely has fewer than 5 eligible questions at every level today (the exact real-inventory shape the review named)',
+      sqlrpgleCounts.every((c) => c < 5),
+      JSON.stringify(sqlrpgleCounts)
+    )
+    check(
+      'SQLRPGLE is therefore not topic-runnable for Quick Quiz -- it can never be selected into an unrunnable state because it is disabled outright, not merely "selectable but always failing"',
+      !isTopicRunnable(matrix['sqlrpgle'], [...offeredLengths])
+    )
+
+    const jobsOpsBeginnerCount = countEligibleQuestions({ topicGroupId: 'jobs-operations', level: 'beginner' }, PRACTICE_QUESTIONS, isQuizEligible)
+    check(
+      'Jobs/Operations + Beginner genuinely has exactly the real, under-5 count the review named',
+      jobsOpsBeginnerCount > 0 && jobsOpsBeginnerCount < 5,
+      String(jobsOpsBeginnerCount)
+    )
+    check(
+      'Jobs/Operations + Beginner is therefore not level-runnable and must be disabled',
+      !isLevelRunnable(matrix['jobs-operations']['beginner'], [...offeredLengths])
+    )
+    check(
+      'Jobs/Operations the TOPIC nonetheless stays runnable overall (Intermediate/Mixed both have enough questions) -- only the Beginner level is disabled, the topic pill itself is not',
+      isTopicRunnable(matrix['jobs-operations'], [...offeredLengths])
+    )
+
+    // Review item 6: the quiz builder's real default (All Topics + Mixed +
+    // 5, matching app/(authenticated)/practice/quiz/builder/page.tsx's
+    // levels=[mixed, beginner, intermediate] / lengths=[5, 10] prop order)
+    // must itself be runnable against the real catalog.
+    check(
+      'the default builder configuration (All Topics, Mixed, 5 questions) is runnable against the real catalog',
+      isConfigRunnable(matrix[ALL_TOPICS_KEY]['mixed'], 5)
+    )
+
+    // Review item 7: simulate the exact auto-correction algorithm
+    // session-builder-form.tsx uses (first level from the caller's own
+    // ordered list that's runnable, then first length from the caller's own
+    // ordered list that's runnable) against every real topic group with the
+    // Quick Quiz builder's real levels/lengths order, and confirm it never
+    // resolves to a level/length that isn't genuinely runnable.
+    const builderLevelOrder: Array<Exclude<SessionLevel, 'advanced'>> = ['mixed', 'beginner', 'intermediate']
+    const builderLengthOrder: SessionLength[] = [5, 10]
+    let autoCorrectionEverPickedDeadEnd = false
+    for (const groupId of groupIds) {
+      const perLevel = matrix[groupId]
+      const resolvedLevel = builderLevelOrder.find((level) => isLevelRunnable(perLevel[level], builderLengthOrder))
+      if (resolvedLevel) {
+        if (!isLevelRunnable(perLevel[resolvedLevel], builderLengthOrder)) autoCorrectionEverPickedDeadEnd = true
+        const resolvedLength = builderLengthOrder.find((length) => isConfigRunnable(perLevel[resolvedLevel], length))
+        if (resolvedLength && !isConfigRunnable(perLevel[resolvedLevel], resolvedLength)) autoCorrectionEverPickedDeadEnd = true
+        if (!resolvedLength && isTopicRunnable(perLevel, builderLengthOrder)) autoCorrectionEverPickedDeadEnd = true
+      } else if (isTopicRunnable(perLevel, builderLengthOrder)) {
+        // isTopicRunnable said yes but the same ordered search found no
+        // runnable level -- a genuine contradiction, not just an edge case.
+        autoCorrectionEverPickedDeadEnd = true
+      }
+    }
+    check(
+      'the auto-correction algorithm, replayed against every real topic group, never resolves to a level/length that is not genuinely runnable',
+      !autoCorrectionEverPickedDeadEnd
+    )
+
+    // Review item 11: a manually crafted URL requesting a real,
+    // insufficient-capacity combination still gets the factual server-side
+    // fallback (never a silent change to the request, never a crash).
+    const sqlrpgleInsufficient = buildGuidedOrQuizSession('quiz', { topicGroupId: 'sqlrpgle', level: 'mixed', length: 5, seed: 1 }, PRACTICE_QUESTIONS)
+    check(
+      'a manually crafted URL for SQLRPGLE + Mixed + 5 (real, insufficient capacity) reports the factual "insufficient" status with the real available count, never a silent shorter session',
+      sqlrpgleInsufficient.status === 'insufficient' && sqlrpgleInsufficient.available === sqlrpgleCounts[0],
+      JSON.stringify(sqlrpgleInsufficient)
+    )
+
     const sessionBuilderFormSrc = stripComments(readRepoFile('components/practice/session-builder-form.tsx'))
-    check('the builder form disables topic pills with zero eligible questions at any level', sessionBuilderFormSrc.includes('disabled={!hasAnyQuestions}'))
-    check('the builder form disables level pills with zero eligible questions for the current topic', sessionBuilderFormSrc.includes('disabled={count === 0}'))
-    check('the builder form disables length pills unsupported by the current topic/level', sessionBuilderFormSrc.includes('disabled={!supported}'))
-    check('the builder form auto-corrects the level when the current one becomes unavailable for a newly chosen topic', sessionBuilderFormSrc.includes('handleTopicChange'))
-    check('the builder form auto-corrects the length when the current one becomes unavailable', /nextLength = lengths\.find/.test(sessionBuilderFormSrc))
+    check(
+      'the builder form never re-derives its own count-based availability check (no disabled={!hasAnyQuestions}/disabled={count === 0} -- the review-flagged bug class)',
+      !/disabled=\{!hasAnyQuestions\}/.test(sessionBuilderFormSrc) && !/disabled=\{count === 0\}/.test(sessionBuilderFormSrc)
+    )
+    check('the builder form disables topic pills via the shared isTopicRunnable() helper, not a local count check', /disabled=\{!isTopicRunnable\(matrix\[ALL_TOPICS_KEY\], offeredLengths\)\}/.test(sessionBuilderFormSrc) && sessionBuilderFormSrc.includes('const topicRunnable = isTopicRunnable(matrix[group.id], offeredLengths)'))
+    check('the builder form disables level pills via the shared isLevelRunnable() helper, not a local count check', sessionBuilderFormSrc.includes('const levelRunnable = isLevelRunnable(entry, offeredLengths)') && /disabled=\{!levelRunnable\}/.test(sessionBuilderFormSrc))
+    check('the builder form disables length pills via the shared isConfigRunnable() helper', sessionBuilderFormSrc.includes('const supported = isConfigRunnable(currentAvailability, len.value)'))
+    check('a disabled topic pill\'s accessible label explains why (not just a silent visual style)', sessionBuilderFormSrc.includes('(not enough questions)'))
+    check('a disabled level pill\'s accessible label explains why (not just a silent visual style)', sessionBuilderFormSrc.includes('-- not enough for a quiz'))
+    check('the builder form auto-corrects the level when the current one becomes unrunnable for a newly chosen topic', sessionBuilderFormSrc.includes('handleTopicChange'))
+    check('the builder form auto-corrects the length when the current one becomes unrunnable', /nextLength = lengths\.find/.test(sessionBuilderFormSrc))
     check('the submit button is disabled unless the current combination can actually start', sessionBuilderFormSrc.includes('disabled={!canSubmit}'))
-    check('the default selection (first level/length option) is validated, not assumed valid', sessionBuilderFormSrc.includes('canSubmit'))
+    check('canSubmit itself is derived via the shared isConfigRunnable() helper, not a local check', sessionBuilderFormSrc.includes('const canSubmit = isConfigRunnable(currentAvailability, length)'))
   }
 
   // ---------------------------------------------------------------------------
