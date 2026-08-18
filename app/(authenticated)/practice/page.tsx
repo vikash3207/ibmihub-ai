@@ -8,7 +8,6 @@ import { PRACTICE_TOPICS } from '@/content/practice/questions'
 import { SectionHero } from '@/components/section-hero'
 import { PRACTICE_HERO_THEME } from '@/lib/section-theme'
 import { PreviewAuthCta } from '@/components/feature-preview/preview-auth-cta'
-import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils'
 
 // Auth-gated page -- never statically cache; always compute fresh per
@@ -18,7 +17,7 @@ export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Practice Hub',
   description:
-    'Practice, assess, and prepare for IBM i work -- guided practice, quick quizzes, hands-on 5250/SQL simulators, and interview preparation coming soon.',
+    'Practice, assess, and prepare for IBM i work -- guided practice, quick quizzes, hands-on 5250/SQL simulators, and Interview Prep.',
   alternates: { canonical: '/practice' },
   robots: { index: false, follow: false },
 }
@@ -53,6 +52,14 @@ const KNOWLEDGE_CARDS: PracticeCardDef[] = [
     title: 'Quick Quiz',
     body: '5 or 10 question quizzes with instant scoring, review, and the option to retry what you missed.',
     cta: 'Build a Quiz',
+  },
+  {
+    href: '/practice/interview',
+    icon: MessageCircleQuestion,
+    accent: 'from-cyan-500 to-blue-500',
+    title: 'Interview Prep',
+    body: '764 real IBM i interview questions organized by topic, difficulty, and question type -- reviewed answers are being added.',
+    cta: 'Explore Interview Prep',
   },
 ]
 
@@ -101,9 +108,19 @@ interface Props {
  * /practice/quiz/builder immediately after creating an account), reusing
  * the same safeInternalPath-validated `next` contract every other
  * protected-preview CTA in this app already relies on -- not a new pattern.
- * Interview Prep is always the same non-interactive ComingSoonCard in both
- * states, so a signed-out visitor is never told something is available
- * that isn't.
+ *
+ * Interview Prep (IBM i Practice Hub -- Interview Prep phase 1) is now a
+ * real card in KNOWLEDGE_CARDS like the other two, linking to
+ * /practice/interview -- not the ComingSoonCard treatment this card used
+ * before this phase. The destination page itself still shows a "being
+ * reviewed" empty state today (see that route's own header comment):
+ * content/practice/interview-questions.ts's 764 imported questions all
+ * have `status: 'draft'` in this PR (no reviewed answers exist yet), so
+ * `isInterviewPrepAvailable()` correctly returns false and nothing
+ * unreviewed is ever shown to a real visitor. Activating the card now
+ * (rather than waiting for the first published answer) matches Guided
+ * Practice/Quick Quiz's own unconditional-link precedent -- the
+ * destination handles emptiness, the card doesn't need to know about it.
  *
  * Legacy `/practice?topic=<id>` links (this route's own URL before Guided
  * Practice was relocated to /practice/guided) still work: a valid topic id
@@ -138,7 +155,7 @@ export default async function PracticePage({ searchParams }: Props) {
         badgeLabel="Learn, practice, assess, and prepare"
         title="Practice Hub"
         accentWord="Hub"
-        description="Reinforce concepts without pressure, test your knowledge with quick quizzes, and get hands-on with commands and SQL in safe simulators -- with interview prep coming soon."
+        description="Reinforce concepts without pressure, test your knowledge with quick quizzes, prepare for IBM&nbsp;i interviews, and get hands-on with commands and SQL in safe simulators."
         theme={PRACTICE_HERO_THEME}
       />
 
@@ -151,11 +168,6 @@ export default async function PracticePage({ searchParams }: Props) {
             {KNOWLEDGE_CARDS.map((card) => (
               <PracticeModeCard key={card.href} {...card} />
             ))}
-            <ComingSoonCard
-              icon={MessageCircleQuestion}
-              title="Interview Prep"
-              body="Mock interview sessions across Beginner, Intermediate, Advanced, and Mixed levels."
-            />
           </div>
         </section>
 
@@ -187,7 +199,7 @@ function PracticePreview({ signedOutNext }: { signedOutNext: string }) {
         badgeLabel="Learn, practice, assess, and prepare"
         title="Practice Hub"
         accentWord="Hub"
-        description="Reinforce concepts without pressure, test your knowledge with quick quizzes, and get hands-on with commands and SQL in safe simulators -- with interview prep coming soon."
+        description="Reinforce concepts without pressure, test your knowledge with quick quizzes, prepare for IBM&nbsp;i interviews, and get hands-on with commands and SQL in safe simulators."
         theme={PRACTICE_HERO_THEME}
       >
         <PreviewAuthCta next={signedOutNext} className="justify-center" />
@@ -202,11 +214,6 @@ function PracticePreview({ signedOutNext }: { signedOutNext: string }) {
             {KNOWLEDGE_CARDS.map((card) => (
               <PracticeModeCard key={card.href} {...card} signedOut />
             ))}
-            <ComingSoonCard
-              icon={MessageCircleQuestion}
-              title="Interview Prep"
-              body="Mock interview sessions across Beginner, Intermediate, Advanced, and Mixed levels."
-            />
           </div>
         </section>
 
@@ -258,32 +265,3 @@ function PracticeModeCard({
   )
 }
 
-/**
- * Interview Prep's card -- deliberately not a <Link> and deliberately not
- * styled like the real, clickable cards next to it (muted slate background/
- * text, no hover elevation, no descriptive-action affordance), matching
- * this codebase's existing "Planned topics" treatment for not-yet-available
- * content (components/deep-dive-browser.tsx). Rendered identically in both
- * the signed-out and authenticated branches -- there is no content to start
- * yet in either case. content/practice/interview-questions.ts's
- * INTERVIEW_QUESTIONS is intentionally empty pending separately reviewed,
- * technically validated content; this card is unconditional and does NOT
- * read from that catalog -- it is explicitly, deliberately "Coming soon"
- * for the duration of this PR, not something that flips on its own once a
- * record exists. Wiring it to real availability is a deferred follow-up,
- * once an actual Interview Prep session/route exists to link to.
- */
-function ComingSoonCard({ icon: Icon, title, body }: { icon: ComponentType<IconProps>; title: string; body: string }) {
-  return (
-    <div className="flex flex-col rounded-2xl border border-slate-100 bg-slate-50 p-6">
-      <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-200 text-slate-500">
-        <Icon className="h-5 w-5" aria-hidden="true" />
-      </div>
-      <div className="mb-1.5 flex flex-wrap items-center gap-2">
-        <h3 className="text-base font-bold text-slate-700">{title}</h3>
-        <Badge variant="neutral">Coming soon</Badge>
-      </div>
-      <p className="flex-1 text-sm leading-relaxed text-slate-500">{body}</p>
-    </div>
-  )
-}
