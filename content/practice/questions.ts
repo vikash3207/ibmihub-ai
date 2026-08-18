@@ -11,10 +11,19 @@
  */
 
 export type PracticeQuestionType = 'multiple-choice' | 'scenario'
-/** 'intermediate' added alongside the professional-depth practice topics
- *  (Advanced RPGLE/ILE, Integration, Advanced SQL, Security, Journaling,
- *  Save/Restore) -- existing 'beginner' questions and topics are unaffected. */
-export type PracticeDifficulty = 'beginner' | 'intermediate'
+/**
+ * 'intermediate' added alongside the professional-depth practice topics
+ * (Advanced RPGLE/ILE, Integration, Advanced SQL, Security, Journaling,
+ * Save/Restore) -- existing 'beginner' questions and topics are unaffected.
+ * 'advanced' added for the IBM i Practice Hub -- this type is shared with
+ * content/practice/interview-questions.ts's InterviewQuestion (a currently-
+ * empty catalog; see that file's own header). No existing PracticeQuestion
+ * record uses 'advanced' today (this catalog's own content only ever
+ * reached 'intermediate' depth), so the Quick Quiz session builder does not
+ * offer an Advanced level -- see lib/practice-session.ts's isValidLevel()
+ * for the same rule enforced server-side.
+ */
+export type PracticeDifficulty = 'beginner' | 'intermediate' | 'advanced'
 
 export interface PracticeTopic {
   id: string

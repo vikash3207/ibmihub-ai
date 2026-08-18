@@ -331,8 +331,19 @@ async function main() {
     // visitor now sees a public preview (<PracticePreview>) instead of being
     // redirected straight to login -- deeper coverage of that preview lives
     // in scripts/protected-preview-regression.ts (test:protected-preview).
-    check('an unauthenticated visitor now sees <PracticePreview> instead of a login redirect', practiceSrc.includes('return <PracticePreview />'))
-    check('Practice still preserves the exact INTRO_NOTICE wording', practiceSrc.includes('there is no ') && practiceSrc.includes('score, ranking, or certificate attached to them'))
+    // IBM i Practice Hub (follow-up correction): the preview now takes a
+    // computed `signedOutNext` prop (preserving a legacy topic destination
+    // through login/sign-up) rather than being rendered with no props.
+    check('an unauthenticated visitor now sees <PracticePreview> instead of a login redirect', practiceSrc.includes('<PracticePreview signedOutNext='))
+    // IBM i Practice Hub: INTRO_NOTICE now lives on the relocated Guided
+    // Practice route (app/(authenticated)/practice/guided/page.tsx), not the
+    // hub landing page itself -- /practice is now a landing page with three
+    // "Test Your Knowledge" cards, not the question browser directly.
+    const guidedPracticeSrc = readRepoFile('app/(authenticated)/practice/guided/page.tsx')
+    check(
+      'Guided Practice still preserves the exact INTRO_NOTICE wording',
+      guidedPracticeSrc.includes('there is no ') && guidedPracticeSrc.includes('score, ranking, or certificate attached to them')
+    )
 
     const practiceLabSrc = readRepoFile('app/(authenticated)/practice-lab/page.tsx')
     check('an unauthenticated visitor now sees <PracticeLabPreview> instead of a login redirect', practiceLabSrc.includes('return <PracticeLabPreview />'))
