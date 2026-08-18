@@ -132,14 +132,17 @@ async function main() {
     check('5250-style Practice Lab is mentioned', page.includes('5250-style'))
     check('ACS-style SQL Console is mentioned', page.includes('SQL Console') || page.includes('ACS-style SQL'))
     // IBM i Practice Hub: Journey 3's body copy broadened from "practice
-    // questions" specifically to cover guided practice and quick quizzes --
-    // the hub is no longer just a question browser. Interview prep is
-    // explicitly labeled "coming soon" here (follow-up correction), never
-    // listed as an unqualified peer of the real, working features -- there
-    // is no session/route for it yet.
+    // questions" specifically to cover guided practice, quick quizzes, and
+    // (Interview Prep phase 1) real interview-question prep -- the hub is
+    // no longer just a question browser. Interview Prep is a real, active
+    // route as of this PR (content/practice/interview-questions.ts's 764
+    // imported questions), so it's listed as a real capability here, not
+    // "coming soon" -- the destination page itself, not this homepage
+    // copy, is what honestly shows an empty state until answers are
+    // reviewed and published.
     check('Guided practice is mentioned', page.includes('guided practice'))
     check('Quick quizzes are mentioned', page.includes('quick quizzes'))
-    check('Interview preparation is mentioned, explicitly as coming soon (never marketed as available today)', page.includes('Interview prep is coming soon'))
+    check('Interview preparation is mentioned as a real, current capability (Interview Prep phase 1 is active, not "coming soon")', page.includes('interview questions') && !page.includes('Interview prep is coming soon'))
   }
 
   // ---------------------------------------------------------------------------
