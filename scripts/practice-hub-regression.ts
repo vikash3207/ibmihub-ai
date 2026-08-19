@@ -1,21 +1,24 @@
 /**
  * IBM i Practice Hub regression pass (UI foundation + Guided Practice
- * relocation + Quick Quiz, using only the existing approved question bank
- * -- Interview Prep content itself is explicitly out of scope for this PR
- * and this suite proves none was published). Standalone via `tsx`, matching
- * the existing scripts/*-regression.ts style (check/section helpers,
- * pass/fail counter, process.exit(1) on any failure).
+ * relocation + Quick Quiz + Interview Prep phase 1 -- a real, active
+ * catalog import with zero published/answered content yet). Standalone via
+ * `tsx`, matching the existing scripts/*-regression.ts style (check/section
+ * helpers, pass/fail counter, process.exit(1) on any failure).
  *
- * Executes the real, pure functions in lib/practice-session.ts directly
- * against the REAL production PRACTICE_QUESTIONS/PRACTICE_TOPICS catalog
- * wherever practical (not just synthetic fixtures) -- e.g. the availability
- * matrix is cross-checked against countEligibleQuestions() independently
- * for every topic-group x level combination, rather than hardcoding any
- * expected count that could silently drift out of sync with real content.
- * Any InterviewQuestion-shaped fixture used to validate
- * isInterviewPrepAvailable()'s logic lives ONLY in this file, as a local
- * constant -- never in content/practice/interview-questions.ts itself,
- * which must stay genuinely empty in production.
+ * Executes the real, pure functions in lib/practice-session.ts,
+ * lib/interview-questions-filter.ts, and lib/interview-search.ts directly
+ * against the REAL production catalogs wherever practical (not just
+ * synthetic fixtures) -- e.g. the Quick Quiz availability matrix is
+ * cross-checked against countEligibleQuestions() independently for every
+ * topic-group x level combination, and the real 764-question
+ * INTERVIEW_QUESTIONS import is validated for count/uniqueness/valid
+ * topic-id/enum-shape directly, rather than hardcoding any expected value
+ * that could silently drift out of sync with real content. Any
+ * InterviewQuestion-shaped `published` fixture used to exercise
+ * display/search/filter logic against non-empty content lives ONLY in this
+ * file, as a local constant -- content/practice/interview-questions.ts's
+ * real 764 records must all stay `status: 'draft'` in this PR (zero
+ * fabricated/placeholder answers).
  *
  * Usage:
  *   npm run test:practice-hub
@@ -24,7 +27,9 @@
 import { readFileSync } from 'fs'
 import { resolve } from 'path'
 import { PRACTICE_QUESTIONS, PRACTICE_TOPICS, type PracticeQuestion } from '../content/practice/questions'
-import { INTERVIEW_QUESTIONS, isInterviewPrepAvailable, type InterviewQuestion } from '../content/practice/interview-questions'
+import { INTERVIEW_QUESTIONS, isInterviewPrepAvailable, type InterviewQuestion, type InterviewQuestionType } from '../content/practice/interview-questions'
+import { filterInterviewQuestions, countByTopic, countByDifficulty, countByType } from '../lib/interview-questions-filter'
+import { searchInterviewQuestions, scoreInterviewQuestion, normalizeQuery as normalizeInterviewQuery } from '../lib/interview-search'
 import { PRACTICE_TOPIC_GROUPS, resolveTopicGroup, topicIdsForGroup } from '../lib/practice-topic-groups'
 import {
   isValidMode,
@@ -75,7 +80,7 @@ function stripComments(src: string): string {
 
 async function main() {
   // ---------------------------------------------------------------------------
-  section('1. Practice Hub hierarchy: two knowledge cards + Interview Prep coming-soon, two hands-on cards, no new nav item')
+  section('1. Practice Hub hierarchy: three real knowledge cards, two hands-on cards, no new nav item')
   // ---------------------------------------------------------------------------
 
   {
@@ -86,29 +91,24 @@ async function main() {
     check('the old "Practise Hands-On" (British spelling) wording is gone', !pageSrc.includes('Practise Hands-On'))
     check('Guided Practice links to its relocated route', pageSrc.includes("href: '/practice/guided'"))
     check('Quick Quiz links to its builder route', pageSrc.includes("href: '/practice/quiz/builder'"))
+    check('Interview Prep links to its real, active route (phase 1 -- catalog import + activation)', pageSrc.includes("href: '/practice/interview'"))
     check('the 5250 Practice Lab card links to the real 5250 route', pageSrc.includes("href: '/practice-lab/5250'"))
     check('the SQL Console card links to the real SQL route', pageSrc.includes("href: '/practice-lab/sql'"))
 
     check('Guided Practice uses a descriptive CTA, not generic "Start"', pageSrc.includes("cta: 'Start Guided Practice'"))
     check('Quick Quiz uses a descriptive CTA, not generic "Start"', pageSrc.includes("cta: 'Build a Quiz'"))
+    check('Interview Prep uses a descriptive CTA, not generic "Start"', pageSrc.includes("cta: 'Explore Interview Prep'"))
     check('the 5250 Practice Lab card uses a descriptive CTA', pageSrc.includes("cta: 'Open 5250 Lab'"))
     check('the SQL Console card uses a descriptive CTA', pageSrc.includes("cta: 'Open SQL Console'"))
     check('no card renders the generic word "Start" as its action label', !/cta:\s*'Start'/.test(pageSrc))
 
     check(
-      'Interview Prep is rendered via ComingSoonCard, not PracticeModeCard (never a clickable Start action)',
-      /<ComingSoonCard[\s\S]*?title="Interview Prep"/.test(pageSrc)
+      'Interview Prep is now a real KNOWLEDGE_CARDS entry (an unconditional <Link> via PracticeModeCard), not a ComingSoonCard',
+      /title:\s*'Interview Prep'/.test(pageSrc)
     )
-    check('Interview Prep is never wrapped in a real navigable <Link> to its own route', !/href="\/practice\/interview/.test(pageSrc) && !/href:\s*'\/practice\/interview/.test(pageSrc))
-    check('the Interview Prep card shows a "Coming soon" badge', pageSrc.includes('Badge variant="neutral">Coming soon'))
-
-    const comingSoonFnMatch = pageSrc.match(/function ComingSoonCard\([\s\S]*?\n\}/)
-    check('found the ComingSoonCard function to isolate and inspect', !!comingSoonFnMatch)
-    if (comingSoonFnMatch) {
-      const body = comingSoonFnMatch[0]
-      check('ComingSoonCard never renders a <Link> (structurally non-clickable, not just visually muted)', !body.includes('<Link'))
-      check('ComingSoonCard never renders a raw <a href> either', !/<a\s+href/.test(body))
-    }
+    check('the old ComingSoonCard function no longer exists on this page (nothing else uses it)', !pageSrc.includes('function ComingSoonCard'))
+    check('the old "Coming soon" badge treatment for Interview Prep is gone', !pageSrc.includes('Badge variant="neutral">Coming soon'))
+    check('the hub page no longer imports the unused Badge component', !pageSrc.includes("from '@/components/ui/badge'"))
 
     const navLinksSrc = readRepoFile('lib/nav-links.ts')
     check('no new top-level nav item was added for Interview Prep/Quiz/Practice Lab', !/label:\s*'(Interview Prep|Quick Quiz)'/.test(navLinksSrc))
@@ -605,91 +605,295 @@ async function main() {
   }
 
   // ---------------------------------------------------------------------------
-  section('11. Interview Prep: unavailable/coming-soon, zero published content, no automatic-activation claims, no leakage')
+  section('11. Interview Prep phase 1: 764-question import integrity, zero fabricated answers, real activation')
   // ---------------------------------------------------------------------------
 
   {
-    check('the real production INTERVIEW_QUESTIONS catalog is empty', INTERVIEW_QUESTIONS.length === 0)
-    check('isInterviewPrepAvailable() correctly reports unavailable against the real (empty) catalog', isInterviewPrepAvailable(INTERVIEW_QUESTIONS) === false)
+    // The 19 individual PRACTICE_TOPICS ids covered by lib/practice-topic-groups.ts's
+    // consolidated groups (the 22 real topics minus interview-readiness/
+    // mini-projects/mixed-review) -- the same set the Quick Quiz builder's
+    // topic picker already restricts itself to.
+    const ALLOWED_INTERVIEW_TOPICS = new Set(PRACTICE_TOPIC_GROUPS.flatMap((g) => g.topicIds))
+    const VALID_DIFFICULTIES = new Set(['beginner', 'intermediate', 'advanced'])
+    const VALID_TYPES = new Set<InterviewQuestionType>(['conceptual', 'scenario-based', 'code-based'])
 
-    // Local, in-test-only fixtures -- proving the *logic* works once real
-    // content exists, without ever touching the production catalog file.
-    const draftOnlyFixture: InterviewQuestion[] = [
+    check('the real production catalog has exactly 764 imported questions', INTERVIEW_QUESTIONS.length === 764, String(INTERVIEW_QUESTIONS.length))
+
+    const ids = INTERVIEW_QUESTIONS.map((q) => q.id)
+    check('every id is unique', new Set(ids).size === ids.length)
+
+    const originalNumbers = INTERVIEW_QUESTIONS.map((q) => q.originalNumber)
+    const expectedNumbers = new Set(Array.from({ length: 764 }, (_, i) => i + 1))
+    check(
+      'originalNumber is unique per record and forms exactly the contiguous set 1..764 (traceable back to the source doc, no gaps/dupes)',
+      new Set(originalNumbers).size === 764 && originalNumbers.every((n) => expectedNumbers.has(n))
+    )
+
+    const invalidTopics = INTERVIEW_QUESTIONS.filter((q) => !ALLOWED_INTERVIEW_TOPICS.has(q.topicId))
+    check(
+      'every question\'s topicId is one of the 19 subject-matter topics lib/practice-topic-groups.ts already uses (never interview-readiness/mini-projects/mixed-review, which are reserved/owned elsewhere)',
+      invalidTopics.length === 0,
+      invalidTopics.slice(0, 5).map((q) => `${q.id}:${q.topicId}`).join(', ')
+    )
+    check('no question uses topicId "interview-readiness" (that id is owned by existing, unrelated Guided-Practice content)', !INTERVIEW_QUESTIONS.some((q) => q.topicId === 'interview-readiness'))
+
+    check('every question has a valid difficulty', INTERVIEW_QUESTIONS.every((q) => VALID_DIFFICULTIES.has(q.difficulty)))
+    check('every question has a valid questionType', INTERVIEW_QUESTIONS.every((q) => VALID_TYPES.has(q.questionType)))
+    check('every question has a non-empty prompt', INTERVIEW_QUESTIONS.every((q) => q.prompt.trim().length > 0))
+
+    // The central, non-negotiable requirement: zero fabricated/placeholder
+    // answers, zero published records, in this PR.
+    check(
+      'every one of the 764 imported questions is status "draft" today (zero published, zero answers written in this PR)',
+      INTERVIEW_QUESTIONS.every((q) => q.status === 'draft')
+    )
+    check('isInterviewPrepAvailable() correctly reports unavailable against the real catalog (0 published)', isInterviewPrepAvailable(INTERVIEW_QUESTIONS) === false)
+
+    // Scoped to the DATA array only, not the whole file -- the
+    // InterviewQuestion type's own 'published'-branch declaration
+    // legitimately names modelAnswer/essentialPoints/commonMistakes as
+    // field names once, and a naive whole-file check would false-fail on
+    // that type definition rather than actually checking the 764 data
+    // records for fabricated answer content.
+    const interviewFileSrc = readRepoFile('content/practice/interview-questions.ts')
+    const interviewDataArraySrc = interviewFileSrc.slice(interviewFileSrc.indexOf('export const INTERVIEW_QUESTIONS'))
+    check('the production data array never contains a modelAnswer field literal (no answer content was written for any of the 764 records)', !interviewDataArraySrc.includes('modelAnswer:'))
+    check('the production data array never contains an essentialPoints field literal', !interviewDataArraySrc.includes('essentialPoints:'))
+    check('the production data array never contains a commonMistakes field literal', !interviewDataArraySrc.includes('commonMistakes:'))
+
+    check(
+      'the file header correctly attributes the isInterviewPrepAvailable() call to the destination page, not the Practice Hub landing page (the landing card is an unconditional link and never calls it)',
+      interviewFileSrc.includes('does NOT call it') && interviewFileSrc.includes('destination')
+    )
+    check(
+      'the stale claim that "the landing page now DOES call it" is gone from the header',
+      !interviewFileSrc.includes('The landing page now DOES call it')
+    )
+
+    const withDuplicateOf = INTERVIEW_QUESTIONS.filter((q) => q.duplicateOf)
+    check('at least one near-duplicate pair was flagged (proves the automated + manual dedup pass actually ran, not just a hypothetical concern)', withDuplicateOf.length > 0, String(withDuplicateOf.length))
+    check(
+      'every duplicateOf link points at a real, existing id in the same catalog (never a dangling reference)',
+      withDuplicateOf.every((q) => ids.includes(q.duplicateOf!))
+    )
+    check('no question is marked as a duplicate of itself', withDuplicateOf.every((q) => q.duplicateOf !== q.id))
+
+    const legacyFlagged = INTERVIEW_QUESTIONS.filter((q) => q.legacyContext)
+    check('at least one legacy-tooling question was flagged (SDA/RLU/PDM/SEU/Query-400/RPG-400-specific)', legacyFlagged.length > 0, String(legacyFlagged.length))
+
+    const releaseDependentFlagged = INTERVIEW_QUESTIONS.filter((q) => q.releaseDependent)
+    check('at least one release-dependent question was flagged (numeric limits that vary by IBM i release)', releaseDependentFlagged.length > 0, String(releaseDependentFlagged.length))
+
+    // Three manually-corrected first-pass misclassifications, locked in so
+    // they can't silently regress if the catalog is regenerated later.
+    // iq-317/iq-589 were caught by a bare "cursor" keyword match that
+    // didn't distinguish a SQL cursor from a 5250 screen/subfile cursor.
+    const iq317 = INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-317')
+    check('iq-317 ("...subfile record on which the cursor is located") is classified as subfiles, not advanced-sql (a screen cursor, not a SQL cursor)', iq317?.topicId === 'subfiles')
+    const iq589 = INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-589')
+    check('iq-589 ("How do you get the cursor position?") is classified as display-files, not advanced-sql', iq589?.topicId === 'display-files')
+    const iq431 = INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-431')
+    check('iq-431 ("What is a trigger?") is classified as physical-logical-files, matching its neighboring PF-trigger questions (iq-432/433/434)', iq431?.topicId === 'physical-logical-files')
+    check(
+      'every genuinely SQL-cursor question (iq-502/596/597/600/601) is still advanced-sql -- the cursor-keyword fix only touched the two false positives, not real SQL-cursor content',
+      ['iq-502', 'iq-596', 'iq-597', 'iq-600', 'iq-601'].every((id) => INTERVIEW_QUESTIONS.find((q) => q.id === id)?.topicId === 'advanced-sql')
+    )
+
+    // The committed source document is the sole, cited source -- cross-check
+    // the imported data actually traces back to it, not just to itself.
+    let sourceDocSrc = ''
+    try {
+      sourceDocSrc = readFileSync(
+        resolve(__dirname, '..', 'docs/tutorials/IBMi Interview Questions/IBM_i_Interview_Questions_Master_onlyQuestions.md'),
+        'utf-8'
+      )
+    } catch {
+      sourceDocSrc = ''
+    }
+    check('the committed source document exists at the documented path', sourceDocSrc.length > 0)
+    check('the source document itself claims exactly 764 unique questions (matches the imported count)', /\*\*Total unique questions:\*\*\s*764\./.test(sourceDocSrc))
+    const sourceQuestionLines = sourceDocSrc.split('\n').filter((l) => /^\d+\.\s+.+/.test(l))
+    check('the source document has exactly 764 numbered question lines', sourceQuestionLines.length === 764, String(sourceQuestionLines.length))
+    const first = INTERVIEW_QUESTIONS.find((q) => q.originalNumber === 1)
+    const last = INTERVIEW_QUESTIONS.find((q) => q.originalNumber === 764)
+    check('question #1 is present and its prompt appears verbatim (or lightly edited) from the source doc\'s first line', !!first && sourceDocSrc.includes('1. Define a shared access path?'))
+    check('question #764 is present and traces to the source doc\'s final numbered line', !!last && /764\. What effect does the P operation extender/.test(sourceDocSrc))
+
+    // --- Pure filter/search logic, exercised against local published
+    // fixtures since the real catalog has zero published entries today. ---
+    const fixtureBase = {
+      relatedLessonSlugs: [] as string[],
+      tags: ['fixture'] as string[],
+    }
+    const publishedFixtures: InterviewQuestion[] = [
       {
-        id: 'fixture-draft-1',
+        ...fixtureBase,
+        id: 'fixture-1',
+        originalNumber: 9001,
         topicId: 'rpgle-foundations',
         difficulty: 'beginner',
-        status: 'draft',
-        prompt: 'test fixture prompt, never published',
-        modelAnswer: 'test fixture answer',
-        essentialPoints: ['test point'],
-        commonMistakes: ['test mistake'],
-        relatedLessonSlugs: [],
-        tags: ['test-fixture'],
+        questionType: 'conceptual',
+        status: 'published',
+        prompt: 'What is a data structure in RPG?',
+        modelAnswer: 'A named grouping of subfields.',
+        essentialPoints: ['groups related fields'],
+        commonMistakes: ['confusing it with a file'],
+      },
+      {
+        ...fixtureBase,
+        id: 'fixture-2',
+        originalNumber: 9002,
+        topicId: 'subfiles',
+        difficulty: 'intermediate',
+        questionType: 'scenario-based',
+        status: 'published',
+        prompt: 'A subfile page is not refreshing after an update -- what would you check first?',
+        modelAnswer: 'Confirm SFLNXTCHG is set and the control record was written.',
+        essentialPoints: ['SFLNXTCHG'],
+        commonMistakes: ['forgetting to write the control record'],
+      },
+      {
+        ...fixtureBase,
+        id: 'fixture-3',
+        originalNumber: 9003,
+        topicId: 'advanced-sql',
+        difficulty: 'advanced',
+        questionType: 'code-based',
+        status: 'published',
+        prompt: 'Write a cursor declaration that reads customer records for update.',
+        modelAnswer: 'DECLARE cursor_name CURSOR FOR SELECT ... FOR UPDATE OF ...',
+        essentialPoints: ['FOR UPDATE clause'],
+        commonMistakes: ['omitting FOR UPDATE'],
       },
     ]
-    check('a draft-only fixture still reports unavailable (draft entries never count)', isInterviewPrepAvailable(draftOnlyFixture) === false)
-
-    const publishedFixture: InterviewQuestion[] = [{ ...draftOnlyFixture[0], id: 'fixture-published-1', status: 'published' }]
-    check('a fixture with at least one published entry correctly reports available (proves the logic itself is correct)', isInterviewPrepAvailable(publishedFixture) === true)
-
-    const interviewFileSrc = readRepoFile('content/practice/interview-questions.ts')
-    const interviewFileSrcNoComments = stripComments(interviewFileSrc)
-    check('content/practice/interview-questions.ts exports an empty production array, not test/placeholder content', /export const INTERVIEW_QUESTIONS: InterviewQuestion\[\] = \[\]/.test(interviewFileSrc))
-    check(
-      'no fixture/dummy prompt text leaked into the production catalog file (checked outside comments, so this file\'s own explanatory doc comment about where fixtures belong can\'t produce a false pass)',
-      !/test fixture|fixture-draft|fixture-published/.test(interviewFileSrcNoComments)
-    )
-    check(
-      'the file explicitly documents that isInterviewPrepAvailable() is not called anywhere in this PR (no false "automatically activates" claim)',
-      interviewFileSrc.includes('Not called anywhere in this PR') || interviewFileSrc.includes('not called anywhere in this PR')
-    )
-    check(
-      'the file header does not claim that publishing a record automatically makes Interview Prep appear/work',
-      !/will (automatically )?(activate|make.*appear|become available)/i.test(interviewFileSrc)
-    )
-
-    // No route/page exists for an Interview Prep session in this PR.
-    let interviewRouteExists = true
-    try {
-      readFileSync(resolve(__dirname, '..', 'app/(authenticated)/practice/interview/page.tsx'), 'utf-8')
-    } catch {
-      interviewRouteExists = false
+    const draftFixture: InterviewQuestion = {
+      ...fixtureBase,
+      id: 'fixture-draft',
+      originalNumber: 9004,
+      topicId: 'rpgle-foundations',
+      difficulty: 'beginner',
+      questionType: 'conceptual',
+      status: 'draft',
+      prompt: 'This fixture is intentionally never published.',
     }
-    check('no /practice/interview session route exists (there is genuinely nothing to link to yet)', !interviewRouteExists)
+    const mixedFixtures = [...publishedFixtures, draftFixture]
 
-    const searchLibSrc = readRepoFile('lib/search.ts')
-    check('lib/search.ts has no reference to interview questions (no per-question search leakage)', !/interview-questions|InterviewQuestion/.test(searchLibSrc))
-    const sitemapSrc = readRepoFile('app/sitemap.ts')
-    check('app/sitemap.ts has no reference to interview questions', !/interview-questions|InterviewQuestion/.test(sitemapSrc))
+    check('isInterviewPrepAvailable() reports unavailable for a draft-only set', isInterviewPrepAvailable([draftFixture]) === false)
+    check('isInterviewPrepAvailable() reports available once at least one published entry exists', isInterviewPrepAvailable(mixedFixtures) === true)
 
-    const practicePageSrc = readRepoFile('app/(authenticated)/practice/page.tsx')
     check(
-      'the landing page never hardcodes an "Interview Prep is available" flag',
-      !/interviewPrepAvailable\s*=\s*true/.test(practicePageSrc)
+      'filterInterviewQuestions() by topic returns only matching-topic questions',
+      filterInterviewQuestions(publishedFixtures, { topicIds: ['subfiles'] }).length === 1 &&
+        filterInterviewQuestions(publishedFixtures, { topicIds: ['subfiles'] })[0].id === 'fixture-2'
     )
     check(
-      'the landing page never calls isInterviewPrepAvailable() to gate the card (Interview Prep is unconditionally coming-soon in this PR, not content-driven yet)',
+      'filterInterviewQuestions() by difficulty returns only matching-difficulty questions',
+      filterInterviewQuestions(publishedFixtures, { difficulties: ['advanced'] }).length === 1
+    )
+    check(
+      'filterInterviewQuestions() by questionType returns only matching-type questions',
+      filterInterviewQuestions(publishedFixtures, { questionTypes: ['code-based'] }).length === 1
+    )
+    check('filterInterviewQuestions() with no filters returns everything unchanged', filterInterviewQuestions(publishedFixtures, {}).length === 3)
+    check(
+      'filterInterviewQuestions() combines topic + difficulty as AND, not OR',
+      filterInterviewQuestions(publishedFixtures, { topicIds: ['subfiles'], difficulties: ['advanced'] }).length === 0
+    )
+
+    check('countByTopic() reflects the real per-topic distribution of the input set', countByTopic(publishedFixtures).every((f) => f.count === 1) && countByTopic(publishedFixtures).length === 3)
+    check('countByDifficulty() omits difficulties with zero matches rather than reporting a zero row', countByDifficulty([publishedFixtures[0]]).length === 1)
+    check('countByType() omits question types with zero matches', countByType([publishedFixtures[0]]).length === 1)
+
+    check('an empty search query returns every input question unfiltered (no results-hidden-by-default surprise)', searchInterviewQuestions(publishedFixtures, '').length === 3)
+    check(
+      'searching for a prompt-only keyword finds the right question and nothing else',
+      searchInterviewQuestions(publishedFixtures, 'subfile page').length === 1 && searchInterviewQuestions(publishedFixtures, 'subfile page')[0].id === 'fixture-2'
+    )
+    check('a query matching zero prompts/tags returns zero results (never falls back to showing everything)', searchInterviewQuestions(publishedFixtures, 'zzz-no-such-term-zzz').length === 0)
+    check('scoreInterviewQuestion() ranks a prompt-prefix match ahead of a mid-prompt match', scoreInterviewQuestion(publishedFixtures[0], normalizeInterviewQuery('what is')) === 1)
+
+    // --- Route existence, auth guard, real page wiring ---
+    const interviewPageSrc = readRepoFile('app/(authenticated)/practice/interview/page.tsx')
+    check('the /practice/interview route now exists (phase 1 activates the real page)', interviewPageSrc.length > 0)
+    check('the route is auth-guarded, redirecting a signed-out visitor to /practice', interviewPageSrc.includes("redirect('/practice')"))
+    check('the route never statically caches (dynamic = force-dynamic, matching every other authenticated Practice sub-route)', interviewPageSrc.includes("export const dynamic = 'force-dynamic'"))
+    check('the route is noindex (robots.index === false), matching every other Practice sub-route', /robots:\s*\{\s*index:\s*false/.test(interviewPageSrc))
+    check('the page calls the real isInterviewPrepAvailable() helper (never re-derives its own availability check)', interviewPageSrc.includes('isInterviewPrepAvailable(INTERVIEW_QUESTIONS)'))
+    check(
+      'the page only ever renders questions filtered to status === \'published\' -- never the full draft set',
+      interviewPageSrc.includes("q.status === 'published'")
+    )
+    check('the page shows an "in review" empty state, not a blank page, when nothing is published', interviewPageSrc.includes('being reviewed'))
+    check('the empty state never exposes the word "prompt" as literal unreviewed content -- it only states the real total in preparation', interviewPageSrc.includes('totalInPreparation'))
+    check('the empty state states the topic count as an exact fact ("across N topics"), not a hedged "up to N topics"', interviewPageSrc.includes('across {topicCount} topics') && !interviewPageSrc.includes('up to {topicCount}'))
+    check('the topic count is computed from the real INTERVIEW_QUESTIONS data (distinct topicId values), not the full 22-topic PRACTICE_TOPICS taxonomy size', interviewPageSrc.includes('new Set(INTERVIEW_QUESTIONS.map((q) => q.topicId)).size'))
+    check('the page has a back-link to the Practice Hub', /href="\/practice"[\s\S]{0,500}Practice Hub/.test(interviewPageSrc))
+
+    const questionListSrc = readRepoFile('components/practice/interview-question-list.tsx')
+    check(
+      'the answer section is only ever rendered behind a status === \'published\' guard in the question list',
+      /q\.status === 'published'[\s\S]{0,60}RevealAnswer/.test(questionListSrc)
+    )
+    check(
+      'RevealAnswer\'s own parameter type is narrowed to the \'published\' branch of the InterviewQuestion union (a type-level guarantee that modelAnswer/essentialPoints/commonMistakes exist, not just a runtime proximity check)',
+      questionListSrc.includes("Extract<InterviewQuestion, { status: 'published' }>")
+    )
+    check('the question-list component never uses dangerouslySetInnerHTML (highlighting renders real <mark> JSX, not an HTML string)', !questionListSrc.includes('dangerouslySetInnerHTML'))
+
+    // --- Reveal Answer: collapsed by default, native accessible disclosure ---
+    check(
+      'the prompt itself (an <h3>) is rendered before the reveal/disclosure element in source order -- always visible, never gated',
+      questionListSrc.indexOf('<h3') !== -1 && questionListSrc.indexOf('<h3') < questionListSrc.indexOf('RevealAnswer question=')
+    )
+    check('the answer is behind a real native <details> element, not a hand-rolled show/hide widget', questionListSrc.includes('<details'))
+    check('the disclosure trigger is a real <summary> (keyboard/screen-reader accessible natively, no custom ARIA widget needed)', questionListSrc.includes('<summary'))
+    check('the disclosure is collapsed by default (no hardcoded `open` attribute forcing it visible)', !/<details[^>]*\bopen\b/.test(questionListSrc))
+    check('the trigger is labeled "Reveal Answer", not a bare icon or ambiguous "Show more"', questionListSrc.includes('Reveal Answer'))
+    check('the trigger keeps a visible focus ring (focus-visible:ring), not focus:outline-none with nothing to replace it', questionListSrc.includes('focus-visible:ring-2') && questionListSrc.includes('<summary'))
+    check('the disclosure chevron is aria-hidden (decorative only -- the real accessible state comes from the native <details> element, not the icon)', /ChevronDown[\s\S]{0,200}aria-hidden="true"/.test(questionListSrc))
+
+    check('the model answer is rendered inside the reveal section', /RevealAnswer[\s\S]*question\.modelAnswer/.test(questionListSrc))
+    check('essential points render as a real list (<ul>/<li>), not a single paragraph blob', /essentialPoints\.map[\s\S]{0,40}<li/.test(questionListSrc))
+    check('essential points are conditionally rendered only when non-empty', questionListSrc.includes('question.essentialPoints.length > 0'))
+    check('common mistakes render as a real list, not a single paragraph blob', /commonMistakes\.map[\s\S]{0,40}<li/.test(questionListSrc))
+    check('common mistakes are conditionally rendered only when non-empty', questionListSrc.includes('question.commonMistakes.length > 0'))
+    check('follow-up questions render as a real list when present', /followUpQuestions\.map[\s\S]{0,40}<li/.test(questionListSrc))
+    check(
+      'follow-up questions (an optional field) are only rendered when the array exists AND is non-empty -- never assumes it\'s always present',
+      questionListSrc.includes('question.followUpQuestions && question.followUpQuestions.length > 0')
+    )
+    check('each of the three answer sections has its own labeled heading (Essential points / Common mistakes / Follow-up questions), not an unlabeled list', questionListSrc.includes('Essential points') && questionListSrc.includes('Common mistakes') && questionListSrc.includes('Follow-up questions'))
+
+    // --- Global search / sitemap boundary preserved (unchanged from before this PR) ---
+    const searchLibSrc = readRepoFile('lib/search.ts')
+    check('lib/search.ts is untouched by Interview Prep (no reference to interview questions -- stays out of global site search)', !/interview-questions|InterviewQuestion/.test(searchLibSrc))
+    const sitemapSrc = readRepoFile('app/sitemap.ts')
+    check('app/sitemap.ts has no reference to interview questions (Practice is excluded wholesale, as before)', !/interview-questions|InterviewQuestion/.test(sitemapSrc))
+    const interviewSearchSrc = readRepoFile('lib/interview-search.ts')
+    check('lib/interview-search.ts never builds a RegExp from the raw query (plain string matching only, same convention as lib/search.ts)', !interviewSearchSrc.includes('new RegExp'))
+
+    // --- Landing-page card activation (real, unconditional link) ---
+    const practicePageSrc = readRepoFile('app/(authenticated)/practice/page.tsx')
+    check('the landing page card links to the real /practice/interview route', practicePageSrc.includes("href: '/practice/interview'"))
+    check(
+      'the landing page itself never calls isInterviewPrepAvailable() -- the card is an unconditional link like Guided Practice/Quick Quiz; the destination page owns the empty-state gating',
       !stripComments(practicePageSrc).includes('isInterviewPrepAvailable')
     )
     check(
-      'the landing page never imports INTERVIEW_QUESTIONS (the card renders with no dependency on catalog content, so it cannot flip on by accident)',
+      'the landing page never imports INTERVIEW_QUESTIONS directly (no dependency on catalog content for the card itself to render)',
       !stripComments(practicePageSrc).includes('INTERVIEW_QUESTIONS')
     )
     check(
-      'the Practice Hub hero copy (shown to both signed-out and authenticated visitors) does not market interview prep as available now -- it is explicitly "coming soon"',
-      practicePageSrc.includes('interview prep coming soon')
+      'the card body copy is honest about review status (mentions reviewed answers being added, never claims the bank is complete/ready)',
+      practicePageSrc.includes('reviewed answers are being added')
     )
 
     const homepageSrc = readRepoFile('app/page.tsx')
     check(
-      'the homepage does not market interview preparation as a currently-available feature alongside the real ones -- it is explicitly labeled coming soon',
-      homepageSrc.includes('Interview prep is coming soon')
+      'the homepage Journey 3 body now mentions real interview-question prep as an available capability, not "coming soon"',
+      homepageSrc.includes('prepare with real') && homepageSrc.includes('interview questions')
     )
-    check(
-      'the homepage no longer lists "prepare for technical interviews" as an unqualified peer of the real, working features',
-      !/test yourself with quick quizzes, prepare for\s+technical interviews/.test(homepageSrc)
-    )
+    check('the stale "Interview prep is coming soon" sentence is gone from the homepage', !homepageSrc.includes('Interview prep is coming soon'))
   }
 
   // ---------------------------------------------------------------------------
