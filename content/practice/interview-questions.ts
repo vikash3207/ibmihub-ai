@@ -1,43 +1,54 @@
 /**
- * Interview Prep question catalog (IBM i Practice Hub -- phase 1 of a
- * two-phase rollout).
+ * Interview Prep question catalog (IBM i Practice Hub).
  *
- * Phase 1 (this file, as of this PR): all 764 questions from the project's
- * master interview-question bank (docs/tutorials/IBMi Interview Questions/
- * IBM_i_Interview_Questions_Master_onlyQuestions.md) are imported with
+ * Phase 1 (PR #215): all 764 questions from the project's master
+ * interview-question bank (docs/tutorials/IBMi Interview Questions/
+ * IBM_i_Interview_Questions_Master_onlyQuestions.md) were imported with
  * stable ids, their original source numbering, a topic/difficulty/
  * questionType classification, and legacy/release-dependent/duplicate
- * flags where relevant -- but every single record has `status: 'draft'`.
- * No answer content (`modelAnswer`/`essentialPoints`/`commonMistakes`) was
- * written for any record in this PR -- a separate answers document exists
- * but was deliberately NOT used, and no placeholder/fabricated answer was
- * generated for any question. `InterviewQuestion` is a discriminated union
- * on `status` specifically so this is enforced by the type system, not
- * just convention: a `'draft'` record is structurally incapable of
- * carrying `modelAnswer`/`essentialPoints`/`commonMistakes` at all.
+ * flags where relevant -- every record shipped `status: 'draft'`, with no
+ * answer content written for any of them.
+ *
+ * Phase 2, first batch (this PR): 25 `ibm-i-fundamentals` questions now
+ * carry real, technically reviewed answers and `status: 'published'` --
+ * original `modelAnswer` prose plus `essentialPoints`/`commonMistakes`
+ * (and `followUpQuestions` where a natural deeper question exists),
+ * verified against IBM's official IBM i documentation and community
+ * references rather than copied from any existing answers document (one
+ * exists but was deliberately never consulted). Two prompts had a verbatim
+ * typo fixed (iq-322 "form" -> "from"; iq-337 "full for" -> "full form")
+ * and one was reworded without changing its technical meaning (iq-378,
+ * "How many types..." implied a single correct count that doesn't exist,
+ * reworded to ask for the categories). `iq-013` ("%SST") was deliberately
+ * left `draft` -- the source document is OCR/transcription-derived with
+ * confirmed nearby typos, and that prompt doesn't correspond to any
+ * verifiable RPG built-in function or CL command, so it was left
+ * unpublished rather than guessed at. `iq-327` (OCCUR max length) was also
+ * left `draft` -- it carries `releaseDependent: true` and its numeric
+ * claim needs release-specific verification not performed in this batch.
+ * `InterviewQuestion` is a discriminated union on `status` specifically so
+ * this is enforced by the type system, not just convention: a `'draft'`
+ * record is structurally incapable of carrying
+ * `modelAnswer`/`essentialPoints`/`commonMistakes` at all.
  *
  * isInterviewPrepAvailable() -- unchanged from before this PR -- only
- * counts `'published'` entries, so it correctly returns `false` today
+ * counts `'published'` entries, so it now correctly returns `true`
  * (confirmed by this file's own regression coverage). The Practice Hub
  * landing page (app/(authenticated)/practice/page.tsx) does NOT call it --
- * that card is now an unconditional link to /practice/interview, matching
- * Guided Practice/Quick Quiz's own always-real-link precedent, unlike the
- * pre-this-PR state where the card was an unconditional ComingSoonCard
- * that never read this file at all. It's the *destination* page
- * (app/(authenticated)/practice/interview/page.tsx) that calls
- * isInterviewPrepAvailable() and owns the empty-state gating: it strictly
- * shows only `status === 'published'` questions (currently zero), with a
- * professional "in review" empty state -- it never renders an unreviewed
- * prompt to a real visitor, matching this codebase's established
- * draft-content convention (getPublishedLessons(), isDeepDiveAvailable(),
- * isInsightAvailable() all work the same way).
+ * that card is an unconditional link to /practice/interview, matching
+ * Guided Practice/Quick Quiz's own always-real-link precedent. It's the
+ * *destination* page (app/(authenticated)/practice/interview/page.tsx)
+ * that calls isInterviewPrepAvailable() and owns the empty/browse gating:
+ * it strictly shows only `status === 'published'` questions, matching this
+ * codebase's established draft-content convention (getPublishedLessons(),
+ * isDeepDiveAvailable(), isInsightAvailable() all work the same way).
  *
- * Phase 2 (a separate, future PR, out of scope here): author reviewed
- * model answers/essential points/common mistakes for a first batch of
- * questions and flip those specific records to `status: 'published'` --
- * at which point the already-built topic nav/search/filter UI on
- * /practice/interview activates for them automatically, with zero further
- * UI changes required.
+ * Future batches (separate, future PRs, out of scope here): author
+ * reviewed answers for the remaining 739 draft questions across the other
+ * 18 topics, and reconsider `iq-013`/`iq-327` once they can be resolved
+ * with confidence -- the already-built topic nav/search/filter UI on
+ * /practice/interview activates for each newly published record
+ * automatically, with zero further UI changes required.
  *
  * Classification methodology (first-pass, meant for human review, not
  * claimed as verified-accurate for all 764 records):
@@ -224,10 +235,26 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What is the difference between UDATE and the system date?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "UDATE (and the newer *DATE) return the job date, not today's actual date -- the date the job started running is captured when the job began and stays fixed for the life of the job, even if the job runs past midnight. The real, live system date changes continuously as the clock advances and is retrieved separately, for example with the %DATE built-in function or by reading the system value QDATE. In modern free-format RPG, %DATE() returns today's actual date at the moment it's called, while UDATE/*DATE keep returning the date the job started.",
+    essentialPoints: [
+      'UDATE/*DATE = job date, fixed for the whole job',
+      'The job date is set when the job starts and does not advance at midnight',
+      '%DATE() (or reading QDATE) returns the true, current system date',
+      'UDATE is 6 digits (MMDDYY by default); *DATE is 8 digits',
+    ],
+    commonMistakes: [
+      "Assuming UDATE always equals 'today' -- a long-running interactive session or overnight batch job can carry yesterday's date",
+      'Using UDATE for audit timestamps that must reflect the actual moment an event occurred',
+    ],
+    followUpQuestions: [
+      'How would you get the true current system date and time inside an RPG program?',
+      'Why might a report look like it printed on the wrong date for a job that ran overnight?',
+    ],
   },
   {
     id: 'iq-011',
@@ -235,10 +262,26 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'List some of the commonly used commands for debugging?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The everyday toolkit centers on a handful of commands. STRDBG (Start Debug) is the modern debugger for ILE programs -- it lets you set breakpoints, step through source, and display or change variables while the program runs. STRISDB is its older counterpart for OPM (RPG/400, CL) programs and can't be used together with STRDBG in the same session. DSPJOBLOG and WRKJOBLOG show the messages a job produced, which is usually the first place to look for an error's real cause. WRKJOB (Work with Job) gives a menu into a job's attributes, open files, locks, and its log all in one place. DSPPGMREF is useful for tracing which files and programs a given program actually references.",
+    essentialPoints: [
+      'STRDBG -- interactive source debugger for ILE programs',
+      'STRISDB -- the equivalent for older OPM programs; mutually exclusive with STRDBG',
+      'DSPJOBLOG / WRKJOBLOG -- review the messages a job actually produced',
+      "WRKJOB -- one screen into a job's status, open files, and log",
+    ],
+    commonMistakes: [
+      'Trying to STRDBG an OPM program (or STRISDB an ILE program) and getting confused by the failure',
+      'Skipping the job log and guessing at an error instead of reading the actual message and its help text',
+    ],
+    followUpQuestions: [
+      "What's the practical difference between OPM and ILE programs?",
+      "How do you debug a batch job that's already running?",
+    ],
   },
   {
     id: 'iq-012',
@@ -268,10 +311,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'Describe the difference between the DOWxx and DOUxx operations?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'Both are structured looping operations, and the difference is when the condition is tested. DOWxx (Do While) checks its condition first, at the top of the loop -- if the condition is false the very first time, the loop body never executes at all. DOUxx (Do Until) checks its condition at the bottom, after ENDDO -- so the loop body always runs at least once, even if the condition was already true before entering it. Choosing between them is really about whether "run at least once" is the correct behavior for the situation: a read-process loop that starts with an already-read record is a natural DOW, while a menu or retry loop that must execute at least one pass before it can even evaluate its exit condition is a natural DOU.',
+    essentialPoints: [
+      'DOW tests the condition before the loop body -- may execute zero times',
+      'DOU tests the condition after the loop body -- always executes at least once',
+      'xx is the optional comparison/relational operator (e.g. DOWEQ, DOUGT) used in fixed-form RPG',
+      'The choice should match whether the first pass genuinely needs to run unconditionally',
+    ],
+    commonMistakes: [
+      'Using DOU when the condition could already be true before entering the loop, causing an unwanted extra iteration',
+      'Assuming DOW and DOU always produce the same number of iterations for the same condition',
+    ],
   },
   {
     id: 'iq-015',
@@ -290,10 +345,23 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
+    status: 'published',
     prompt: 'How would you copy records from one file to another when the target file might not exist and existing target records should be replaced?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The Copy File (CPYF) command does this directly with two parameters working together: CRTFILE(*YES) tells the system to create the target file (using the source file's description) if it doesn't already exist, and MBROPT(*REPLACE) tells it to replace the existing member's records if the target file (and member) already does exist. A typical command looks like CPYF FROMFILE(SRCLIB/SRCPF) TOFILE(TGTLIB/TGTPF) CRTFILE(*YES) MBROPT(*REPLACE). This single command safely handles both the first-run case (target doesn't exist yet) and every subsequent run (target exists and should be refreshed), which is exactly why it's the standard building block for nightly refresh/extract jobs.",
+    essentialPoints: [
+      "CRTFILE(*YES) creates the target file from the source file's description if it isn't there yet",
+      'MBROPT(*REPLACE) clears out and replaces existing member records rather than appending to them',
+      'The default MBROPT is *ADD, which would append duplicate data if the target already has records',
+      'Works for both physical and logical target files',
+    ],
+    commonMistakes: [
+      'Leaving MBROPT at its default *ADD, which silently duplicates data on every rerun instead of refreshing it',
+      "Forgetting CRTFILE(*YES) and having the very first run fail because the target file doesn't exist yet",
+    ],
+    followUpQuestions: ['What is the difference between CPYF and CRTDUPOBJ for this kind of task?'],
   },
   {
     id: 'iq-017',
@@ -444,10 +512,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
+    status: 'published',
     prompt: 'How can you detect overflow for a print program that prints multiple lines per cycle?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The classic technique is the OFLIND keyword on the printer file's DDS, which assigns overflow detection to a specific RPG indicator (commonly *INOF): once the current line count on the page passes the overflow line you configured, that indicator turns on, and your program checks it to fire a heading/new-page routine. The complication in this question is that a single WRITE can itself output several lines at once -- if you only check the overflow indicator after that WRITE completes, you can end up with a WRITE that spans the page break and prints output straddling two pages. The safer pattern is to look ahead: before doing a multi-line WRITE, read the printer file's file information data structure (which exposes the current line number and the page's overflow line) and calculate whether the lines about to be written would cross the overflow boundary, and if so, force the heading/new-page routine first so the whole multi-line block starts cleanly on the new page.",
+    essentialPoints: [
+      "OFLIND ties an RPG indicator to the printer file's configured overflow line",
+      'A single WRITE that outputs multiple lines can straddle a page break if you only check overflow after writing',
+      "Look ahead using the printer file's info data structure (current line count) before a multi-line WRITE",
+      'Trigger the heading/new-page routine proactively when the upcoming lines would cross the overflow boundary',
+    ],
+    commonMistakes: [
+      'Checking the overflow indicator only after a multi-line WRITE, letting output split awkwardly across two pages',
+      "Hardcoding a 'lines per page' assumption instead of reading it from the printer file's actual attributes",
+    ],
   },
   {
     id: 'iq-031',
@@ -455,10 +535,23 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
+    status: 'published',
     prompt: 'How would you design the process for a nightly, high volume check producing process that needs to select only records that are flagged to be processed?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The design goal is to avoid scanning the entire file every night just to find the small subset of records that are actually flagged for processing. The most important piece is a keyed access path -- a logical file or SQL index built over the flag field (and ideally the flag plus a processing-date/sequence field) -- so the program can position directly to flagged records instead of reading every row and testing the flag in RPG. The batch job itself should run as a submitted job (SBMJOB) against an appropriately sized job queue/subsystem, outside interactive hours, so it doesn't compete with daytime workload. For a genuinely high-volume run, process records in reasonably sized commit-control units rather than one enormous transaction, so a failure partway through doesn't force a full-file reprocess and doesn't hold locks for an excessive stretch. Finally, the flag itself should be updated (cleared, or moved to a 'processed' state) as part of the same unit of work that processes the record, so a job that's interrupted partway through can be safely rerun without double-processing records it already handled.",
+    essentialPoints: [
+      'Build a keyed logical file/index over the flag field so the job can select flagged records directly, not scan the whole file',
+      'Run as a submitted batch job (SBMJOB) outside interactive hours, on a job queue sized for the workload',
+      'Process in reasonably sized commit-control units rather than one huge transaction',
+      'Update/clear the flag as part of the same unit of work that processes the record, so a rerun after failure does not double-process',
+    ],
+    commonMistakes: [
+      'Reading every record and testing the flag in RPG instead of using a keyed access path built for that selection',
+      'Updating the flag in a separate, later step instead of the same transaction as the processing, leaving records in an inconsistent state if the job fails partway through',
+    ],
+    followUpQuestions: ['How would you make this job safely restartable if it fails halfway through?'],
   },
   {
     id: 'iq-032',
@@ -488,10 +581,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
+    status: 'published',
     prompt: 'Show 2 ways to convert a date from YYMMDD to MMDDYY (MULT operation not acceptable)?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "One way is pure character rearrangement: since both formats are just six digits, use %SUBST to pull out the YY, MM, and DD pieces from the 6-character YYMMDD field and concatenate them back together in MM/DD/YY order into the target field -- no arithmetic at all, just substring and concatenate. A second way is to go through RPG's real date support: use %DATE to convert the YYMMDD character/numeric value into an actual date value (specifying its input format), then use %CHAR with an edit code or a specific output date format to render that date back out as MMDDYY. The date-based approach is generally the safer of the two for production code because %DATE validates that the value is a real calendar date, whereas a pure substring rearrangement will happily reformat garbage input.",
+    essentialPoints: [
+      'Method 1: %SUBST to pick apart YY/MM/DD and reassemble as MM/DD/YY -- pure string manipulation',
+      'Method 2: %DATE to parse the value as a real date, then %CHAR to output it in the new format',
+      'Neither approach needs MULT/arithmetic to reposition the digits',
+      'The %DATE route additionally validates the input is a real, valid calendar date',
+    ],
+    commonMistakes: [
+      'Rearranging digits with %SUBST without validating the input is a real date, silently producing a bogus but well-formed-looking output for bad data',
+      'Forgetting that %DATE needs to know the incoming format (e.g. *YMD) to parse a YYMMDD value correctly',
+    ],
   },
   {
     id: 'iq-035',
@@ -622,10 +727,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What is the purpose of Overrides?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'An override (OVRDBF for database files, OVRPRTF for printer files, and similar commands for other file types) lets you redirect what file, member, or set of runtime attributes a program actually uses at run time, without changing or recompiling the program itself. The program still opens the same file name it was written against, but the override -- issued before the program is called, typically from a CL program or command line -- substitutes a different physical library, member, or set of open options behind the scenes. This is what makes it possible to run the exact same program against a test library one day and a production library the next, or to point the same report program at a different output queue, purely through the calling job\'s environment.',
+    essentialPoints: [
+      'Overrides redirect a file reference (library/member/attributes) at run time without touching the program',
+      'OVRDBF for database files, OVRPRTF for printer files -- most file types have an equivalent',
+      'Must be issued before the file is opened, usually from the calling CL program',
+      'Scoped to the job (or activation group) unless explicitly extended further down the call stack',
+    ],
+    commonMistakes: [
+      'Assuming an override is permanent -- it only lasts for the scope it was issued in and is cleared by DLTOVR or job end',
+      'Forgetting an override was left active from an earlier step, causing a later step to silently read/write the wrong library',
+    ],
   },
   {
     id: 'iq-047',
@@ -1290,10 +1407,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What is the native language of the AS/400?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The native language of the platform is Control Language (CL). Every operation on the system -- creating an object, submitting a job, changing a user profile, calling another program -- ultimately happens through a CL command, whether that command is typed at a command line, run from a menu, or issued programmatically from inside a CL program. CL is also a real structured programming language in its own right (IF/ELSE, DOW/DOU loops, variables, error monitoring), which is why CL programs are so common as the 'glue' that drives batch job flow, calls RPG or COBOL business logic, and handles error recovery. Other languages like RPG, COBOL, and Java run on the system too, but CL is the one every other command and utility is ultimately built on.",
+    essentialPoints: [
+      "CL (Control Language) is the platform's native command interface -- every system operation is a CL command underneath",
+      'CL is also a full programming language: variables, IF/ELSE, DOW/DOU, error monitoring',
+      "CL programs are the typical 'glue' that sequences batch steps and calls RPG/COBOL business logic",
+      'RPG, COBOL, Java, C/C++ and others are supported languages, but sit on top of CL, not beneath it',
+    ],
+    commonMistakes: [
+      "Confusing CL with RPG as 'the' business-logic language -- CL is for control flow and system interaction, not typically heavy data processing",
+    ],
   },
   {
     id: 'iq-107',
@@ -1359,10 +1487,23 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
+    status: 'published',
     prompt: 'How do you know that records are locked?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'In RPG, use the error indicator or %STATUS after a CHAIN, UPDATE, or similar file operation with the (E) error-handling extender. If the record is already locked by another job, the operation fails with file status 1218, so checking whether %STATUS(FileName) equals 1218 right after the operation tells you definitively that the record is locked elsewhere (status 1211 is used instead when your own job already holds the lock). Outside a program, WRKOBJLCK (Work with Object Locks) lets an operator or developer see, on demand, exactly which job holds a lock on a given object or record and for how long, which is invaluable when troubleshooting a job that appears to be hanging.',
+    essentialPoints: [
+      'Use CHAIN/UPDATE with the (E) extender and check %STATUS afterward',
+      'Status code 1218 = record locked by a different job; 1211 = already locked by your own job',
+      'WRKOBJLCK shows, interactively, which job is holding a lock on an object or record',
+      'A locked record does not raise a hard RPG error by default -- it only becomes visible through the status/error check',
+    ],
+    commonMistakes: [
+      'Forgetting the (E) extender, so a lock condition throws an unhandled program exception instead of a checkable status',
+      "Treating every non-zero %STATUS as 'record not found' instead of distinguishing lock conditions (1211/1218) from other errors",
+    ],
+    followUpQuestions: ['How would you build a short retry loop that waits for a lock to clear?'],
   },
   {
     id: 'iq-113',
@@ -1448,10 +1589,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What is DDM?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'DDM (Distributed Data Management) is the IBM i function that lets a program on one system access a database file that physically lives on another IBM i system, as if it were local. You create a DDM file with CRTDDMF, pointing it at the remote system and the remote file it represents; from then on, a program can open and use that DDM file with ordinary RPG or CL file operations exactly like a local file -- read, add, update, delete records -- while the actual I/O is transparently routed to the remote system. It predates modern alternatives like distributed SQL access, but is still used in older applications and simple system-to-system data movement.',
+    essentialPoints: [
+      'DDM = Distributed Data Management -- remote database file access that looks local to the program',
+      'A DDM file is created with CRTDDMF and points at a specific file on a specific remote system',
+      'The calling program uses ordinary file operations; DDM handles the remote communication transparently',
+      'Distinct from (and older than) accessing a remote system via SQL over a database connection',
+    ],
+    commonMistakes: [
+      'Confusing a DDM file with a DDS-described file -- DDM is about remote data access, DDS is about describing a file layout',
+    ],
   },
   {
     id: 'iq-121',
@@ -1470,10 +1622,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'How are the objects stored on AS/400?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "IBM i uses a single-level storage architecture: rather than treating main memory and disk as two separate address spaces the way most operating systems do, every byte of disk and memory on the system is mapped into one continuous address space, and the operating system manages moving data between fast memory and disk transparently as it's referenced -- an application never has to know or care whether something is physically 'in memory' or 'on disk' right now. On top of that, everything the system manages is a typed object (a program, a file, a user profile, a queue, and so on), and libraries don't physically contain objects the way a folder contains files elsewhere -- a library is really a grouping/index that associates a set of objects by name, while the object itself lives in the single-level storage space. This object-based, single-level-storage design is one of the platform's most distinctive architectural traits.",
+    essentialPoints: [
+      'Single-level storage: one continuous address space spans both memory and disk, managed transparently by the system',
+      'Every system entity is a typed object (*PGM, *FILE, *USRPRF, etc.), not a raw byte stream',
+      'A library is a grouping/association of objects by name, not a physical container the way a directory is',
+      'This is a deliberate architectural choice, distinct from how most other operating systems separate memory and disk',
+    ],
+    commonMistakes: [
+      "Describing a library as physically 'holding' its objects the way a folder holds files -- it's an association, not physical containment",
+    ],
+    followUpQuestions: ['How does this architecture relate to why IBM i needs comparatively little manual memory tuning?'],
   },
   {
     id: 'iq-123',
@@ -1492,10 +1656,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
-    prompt: 'Name few IBM supplied libraries?',
+    status: 'published',
+    prompt: 'Name a few IBM-supplied libraries.',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'QSYS is the most fundamental one -- it holds the operating system itself, and things like device descriptions and user profiles live directly in it. QGPL (General Purpose Library) is where IBM places general-purpose shipped objects and is also the default fallback library the system uses when *CURLIB is specified but no current library is actually set for the job. QTEMP is a private, job-scoped library the system automatically creates for every job and automatically deletes when the job ends -- it is the standard place for a program to create scratch/work files that should not collide with another job\'s temporary data. QUSRSYS holds IBM-supplied objects that support system functions, along with things like user message queues. A few others worth knowing: QHLPSYS (online help text) and QSYS2 (a library exposing many IBM-supplied SQL services and views).',
+    essentialPoints: [
+      'QSYS -- the operating system itself; nearly everything else is reachable through it',
+      'QGPL -- general-purpose library, and the fallback for *CURLIB when no current library is set',
+      'QTEMP -- private, job-scoped scratch library, created and destroyed automatically with the job',
+      'QUSRSYS -- IBM-supplied objects supporting system functions, including user message queues',
+    ],
+    commonMistakes: [
+      'Creating permanent objects in QTEMP, not realizing they vanish the instant the job ends',
+      "Assuming all libraries beginning with 'Q' are safe to modify -- they are IBM-owned and reserved for system use",
+    ],
   },
   {
     id: 'iq-125',
@@ -1878,10 +2054,23 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
+    status: 'published',
     prompt: 'How do you put jobs in batch mode?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'The Submit Job (SBMJOB) command is how you put work into batch. It takes the work to run -- either a single CL command via the CMD parameter, or a job description\'s request data -- and places it on a job queue (JOBQ parameter) to be picked up and run asynchronously by a subsystem, instead of running synchronously and tying up the session that submitted it. A typical call looks like SBMJOB CMD(CALL PGM(MYPGM)) JOBQ(QBATCH) JOBD(MYJOBD). Once submitted, the job runs independently -- the interactive session that issued SBMJOB gets control back immediately and can go on to other work while the batch job executes in its own job, with its own job log, on its own schedule.',
+    essentialPoints: [
+      'SBMJOB submits work to a job queue to run asynchronously as a batch job',
+      'CMD parameter specifies a single CL command to run in the new job',
+      'JOBQ determines which queue (and ultimately which subsystem) picks the job up',
+      'The submitting session regains control immediately -- it does not wait for the batch job to finish',
+    ],
+    commonMistakes: [
+      'Assuming SBMJOB blocks until the submitted job completes -- it does not, by design',
+      'Submitting to a job queue that is not attached to any active subsystem, so the job just sits pending indefinitely',
+    ],
+    followUpQuestions: ['How would you monitor a submitted job\'s status or wait for it to complete from another program?'],
   },
   {
     id: 'iq-160',
@@ -2994,10 +3183,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'Is it possible to join the same file to itself?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "Yes -- SQL fully supports joining a table to itself; it's called a self-join. Since you can't reference the same table name twice unqualified in one query, you give it two different correlation names (aliases) in the FROM clause, and from the query's point of view those two aliases behave like two independent tables even though they're really the same underlying data. This is the standard technique for comparing rows within one table to each other -- classic examples are finding an employee's manager by joining an EMPLOYEE table to itself on manager-id = employee-id, or comparing each order to the customer's previous order. On IBM i's Db2, this works the same way whether you're querying a physical file or a real SQL table.",
+    essentialPoints: [
+      "Yes -- reference the same table twice in FROM, each with its own correlation name/alias",
+      'Enables comparing rows within a single table to each other (hierarchies, previous/next row comparisons)',
+      'Any join type (INNER, LEFT OUTER, etc.) can be used in a self-join, not just INNER',
+      'Works identically for Db2 for i SQL tables and SQL views over physical/logical files',
+    ],
+    commonMistakes: [
+      'Forgetting to alias both references, which produces an ambiguous-column-reference error',
+      'Assuming a self-join needs special DDS support -- it is an SQL-level technique, not a file-definition feature',
+    ],
   },
   {
     id: 'iq-260',
@@ -3660,10 +3861,23 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What is QCMDEXC?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "QCMDEXC is an IBM-supplied API that lets a high-level-language program -- RPG, COBOL, and so on -- run a single CL command whose text isn't known until run time. It takes two parameters: the command string itself, and the length of that string (a packed/zoned numeric). This is the standard way to run a command dynamically from inside RPG when the exact command (or its parameters) needs to be built at run time -- for example, constructing and issuing an OVRDBF or a DLTF whose target library or file name is only known once the program is executing. It's a run-it-and-forget-it call: QCMDEXC can't return data back to the caller, so it's only suitable for commands that don't need to hand results back through the API itself.",
+    essentialPoints: [
+      'API that executes a single CL command string built/known only at run time',
+      'Two parameters: the command text, and its length',
+      'Used from RPG/COBOL/CL whenever the exact command cannot be hard-coded at compile time',
+      'Cannot return data to the caller -- only suitable for commands that do not need to hand back a result',
+    ],
+    commonMistakes: [
+      'Passing an incorrect length (not matching the actual trimmed command text), which causes the command to fail or truncate',
+      'Expecting QCMDEXC to return output/data from the command it runs',
+    ],
+    followUpQuestions: ['How would you capture and react to an error raised by the command QCMDEXC just ran?'],
   },
   {
     id: 'iq-319',
@@ -3705,10 +3919,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'code-based',
-    status: 'draft',
-    prompt: 'How do you translate field values form lower case to Upper case?',
+    status: 'published',
+    prompt: 'How do you translate field values from lowercase to uppercase?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The classic RPG built-in function for this is %XLATE: you give it a 'from' string of characters, a 'to' string of their replacements, and the string to translate, and it substitutes every matching character. To go from lowercase to uppercase you'd call %XLATE with a lowercase alphabet constant as the 'from' argument and the matching uppercase alphabet as the 'to' argument, e.g. %XLATE(lowerConst : upperConst : inputField). On current releases (IBM i 7.3 TR10 / 7.4 TR4 and later), the simpler %UPPER and %LOWER built-in functions do the same job without needing to build translation-table constants yourself, so on a modern release those are generally the more convenient choice. Outside RPG, the same conversion can be done in SQL with the UPPER()/LOWER() scalar functions.",
+    essentialPoints: [
+      '%XLATE(from : to : string) substitutes characters using explicit from/to translation lists',
+      'For upper/lowercasing, the from/to arguments are typically alphabet constants',
+      'IBM i 7.3 TR10+ / 7.4 TR4+ added %UPPER / %LOWER, which do the same job more simply on current releases',
+      'SQL\'s UPPER()/LOWER() scalar functions are the equivalent outside RPG',
+    ],
+    commonMistakes: [
+      'Building a %XLATE alphabet constant that only covers A-Z/a-z, silently leaving accented or non-English characters unconverted',
+      'Assuming %UPPER/%LOWER are available on every release -- they require a fairly recent TR level',
+    ],
   },
   {
     id: 'iq-323',
@@ -3873,10 +4099,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
-    prompt: 'What is the full for of CA and CF?',
+    status: 'published',
+    prompt: 'What is the full form of CA and CF?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "Both are DDS keywords used on a display file to tell the system which function keys the program should respond to, and the difference is what happens to the data on the screen when the key is pressed. CF stands for Command Function: pressing a CFxx-defined key returns control to the program along with whatever data the user had entered on the screen, which is why it's the right choice for something like F1=Help or F9=Retrieve, where the program may still need the user's in-progress input. CA stands for Command Attention: pressing a CAxx-defined key returns control to the program but discards the screen's entered data, which fits an action like F3=Exit or F12=Cancel, where you specifically don't want to process whatever was half-typed on the screen. Both use the format CAxx(ii 'text') / CFxx(ii 'text'), where ii is the response indicator (01-99) turned on when that key is pressed.",
+    essentialPoints: [
+      'CA = Command Attention -- returns control without the screen\'s entered data',
+      'CF = Command Function -- returns control and returns the screen\'s entered data',
+      "Format: CAxx(indicator 'key-description') / CFxx(indicator 'key-description')",
+      "Choice depends on whether the program needs the user's in-progress input for that key's action",
+    ],
+    commonMistakes: [
+      'Using CF for an Exit/Cancel key, which then still processes stale or partial screen data the user did not mean to submit',
+      'Using CA for a key like Help or Retrieve where the program genuinely needs the entered data',
+    ],
   },
   {
     id: 'iq-338',
@@ -4274,10 +4512,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What types of libraries are used on IBM i?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'Functionally, libraries on IBM i fall into a few roles. System libraries (QSYS itself, plus system-support libraries like QHLPSYS and QUSRSYS) hold the operating system and its supporting objects and always sit at the top of a job\'s library list. Product libraries are added automatically when an IBM (or third-party) licensed product is installed, and hold that product\'s own objects. The current library is whichever single library a particular user or job has designated as its default target for new objects and its first stop when resolving an unqualified object name. User libraries are ordinary libraries an organization creates itself to hold its own applications, split however makes sense -- commonly separated into production, test, and development libraries so that changes can be developed and verified without touching live data. All of these are tied together at run time by a job\'s library list, which determines the order the system searches libraries in when an object name is not explicitly qualified.',
+    essentialPoints: [
+      'System libraries -- QSYS and its supporting libraries (QHLPSYS, QUSRSYS, etc.), always at the top of the library list',
+      'Product libraries -- added automatically when a licensed product is installed',
+      "Current library -- the job's default target library, set per user/job",
+      'User libraries -- organization-created, typically split into production/test/development',
+    ],
+    commonMistakes: [
+      'Mixing production and test objects in one library instead of separating them, making promotion/rollback risky',
+      "Confusing 'current library' (a job setting) with a fixed system library, rather than realizing it is set per job",
+    ],
   },
   {
     id: 'iq-373',
@@ -4341,10 +4591,22 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
-    prompt: 'How many types of files are available on AS/400?',
+    status: 'published',
+    prompt: 'What are the different types of files available on IBM i?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "IBM i groups files by the kind of I/O they support rather than by a single fixed count. On the database side there are physical files (*PF), which actually hold the data records, and logical files (*LF), which provide an alternate view -- a different key order, a subset of fields, or filtered rows -- over one or more physical files without duplicating the data. Beyond the database, there are device files, which represent I/O to a specific kind of device: display files for interactive 5250 screens, printer files for spooled output, and files for physical media devices like tape and diskette. There are also save files (*SAVF), used as a disk-based container for saving objects instead of writing directly to tape, and source physical files, which are physical files specifically organized to hold program source members. Which of these a program uses depends entirely on what it needs to do -- process stored data, talk to a screen, print, or move objects around.",
+    essentialPoints: [
+      'Database files: physical files (hold data) and logical files (alternate views over physical files)',
+      'Device files: display (interactive screens), printer (spooled output), tape/diskette (physical media)',
+      'Save files (*SAVF) -- disk-based container for saving objects',
+      'Source physical files -- physical files organized to hold program source members',
+    ],
+    commonMistakes: [
+      'Treating a logical file as if it stores its own copy of the data -- it is a view, not separate storage',
+      "Trying to name one single official 'total count' of file types -- IBM i categorizes by purpose, not a fixed enumerated list",
+    ],
   },
   {
     id: 'iq-379',
@@ -4407,10 +4669,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'intermediate',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'Which is the Primary Editor of AS/400?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'Historically, the primary source editor was SEU (Source Entry Utility), a green-screen, syntax-aware text editor that has been part of the platform\'s Application Development Tool Set for decades, almost always used together with PDM (Programming Development Manager) for navigating and acting on members, and SDA (Screen Design Aid) for laying out display files. IBM formally withdrew support for SEU/PDM/SDA starting with IBM i 6.1 in 2008, though the tools still ship with the OS and plenty of shops still use them today. The modern replacement is RDi (Rational Developer for i), an Eclipse-based graphical IDE that gives syntax highlighting, outline views, content assist, and integrated debugging for RPG, COBOL, CL, and more -- it is what IBM recommends and actively develops going forward.',
+    essentialPoints: [
+      'Historically: SEU (Source Entry Utility), typically paired with PDM and SDA',
+      'SEU/PDM/SDA support was formally withdrawn starting with IBM i 6.1 (2008), though still shipped',
+      'Modern primary editor: RDi (Rational Developer for i), an Eclipse-based graphical IDE',
+      'RDi is what IBM currently develops and recommends for new work',
+    ],
+    commonMistakes: [
+      'Answering only "SEU" without acknowledging it is the legacy answer and RDi is the current one -- both are correct depending on which era the question means',
+    ],
   },
   {
     id: 'iq-385',
@@ -6585,10 +6858,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What is *ISO date format?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "*ISO is one of the standard date formats IBM i's date-handling supports, following an ISO 8601-style layout of YYYY-MM-DD (four-digit year, two-digit month, two-digit day, separated by hyphens). It's set as a field's date format either with the DATFMT keyword in DDS for a physical/logical file's date field, or on RPG's own date declarations. *ISO is also the internal format RPG's date data type defaults to, and it's generally the recommended choice for a stored date whenever the field will be sorted or range-compared, because YYYY-MM-DD sorts correctly as plain text/character data -- unlike, say, MM/DD/YY, where a simple ascending sort does not match chronological order.",
+    essentialPoints: [
+      'ISO = YYYY-MM-DD, following ISO 8601-style formatting',
+      "Set via the DATFMT keyword (DDS) or on RPG's date-type declarations",
+      "It is RPG's own default internal date format",
+      'Recommended for stored/sorted date fields because YYYY-MM-DD sorts correctly as plain text',
+    ],
+    commonMistakes: [
+      'Storing dates in a format like MM/DD/YY for display convenience and then being surprised that sorting/range comparisons do not come out chronological',
+    ],
   },
   {
     id: 'iq-580',
@@ -6861,10 +7145,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
-    prompt: 'What is JOBQ and PRINTQ?',
+    status: 'published',
+    prompt: 'What are JOBQ and PRINTQ?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'A job queue (JOBQ) is where a submitted batch job waits before it actually starts running -- when you SBMJOB, the job is placed on a specified job queue, and a subsystem monitoring that queue picks it up (subject to how many jobs that subsystem is configured to run at once) and starts it. An output queue -- commonly called a print queue or PRINTQ -- is a completely different kind of queue: it is where spooled output (printed reports, for example) waits after a job has already run, until a printer writer picks it up and actually prints it, or until a user works with it directly (hold, release, delete, view). In short: a JOBQ queues work waiting to start, while an output queue holds spooled output waiting to be printed -- one is about job scheduling, the other about print/spool management.',
+    essentialPoints: [
+      'JOBQ -- holds submitted batch jobs waiting for a subsystem to start them',
+      'Output queue (PRINTQ) -- holds spooled files waiting to be printed or reviewed',
+      'A job moves off its JOBQ once it starts; a spooled file sits on its output queue until printed/deleted',
+      'Separate, unrelated queue types serving different stages of work',
+    ],
+    commonMistakes: [
+      "Confusing the two -- assuming a 'print queue' controls when a job runs, rather than what happens to its printed output afterward",
+    ],
   },
   {
     id: 'iq-605',
@@ -7140,10 +7435,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
+    status: 'published',
     prompt: 'What are the different high-level languages available on AS/400?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      'IBM i supports a genuinely broad set of high-level languages side by side on the same machine. The traditional business-application languages are RPG (in both its legacy fixed-form and modern free-form ILE styles) and COBOL, both still heavily used for core business logic. CL (Control Language) functions as both the system\'s command language and its own structured programming language. Beyond those, the platform runs Java, C and C++ (through ILE), and SQL PL for writing logic directly inside Db2 for i as stored procedures and functions. Through IBM\'s PASE environment, it can also run software originally written for AIX/Unix, which extends the practical language list further (Python, Node.js, and others are commonly deployed this way). Which language a given shop leans on is mostly a matter of history and the kind of workload -- RPG/COBOL for core transactional business logic, Java or open-source languages for modern web/API layers.',
+    essentialPoints: [
+      'RPG (fixed-form and free-form ILE) and COBOL -- the traditional business-logic languages',
+      'CL -- both the system command language and a structured programming language',
+      'Java, C/C++, and SQL PL are all fully supported ILE/Db2-integrated languages',
+      'PASE extends the platform to AIX/Unix-style software, including Python and Node.js',
+    ],
+    commonMistakes: [
+      'Assuming IBM i can only run RPG and COBOL -- it is a genuinely multi-language platform',
+    ],
   },
   {
     id: 'iq-630',
@@ -7151,10 +7457,21 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
     topicId: 'ibm-i-fundamentals',
     difficulty: 'beginner',
     questionType: 'conceptual',
-    status: 'draft',
-    prompt: 'What is the Operating System on AS/400?',
+    status: 'published',
+    prompt: 'What is the operating system on the AS/400 (IBM i)?',
     relatedLessonSlugs: [],
     tags: [],
+    modelAnswer:
+      "The operating system has gone through three names over the platform's history while remaining fundamentally the same underlying OS. It launched in 1988 as OS/400, alongside the original AS/400 hardware. In 2004, alongside a hardware rebrand to the eServer i5 line built on POWER5 processors, it was renamed i5/OS. In 2008, IBM renamed it again to simply IBM i, dropping the '5' to remove the tie to a specific processor generation, and that's the name it has kept since -- it now runs on IBM Power Systems hardware. So depending on which era an interview question or older document is written in, you might see the exact same operating system referred to as OS/400, i5/OS, or IBM i.",
+    essentialPoints: [
+      'Originally OS/400 (1988, with the AS/400)',
+      'Renamed i5/OS in 2004 (with the eServer i5 / POWER5 rebrand)',
+      'Renamed again to IBM i in 2008 -- its current name',
+      'One continuous operating system lineage across all three names, now running on Power Systems',
+    ],
+    commonMistakes: [
+      'Treating OS/400, i5/OS, and IBM i as three different operating systems rather than one lineage with three names',
+    ],
   },
   {
     id: 'iq-631',
