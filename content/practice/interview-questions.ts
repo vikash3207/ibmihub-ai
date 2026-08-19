@@ -18,16 +18,19 @@
  *
  * isInterviewPrepAvailable() -- unchanged from before this PR -- only
  * counts `'published'` entries, so it correctly returns `false` today
- * (confirmed by this file's own regression coverage). The landing page
- * now DOES call it and DOES render a real /practice/interview route (see
- * app/(authenticated)/practice/page.tsx and .../practice/interview/
- * page.tsx) -- unlike the pre-this-PR state, where the card was an
- * unconditional ComingSoonCard that never read this file at all. The new
- * page strictly shows only `status === 'published'` questions (currently
- * zero), with a professional "in review" empty state -- it never renders
- * an unreviewed prompt to a real visitor, matching this codebase's
- * established draft-content convention (getPublishedLessons(),
- * isDeepDiveAvailable(), isInsightAvailable() all work the same way).
+ * (confirmed by this file's own regression coverage). The Practice Hub
+ * landing page (app/(authenticated)/practice/page.tsx) does NOT call it --
+ * that card is now an unconditional link to /practice/interview, matching
+ * Guided Practice/Quick Quiz's own always-real-link precedent, unlike the
+ * pre-this-PR state where the card was an unconditional ComingSoonCard
+ * that never read this file at all. It's the *destination* page
+ * (app/(authenticated)/practice/interview/page.tsx) that calls
+ * isInterviewPrepAvailable() and owns the empty-state gating: it strictly
+ * shows only `status === 'published'` questions (currently zero), with a
+ * professional "in review" empty state -- it never renders an unreviewed
+ * prompt to a real visitor, matching this codebase's established
+ * draft-content convention (getPublishedLessons(), isDeepDiveAvailable(),
+ * isInsightAvailable() all work the same way).
  *
  * Phase 2 (a separate, future PR, out of scope here): author reviewed
  * model answers/essential points/common mistakes for a first batch of
@@ -58,6 +61,18 @@
  *    (typos, awkward phrasing) without changing technical meaning;
  *    `originalNumber` always traces back to the exact source-document
  *    question for verification against the committed source file.
+ *  - Follow-up correction (after initial review): the keyword-pattern
+ *    classifier's bare "cursor" match was ambiguous between a SQL cursor
+ *    and a 5250 screen/subfile cursor -- iq-317 ("...subfile record on
+ *    which the cursor is located") and iq-589 ("How do you get the cursor
+ *    position?") were misclassified into `advanced-sql` and manually
+ *    corrected to `subfiles`/`display-files` respectively (every other
+ *    "cursor" match in the bank -- iq-502/596/597/600/601 -- is genuinely
+ *    SQL-cursor content and was left as `advanced-sql`, confirmed
+ *    individually). iq-431 ("What is a trigger?") was corrected from
+ *    `libraries-and-objects` to `physical-logical-files`, matching its
+ *    three neighboring trigger questions (iq-432/433/434, all already
+ *    `physical-logical-files`) for consistency.
  */
 
 import type { PracticeDifficulty } from './questions'
@@ -3631,7 +3646,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: 'iq-317',
     originalNumber: 317,
-    topicId: 'advanced-sql',
+    topicId: 'subfiles',
     difficulty: 'advanced',
     questionType: 'code-based',
     status: 'draft',
@@ -4912,7 +4927,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: 'iq-431',
     originalNumber: 431,
-    topicId: 'libraries-and-objects',
+    topicId: 'physical-logical-files',
     difficulty: 'beginner',
     questionType: 'conceptual',
     status: 'draft',
@@ -6677,7 +6692,7 @@ export const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
   {
     id: 'iq-589',
     originalNumber: 589,
-    topicId: 'advanced-sql',
+    topicId: 'display-files',
     difficulty: 'advanced',
     questionType: 'code-based',
     status: 'draft',
