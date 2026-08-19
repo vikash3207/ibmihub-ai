@@ -117,7 +117,7 @@ function EmptyState({ totalInPreparation, topicCount }: { totalInPreparation: nu
       </span>
       <h2 className="relative text-xl font-bold text-slate-900 mb-2">Interview Prep questions are being reviewed</h2>
       <p className="relative text-sm text-slate-600 leading-relaxed">
-        {totalInPreparation} real IBM&nbsp;i interview questions across up to {topicCount} topics are being organized here. Each
+        {totalInPreparation} real IBM&nbsp;i interview questions across {topicCount} topics are being organized here. Each
         answer is written and technically reviewed before publication, so every question that appears here is accurate and
         genuinely useful for interview prep -- none are published yet.
       </p>

@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react'
 import { PRACTICE_TOPICS } from '@/content/practice/questions'
 import type { InterviewQuestion } from '@/content/practice/interview-questions'
 import { highlightMatch } from '@/lib/interview-search'
@@ -8,10 +9,17 @@ const TYPE_LABELS: Record<string, string> = { conceptual: 'Conceptual', 'scenari
 /**
  * Renders published Interview Prep questions only -- callers must already
  * have filtered to `status === 'published'` (see app/(authenticated)/
- * practice/interview/page.tsx). Every published entry has a real
- * modelAnswer (enforced by InterviewQuestion's discriminated union), so
- * this can safely show it directly, no reveal-then-answer interaction
- * needed the way Guided Practice's no-score questions use one.
+ * practice/interview/page.tsx). Only the prompt is shown up front; the
+ * answer (modelAnswer/essentialPoints/commonMistakes/followUpQuestions --
+ * every published entry has the first three, enforced by
+ * InterviewQuestion's discriminated union) sits behind a collapsed, opt-in
+ * <details>/<summary> "Reveal Answer" disclosure -- the same native,
+ * zero-JS, keyboard/screen-reader-accessible pattern already used
+ * elsewhere in this codebase (components/deep-dive-browser.tsx's "Planned
+ * topics" panel, components/curriculum-sidebar.tsx's mobile panel), rather
+ * than a hand-rolled show/hide widget. Collapsed by default so a visitor
+ * self-tests against the prompt before checking the answer, matching how
+ * an interview-prep resource is actually used.
  */
 export function InterviewQuestionList({ questions, query }: { questions: InterviewQuestion[]; query: string }) {
   if (questions.length === 0) {
@@ -48,12 +56,66 @@ export function InterviewQuestionList({ questions, query }: { questions: Intervi
                 )
               )}
             </h3>
-            {q.status === 'published' && (
-              <p className="mt-3 text-sm leading-relaxed text-slate-700">{q.modelAnswer}</p>
-            )}
+            {q.status === 'published' && <RevealAnswer question={q} />}
           </li>
         ))}
       </ul>
     </div>
+  )
+}
+
+/**
+ * Extracted so its prop can be narrowed to the `status: 'published'`
+ * branch of the InterviewQuestion union -- TypeScript then guarantees
+ * modelAnswer/essentialPoints/commonMistakes are genuinely present, no
+ * `!`/optional-chaining guesswork needed to read them.
+ */
+function RevealAnswer({ question }: { question: Extract<InterviewQuestion, { status: 'published' }> }) {
+  return (
+    <details className="group mt-3 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+      <summary className="flex cursor-pointer list-none items-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 focus-visible:ring-offset-1 focus-visible:rounded-xl">
+        <ChevronDown
+          className="h-4 w-4 shrink-0 transition-transform motion-reduce:transition-none group-open:rotate-180"
+          aria-hidden="true"
+        />
+        Reveal Answer
+      </summary>
+      <div className="space-y-3 border-t border-slate-200 px-4 py-3">
+        <p className="text-sm leading-relaxed text-slate-700">{question.modelAnswer}</p>
+
+        {question.essentialPoints.length > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Essential points</h4>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              {question.essentialPoints.map((point, i) => (
+                <li key={i}>{point}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {question.commonMistakes.length > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Common mistakes</h4>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              {question.commonMistakes.map((mistake, i) => (
+                <li key={i}>{mistake}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {question.followUpQuestions && question.followUpQuestions.length > 0 && (
+          <div>
+            <h4 className="text-xs font-semibold uppercase tracking-wide text-slate-500">Follow-up questions</h4>
+            <ul className="mt-1 list-disc space-y-1 pl-5 text-sm text-slate-700">
+              {question.followUpQuestions.map((followUp, i) => (
+                <li key={i}>{followUp}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </details>
   )
 }
