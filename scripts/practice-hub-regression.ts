@@ -87,6 +87,12 @@ async function main() {
     const pageSrc = stripComments(readRepoFile('app/(authenticated)/practice/page.tsx'))
 
     check('the hub page has a "Test Your Knowledge" section', pageSrc.includes('Test Your Knowledge'))
+    const testYourKnowledgeHeadingMatches = pageSrc.match(/id="test-your-knowledge-heading"\s+className="[^"]*bg-white[^"]*"/g) ?? []
+    check(
+      'both "Test Your Knowledge" headings (signed-in and signed-out preview) carry an opaque bg-white chip so the heading stays legible over the hero\'s bottom fade (contrast fix)',
+      testYourKnowledgeHeadingMatches.length === 2,
+      String(testYourKnowledgeHeadingMatches.length)
+    )
     check('the hub page has a "Hands-On Practice" section (American-English spelling, not "Practise")', pageSrc.includes('Hands-On Practice'))
     check('the old "Practise Hands-On" (British spelling) wording is gone', !pageSrc.includes('Practise Hands-On'))
     check('Guided Practice links to its relocated route', pageSrc.includes("href: '/practice/guided'"))
@@ -815,7 +821,19 @@ async function main() {
     // --- Route existence, auth guard, real page wiring ---
     const interviewPageSrc = readRepoFile('app/(authenticated)/practice/interview/page.tsx')
     check('the /practice/interview route now exists (phase 1 activates the real page)', interviewPageSrc.length > 0)
-    check('the route is auth-guarded, redirecting a signed-out visitor to /practice', interviewPageSrc.includes("redirect('/practice')"))
+    check(
+      'a signed-out visitor is redirected through /auth/login with a next param (not dropped on the generic hub, losing the destination)',
+      interviewPageSrc.includes('redirect(`/auth/login?next=')
+    )
+    check(
+      'the old lossy redirect(\'/practice\') fallback for signed-out visitors is gone from this route',
+      !interviewPageSrc.includes("redirect('/practice')")
+    )
+    check(
+      'searchParams are read before the auth guard so active topic/difficulty/type/q filters survive the login redirect',
+      interviewPageSrc.indexOf('await searchParams') !== -1 &&
+        interviewPageSrc.indexOf('await searchParams') < interviewPageSrc.indexOf('if (!user)')
+    )
     check('the route never statically caches (dynamic = force-dynamic, matching every other authenticated Practice sub-route)', interviewPageSrc.includes("export const dynamic = 'force-dynamic'"))
     check('the route is noindex (robots.index === false), matching every other Practice sub-route', /robots:\s*\{\s*index:\s*false/.test(interviewPageSrc))
     check('the page calls the real isInterviewPrepAvailable() helper (never re-derives its own availability check)', interviewPageSrc.includes('isInterviewPrepAvailable(INTERVIEW_QUESTIONS)'))

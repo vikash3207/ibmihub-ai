@@ -31,18 +31,16 @@ interface Props {
 }
 
 /**
- * Interview Prep browsing page (IBM i Practice Hub -- phase 1, first
- * published batch as of this PR). Strictly published-only:
- * content/practice/interview-questions.ts's 764 imported questions started
- * this PR all `status: 'draft'`; 25 IBM i Fundamentals questions with
- * reviewed answers are now `status: 'published'`, so `publishedQuestions`
- * is real and this page renders the actual browse UI below instead of the
- * "in review" empty state -- the empty state remains in place for however
- * many topics/questions are still unpublished. Topic navigation, search,
- * and the difficulty/question-type filters are all built for real against
- * `publishedQuestions` (not the full draft set), so they keep activating
- * automatically and correctly as future PRs publish more answered records
- * -- zero further UI changes needed.
+ * Interview Prep browsing page (IBM i Practice Hub -- phase 1). Strictly
+ * published-only: content/practice/interview-questions.ts's 764 imported
+ * questions all have `status: 'draft'` (no reviewed answers exist yet), so
+ * `publishedQuestions` is empty and this page renders the "in review"
+ * empty state below -- never an unreviewed prompt. Topic navigation,
+ * search, and the difficulty/question-type filters are all built for real
+ * against `publishedQuestions` (not the full draft set), so they activate
+ * automatically and correctly the moment a future, explicitly approved PR
+ * flips real, answered records to `published` -- zero further UI changes
+ * needed.
  *
  * Filtering/search are real GET navigation (topic/difficulty/type pills are
  * plain <Link>s, the search box is a real <form method="get">), matching
