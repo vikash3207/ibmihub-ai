@@ -1,10 +1,9 @@
 /**
  * IBM i Practice Hub regression pass (UI foundation + Guided Practice
- * relocation + Quick Quiz + Interview Prep -- phase 1 catalog import, plus
- * the first published batch of 25 reviewed answers + two UX fixes).
- * Standalone via `tsx`, matching the existing scripts/*-regression.ts style
- * (check/section helpers, pass/fail counter, process.exit(1) on any
- * failure).
+ * relocation + Quick Quiz + Interview Prep phase 1 -- a real, active
+ * catalog import with zero published/answered content yet). Standalone via
+ * `tsx`, matching the existing scripts/*-regression.ts style (check/section
+ * helpers, pass/fail counter, process.exit(1) on any failure).
  *
  * Executes the real, pure functions in lib/practice-session.ts,
  * lib/interview-questions-filter.ts, and lib/interview-search.ts directly
@@ -14,11 +13,12 @@
  * topic-group x level combination, and the real 764-question
  * INTERVIEW_QUESTIONS import is validated for count/uniqueness/valid
  * topic-id/enum-shape directly, rather than hardcoding any expected value
- * that could silently drift out of sync with real content. Some
- * InterviewQuestion-shaped `published` fixtures are still used to exercise
- * display/search/filter logic in isolation, but section 11 also asserts
- * directly against the real 25 published records now in
- * content/practice/interview-questions.ts (25 published, 739 still draft).
+ * that could silently drift out of sync with real content. Any
+ * InterviewQuestion-shaped `published` fixture used to exercise
+ * display/search/filter logic against non-empty content lives ONLY in this
+ * file, as a local constant -- content/practice/interview-questions.ts's
+ * real 764 records must all stay `status: 'draft'` in this PR (zero
+ * fabricated/placeholder answers).
  *
  * Usage:
  *   npm run test:practice-hub
@@ -87,12 +87,6 @@ async function main() {
     const pageSrc = stripComments(readRepoFile('app/(authenticated)/practice/page.tsx'))
 
     check('the hub page has a "Test Your Knowledge" section', pageSrc.includes('Test Your Knowledge'))
-    const testYourKnowledgeHeadingMatches = pageSrc.match(/id="test-your-knowledge-heading"\s+className="[^"]*bg-white[^"]*"/g) ?? []
-    check(
-      'both "Test Your Knowledge" headings (signed-in and signed-out preview) carry an opaque bg-white chip so the heading stays legible over the hero\'s bottom fade (contrast fix)',
-      testYourKnowledgeHeadingMatches.length === 2,
-      String(testYourKnowledgeHeadingMatches.length)
-    )
     check('the hub page has a "Hands-On Practice" section (American-English spelling, not "Practise")', pageSrc.includes('Hands-On Practice'))
     check('the old "Practise Hands-On" (British spelling) wording is gone', !pageSrc.includes('Practise Hands-On'))
     check('Guided Practice links to its relocated route', pageSrc.includes("href: '/practice/guided'"))
@@ -611,7 +605,7 @@ async function main() {
   }
 
   // ---------------------------------------------------------------------------
-  section('11. Interview Prep: 764-question import integrity, first 25-question published batch, real activation')
+  section('11. Interview Prep phase 1: 764-question import integrity, zero fabricated answers, real activation')
   // ---------------------------------------------------------------------------
 
   {
@@ -647,60 +641,25 @@ async function main() {
     check('every question has a valid questionType', INTERVIEW_QUESTIONS.every((q) => VALID_TYPES.has(q.questionType)))
     check('every question has a non-empty prompt', INTERVIEW_QUESTIONS.every((q) => q.prompt.trim().length > 0))
 
-    // The central, non-negotiable requirement for this batch: exactly the
-    // 25 deliberately chosen, reviewed ibm-i-fundamentals questions are
-    // published -- everything else stays draft, and every published record
-    // genuinely has real, non-empty answer content.
-    const PUBLISHED_BATCH_IDS = [
-      'iq-010', 'iq-011', 'iq-014', 'iq-016', 'iq-030', 'iq-031', 'iq-034',
-      'iq-046', 'iq-106', 'iq-112', 'iq-120', 'iq-122', 'iq-124', 'iq-159',
-      'iq-259', 'iq-318', 'iq-322', 'iq-337', 'iq-372', 'iq-378', 'iq-384',
-      'iq-579', 'iq-604', 'iq-629', 'iq-630',
-    ]
-    const publishedQuestions = INTERVIEW_QUESTIONS.filter((q) => q.status === 'published')
-    const draftQuestions = INTERVIEW_QUESTIONS.filter((q) => q.status === 'draft')
-
-    check('exactly 25 questions are published in this first batch', publishedQuestions.length === 25, String(publishedQuestions.length))
-    check('exactly 739 questions remain draft (764 - 25)', draftQuestions.length === 739, String(draftQuestions.length))
+    // The central, non-negotiable requirement: zero fabricated/placeholder
+    // answers, zero published records, in this PR.
     check(
-      'the published set is exactly the 25 deliberately chosen ids -- locked in so a future regeneration cannot silently drop or alter the batch',
-      publishedQuestions.map((q) => q.id).sort().join(',') === [...PUBLISHED_BATCH_IDS].sort().join(',')
+      'every one of the 764 imported questions is status "draft" today (zero published, zero answers written in this PR)',
+      INTERVIEW_QUESTIONS.every((q) => q.status === 'draft')
     )
-    check(
-      "every published question belongs to the ibm-i-fundamentals topic (this batch's scope)",
-      publishedQuestions.every((q) => q.topicId === 'ibm-i-fundamentals')
-    )
-    check('isInterviewPrepAvailable() now correctly reports available (at least one record is published)', isInterviewPrepAvailable(INTERVIEW_QUESTIONS) === true)
-
-    check('every published question has a non-empty modelAnswer', publishedQuestions.every((q) => q.modelAnswer.trim().length > 0))
-    check('every published question has at least one essential point', publishedQuestions.every((q) => q.essentialPoints.length > 0))
-    check('every published question has at least one common mistake', publishedQuestions.every((q) => q.commonMistakes.length > 0))
-    check(
-      'every draft question is structurally free of answer content (a runtime check reinforcing the discriminated-union compile-time guarantee)',
-      draftQuestions.every((q) => !('modelAnswer' in q) && !('essentialPoints' in q) && !('commonMistakes' in q))
-    )
-    check(
-      'iq-013 ("%SST") was deliberately left unpublished -- the prompt does not correspond to a verifiable RPG BIF or CL command',
-      INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-013')?.status === 'draft'
-    )
-    check(
-      'iq-327 (OCCUR max length, releaseDependent) was deliberately left unpublished -- its numeric claim needs release-specific verification not performed in this batch',
-      INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-327')?.status === 'draft'
-    )
+    check('isInterviewPrepAvailable() correctly reports unavailable against the real catalog (0 published)', isInterviewPrepAvailable(INTERVIEW_QUESTIONS) === false)
 
     // Scoped to the DATA array only, not the whole file -- the
     // InterviewQuestion type's own 'published'-branch declaration
     // legitimately names modelAnswer/essentialPoints/commonMistakes as
     // field names once, and a naive whole-file check would false-fail on
-    // that type definition rather than actually checking the data records.
+    // that type definition rather than actually checking the 764 data
+    // records for fabricated answer content.
     const interviewFileSrc = readRepoFile('content/practice/interview-questions.ts')
     const interviewDataArraySrc = interviewFileSrc.slice(interviewFileSrc.indexOf('export const INTERVIEW_QUESTIONS'))
-    const modelAnswerLiteralCount = (interviewDataArraySrc.match(/modelAnswer:/g) ?? []).length
-    const essentialPointsLiteralCount = (interviewDataArraySrc.match(/essentialPoints:/g) ?? []).length
-    const commonMistakesLiteralCount = (interviewDataArraySrc.match(/commonMistakes:/g) ?? []).length
-    check('the production data array contains exactly 25 modelAnswer field literals -- one per published record', modelAnswerLiteralCount === 25, String(modelAnswerLiteralCount))
-    check('the production data array contains exactly 25 essentialPoints field literals', essentialPointsLiteralCount === 25, String(essentialPointsLiteralCount))
-    check('the production data array contains exactly 25 commonMistakes field literals', commonMistakesLiteralCount === 25, String(commonMistakesLiteralCount))
+    check('the production data array never contains a modelAnswer field literal (no answer content was written for any of the 764 records)', !interviewDataArraySrc.includes('modelAnswer:'))
+    check('the production data array never contains an essentialPoints field literal', !interviewDataArraySrc.includes('essentialPoints:'))
+    check('the production data array never contains a commonMistakes field literal', !interviewDataArraySrc.includes('commonMistakes:'))
 
     check(
       'the file header correctly attributes the isInterviewPrepAvailable() call to the destination page, not the Practice Hub landing page (the landing card is an unconditional link and never calls it)',
@@ -761,10 +720,7 @@ async function main() {
     check('question #764 is present and traces to the source doc\'s final numbered line', !!last && /764\. What effect does the P operation extender/.test(sourceDocSrc))
 
     // --- Pure filter/search logic, exercised against local published
-    // fixtures for isolated, deterministic multi-topic/difficulty/type
-    // coverage that doesn't depend on which real questions happen to be
-    // published (the real 25 published records are asserted separately
-    // above and exercised end-to-end in Playwright QA). ---
+    // fixtures since the real catalog has zero published entries today. ---
     const fixtureBase = {
       relatedLessonSlugs: [] as string[],
       tags: ['fixture'] as string[],
@@ -859,19 +815,7 @@ async function main() {
     // --- Route existence, auth guard, real page wiring ---
     const interviewPageSrc = readRepoFile('app/(authenticated)/practice/interview/page.tsx')
     check('the /practice/interview route now exists (phase 1 activates the real page)', interviewPageSrc.length > 0)
-    check(
-      'a signed-out visitor is redirected through /auth/login with a next param (not dropped on the generic hub, losing the destination)',
-      interviewPageSrc.includes('redirect(`/auth/login?next=')
-    )
-    check(
-      'the old lossy redirect(\'/practice\') fallback for signed-out visitors is gone from this route',
-      !interviewPageSrc.includes("redirect('/practice')")
-    )
-    check(
-      'searchParams are read before the auth guard so active topic/difficulty/type/q filters survive the login redirect',
-      interviewPageSrc.indexOf('await searchParams') !== -1 &&
-        interviewPageSrc.indexOf('await searchParams') < interviewPageSrc.indexOf('if (!user)')
-    )
+    check('the route is auth-guarded, redirecting a signed-out visitor to /practice', interviewPageSrc.includes("redirect('/practice')"))
     check('the route never statically caches (dynamic = force-dynamic, matching every other authenticated Practice sub-route)', interviewPageSrc.includes("export const dynamic = 'force-dynamic'"))
     check('the route is noindex (robots.index === false), matching every other Practice sub-route', /robots:\s*\{\s*index:\s*false/.test(interviewPageSrc))
     check('the page calls the real isInterviewPrepAvailable() helper (never re-derives its own availability check)', interviewPageSrc.includes('isInterviewPrepAvailable(INTERVIEW_QUESTIONS)'))
