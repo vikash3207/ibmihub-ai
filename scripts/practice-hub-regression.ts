@@ -661,6 +661,15 @@ async function main() {
     check('the production data array never contains an essentialPoints field literal', !interviewDataArraySrc.includes('essentialPoints:'))
     check('the production data array never contains a commonMistakes field literal', !interviewDataArraySrc.includes('commonMistakes:'))
 
+    check(
+      'the file header correctly attributes the isInterviewPrepAvailable() call to the destination page, not the Practice Hub landing page (the landing card is an unconditional link and never calls it)',
+      interviewFileSrc.includes('does NOT call it') && interviewFileSrc.includes('destination')
+    )
+    check(
+      'the stale claim that "the landing page now DOES call it" is gone from the header',
+      !interviewFileSrc.includes('The landing page now DOES call it')
+    )
+
     const withDuplicateOf = INTERVIEW_QUESTIONS.filter((q) => q.duplicateOf)
     check('at least one near-duplicate pair was flagged (proves the automated + manual dedup pass actually ran, not just a hypothetical concern)', withDuplicateOf.length > 0, String(withDuplicateOf.length))
     check(
@@ -674,6 +683,21 @@ async function main() {
 
     const releaseDependentFlagged = INTERVIEW_QUESTIONS.filter((q) => q.releaseDependent)
     check('at least one release-dependent question was flagged (numeric limits that vary by IBM i release)', releaseDependentFlagged.length > 0, String(releaseDependentFlagged.length))
+
+    // Three manually-corrected first-pass misclassifications, locked in so
+    // they can't silently regress if the catalog is regenerated later.
+    // iq-317/iq-589 were caught by a bare "cursor" keyword match that
+    // didn't distinguish a SQL cursor from a 5250 screen/subfile cursor.
+    const iq317 = INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-317')
+    check('iq-317 ("...subfile record on which the cursor is located") is classified as subfiles, not advanced-sql (a screen cursor, not a SQL cursor)', iq317?.topicId === 'subfiles')
+    const iq589 = INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-589')
+    check('iq-589 ("How do you get the cursor position?") is classified as display-files, not advanced-sql', iq589?.topicId === 'display-files')
+    const iq431 = INTERVIEW_QUESTIONS.find((q) => q.id === 'iq-431')
+    check('iq-431 ("What is a trigger?") is classified as physical-logical-files, matching its neighboring PF-trigger questions (iq-432/433/434)', iq431?.topicId === 'physical-logical-files')
+    check(
+      'every genuinely SQL-cursor question (iq-502/596/597/600/601) is still advanced-sql -- the cursor-keyword fix only touched the two false positives, not real SQL-cursor content',
+      ['iq-502', 'iq-596', 'iq-597', 'iq-600', 'iq-601'].every((id) => INTERVIEW_QUESTIONS.find((q) => q.id === id)?.topicId === 'advanced-sql')
+    )
 
     // The committed source document is the sole, cited source -- cross-check
     // the imported data actually traces back to it, not just to itself.
@@ -801,11 +825,44 @@ async function main() {
     )
     check('the page shows an "in review" empty state, not a blank page, when nothing is published', interviewPageSrc.includes('being reviewed'))
     check('the empty state never exposes the word "prompt" as literal unreviewed content -- it only states the real total in preparation', interviewPageSrc.includes('totalInPreparation'))
+    check('the empty state states the topic count as an exact fact ("across N topics"), not a hedged "up to N topics"', interviewPageSrc.includes('across {topicCount} topics') && !interviewPageSrc.includes('up to {topicCount}'))
+    check('the topic count is computed from the real INTERVIEW_QUESTIONS data (distinct topicId values), not the full 22-topic PRACTICE_TOPICS taxonomy size', interviewPageSrc.includes('new Set(INTERVIEW_QUESTIONS.map((q) => q.topicId)).size'))
     check('the page has a back-link to the Practice Hub', /href="\/practice"[\s\S]{0,500}Practice Hub/.test(interviewPageSrc))
 
     const questionListSrc = readRepoFile('components/practice/interview-question-list.tsx')
-    check('the question-list component only ever renders modelAnswer behind a status === \'published\' guard', /q\.status === 'published'[\s\S]{0,80}q\.modelAnswer/.test(questionListSrc))
+    check(
+      'the answer section is only ever rendered behind a status === \'published\' guard in the question list',
+      /q\.status === 'published'[\s\S]{0,60}RevealAnswer/.test(questionListSrc)
+    )
+    check(
+      'RevealAnswer\'s own parameter type is narrowed to the \'published\' branch of the InterviewQuestion union (a type-level guarantee that modelAnswer/essentialPoints/commonMistakes exist, not just a runtime proximity check)',
+      questionListSrc.includes("Extract<InterviewQuestion, { status: 'published' }>")
+    )
     check('the question-list component never uses dangerouslySetInnerHTML (highlighting renders real <mark> JSX, not an HTML string)', !questionListSrc.includes('dangerouslySetInnerHTML'))
+
+    // --- Reveal Answer: collapsed by default, native accessible disclosure ---
+    check(
+      'the prompt itself (an <h3>) is rendered before the reveal/disclosure element in source order -- always visible, never gated',
+      questionListSrc.indexOf('<h3') !== -1 && questionListSrc.indexOf('<h3') < questionListSrc.indexOf('RevealAnswer question=')
+    )
+    check('the answer is behind a real native <details> element, not a hand-rolled show/hide widget', questionListSrc.includes('<details'))
+    check('the disclosure trigger is a real <summary> (keyboard/screen-reader accessible natively, no custom ARIA widget needed)', questionListSrc.includes('<summary'))
+    check('the disclosure is collapsed by default (no hardcoded `open` attribute forcing it visible)', !/<details[^>]*\bopen\b/.test(questionListSrc))
+    check('the trigger is labeled "Reveal Answer", not a bare icon or ambiguous "Show more"', questionListSrc.includes('Reveal Answer'))
+    check('the trigger keeps a visible focus ring (focus-visible:ring), not focus:outline-none with nothing to replace it', questionListSrc.includes('focus-visible:ring-2') && questionListSrc.includes('<summary'))
+    check('the disclosure chevron is aria-hidden (decorative only -- the real accessible state comes from the native <details> element, not the icon)', /ChevronDown[\s\S]{0,200}aria-hidden="true"/.test(questionListSrc))
+
+    check('the model answer is rendered inside the reveal section', /RevealAnswer[\s\S]*question\.modelAnswer/.test(questionListSrc))
+    check('essential points render as a real list (<ul>/<li>), not a single paragraph blob', /essentialPoints\.map[\s\S]{0,40}<li/.test(questionListSrc))
+    check('essential points are conditionally rendered only when non-empty', questionListSrc.includes('question.essentialPoints.length > 0'))
+    check('common mistakes render as a real list, not a single paragraph blob', /commonMistakes\.map[\s\S]{0,40}<li/.test(questionListSrc))
+    check('common mistakes are conditionally rendered only when non-empty', questionListSrc.includes('question.commonMistakes.length > 0'))
+    check('follow-up questions render as a real list when present', /followUpQuestions\.map[\s\S]{0,40}<li/.test(questionListSrc))
+    check(
+      'follow-up questions (an optional field) are only rendered when the array exists AND is non-empty -- never assumes it\'s always present',
+      questionListSrc.includes('question.followUpQuestions && question.followUpQuestions.length > 0')
+    )
+    check('each of the three answer sections has its own labeled heading (Essential points / Common mistakes / Follow-up questions), not an unlabeled list', questionListSrc.includes('Essential points') && questionListSrc.includes('Common mistakes') && questionListSrc.includes('Follow-up questions'))
 
     // --- Global search / sitemap boundary preserved (unchanged from before this PR) ---
     const searchLibSrc = readRepoFile('lib/search.ts')
