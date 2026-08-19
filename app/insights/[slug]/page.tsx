@@ -81,6 +81,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       publishedTime: insight.publishedAt,
       ...(insight.updatedAt ? { modifiedTime: insight.updatedAt } : {}),
     },
+    // Without this, Next inherits the root layout's generic `twitter` block
+    // wholesale (metadata merges per top-level key, not deeply -- see
+    // app/insights/page.tsx's identical note) so an X/Twitter card would show
+    // the site-wide title/description instead of this article's own, even
+    // though openGraph above is already article-specific.
+    twitter: {
+      card: 'summary_large_image',
+      title: insight.title,
+      description: insight.description,
+    },
   }
 }
 
