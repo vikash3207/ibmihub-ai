@@ -161,7 +161,10 @@ export default async function PracticePage({ searchParams }: Props) {
 
       <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-5xl space-y-12 px-4 pb-16 sm:px-6 sm:pb-20">
         <section aria-labelledby="test-your-knowledge-heading">
-          <h2 id="test-your-knowledge-heading" className="mb-5 text-lg font-bold text-slate-900">
+          <h2
+            id="test-your-knowledge-heading"
+            className="mb-5 inline-block rounded-lg bg-white px-3 py-1.5 text-lg font-bold text-slate-900 shadow-sm"
+          >
             Test Your Knowledge
           </h2>
           <div className="grid gap-5 sm:grid-cols-3">
@@ -207,7 +210,10 @@ function PracticePreview({ signedOutNext }: { signedOutNext: string }) {
 
       <div className="relative z-10 -mt-12 sm:-mt-16 mx-auto max-w-5xl space-y-12 px-4 pb-16 sm:px-6 sm:pb-20">
         <section aria-labelledby="test-your-knowledge-heading">
-          <h2 id="test-your-knowledge-heading" className="mb-5 text-lg font-bold text-slate-900">
+          <h2
+            id="test-your-knowledge-heading"
+            className="mb-5 inline-block rounded-lg bg-white px-3 py-1.5 text-lg font-bold text-slate-900 shadow-sm"
+          >
             Test Your Knowledge
           </h2>
           <div className="grid gap-5 sm:grid-cols-3">
